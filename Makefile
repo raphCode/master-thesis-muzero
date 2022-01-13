@@ -8,3 +8,6 @@ clean:
 
 pvc:
 	texfot latexmk -pvc
+
+check:
+	checkcites main
