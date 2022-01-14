@@ -1,3 +1,26 @@
 \setlength{\parindent}{0em}
 \setuptodonotes{inline, fancyline, color=cyan!50}
 \newcommandx{\question}[2][1=]{\todo[color=green,#1]{#2}}
+
+\DeclareCiteCommand{\citeauthor}
+    {\boolfalse{citetracker}
+     \boolfalse{pagetracker}
+     \usebibmacro{prenote}}
+    {\ifciteindex
+     {\indexnames{labelname}}
+     {}
+     \printtext[bibhyperref]{\printnames{labelname}}}
+    {\multicitedelim}
+    {\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\citetitle}
+    {\boolfalse{citetracker}
+     \boolfalse{pagetracker}
+     \usebibmacro{prenote}}
+    {\ifciteindex
+     {\indexfield{indextitle}}
+     {}
+     \printtext[bibhyperref]{\printfield[citetitle]{labeltitle}}}
+    {\multicitedelim}
+    {\usebibmacro{postnote}}
+
