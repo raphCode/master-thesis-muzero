@@ -3,16 +3,22 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{natbib}
+\usepackage[colorinlistoftodos, textsize=tiny]{todonotes}
 %\usepackage{amsmath}
-\setlength{\parindent}{0em}
 
 \bibliographystyle{abbrvnat} 
+\input{commands}
 
 \begin{document}
 
 \include{title_page}
 \tableofcontents
 
+\todo[size=\Large]{\textit{Color reference: This is a todo for me}}
+\question[size=\Large]{\textit{Color reference: This is a question to the
+supervisor}}
+\todo{check out \textbackslash autocite and stuff of biblatex, can we keep \textbackslash
+cite?}
 \include{introduction}
 \include{related_work}
 \include{theory}
@@ -23,5 +29,7 @@
 \include{conclusion}
 
 \bibliography{bibliography}
+\todototoc
+\listoftodos
 
 \end{document}
