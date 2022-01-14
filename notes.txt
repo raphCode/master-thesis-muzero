@@ -1,0 +1,9 @@
+- muzero flips rewards for other player, not sure how this relates to multiple player environments and general games
+  - shouldn't the network prediction flip automatically when its not their turn?
+
+other papers:
+- nvidia gan pacman learned gameGAN
+- muzero unplugged
+
+cite Sutton reinforcement learning book?
+
