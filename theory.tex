@@ -4,3 +4,25 @@
 % In Research-papern ist hierfür meist kein Platz aber in einer Abschlussarbeit kann man
 % damit gut zeigen, dass man das Material verstanden hat.
 
+\begin{itemize}
+    \item Original Paper has special requirements for the type of games
+    that can be learned:
+    \todo{Check if the \cite{muzero} mentions these restrictions, I actually found
+    these in \url{https://sebastianbodenstein.net/post/alphazero/}}
+    \question{please comment on the general situation: "found information / idea on
+    the internet, should I mention the link or just confirm the information exists in
+    the original paper and only reference that?}
+    \begin{itemize}
+        \item sequential (informaticup game is not)
+        \item single player or two player
+        \item two player: zero sum (optimisations in the search tree:
+        flipping rewards every other turn)
+        \item transitive "better than" relation on game strategies: unique best
+        strategy must exist (counterexample: starcraft)
+    \end{itemize}
+    \item Basic techniques:
+    \begin{itemize}
+        \item Monte Carlo Tree Search \cite{mcts_survey}
+        \item Model-based RL
+    \end{itemize}
+\end{itemize}
