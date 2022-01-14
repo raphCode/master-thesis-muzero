@@ -2,12 +2,16 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
-\usepackage{natbib}
+\usepackage[style=authoryear, backend=biber]{biblatex}
+\usepackage{hyperref}
+%\usepackage[dvipsnames]{xcolor}
 \usepackage[colorinlistoftodos, textsize=tiny]{todonotes}
+\usepackage{xargs}
 %\usepackage{amsmath}
 
-\bibliographystyle{abbrvnat} 
 \input{commands}
+
+\addbibresource{bibliography.bib}
 
 \begin{document}
 
@@ -17,8 +21,10 @@
 \todo[size=\Large]{\textit{Color reference: This is a todo for me}}
 \question[size=\Large]{\textit{Color reference: This is a question to the
 supervisor}}
+
 \todo{check out \textbackslash autocite and stuff of biblatex, can we keep \textbackslash
 cite?}
+
 \include{introduction}
 \include{related_work}
 \include{theory}
@@ -28,8 +34,11 @@ cite?}
 \include{discussion}
 \include{conclusion}
 
-\bibliography{bibliography}
 \todototoc
 \listoftodos
+
+\printbibliography
+\question{Is this bibliography style okay? I switched to biblatex instead of natbib, and
+may need to tweak the styles}
 
 \end{document}
