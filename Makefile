@@ -4,7 +4,7 @@
 
 clean:
 	latexmk -C *.tex
-	rm *.bbl *.tdo
+	rm -f *.bbl *.tdo
 
 pvc:
 	texfot latexmk -pvc
