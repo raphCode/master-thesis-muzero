@@ -4,6 +4,41 @@
 % In Research-papern ist hierfür meist kein Platz aber in einer Abschlussarbeit kann man
 % damit gut zeigen, dass man das Material verstanden hat.
 
+\section{Principles}
+\question{unsure about the title}
+
+\question{should I add more maths and formulas? They don't help my understanding, but
+everyone uses them...}
+
+Reinforcement learning is about finding an optimal behaviour in a given enviroment.
+These environments can be, for example, games and usually consist of a number of steps.
+Each step can be decomposed into actions, which correspond to a move in a game and an
+immediate feedback value called a reward.
+After each step, the environment is in a new state which is communicated to the agent to
+be trained so it can decide on the next action.
+The behaviour, also termed policy, to learn is a mapping from states to actions.
+Its performance is evaluated by calculating the cumultative reward throughout the episode,
+that is all steps until the end of e.g. the game.
+\question{emphasize keywords (action, state, reward, ...) the first time they are
+mentioned?}
+\todo{image?}
+\todo{cite}
+
+The learning takes place by repeatedly stepping through the environment, evaluating the
+current policy for each state to choose the next action.
+The only signal to learn from is the reward returned at each step, which decides how good
+the taken action was.
+Actions that lead to high rewards are reinforced, while actions that yield negative
+rewards are discouraged.
+Often the reward signal is said to be sparse, meaning most of the time it is actually
+zero, which provides no learning feedback.
+Many games fall in this category, since only at the very end it is known which player has
+won.
+Thus, an additional challenge is then to assign the reward to the deciding actions, that
+is answering the question:
+Which moves attributed how much to the final result of the game?
+\todo{cite}
+
 \begin{itemize}
     \item Evolution:
     \begin{itemize}
