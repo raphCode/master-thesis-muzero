@@ -7,5 +7,8 @@ clean:
 continous-preview:
 	latexmk -pvc <&-
 
+pdf:
+	latexmk <&-
+
 check:
 	checkcites main
