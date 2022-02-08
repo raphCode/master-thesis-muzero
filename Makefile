@@ -4,7 +4,7 @@ clean:
 	latexmk -C *.tex
 	rm -f *.bbl *.tdo
 
-pvc:
+continous-preview:
 	latexmk -pvc <&-
 
 check:
