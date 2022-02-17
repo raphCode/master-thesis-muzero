@@ -2,18 +2,18 @@ from abc import ABC, abstractmethod
 
 class Network(ABC):
     @abstractmethod
-    def inference(self, input):
+    def forward(self, input):
         pass
 
 class RepresentationNet(Network):
-    def inference(self, GameState) -> LatentRep:
+    def forward(self, GameState) -> LatentRep:
         pass
 
 class PredictionNet(Network):
-    def inference(self, LatentRep) -> LatentRep:
+    def forward(self, LatentRep) -> LatentRep:
         pass
 
 class DynamicsNet(Network):
-    def inference(self, LatentRep) -> Action:
+    def forward(self, LatentRep) -> Action:
         pass
 
