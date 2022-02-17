@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 
 class Network(ABC):
+    model: "TODO"
+
     @abstractmethod
     def forward(self, input):
-        pass
+        return self.model.forward(input)
 
 class RepresentationNet(Network):
     def forward(self, input: GameState) -> LatentRep:
