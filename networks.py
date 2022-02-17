@@ -6,14 +6,14 @@ class Network(ABC):
         pass
 
 class RepresentationNet(Network):
-    def forward(self, GameState) -> LatentRep:
+    def forward(self, input: GameState) -> LatentRep:
         pass
 
 class PredictionNet(Network):
-    def forward(self, LatentRep) -> LatentRep:
+    def forward(self, input: LatentRep) -> LatentRep:
         pass
 
 class DynamicsNet(Network):
-    def forward(self, LatentRep) -> Action:
+    def forward(self, input: LatentRep) -> Action:
         pass
 
