@@ -30,8 +30,8 @@ The learning takes place by repeatedly stepping through the environment, evaluat
 current policy for each state to choose the next action.
 The only signal to learn from is the reward returned at each step, which decides how good
 the taken action was.
-Actions that lead to high rewards are reinforced, while actions that yield negative
-rewards are discouraged.
+Actions that lead to high rewards are reinforced, while actions that yield lower rewards
+are discouraged.
 Often the reward signal is said to be sparse, meaning most of the time it is actually
 zero, which provides no learning feedback.
 Many games fall in this category, since only at the very end it is known which player has
