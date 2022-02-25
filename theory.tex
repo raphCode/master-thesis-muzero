@@ -10,13 +10,15 @@
 \question{should I add more maths and formulas? They don't help my understanding, but
 everyone uses them...}
 
-Reinforcement learning is about finding an optimal behaviour in a given enviroment.
-These environments can be, for example, games and usually consist of a number of steps.
-Each step can be decomposed into actions, which correspond to a move in a game and an
-immediate feedback value called a reward.
-After each step, the environment is in a new state which is communicated to the agent to
-be trained so it can decide on the next action.
-The behaviour, also termed policy, to learn is a mapping from states to actions.
+Reinforcement learning is about finding an optimal behaviour in a given enviroment by
+trail-and-error interaction.
+These environments can be decomposed into a number of steps, for example a game made up of
+single moves.
+At each step, the agent to be trained perceives the current state of the environment and
+decides on an action to perform.
+This yields an immediate scalar reward value judging the chosen action's quality and leads
+to a new state.
+The behaviour to learn is a mapping from states to actions, also termed policy.
 Its performance is evaluated by calculating the cumultative reward throughout the episode,
 that is all steps until the end of e.g. the game.
 \question{emphasize keywords (action, state, reward, ...) the first time they are
