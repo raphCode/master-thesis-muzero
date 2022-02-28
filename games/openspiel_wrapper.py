@@ -27,9 +27,19 @@ class OpenSpielGameState(GameState):
             self.state.apply_action_with_legality_check(action)
             assert(self.state.is_player_node() or self.state.is_terminal())
 
-def new_game(game: pyspiel.Game) -> OpenSpielGameState:
-    """
-    Start a new game and return the root state.
-    Bind this with functool.partial to a Game created by pyspiel.load_game().
-    """
-    return OpenSpielGameState(game.new_initial_state())
+class OpenSpielGame(Game):
+    game: pyspiel.Game
+
+    def __init__(self, game_name: str):
+        self.game = pyspiel.load_game(game_name)
+
+    def new_initial_state(self) -> OpenSpielGameState:
+        return self.game.new_initial_state()
+
+    @property
+    def num_players(self) -> int:
+        return self.game.num_players()
+
+    @property
+    def num_actions(self) -> int:
+        return self.game.num_distinct_actions()
