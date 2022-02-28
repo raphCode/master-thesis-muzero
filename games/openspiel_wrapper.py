@@ -19,11 +19,13 @@ class OpenSpielGameState(GameState):
         return self.state.current_player()
 
     def apply_action(self, action: int):
-        try:
-            self.state.apply_action_with_legality_check(action)
-            assert(self.state.is_player_node())
-        except pyspiel.SpielError:
+        if self.invalid or action not in self.state.legal_actions():
+            # also covers terminal states because the legal actions are empty then
             self.invalid = True
+        else:
+            # TODO: remove legality check, this is just a safety measure now
+            self.state.apply_action_with_legality_check(action)
+            assert(self.state.is_player_node() or self.state.is_terminal())
 
 def new_game(game: pyspiel.Game) -> OpenSpielGameState:
     """
