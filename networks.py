@@ -1,30 +1,20 @@
-from abc import ABC, abstractmethod
-from typing import Tuple, NewType
-
-LatentRepr = NewType("LatentRepr", torch.Tensor)
-ValueScalar = NewType("ValueScalar", torch.Tensor)
-ActionOnehot = NewType("ActionOnehot", torch.Tensor)
-RewardScalar = NewType("RewardScalar", torch.Tensor)
+from abc import ABC
 
 class Network(ABC):
     model: "TODO"
 
-    @abstractmethod
     def forward(self, input):
-        pass
+        return self.model.forward(input)
 
 class RepresentationNet(Network):
-    def forward(self, input: GameState) -> LatentRepr:
-        latent = self.model.forward(input)
-        return LatentRepr(latent)
+    # Observation -> LatentRepr
+    pass
 
 class PredictionNet(Network):
-    def forward(self, input: LatentRepr) -> Tuple[ValueScalar, ActionOnehot]:
-        value, action = self.model.forward(input)
-        return ValueScalar(value), ActionOnehot(action)
+    # LatentRepr -> (ValueScalar, ActionOnehot)
+    pass
 
 class DynamicsNet(Network):
-    def forward(self, input: LatentRepr) -> Tuple[RewardScalar, LatentRepr]:
-        reward, latent = self.model.forward(input)
-        return RewardScalar(reward), LatentRepr(latent)
+    # LatentRepr -> (RewardScalar, LatentRepr)
+    pass
 
