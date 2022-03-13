@@ -65,3 +65,28 @@ class Node:
         self.children[action].latent_rep = latent_rep
         self.visit_count = 0
         self.value_sum = 0
+
+def run_mcts(root_state: GameState):
+    # this is run only for the player's own moves
+    # TODO: maybe make the observation part of the game wrapper?
+    observation = C.funcs.state2observation(root_state)
+    latent_rep = C.nets.representation(observation)
+
+    root = Node(None, None, None)
+    root.latent_rep = latent_rep
+    root.expand()
+    for _ in range(C.param.mcts_num_simulations):
+        node = root
+        search_path = [root]
+        while(node.is_expanded):
+            action, node = node.select_child()
+        node.expand()
+
+        # backpropagate
+        r = 0
+        while (node != root):
+            # Accumulate reward predictions in the parents's value_sum
+            r = r * C.param.discount + node.reward
+            node = node.parent
+            node.value_sum += r
+            node.visit_count += 1
