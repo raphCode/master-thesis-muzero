@@ -11,14 +11,13 @@ class Network(ABC):
         return self.model(input)
 
 class RepresentationNet(Network):
-    # Observation -> LatentRepr
+    # Observation -> LatentRep
     pass
 
 class PredictionNet(Network):
-    # LatentRepr -> (ValueScalar, ActionOnehot)
+    # LatentRep -> (ValueScalar, ActionProbs, NodeType)
     pass
 
 class DynamicsNet(Network):
-    # LatentRepr -> (RewardScalar, LatentRepr)
+    # (LatentRep, Action) -> (RewardScalar, LatentRep)
     pass
-
