@@ -8,7 +8,7 @@ class Network(ABC):
         self.model = model
 
     def forward(self, input):
-        return self.model.forward(input)
+        return self.model(input)
 
 class RepresentationNet(Network):
     # Observation -> LatentRepr
