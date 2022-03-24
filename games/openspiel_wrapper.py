@@ -11,7 +11,7 @@ class OpenSpielGameState(GameState):
         self.invalid = False
 
     @property
-    def is_terminal(self) -> bool::
+    def is_terminal(self) -> bool:
         return self.invalid or self.state.is_terminal()
 
     @property
