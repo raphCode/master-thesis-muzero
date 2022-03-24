@@ -1,4 +1,4 @@
-from game import GameState
+from bases import GameState, Game
 import pyspiel
 
 class OpenSpielGameState(GameState):
