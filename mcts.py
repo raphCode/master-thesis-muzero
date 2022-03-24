@@ -1,5 +1,5 @@
 import torch
-from typing import List
+from typing import List, Optional
 from enum import IntEnum, auto
 
 class NodeType(IntEnum):
@@ -28,7 +28,7 @@ class Node:
     prior: float
     reward: float
 
-    def __init__(self,  parent: Node, action: int, prior: float):
+    def __init__(self,  parent: Optional[Node], action: int, prior: float):
         self.parent = parent
         self.action = action
         self.prior = prior
