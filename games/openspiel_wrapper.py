@@ -27,6 +27,7 @@ class OpenSpielGameState(GameState):
             self.state.apply_action_with_legality_check(action)
             assert(self.state.is_player_node() or self.state.is_terminal())
 
+
 class OpenSpielGame(Game):
     game: pyspiel.Game
 
