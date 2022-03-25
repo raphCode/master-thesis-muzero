@@ -43,7 +43,7 @@ class Node:
 
     @property
     def selection_score(self) -> float:
-        return C.funcs.node_selection_score(self)
+        return C.func.node_selection_score(self)
 
     def select_child(self) -> Node:
         """returns child node with highest selection_score"""
@@ -66,7 +66,7 @@ class Node:
 def run_mcts(root_state: GameState):
     # this is run only for the player's own moves
     # TODO: maybe make the observation part of the game wrapper?
-    observation = C.funcs.state2observation(root_state)
+    observation = C.func.state2observation(root_state)
     latent_rep = C.nets.representation(observation)
 
     root = Node(None, None, None)
