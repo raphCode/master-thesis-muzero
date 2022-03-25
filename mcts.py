@@ -64,7 +64,7 @@ class Node:
         self.children = [Node(self, action, p) for action, p in enumerate(probs)]
         self.children[action].latent_rep = latent_rep
 
-def run_mcts(root_state: GameState):
+def run_mcts(root_state: GameState) -> torch.Tensor:
     # this is run only for the player's own moves
     # TODO: maybe make the observation part of the game wrapper?
     observation = C.func.state2observation(root_state)
@@ -88,3 +88,5 @@ def run_mcts(root_state: GameState):
             node = node.parent
             node.value_sum += r
             node.visit_count += 1
+
+    return C.func.mcts_root2results(root)
