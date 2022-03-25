@@ -1,11 +1,6 @@
 import torch
+from common import PlayerType
 from typing import List, Optional
-from enum import IntEnum, auto
-
-class NodeType(IntEnum):
-    Chance = auto()
-    OwnPlayer = auto()
-    OtherPlayer = auto()
 
 class Node:
     """
@@ -19,7 +14,7 @@ class Node:
     parent: Node
     value_sum: float
     visit_count: int
-    node_type: NodeType
+    player_type: Optional[PlayerType]
     latent_rep: Optional[torch.Tensor]
     children: List[Node] # List index corresponds to action number
 
@@ -60,7 +55,7 @@ class Node:
         if self.parent is not None:
             # root node gets latent_rep set externally
             self.reward, self.latent_rep = C.nets.dynamics(self.action, parent.latent_rep)
-        value, probs, self.node_type = C.nets.prediction(self.latent_rep)
+        value, probs, self.player_type = C.nets.prediction(self.latent_rep)
         self.children = [Node(self, action, p) for action, p in enumerate(probs)]
         self.children[action].latent_rep = latent_rep
         self.visit_count = 0
