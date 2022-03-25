@@ -28,6 +28,10 @@ class Node:
         self.action = action
         self.prior = prior
         self.children = []
+        self.visit_count = 0
+        self.value_sum = 0
+        self.reward = None
+        self.player_type = None
 
     @property
     def is_expanded(self) -> bool:
@@ -58,8 +62,6 @@ class Node:
         value, probs, self.player_type = C.nets.prediction(self.latent_rep)
         self.children = [Node(self, action, p) for action, p in enumerate(probs)]
         self.children[action].latent_rep = latent_rep
-        self.visit_count = 0
-        self.value_sum = 0
 
 def run_mcts(root_state: GameState):
     # this is run only for the player's own moves
