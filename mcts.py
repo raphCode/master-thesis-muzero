@@ -11,7 +11,7 @@ class Node:
     Some node attributes do not refer to the node itself, but to the action transition
     leading from the parent to this node.
     """
-    parent: Node
+    parent: Optional[Node]
     value_sum: float
     visit_count: int
     player_type: Optional[PlayerType]
@@ -21,7 +21,7 @@ class Node:
     # The following attributes refer to the transition from the parent to this node
     action: int
     prior: float
-    reward: float
+    reward: Optional[float]
 
     def __init__(self,  parent: Optional[Node], action: int, prior: float):
         self.parent = parent
