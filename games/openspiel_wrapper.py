@@ -1,4 +1,4 @@
-from bases import GameState, Game
+from game import GameState, Game
 import pyspiel
 
 
