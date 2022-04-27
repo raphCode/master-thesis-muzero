@@ -6,7 +6,7 @@ class OpenSpielGameState(GameState):
     invalid: bool
 
     def __init__(self, state: pyspiel.State):
-        assert(state.is_player_node())
+        assert state.is_player_node()
         self.state = state
         self.invalid = False
 
@@ -25,7 +25,7 @@ class OpenSpielGameState(GameState):
         else:
             # TODO: remove legality check, this is just a safety measure now
             self.state.apply_action_with_legality_check(action)
-            assert(self.state.is_player_node() or self.state.is_terminal())
+            assert self.state.is_player_node() or self.state.is_terminal()
 
 
 class OpenSpielGame(Game):
