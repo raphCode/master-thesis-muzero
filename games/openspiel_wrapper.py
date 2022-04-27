@@ -11,6 +11,10 @@ class OpenSpielGameState(GameState):
         self.invalid = False
 
     @property
+    def rewards(self) -> List[float]:
+        return self.state.rewards()
+
+    @property
     def is_terminal(self) -> bool:
         return self.invalid or self.state.is_terminal()
 
@@ -21,6 +25,7 @@ class OpenSpielGameState(GameState):
     def apply_action(self, action: int):
         if self.invalid or action not in self.state.legal_actions():
             # also covers terminal states because the legal actions are empty then
+            # TODO: set bad reward for offending player
             self.invalid = True
         else:
             # TODO: remove legality check, this is just a safety measure now
