@@ -11,6 +11,10 @@ class OpenSpielGameState(GameState):
         self.invalid = False
 
     @property
+    def observation(self) -> torch.Tensor:
+        return NotImplemented
+
+    @property
     def rewards(self) -> List[float]:
         return self.state.rewards()
 
