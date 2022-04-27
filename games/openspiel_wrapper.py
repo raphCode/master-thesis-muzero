@@ -24,7 +24,8 @@ class OpenSpielGameState(GameState):
 
     @property
     def current_player(self) -> int:
-        return self.state.current_player()
+        # Add one because chance player is originally id -1
+        return self.state.current_player() + 1
 
     @property
     def legal_actions(self) -> List[int]:
