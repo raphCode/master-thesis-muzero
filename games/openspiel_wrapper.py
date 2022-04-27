@@ -1,6 +1,7 @@
 from bases import GameState, Game
 import pyspiel
 
+
 class OpenSpielGameState(GameState):
     state: pyspiel.State
     invalid: bool
