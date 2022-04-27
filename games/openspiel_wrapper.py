@@ -26,6 +26,10 @@ class OpenSpielGameState(GameState):
     def current_player(self) -> int:
         return self.state.current_player()
 
+    @property
+    def legal_actions(self) -> List[int]:
+        return self.state.legal_actions()
+
     def apply_action(self, action: int):
         if self.invalid or action not in self.state.legal_actions():
             # also covers terminal states because the legal actions are empty then
