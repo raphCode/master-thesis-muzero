@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+CHANCE_PLAYER_ID = 0
+
 
 class GameState(ABC):
     @property
