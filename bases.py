@@ -46,3 +46,10 @@ class Game(ABC):
     @abstractmethod
     def num_actions(self) -> int:
         pass
+
+
+class Player(ABC):
+    @abstractmethod
+    def request_action(self, state: GameState, game: Game) -> int:
+        """Request an action from the player for the current game state"""
+        pass
