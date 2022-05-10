@@ -1,6 +1,8 @@
 import torch
-from common import PlayerType
 from typing import List, Optional
+
+from game import PlayerType
+
 
 class Node:
     """
