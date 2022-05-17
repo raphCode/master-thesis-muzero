@@ -26,6 +26,11 @@ class GameState(ABC):
 
     @property
     @abstractmethod
+    def chance_outcomes(self) -> List[float]:
+        pass
+
+    @property
+    @abstractmethod
     def legal_actions(self) -> int:
         pass
 
