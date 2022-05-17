@@ -58,5 +58,5 @@ class OpenSpielGame(Game):
         return self.game.num_players()
 
     @property
-    def num_actions(self) -> int:
-        return self.game.num_distinct_actions()
+    def max_num_actions(self) -> int:
+        return max(self.game.num_distinct_actions(), self.game.max_chance_outcomes())
