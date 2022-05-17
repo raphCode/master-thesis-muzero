@@ -4,10 +4,10 @@ repos:
     hooks:
     -   id: isort
         name: isort (python)
-        args: ["--check"]
+        args: ["--check", "--diff"]
 -   repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:
     -   id: black
         name: black (python)
-        args: ["--check"]
+        args: ["--check", "--diff"]
