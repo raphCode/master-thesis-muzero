@@ -66,7 +66,7 @@ class Node:
             self.reward, self.latent_rep = C.nets.dynamics(self.action, parent.latent_rep)
         value, probs, self.player_type = C.nets.prediction(self.latent_rep)
         self.children = [Node(self, action, p) for action, p in enumerate(probs)]
-        self.children[action].latent_rep = latent_rep
+
 
 def run_mcts(root_state: GameState) -> torch.Tensor:
     # this is run only for the player's own moves
