@@ -9,8 +9,8 @@ class Network(ABC):
     def __init__(self, model: nn.Module):
         self.model = model
 
-    def forward(self, input):
-        return self.model(input)
+    def forward(self, *inputs):
+        return self.model(*inputs)
 
 
 class RepresentationNet(Network):
