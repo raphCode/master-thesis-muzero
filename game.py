@@ -51,7 +51,11 @@ class Game(ABC):
 
     @property
     @abstractmethod
-    def num_actions(self) -> int:
+    def max_num_actions(self) -> int:
+        """
+        Number of actions or chance outcomes, whichever is higher.
+        Used to set the size of the Action network in/outputs.
+        """
         pass
 
 
