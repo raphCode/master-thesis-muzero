@@ -6,11 +6,13 @@ from game import Game, GameState
 class OpenSpielGameState(GameState):
     state: pyspiel.State
     invalid: bool
+    _max_num_actions: int
 
-    def __init__(self, state: pyspiel.State):
+    def __init__(self, state: pyspiel.State, max_num_actions: int):
         assert state.is_player_node()
         self.state = state
         self.invalid = False
+        self._max_num_actions = max_num_actions
 
     @property
     def observation(self) -> torch.Tensor:
@@ -28,6 +30,11 @@ class OpenSpielGameState(GameState):
     def current_player(self) -> int:
         # Add one because chance player is originally id -1
         return self.state.current_player() + 1
+
+    @abstractmethod
+    def chance_outcomes(self) -> List[float]:
+        d = dict(self.state.chance_outcomes())
+        return [d.get(a, 0.0) for a in range(self._max_num_actions)]
 
     @property
     def legal_actions(self) -> List[int]:
@@ -51,7 +58,7 @@ class OpenSpielGame(Game):
         self.game = pyspiel.load_game(game_name)
 
     def new_initial_state(self) -> OpenSpielGameState:
-        return self.game.new_initial_state()
+        return OpenSpielGameState(self.game.new_initial_state(), self.max_num_actions)
 
     @property
     def num_players(self) -> int:
