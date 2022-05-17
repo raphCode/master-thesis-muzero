@@ -1,5 +1,6 @@
-from game import GameState, Game
 import pyspiel
+
+from game import Game, GameState
 
 
 class OpenSpielGameState(GameState):
