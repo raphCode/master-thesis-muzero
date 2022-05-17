@@ -14,19 +14,20 @@ class Node:
     Some node attributes do not refer to the node itself, but to the action transition
     leading from the parent to this node.
     """
+
     parent: Optional[Node]
     value_sum: float
     visit_count: int
     player_type: Optional[PlayerType]
     latent_rep: Optional[torch.Tensor]
-    children: List[Node] # List index corresponds to action number
+    children: List[Node]  # List index corresponds to action number
 
     # The following attributes refer to the transition from the parent to this node
     action: int
     prior: float
     reward: Optional[float]
 
-    def __init__(self,  parent: Optional[Node], action: int, prior: float):
+    def __init__(self, parent: Optional[Node], action: int, prior: float):
         self.parent = parent
         self.action = action
         self.prior = prior
@@ -50,7 +51,7 @@ class Node:
 
     def select_child(self) -> Node:
         """returns child node with highest selection_score"""
-        assert(self.player_type != PlayerType.Chance)  # TODO: chance players
+        assert self.player_type != PlayerType.Chance  # TODO: chance players
         score, node = max((node.selection_score, node) for node in self.children)
         return node
 
@@ -79,13 +80,13 @@ def run_mcts(root_state: GameState) -> torch.Tensor:
     for _ in range(C.param.mcts_num_simulations):
         node = root
         search_path = [root]
-        while(node.is_expanded):
+        while node.is_expanded:
             action, node = node.select_child()
         node.expand()
 
         # backpropagate
         r = 0
-        while (node != root):
+        while node != root:
             # Accumulate reward predictions in the parents's value_sum
             r = r * C.param.discount + node.reward
             node = node.parent
