@@ -1,3 +1,5 @@
+from functools import cached_property
+
 import pyspiel
 
 from game import Game, GameState
@@ -60,10 +62,10 @@ class OpenSpielGame(Game):
     def new_initial_state(self) -> OpenSpielGameState:
         return OpenSpielGameState(self.game.new_initial_state(), self.max_num_actions)
 
-    @property
+    @cached_property
     def num_players(self) -> int:
         return self.game.num_players()
 
-    @property
+    @cached_property
     def max_num_actions(self) -> int:
         return max(self.game.num_distinct_actions(), self.game.max_chance_outcomes())
