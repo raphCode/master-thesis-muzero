@@ -1,5 +1,6 @@
-import torch
 from typing import List, Optional
+
+import torch
 
 from game import PlayerType
 
