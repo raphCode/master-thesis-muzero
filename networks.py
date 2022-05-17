@@ -14,15 +14,15 @@ class Network(ABC):
 
 
 class RepresentationNet(Network):
-    # Observation -> LatentRep
+    # Observation, Beliefs, PlayerType -> LatentRep, Beliefs
     pass
 
 
 class PredictionNet(Network):
-    # LatentRep -> (ValueScalar, ActionProbs, NodeType)
+    # LatentRep, Beliefs -> ValueScalar, ActionProbs, PlayerType
     pass
 
 
 class DynamicsNet(Network):
-    # (LatentRep, Action) -> (RewardScalar, LatentRep)
+    # LatentRep, Beliefs, Action -> LatentRep, Beliefs, RewardScalar
     pass
