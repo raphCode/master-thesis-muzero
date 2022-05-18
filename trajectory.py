@@ -1,4 +1,5 @@
 from enum import IntEnum, auto
+from typing import List
 from collections import namedtuple
 
 
@@ -26,3 +27,26 @@ TrajectoryState = namedtuple(
         "target_policy",
     ],
 )
+
+
+rng = np.random.default_rng()
+
+
+class ReplayBuffer:
+    lens = deque[int]
+    trajs = deque[List[TrajectoryState]]
+
+    def __init__(self, size: int):
+        self.lens = deque(maxlen=size)
+        self.trajs = deque(maxlen=size)
+
+    def add_trajectory(self, traj: List[TrajectoryState]):
+        self.trajs.append(traj)
+        self.lens.append(len(traj))
+
+    def sample(self, size: int) -> List[TrajectoryState]:
+        lens = np.array(self.lens)
+        traj = rng.choice(self.trajs, p=lens / lens.sum())
+        idx = rng.integers(len(traj))
+        # TODO: Batch from different games, always start batch at own moves
+        return traj[idx : idx + C.param.batchsize]
