@@ -19,6 +19,7 @@ class Node:
     value_sum: float
     visit_count: int
     reward: Optional[float]
+    beliefs: Optional[torch.Tensor]
     player_type: Optional[PlayerType]
     latent_rep: Optional[torch.Tensor]
     children: List[Node]  # List index corresponds to action number
@@ -36,6 +37,7 @@ class Node:
         self.visit_count = 0
         self.value_sum = 0
         self.reward = None
+        self.beliefs = None
         self.latent_rep = None
         self.player_type = None
 
@@ -64,20 +66,18 @@ class Node:
         - add empty children for all possible actions
         """
         if self.parent is not None:
-            # root node gets latent_rep set externally
-            self.reward, self.latent_rep = C.nets.dynamics(self.action, parent.latent_rep)
-        value, probs, self.player_type = C.nets.prediction(self.latent_rep)
+            # root node gets latent_rep and beliefs set externally
+            tmp = C.nets.dynamics(parent.latent_rep, parent.beliefs, self.action)
+            self.latent_rep, self.beliefs, self.reward = tmp
+        value, probs, self.player_type = C.nets.prediction(self.latent_rep, self.beliefs)
         self.children = [Node(self, action, p) for action, p in enumerate(probs)]
 
 
-def run_mcts(root_state: GameState) -> torch.Tensor:
-    # this is run only for the player's own moves
-    # TODO: maybe make the observation part of the game wrapper?
-    observation = C.func.state2observation(root_state)
-    latent_rep = C.nets.representation(observation)
-
+def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
+    # this is called only for the player's own moves
     root = Node(None, None, None)
     root.latent_rep = latent_rep
+    root.beliefs = beliefs
     root.reward = 0
     root.expand()
     for _ in range(C.param.mcts_num_simulations):
@@ -96,4 +96,4 @@ def run_mcts(root_state: GameState) -> torch.Tensor:
             node.value_sum += r
             node.visit_count += 1
 
-    return C.func.mcts_root2results(root)
+    return root
