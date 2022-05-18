@@ -88,6 +88,7 @@ def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
         node.expand()
 
         # backpropagate
+        # TODO: move this into a configurable function
         r = 0
         while node != root:
             # Accumulate reward predictions in the parents's value_sum
