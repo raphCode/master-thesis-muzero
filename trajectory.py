@@ -1,4 +1,5 @@
 from enum import IntEnum, auto
+from collections import namedtuple
 
 
 class PlayerType(IntEnum):
@@ -12,3 +13,16 @@ class PlayerType(IntEnum):
     Chance = auto()
     Opponent = auto()
     Teammate = auto()
+
+
+TrajectoryState = namedtuple(
+    "TrajectoryState",
+    [
+        "observation",
+        "beliefs",
+        "player_onehot",
+        "action",
+        "rewards",
+        "target_policy",
+    ],
+)
