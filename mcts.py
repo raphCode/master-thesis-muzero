@@ -18,6 +18,7 @@ class Node:
     parent: Optional[Node]
     value_sum: float
     visit_count: int
+    reward: Optional[float]
     player_type: Optional[PlayerType]
     latent_rep: Optional[torch.Tensor]
     children: List[Node]  # List index corresponds to action number
@@ -35,6 +36,7 @@ class Node:
         self.visit_count = 0
         self.value_sum = 0
         self.reward = None
+        self.latent_rep = None
         self.player_type = None
 
     @property
