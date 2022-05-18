@@ -81,7 +81,7 @@ def run_mcts(root_state: GameState) -> torch.Tensor:
         node = root
         search_path = [root]
         while node.is_expanded:
-            action, node = node.select_child()
+            node = node.select_child()
         node.expand()
 
         # backpropagate
