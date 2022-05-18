@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+# Implicitly modeling chance game states with player id 0 allows to feed the current
+# player id into the networks one-hot encoding whose turn it is.
 CHANCE_PLAYER_ID = 0
 
 
@@ -42,11 +44,16 @@ class GameState(ABC):
 class Game(ABC):
     @abstractmethod
     def new_initial_state(self) -> GameState:
+        """Return a GameState which represents a new game at intial state"""
         pass
 
     @property
     @abstractmethod
     def num_players(self) -> int:
+        """
+        Return the number of players in this game.
+        Used to set the size of the PlayerOneHot network in/outputs.
+        """
         pass
 
     @property
