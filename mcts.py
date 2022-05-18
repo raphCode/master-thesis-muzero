@@ -78,6 +78,7 @@ def run_mcts(root_state: GameState) -> torch.Tensor:
 
     root = Node(None, None, None)
     root.latent_rep = latent_rep
+    root.reward = 0
     root.expand()
     for _ in range(C.param.mcts_num_simulations):
         node = root
