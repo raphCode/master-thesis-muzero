@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 # Implicitly modeling chance game states with player id 0 allows to feed the current
 # player id into the networks one-hot encoding whose turn it is.
+# For consistency this is also done for games without randomness.
 CHANCE_PLAYER_ID = 0
 
 
@@ -14,6 +15,10 @@ class GameState(ABC):
     @property
     @abstractmethod
     def rewards(self) -> Tuple[float]:
+        """
+        Tuple of rewards, one for each player.
+        Index 0 should always be 0 since that is the id of the chance player.
+        """
         pass
 
     @property
