@@ -21,7 +21,8 @@ TrajectoryState = namedtuple(
     [
         "observation",
         "beliefs",
-        "player_onehot",
+        "player_id",
+        "player_type",
         "action",
         "rewards",
         "target_policy",
