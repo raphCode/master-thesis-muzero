@@ -10,7 +10,7 @@ class PlayerType(IntEnum):
     The chance player models randomness in a game by taking a random action.
     """
 
-    Own = auto()
+    Self = auto()
     Chance = auto()
     Opponent = auto()
     Teammate = auto()
