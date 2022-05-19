@@ -49,9 +49,9 @@ class Game(ABC):
 
     @property
     @abstractmethod
-    def num_players(self) -> int:
+    def max_num_players(self) -> int:
         """
-        Return the number of players in this game.
+        Maximum number of players that occur in playouts created by this game instance.
         Used to set the size of the PlayerOneHot network in/outputs.
         """
         pass
