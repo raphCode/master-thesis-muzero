@@ -13,7 +13,7 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def rewards(self) -> List[float]:
+    def rewards(self) -> Tuple[float]:
         pass
 
     @property
@@ -28,7 +28,7 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def chance_outcomes(self) -> List[float]:
+    def chance_outcomes(self) -> Tuple[float]:
         pass
 
     @property

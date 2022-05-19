@@ -21,8 +21,8 @@ class OpenSpielGameState(GameState):
         return NotImplemented
 
     @property
-    def rewards(self) -> List[float]:
-        return self.state.rewards()
+    def rewards(self) -> Tuple[float]:
+        return (0,) + self.state.rewards()
 
     @property
     def is_terminal(self) -> bool:
@@ -34,9 +34,9 @@ class OpenSpielGameState(GameState):
         return self.state.current_player() + 1
 
     @abstractmethod
-    def chance_outcomes(self) -> List[float]:
+    def chance_outcomes(self) -> Tuple[float]:
         d = dict(self.state.chance_outcomes())
-        return [d.get(a, 0.0) for a in range(self._max_num_actions)]
+        return tuple(d.get(a, 0.0) for a in range(self._max_num_actions))
 
     @property
     def legal_actions(self) -> List[int]:
