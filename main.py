@@ -1,9 +1,14 @@
 import numpy as np
+import torch
+from torch.nn import functional as F
 
 from game import CHANCE_PLAYER_ID
 from config import config as C
+from rl_player import RLPlayer
 
 rng = np.random.default_rng()
+
+players = ...
 
 state = C.game.new_initial_state()
 for _ in range(C.param.max_steps_per_episode):
@@ -19,3 +24,13 @@ for _ in range(C.param.max_steps_per_episode):
         action = rng.choice(C.game.max_num_actions, p=chance_outcomes)
         state.apply_action(action)
         continue
+
+    player = players[pid]
+    if isinstance(player, RLPlayer):
+        obs = state.observation
+        player_onehot = F.one_hot(torch.tensor(pid), C.game.num_players)
+        action, old_beliefs, mcts_policy = player.request_action(obs, player_onehot)
+    else:
+        action = player.request_action(state, C.game)
+
+    state.apply_action(action)
