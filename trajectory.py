@@ -1,5 +1,5 @@
 from enum import IntEnum, auto
-from typing import List
+from typing import List, Tuple
 from collections import namedtuple
 
 
@@ -35,19 +35,27 @@ rng = np.random.default_rng()
 
 class ReplayBuffer:
     lens = deque[int]
-    trajs = deque[List[TrajectoryState]]
+    data = deque[Tuple[List[int], List[TrajectoryState]]]
 
     def __init__(self, size: int):
         self.lens = deque(maxlen=size)
-        self.trajs = deque(maxlen=size)
+        self.data = deque(maxlen=size)
 
     def add_trajectory(self, traj: List[TrajectoryState]):
-        self.trajs.append(traj)
-        self.lens.append(len(traj))
+        self_idx = [n for n, ts in enumerate(traj) if ts.player_type == PlayerType.Self]
+        self.lens.append(len(self_idx))
+        self.data.append((self_idx, traj))
 
     def sample(self) -> List[TrajectoryState]:
         lens = np.array(self.lens)
-        traj = rng.choice(self.trajs, p=lens / lens.sum())
-        idx = rng.integers(len(traj))
-        # TODO: Batch from different games, always start batch at own moves
-        return traj[idx : idx + C.param.batchsize]
+        probs = lens / lens.sum()
+        batch = []
+        batchsize = 0
+        while batchsize < C.param.min_batchsize:
+            self_idx, traj = rng.choice(self.data, p=probs)
+            i = rng.integers(len(self_idx))
+            end = self_idx.get(i + C.param.batch_continuous_rounds, len(traj))
+            segment = traj[self_idx[i] : end + 1]
+            batch.append(segment)
+            batchsize += len(segment)
+        return batch
