@@ -22,16 +22,19 @@ class OpenSpielGameState(GameState):
 
     @property
     def rewards(self) -> Tuple[float]:
-        return (0,) + self.state.rewards()
+        return self.state.rewards()
 
     @property
     def is_terminal(self) -> bool:
         return self.invalid or self.state.is_terminal()
 
     @property
+    def is_chance(self) -> bool:
+        return self.state.is_chance_node()
+
+    @property
     def current_player(self) -> int:
-        # Add one because chance player is originally id -1
-        return self.state.current_player() + 1
+        return self.state.current_player()
 
     @abstractmethod
     def chance_outcomes(self) -> Tuple[float]:
