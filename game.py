@@ -20,6 +20,11 @@ class GameState(ABC):
 
     @property
     @abstractmethod
+    def is_chance(self) -> bool:
+        pass
+
+    @property
+    @abstractmethod
     def current_player(self) -> int:
         pass
 

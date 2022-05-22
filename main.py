@@ -17,13 +17,13 @@ for _ in range(C.param.max_steps_per_episode):
     if state.is_terminal:
         break
 
-    pid = state.current_player
-    if pid == CHANCE_PLAYER_ID:
+    if state.is_chance:
         chance_outcomes = state.chance_outcomes
         action = rng.choice(C.game.max_num_actions, p=chance_outcomes)
         state.apply_action(action)
         continue
 
+    pid = state.current_player
     player = players[pid]
     if isinstance(player, RLPlayer):
         obs = state.observation
