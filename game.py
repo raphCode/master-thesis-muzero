@@ -51,10 +51,12 @@ class Game(ABC):
 
     @property
     @abstractmethod
-    def max_num_players(self) -> int:
+    def num_players(self) -> int:
         """
-        Maximum number of players that occur in playouts created by this game instance.
-        Used to set the size of the PlayerOneHot network in/outputs.
+        Number of players in the current playout from the last call to new_initial_state()
+        Since this may keep state, a single Game instance should not be shared across
+        multiple active playouts. In a multiprocess environment, this is less of a concern
+        since by default, everything is copied anyways to the different processes.
         """
         pass
 
