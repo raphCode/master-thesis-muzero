@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from torch.nn import functional as F
 
 from game import CHANCE_PLAYER_ID
 from config import config as C
@@ -28,8 +27,7 @@ for _ in range(C.param.max_steps_per_episode):
     player = players[pid]
     if isinstance(player, RLPlayer):
         obs = state.observation
-        player_onehot = F.one_hot(torch.tensor(pid), C.game.num_players)
-        action, old_beliefs, mcts_policy = player.request_action(obs, player_onehot)
+        action, old_beliefs, mcts_policy = player.request_action(obs)
     else:
         action = player.request_action(state, C.game)
 

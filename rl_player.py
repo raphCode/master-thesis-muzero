@@ -26,15 +26,13 @@ class RLPlayer:
     def __init__(self):
         self.reset_new_game()
 
-    def request_action(self, obs: torch.Tensor, player_onehot: torch.Tensor) -> RLPResult:
+    def request_action(self, obs: torch.Tensor) -> RLPResult:
         """
         Requests an action from RL agent for the current observation.
         Returns an action to choose as well as extra data for recording a game trajectory.
         """
         old_beliefs = self.beliefs.to(device="cpu", copy=True)
-        latent_rep, self.beliefs = C.nets.representation.forward(
-            obs, self.beliefs, player_onehot
-        )
+        latent_rep, self.beliefs = C.nets.representation.forward(obs, self.beliefs)
         root_node = run_mcts(latent_rep, new_beliefs)
         action = C.func.mcts_root2action(root_node)
         target_policy = C.func.mcts_root2target_policy(root_node)
