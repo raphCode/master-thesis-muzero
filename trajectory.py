@@ -45,7 +45,7 @@ class ReplayBuffer:
         self.trajs.append(traj)
         self.lens.append(len(traj))
 
-    def sample(self, size: int) -> List[TrajectoryState]:
+    def sample(self) -> List[TrajectoryState]:
         lens = np.array(self.lens)
         traj = rng.choice(self.trajs, p=lens / lens.sum())
         idx = rng.integers(len(traj))
