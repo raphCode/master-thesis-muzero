@@ -66,7 +66,8 @@ class OpenSpielGame(Game):
         return OpenSpielGameState(self.game.new_initial_state(), self.max_num_actions)
 
     @cached_property
-    def max_num_players(self) -> int:
+    def num_players(self) -> int:
+        # TODO: make variable number of players per playout possible
         return self.game.num_players()
 
     @cached_property
