@@ -14,7 +14,7 @@ class Network(ABC):
 
 
 class RepresentationNet(Network):
-    # Observation, Beliefs, PlayerType -> LatentRep, Beliefs
+    # Observation, Beliefs -> LatentRep, Beliefs
     pass
 
 
