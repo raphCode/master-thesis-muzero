@@ -32,7 +32,7 @@ class RLPlayer:
         Returns an action to choose as well as extra data for recording a game trajectory.
         """
         old_beliefs = self.beliefs.to(device="cpu", copy=True)
-        latent_rep, self.beliefs = C.nets.representation.forward(obs, self.beliefs)
+        latent_rep, self.beliefs = C.nets.representation(obs, self.beliefs)
         root_node = run_mcts(latent_rep, new_beliefs)
         action = C.func.mcts_root2action(root_node)
         target_policy = C.func.mcts_root2target_policy(root_node)
