@@ -46,7 +46,7 @@ class ReplayBuffer:
         self.lens.append(len(self_idx))
         self.data.append((self_idx, traj))
 
-    def sample(self) -> List[TrajectoryState]:
+    def sample(self) -> List[List[TrajectoryState]]:
         lens = np.array(self.lens)
         probs = lens / lens.sum()
         batch = []
