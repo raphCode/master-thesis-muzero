@@ -19,7 +19,7 @@ class RepresentationNet(Network):
 
 
 class PredictionNet(Network):
-    # LatentRep, Beliefs -> ValueScalar, ActionProbs, PlayerType
+    # LatentRep, Beliefs -> ValueScalar, Policy, PlayerType
     pass
 
 
