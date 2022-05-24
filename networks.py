@@ -24,5 +24,5 @@ class PredictionNet(Network):
 
 
 class DynamicsNet(Network):
-    # LatentRep, Beliefs, Action -> LatentRep, Beliefs, RewardScalar
+    # LatentRep, Beliefs, ActionOnehot -> LatentRep, Beliefs, RewardScalar
     pass
