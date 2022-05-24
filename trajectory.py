@@ -1,6 +1,5 @@
 from enum import IntEnum, auto
-from typing import List, Tuple
-from collections import namedtuple
+from typing import List, Tuple, NamedTuple
 
 
 class PlayerType(IntEnum):
@@ -16,18 +15,14 @@ class PlayerType(IntEnum):
     Teammate = auto()
 
 
-TrajectoryState = namedtuple(
-    "TrajectoryState",
-    [
-        "observation",
-        "beliefs",
-        "player_id",
-        "player_type",
-        "action",
-        "rewards",
-        "target_policy",
-    ],
-)
+class TrajectoryState(NamedTuple):
+    observation: torch.Tensor
+    beliefs: torch.Tensor
+    player_id: int
+    player_type: PlayerType
+    action: int
+    rewards: Tuple[float]
+    target_policy: torch.Tensor
 
 
 rng = np.random.default_rng()
