@@ -18,12 +18,11 @@ class PlayerType(IntEnum):
 class TrajectoryState(NamedTuple):
     observation: torch.Tensor
     beliefs: torch.Tensor
-    player_id: int
     player_type: PlayerType
     action: int
     target_policy: torch.Tensor
     # The following values actually refer to the next state after the action transition
-    rewards: Tuple[float]
+    reward: float
     terminal: bool
 
 
