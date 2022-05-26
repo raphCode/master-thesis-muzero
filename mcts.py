@@ -82,7 +82,6 @@ def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
     root.expand()
     for _ in range(C.param.mcts_num_simulations):
         node = root
-        search_path = [root]
         while node.is_expanded:
             node = node.select_child()
         node.expand()
