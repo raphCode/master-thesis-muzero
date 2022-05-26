@@ -21,9 +21,8 @@ class TrajectoryState(NamedTuple):
     player_type: PlayerType
     action: int
     target_policy: torch.Tensor
-    # The following values actually refer to the next state after the action transition
+    # The following value actually refers to the next state after the action transition
     reward: float
-    terminal: bool
 
 
 rng = np.random.default_rng()
