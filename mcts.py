@@ -80,7 +80,13 @@ def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
     root.beliefs = beliefs
     root.reward = 0
     root.expand()
-    for _ in range(C.param.mcts_num_simulations):
+    ensure_visit_count(root, C.param.mcts_num_simulations)
+    return root
+
+
+def ensure_visit_count(root: Node, visit_count: int):
+    """Run the tree search on an already expanded Node until the visit count is reached"""
+    for _ in range(root.visit_count - visit_count):
         node = root
         while node.is_expanded:
             node = node.select_child()
@@ -95,5 +101,3 @@ def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
             node = node.parent
             node.value_sum += r
             node.visit_count += 1
-
-    return root
