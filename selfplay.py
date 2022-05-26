@@ -27,7 +27,8 @@ for _ in range(C.param.max_steps_per_episode):
     player = players[pid]
     if isinstance(player, RLPlayer):
         obs = state.observation
-        action, old_beliefs, mcts_policy = player.request_action(obs)
+        action, old_beliefs, root_node = player.request_action(obs)
+        target_policy = C.func.mcts_root2target_policy(root_node)
     else:
         action = player.request_action(state, C.game)
 

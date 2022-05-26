@@ -2,13 +2,13 @@ from typing import NamedTuple
 
 import torch
 
-from mcts import run_mcts
+from mcts import Node, run_mcts
 
 
 class RLPResult(NamedTuple):
     action: int
     old_beliefs: torch.Tensor
-    target_policy: torch.Tensor
+    mcts_value: float
 
 
 class RLPlayer:
@@ -32,8 +32,7 @@ class RLPlayer:
         latent_rep, self.beliefs = C.nets.representation(obs, self.beliefs)
         root_node = run_mcts(latent_rep, new_beliefs)
         action = C.func.mcts_root2action(root_node)
-        target_policy = C.func.mcts_root2target_policy(root_node)
-        return RLPResult(action, old_beliefs, target_policy)
+        return RLPResult(action, old_beliefs, root_node)
 
     def reset_new_game(self):
         self.beliefs = torch.zeros(tuple(C.param.belief_size))
