@@ -19,6 +19,7 @@ class Node:
     value_sum: float
     visit_count: int
     reward: Optional[float]
+    value_pred: Optional[float]
     beliefs: Optional[torch.Tensor]
     player_type: Optional[PlayerType]
     latent_rep: Optional[torch.Tensor]
@@ -38,6 +39,7 @@ class Node:
         self.value_sum = 0
         self.reward = None
         self.beliefs = None
+        self.value_pred = None
         self.latent_rep = None
         self.player_type = None
 
@@ -70,7 +72,9 @@ class Node:
             self.latent_rep, self.beliefs, self.reward = C.nets.dynamics(
                 parent.latent_rep, parent.beliefs, self.action
             )
-        value, probs, self.player_type = C.nets.prediction(self.latent_rep, self.beliefs)
+        self.value_pred, probs, self.player_type = C.nets.prediction(
+            self.latent_rep, self.beliefs
+        )
         self.children = [Node(self, action, p) for action, p in enumerate(probs)]
 
 
@@ -95,7 +99,7 @@ def ensure_visit_count(root: Node, visit_count: int):
 
         # backpropagate
         # TODO: move this into a configurable function
-        r = 0
+        r = node.value_pred
         while node != root:
             # Accumulate reward predictions in the parents's value_sum
             r = r * C.param.discount + node.reward
