@@ -1,17 +1,14 @@
-from collections import namedtuple
+from typing import NamedTuple
 
 import torch
 
 from mcts import run_mcts
 
-RLPResult = namedtuple(
-    "RLPResult",
-    [
-        "action",
-        "old_beliefs",
-        "target_policy",
-    ],
-)
+
+class RLPResult(NamedTuple):
+    action: int
+    old_beliefs: torch.Tensor
+    target_policy: torch.Tensor
 
 
 class RLPlayer:
