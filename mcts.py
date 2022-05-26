@@ -85,7 +85,7 @@ def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
     root.beliefs = beliefs
     root.reward = 0
     root.expand()
-    ensure_visit_count(root, C.param.mcts_num_simulations)
+    ensure_visit_count(root, C.param.mcts_iterations)
     return root
 
 
