@@ -67,8 +67,9 @@ class Node:
         """
         if self.parent is not None:
             # root node gets latent_rep and beliefs set externally
-            tmp = C.nets.dynamics(parent.latent_rep, parent.beliefs, self.action)
-            self.latent_rep, self.beliefs, self.reward = tmp
+            self.latent_rep, self.beliefs, self.reward = C.nets.dynamics(
+                parent.latent_rep, parent.beliefs, self.action
+            )
         value, probs, self.player_type = C.nets.prediction(self.latent_rep, self.beliefs)
         self.children = [Node(self, action, p) for action, p in enumerate(probs)]
 
