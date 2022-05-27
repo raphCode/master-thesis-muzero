@@ -1,5 +1,6 @@
 import torch.nn.functional as F
 
+from config import config as C
 from trajectory import TrajectoryState
 
 
