@@ -86,6 +86,25 @@ class Node:
         )
         self.children = [Node(self, action, p) for action, p in enumerate(probs)]
 
+    def ensure_expanded(self):
+        if not self.is_expanded:
+            self.expand()
+
+    def get_action_subtree(self, action: int) -> Node:
+        """
+        Returns the child with the given action as a new tree root, discards parent tree.
+        The rest of the tree above the returned node is effectively broken after this
+        operation and should not be used anymore.
+        All data in the subtree below the returned node is retained and can still be used.
+        """
+        self.ensure_expanded()
+        node = self.children[action]
+        node.ensure_expanded()
+        node.parent = None
+        node.action = None
+        node.reward = 0
+        return node
+
 
 def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
     # this is called only for the player's own moves
