@@ -43,6 +43,15 @@ class Node:
         self.latent_rep = None
         self.player_type = None
 
+    @classmethod
+    def from_latents(cls, latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
+        """Construct a Node from latent_rep and beliefs, suitable as a new tree root"""
+        self = cls(None, None, None)
+        self.latent_rep = latent_rep
+        self.beliefs = beliefs
+        self.reward = 0
+        return self
+
     @property
     def is_expanded(self) -> bool:
         return len(self.children) > 0
@@ -80,10 +89,7 @@ class Node:
 
 def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
     # this is called only for the player's own moves
-    root = Node(None, None, None)
-    root.latent_rep = latent_rep
-    root.beliefs = beliefs
-    root.reward = 0
+    root = Node.from_latents(latent_rep, beliefs)
     root.expand()
     ensure_visit_count(root, C.param.mcts_iterations)
     return root
