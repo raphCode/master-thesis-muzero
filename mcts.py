@@ -15,7 +15,7 @@ class Node:
     leading from the parent to this node.
     """
 
-    parent: Optional[Node]
+    parent: Node
     value_sum: float
     visit_count: int
     reward: Optional[float]
@@ -30,7 +30,7 @@ class Node:
     prior: float
     reward: Optional[float]
 
-    def __init__(self, parent: Optional[Node], action: int, prior: float):
+    def __init__(self, parent: Node, action: int, prior: float):
         self.parent = parent
         self.action = action
         self.prior = prior
