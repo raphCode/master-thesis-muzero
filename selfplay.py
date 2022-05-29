@@ -45,7 +45,8 @@ for _ in range(C.param.max_steps_per_episode):
             traj.append(
                 TrajectoryState(
                     None,
-                    None,
+                    node.latent_rep,
+                    node.beliefs,
                     PlayerType.Chance,
                     action,
                     chance_outcomes,
@@ -73,6 +74,7 @@ for _ in range(C.param.max_steps_per_episode):
         if tid == pid:
             ts = TrajectoryState(
                 obs,
+                None,
                 old_beliefs,
                 PlayerType.Self,
                 action,
@@ -84,7 +86,8 @@ for _ in range(C.param.max_steps_per_episode):
             node = get_update_mcts_tree(tid, action)
             ts = TrajectoryState(
                 None,
-                None,
+                node.latent_rep,
+                node.beliefs,
                 PlayerType.Teammate
                 if C.func.is_teammate(pid, tid)
                 else PlayerType.Opponent,
