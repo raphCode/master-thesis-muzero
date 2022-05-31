@@ -30,6 +30,5 @@ def process_trajectory(traj: List[TrajectoryState], loss: Loss):
 
         if ts.observation is not None:
             new_latent_rep, beliefs = C.nets.representation(ts.observation, beliefs)
-            if latent_rep is not None and C.param.efficient_zero_optimisation:
-                loss.latent += F.mse_loss(latent_rep, new_latent_rep)
+            loss.latent += F.mse_loss(latent_rep, new_latent_rep)
             latent_rep = new_latent_rep
