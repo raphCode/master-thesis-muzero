@@ -66,12 +66,8 @@ class ReplayBuffer:
         lens = np.array(self.lens)
         probs = lens / lens.sum()
         batch = []
-        batchsize = 0
-        while batchsize < C.param.min_batchsize:
-            self_idx, traj = rng.choice(self.data, p=probs)
-            i = rng.integers(len(self_idx))
-            end = self_idx.get(i + C.param.batch_continuous_rounds, len(traj))
-            segment = traj[self_idx[i] : end + 1]
-            batch.append(segment)
-            batchsize += len(segment)
+        for _ in range(C.param.batch_num_games):
+            traj = rng.choice(self.data, p=probs)
+            i = rng.integers(len(traj))
+            batch.append(traj[i : i + C.param.batch_game_size])
         return batch
