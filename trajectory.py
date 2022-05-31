@@ -1,6 +1,8 @@
 from enum import IntEnum, auto
 from typing import List, Tuple, NamedTuple
 
+import numpy as np
+
 
 class PlayerType(IntEnum):
     """
