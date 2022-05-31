@@ -25,7 +25,6 @@ class TrajectoryState(NamedTuple):
     action: int
     target_policy: torch.Tensor
     mcts_value: float
-    # The following value actually refers to the next state after the action transition
     reward: float
 
 
