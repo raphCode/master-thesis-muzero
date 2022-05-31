@@ -46,7 +46,8 @@ for _ in range(C.param.max_steps_per_episode):
                 TrajectoryState(
                     observation=None,
                     latent_rep=node.latent_rep,
-                    beliefs=node.beliefs,
+                    old_beliefs=player[tid].beliefs,
+                    dyn_beliefs=node.beliefs,
                     player_type=PlayerType.Chance,
                     action=action,
                     target_policy=chance_outcomes,
@@ -75,7 +76,8 @@ for _ in range(C.param.max_steps_per_episode):
             ts = TrajectoryState(
                 observation=obs,
                 latent_rep=None,
-                beliefs=old_beliefs,
+                old_beliefs=old_beliefs,
+                dyn_beliefs=None,
                 player_type=PlayerType.Self,
                 action=action,
                 target_policy=target_policy,
@@ -87,7 +89,8 @@ for _ in range(C.param.max_steps_per_episode):
             ts = TrajectoryState(
                 observation=None,
                 latent_rep=node.latent_rep,
-                beliefs=node.beliefs,
+                old_beliefs=player[tid].beliefs,
+                dyn_beliefs=node.beliefs,
                 player_type=PlayerType.Teammate
                 if C.func.is_teammate(pid, tid)
                 else PlayerType.Opponent,

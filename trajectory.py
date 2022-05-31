@@ -20,7 +20,8 @@ class PlayerType(IntEnum):
 class TrajectoryState(NamedTuple):
     observation: torch.Tensor
     latent_rep: torch.Tensor
-    beliefs: torch.Tensor
+    old_beliefs: torch.Tensor  # old beliefs prior to the representation inference
+    dyn_beliefs: torch.Tensor  # beliefs after the dynamics inference
     player_type: PlayerType
     action: int
     target_policy: torch.Tensor
