@@ -11,6 +11,7 @@ class Loss(NamedTuple):
     value: torch.Tensor
     reward: torch.Tensor
     policy: torch.Tensor
+    beliefs: torch.Tensor
     player_type: torch.Tensor
 
 
@@ -29,6 +30,8 @@ def process_trajectory(traj: List[TrajectoryState], loss: Loss):
         loss.reward += F.mse_loss(reward, ts.reward)
 
         if ts.observation is not None:
-            new_latent_rep, beliefs = C.nets.representation(ts.observation, beliefs)
+            new_latent_rep, new_beliefs = C.nets.representation(ts.observation, beliefs)
             loss.latent += F.mse_loss(latent_rep, new_latent_rep)
+            loss.beliefs += F.mse_loss(beliefs, new_beliefs)
             latent_rep = new_latent_rep
+            beliefs = new_beliefs
