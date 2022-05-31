@@ -44,14 +44,14 @@ for _ in range(C.param.max_steps_per_episode):
             node = get_update_mcts_tree(tid, action)
             traj.append(
                 TrajectoryState(
-                    None,
-                    node.latent_rep,
-                    node.beliefs,
-                    PlayerType.Chance,
-                    action,
-                    chance_outcomes,
-                    node.value,
-                    C.func.calculate_reward(state.rewards, tid),
+                    observation=None,
+                    latent_rep=node.latent_rep,
+                    beliefs=node.beliefs,
+                    player_type=PlayerType.Chance,
+                    action=action,
+                    target_policy=chance_outcomes,
+                    value=node.value,
+                    reward=C.func.calculate_reward(state.rewards, tid),
                 )
             )
         continue
@@ -73,28 +73,28 @@ for _ in range(C.param.max_steps_per_episode):
     for tid, traj in trajectories.items():
         if tid == pid:
             ts = TrajectoryState(
-                obs,
-                None,
-                old_beliefs,
-                PlayerType.Self,
-                action,
-                target_policy,
-                root_node.value,
-                C.func.calculate_reward(state.rewards, pid),
+                observation=obs,
+                latent_rep=None,
+                beliefs=old_beliefs,
+                player_type=PlayerType.Self,
+                action=action,
+                target_policy=target_policy,
+                value=root_node.value,
+                reward=C.func.calculate_reward(state.rewards, pid),
             )
         else:
             node = get_update_mcts_tree(tid, action)
             ts = TrajectoryState(
-                None,
-                node.latent_rep,
-                node.beliefs,
-                PlayerType.Teammate
+                observation=None,
+                latent_rep=node.latent_rep,
+                beliefs=node.beliefs,
+                player_type=PlayerType.Teammate
                 if C.func.is_teammate(pid, tid)
                 else PlayerType.Opponent,
-                action,
-                move_onehot,
-                node.value,
-                C.func.calculate_reward(state.rewards, tid),
+                action=action,
+                target_policy=move_onehot,
+                value=node.value,
+                reward=C.func.calculate_reward(state.rewards, tid),
             )
         traj.append(ts)
 
