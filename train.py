@@ -35,3 +35,9 @@ def process_trajectory(traj: List[TrajectoryState], loss: Loss):
             loss.beliefs += F.mse_loss(beliefs, new_beliefs)
             latent_rep = new_latent_rep
             beliefs = new_beliefs
+
+        value, policy, player_type = C.nets.prediction(latent_rep, beliefs)
+        loss.value += F.mse_loss(value, ts.value)
+        loss.policy += F.mse_loss(policy, ts.target_policy)
+        # TODO: correct for class imbalance?
+        loss.player_type += F.cross_entropy(player_type, ts.player_type)
