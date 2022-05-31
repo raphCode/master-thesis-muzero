@@ -24,25 +24,43 @@ class TrajectoryState(NamedTuple):
     player_type: PlayerType
     action: int
     target_policy: torch.Tensor
-    mcts_value: float
+    value: float  # either mcts estimate (trajectory) or value target (training data)
     reward: float
 
 
 rng = np.random.default_rng()
+discounts = np.concatenate(
+    ([1], np.cumprod(np.full(C.param.n_step_return - 1, C.param.reward_discount)))
+)
 
 
 class ReplayBuffer:
     lens = deque[int]
-    data = deque[Tuple[List[int], List[TrajectoryState]]]
+    data = deque[List[TrajectoryState]]
 
     def __init__(self, size: int):
         self.lens = deque(maxlen=size)
         self.data = deque(maxlen=size)
 
-    def add_trajectory(self, traj: List[TrajectoryState]):
-        self_idx = [n for n, ts in enumerate(traj) if ts.player_type == PlayerType.Self]
-        self.lens.append(len(self_idx))
-        self.data.append((self_idx, traj))
+    def add_trajectory(self, traj: List[TrajectoryState], game_terminated: bool):
+        *_, rewards = zip(*traj)
+        rewards = np.array(rewards)
+
+        train_data = []
+        for n, ts in enumerate(traj):
+            nstep_idx = min(len(traj), n + C.param.n_step_return)
+            if nstep_idx == len(traj) and game_terminated:
+                v = 0
+            else:
+                nstep_idx -= 1
+                v = traj[nstep_idx].value * discounts[nstep_idx - n]
+
+            v += np.inner(rewards[n:nstep_idx], discounts[: nstep_idx - n])
+            *data, _, reward = ts
+            train_data.append(TrajectoryState(*data, v, reward))
+
+        self.lens.append(len(train_data))
+        self.data.append(train_data)
 
     def sample(self) -> List[List[TrajectoryState]]:
         lens = np.array(self.lens)
