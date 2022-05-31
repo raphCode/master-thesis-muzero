@@ -9,6 +9,7 @@ from trajectory import TrajectoryState
 class Loss(NamedTuple):
     latent: torch.Tensor
     value: torch.Tensor
+    reward: torch.Tensor
     policy: torch.Tensor
     player_type: torch.Tensor
 
@@ -24,6 +25,9 @@ def process_trajectory(traj: List[TrajectoryState], loss: Loss):
         latent_rep, beliefs = C.nets.representation(first.observation, first.old_beliefs)
 
     for ts in traj:
+        latent_rep, beliefs, reward = C.nets.dynamics(latent_rep, beliefs, ts.action)
+        loss.reward += F.mse_loss(reward, ts.reward)
+
         if ts.observation is not None:
             new_latent_rep, beliefs = C.nets.representation(ts.observation, beliefs)
             if latent_rep is not None and C.param.efficient_zero_optimisation:
