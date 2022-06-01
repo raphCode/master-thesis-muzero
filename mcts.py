@@ -127,7 +127,7 @@ def ensure_visit_count(root: Node, visit_count: int):
         r = node.value_pred
         while node != root:
             # Accumulate reward predictions in the parents's value_sum
-            r = r * C.param.discount + node.reward
+            r = r * C.param.discount_factor + node.reward
             node = node.parent
             node.value_sum += r
             node.visit_count += 1

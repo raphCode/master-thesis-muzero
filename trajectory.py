@@ -31,7 +31,7 @@ class TrajectoryState(NamedTuple):
 
 rng = np.random.default_rng()
 discounts = np.concatenate(
-    ([1], np.cumprod(np.full(C.param.n_step_return - 1, C.param.reward_discount)))
+    ([1], np.cumprod(np.full(C.param.n_step_return - 1, C.param.discount_factor)))
 )
 
 
