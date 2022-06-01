@@ -35,4 +35,4 @@ class RLPlayer:
         return RLPResult(action, old_beliefs, root_node)
 
     def reset_new_game(self):
-        self.beliefs = torch.zeros(tuple(C.param.belief_size))
+        self.beliefs = C.nets.initial_beliefs.detach().clone()
