@@ -110,7 +110,7 @@ def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
     # this is called only for the player's own moves
     root = Node.from_latents(latent_rep, beliefs)
     root.expand()
-    ensure_visit_count(root, C.param.mcts_iterations)
+    ensure_visit_count(root, C.param.mcts_iter_move_selection)
     return root
 
 
