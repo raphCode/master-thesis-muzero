@@ -1,5 +1,5 @@
 from enum import IntEnum, auto
-from typing import List, Tuple, NamedTuple
+from typing import List, Deque, Tuple, NamedTuple
 from collections import deque
 
 import numpy as np
@@ -40,8 +40,8 @@ discounts = np.concatenate(
 
 
 class ReplayBuffer:
-    lens = deque[int]
-    data = deque[List[TrajectoryState]]
+    lens = Deque[int]
+    data = Deque[List[TrajectoryState]]
 
     def __init__(self, size: int):
         self.lens = deque(maxlen=size)
