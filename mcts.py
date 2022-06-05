@@ -15,7 +15,7 @@ class Node:
     leading from the parent to this node.
     """
 
-    parent: Node
+    parent: "Node"
     value_sum: float
     visit_count: int
     reward: Optional[float]
@@ -23,14 +23,14 @@ class Node:
     beliefs: Optional[torch.Tensor]
     player_type: Optional[PlayerType]
     latent_rep: Optional[torch.Tensor]
-    children: List[Node]  # List index corresponds to action number
+    children: List["Node"]  # List index corresponds to action number
 
     # The following attributes refer to the transition from the parent to this node
     action: int
     prior: float
     reward: Optional[float]
 
-    def __init__(self, parent: Node, action: int, prior: float):
+    def __init__(self, parent: "Node", action: int, prior: float):
         self.parent = parent
         self.action = action
         self.prior = prior
@@ -44,7 +44,7 @@ class Node:
         self.player_type = None
 
     @classmethod
-    def from_latents(cls, latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
+    def from_latents(cls, latent_rep: torch.Tensor, beliefs: torch.Tensor) -> "Node":
         """Construct a Node from latent_rep and beliefs, suitable as a new tree root"""
         self = cls(None, None, None)
         self.latent_rep = latent_rep
@@ -64,7 +64,7 @@ class Node:
     def selection_score(self) -> float:
         return C.func.node_selection_score(self)
 
-    def select_child(self) -> Node:
+    def select_child(self) -> "Node":
         """returns child node with highest selection_score"""
         assert self.player_type != PlayerType.Chance  # TODO: chance players
         score, node = max((node.selection_score, node) for node in self.children)
@@ -90,7 +90,7 @@ class Node:
         if not self.is_expanded:
             self.expand()
 
-    def get_action_subtree(self, action: int) -> Node:
+    def get_action_subtree(self, action: int) -> "Node":
         """
         Returns the child with the given action as a new tree root, discards parent tree.
         The rest of the tree above the returned node is effectively broken after this
