@@ -1,7 +1,11 @@
 from enum import IntEnum, auto
 from typing import List, Tuple, NamedTuple
+from collections import deque
 
 import numpy as np
+import torch
+
+from config import config as C
 
 
 class PlayerType(IntEnum):

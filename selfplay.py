@@ -3,7 +3,6 @@ from copy import deepcopy
 import numpy as np
 import torch
 
-from game import CHANCE_PLAYER_ID
 from mcts import Node, ensure_visit_count
 from config import config as C
 from rl_player import RLPlayer

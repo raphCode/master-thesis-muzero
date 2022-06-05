@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import torch
 
-from game import PlayerType
+from trajectory import PlayerType
 
 
 class Node:
