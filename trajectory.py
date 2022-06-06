@@ -54,14 +54,14 @@ class ReplayBuffer:
         for n, ts in enumerate(traj):
             nstep_idx = min(len(traj), n + C.param.n_step_return)
             if nstep_idx == len(traj) and game_terminated:
-                v = 0
+                value_target = 0
             else:
                 nstep_idx -= 1
-                v = traj[nstep_idx].value * discounts[nstep_idx - n]
+                value_target = traj[nstep_idx].value * discounts[nstep_idx - n]
 
-            v += np.inner(rewards[n:nstep_idx], discounts[: nstep_idx - n])
+            value_target += np.inner(rewards[n:nstep_idx], discounts[: nstep_idx - n])
             *data, _, reward = ts
-            train_data.append(TrajectoryState(*data, v, reward))
+            train_data.append(TrajectoryState(*data, value_target, reward))
 
         self.lens.append(len(train_data))
         self.data.append(train_data)
