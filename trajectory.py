@@ -1,9 +1,10 @@
 from enum import IntEnum, auto
-from typing import List, Deque, Tuple, NamedTuple
+from typing import List, Deque, Tuple
 from collections import deque
 
 import numpy as np
 import torch
+from attrs import evolve, frozen
 
 from config import config as C
 
@@ -21,7 +22,8 @@ class PlayerType(IntEnum):
     Teammate = auto()
 
 
-class TrajectoryState(NamedTuple):
+@frozen(kw_only=True)
+class TrajectoryState:
     observation: torch.Tensor
     latent_rep: torch.Tensor
     old_beliefs: torch.Tensor  # old beliefs prior to the representation inference
@@ -60,8 +62,7 @@ class ReplayBuffer:
                 value_target = traj[nstep_idx].value * discounts[nstep_idx - n]
 
             value_target += np.inner(rewards[n:nstep_idx], discounts[: nstep_idx - n])
-            *data, _, reward = ts
-            train_data.append(TrajectoryState(*data, value_target, reward))
+            train_data.append(evolve(ts, value=value_target))
 
         self.lens.append(len(train_data))
         self.data.append(train_data)
