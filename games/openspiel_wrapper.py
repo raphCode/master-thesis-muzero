@@ -5,7 +5,7 @@ from functools import cached_property
 import torch
 import pyspiel
 
-from game import Game, GameState
+from .bases import Game, GameState
 
 
 class OpenSpielGameState(GameState):
