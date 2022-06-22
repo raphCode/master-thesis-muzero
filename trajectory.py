@@ -1,5 +1,5 @@
 from enum import IntEnum, auto
-from typing import List, Deque, Tuple
+from typing import Deque
 from collections import deque
 
 import numpy as np
@@ -43,13 +43,13 @@ discounts = np.concatenate(
 
 class ReplayBuffer:
     lens = Deque[int]
-    data = Deque[List[TrajectoryState]]
+    data = Deque[list[TrajectoryState]]
 
     def __init__(self, size: int):
         self.lens = deque(maxlen=size)
         self.data = deque(maxlen=size)
 
-    def add_trajectory(self, traj: List[TrajectoryState], game_terminated: bool):
+    def add_trajectory(self, traj: list[TrajectoryState], game_terminated: bool):
         rewards = np.fromiter((ts.reward for ts in traj), dtype=float, count=len(traj))
 
         train_data = []
@@ -67,7 +67,7 @@ class ReplayBuffer:
         self.lens.append(len(train_data))
         self.data.append(train_data)
 
-    def sample(self) -> List[List[TrajectoryState]]:
+    def sample(self) -> list[list[TrajectoryState]]:
         lens = np.array(self.lens)
         probs = lens / lens.sum()
         batch = []

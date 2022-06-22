@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from typing import List, Tuple
 from functools import cached_property
 
 import torch
@@ -24,7 +23,7 @@ class OpenSpielGameState(GameState):
         return NotImplemented
 
     @property
-    def rewards(self) -> Tuple[float]:
+    def rewards(self) -> tuple[float]:
         return self.state.rewards()
 
     @property
@@ -40,12 +39,12 @@ class OpenSpielGameState(GameState):
         return self.state.current_player()
 
     @abstractmethod
-    def chance_outcomes(self) -> Tuple[float]:
+    def chance_outcomes(self) -> tuple[float]:
         d = dict(self.state.chance_outcomes())
         return tuple(d.get(a, 0.0) for a in range(self._max_num_actions))
 
     @property
-    def legal_actions(self) -> List[int]:
+    def legal_actions(self) -> list[int]:
         return self.state.legal_actions()
 
     def apply_action(self, action: int):

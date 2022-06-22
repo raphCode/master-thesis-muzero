@@ -16,7 +16,7 @@ class Loss(NamedTuple):
     player_type: torch.Tensor
 
 
-def process_trajectory(traj: List[TrajectoryState], loss: Loss):
+def process_trajectory(traj: list[TrajectoryState], loss: Loss):
     # TODO: move tensors to GPU
 
     first = traj[0]

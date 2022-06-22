@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 import torch
 
@@ -23,7 +23,7 @@ class Node:
     beliefs: Optional[torch.Tensor]
     player_type: Optional[PlayerType]
     latent_rep: Optional[torch.Tensor]
-    children: List["Node"]  # List index corresponds to action number
+    children: list["Node"]  # list index corresponds to action number
 
     # The following attributes refer to the transition from the parent to this node
     action: int

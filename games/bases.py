@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
 
 import torch
 
@@ -12,7 +11,7 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def rewards(self) -> Tuple[float]:
+    def rewards(self) -> tuple[float]:
         """Tuple of rewards, one for each player, starting at 0 for the first player"""
         pass
 
@@ -33,7 +32,7 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def chance_outcomes(self) -> Tuple[float]:
+    def chance_outcomes(self) -> tuple[float]:
         pass
 
     @property
