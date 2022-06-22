@@ -31,7 +31,7 @@ class RLPlayer:
         old_beliefs = self.beliefs.to(device="cpu", copy=True)
         latent_rep, self.beliefs = C.nets.representation(obs, self.beliefs)
         root_node = run_mcts(latent_rep, new_beliefs)
-        action = C.func.mcts_root2action(root_node)
+        action = C.mcts.get_node_action(root_node)
         return RLPResult(action, old_beliefs, root_node)
 
     def reset_new_game(self):

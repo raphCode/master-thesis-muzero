@@ -23,7 +23,7 @@ mcts_nodes = {n: deepcopy(initial_node) for n in rl_pids}
 
 def get_update_mcts_tree(pid: int, action: int) -> Node:
     node = mcts_nodes[pid].get_action_subtree(action)
-    ensure_visit_count(node, C.param.mcts_iter_value_estimate)
+    ensure_visit_count(node, C.mcts.iterations_value_estimate)
     mcts_nodes[rid] = node
     return node
 
@@ -61,7 +61,7 @@ for _ in range(C.param.max_steps_per_episode):
     if pid in rl_pids:
         obs = state.observation
         action, old_beliefs, root_node = player.request_action(obs)
-        target_policy = C.func.mcts_root2target_policy(root_node)
+        target_policy = C.mcts.get_node_target_policy(root_node)
         mcts_nodes[pid] = root_node
     else:
         action = player.request_action(state, C.game)
