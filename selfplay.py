@@ -12,7 +12,7 @@ rng = np.random.default_rng()
 
 players = ...
 rl_pids = {n for n, p in players.items() if isinstance(p, RLPlayer)}
-replay_buffer = ReplayBuffer(C.param.replay_buffer_size)
+replay_buffer = ReplayBuffer(C.train.replay_buffer_size)
 
 state = C.game.new_initial_state()
 trajectories = {n: [] for n in rl_pids}

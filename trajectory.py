@@ -37,7 +37,7 @@ class TrajectoryState:
 
 rng = np.random.default_rng()
 discounts = np.concatenate(
-    ([1], np.cumprod(np.full(C.param.n_step_return - 1, C.param.discount_factor)))
+    ([1], np.cumprod(np.full(C.train.n_step_return - 1, C.train.discount_factor)))
 )
 
 
@@ -54,7 +54,7 @@ class ReplayBuffer:
 
         train_data = []
         for n, ts in enumerate(traj):
-            nstep_idx = min(len(traj), n + C.param.n_step_return)
+            nstep_idx = min(len(traj), n + C.train.n_step_return)
             if nstep_idx == len(traj) and game_terminated:
                 value_target = 0
             else:
@@ -71,8 +71,8 @@ class ReplayBuffer:
         lens = np.array(self.lens)
         probs = lens / lens.sum()
         batch = []
-        for _ in range(C.param.batch_num_games):
+        for _ in range(C.train.batch_num_games):
             traj = rng.choice(self.data, p=probs)
             i = rng.integers(len(traj))
-            batch.append(traj[i : i + C.param.batch_game_size])
+            batch.append(traj[i : i + C.train.batch_game_size])
         return batch
