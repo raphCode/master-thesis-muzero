@@ -14,7 +14,7 @@ players = ...
 rl_pids = {n for n, p in players.items() if isinstance(p, RLPlayer)}
 replay_buffer = ReplayBuffer(C.train.replay_buffer_size)
 
-state = C.game.new_initial_state()
+state = C.game.instance.new_initial_state()
 trajectories = {n: [] for n in rl_pids}
 
 initial_node = Node.from_latents(C.nets.initial_latent_rep, C.nets.initial_beliefs)
@@ -28,7 +28,7 @@ def get_update_mcts_tree(pid: int, action: int) -> Node:
     return node
 
 
-for _ in range(C.param.max_steps_per_episode):
+for _ in range(C.game.instance.max_steps_per_episode):
     # Unsure about how to deal with non-terminal rewards or when exactly they occur
     assert all(r == 0 for r in state.rewards) or state.is_terminal
 
@@ -37,7 +37,7 @@ for _ in range(C.param.max_steps_per_episode):
 
     if state.is_chance:
         chance_outcomes = state.chance_outcomes
-        action = rng.choice(C.game.max_num_actions, p=chance_outcomes)
+        action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
         state.apply_action(action)
         for tid, traj in trajectories.items():
             node = get_update_mcts_tree(tid, action)
@@ -51,7 +51,7 @@ for _ in range(C.param.max_steps_per_episode):
                     action=action,
                     target_policy=chance_outcomes,
                     value=node.value,
-                    reward=C.func.calculate_reward(state.rewards, tid),
+                    reward=C.game.calculate_reward(state.rewards, tid),
                 )
             )
         continue
@@ -64,10 +64,10 @@ for _ in range(C.param.max_steps_per_episode):
         target_policy = C.mcts.get_node_target_policy(root_node)
         mcts_nodes[pid] = root_node
     else:
-        action = player.request_action(state, C.game)
+        action = player.request_action(state, C.game.instance)
 
     # estimate opponent behavior by averaging over their single moves:
-    move_onehot = F.one_hot(torch.tensor(action), C.game.max_num_actions)
+    move_onehot = F.one_hot(torch.tensor(action), C.game.instance.max_num_actions)
     state.apply_action(action)
 
     for tid, traj in trajectories.items():
@@ -81,7 +81,7 @@ for _ in range(C.param.max_steps_per_episode):
                 action=action,
                 target_policy=target_policy,
                 value=root_node.value,
-                reward=C.func.calculate_reward(state.rewards, pid),
+                reward=C.game.calculate_reward(state.rewards, pid),
             )
         else:
             node = get_update_mcts_tree(tid, action)
@@ -91,12 +91,12 @@ for _ in range(C.param.max_steps_per_episode):
                 old_beliefs=player[tid].beliefs,
                 dyn_beliefs=node.beliefs,
                 player_type=PlayerType.Teammate
-                if C.func.is_teammate(pid, tid)
+                if C.game.is_teammate(pid, tid)
                 else PlayerType.Opponent,
                 action=action,
                 target_policy=move_onehot,
                 value=node.value,
-                reward=C.func.calculate_reward(state.rewards, tid),
+                reward=C.game.calculate_reward(state.rewards, tid),
             )
         traj.append(ts)
 
