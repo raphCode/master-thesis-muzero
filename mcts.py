@@ -65,7 +65,7 @@ class Node:
     def select_child(self) -> "Node":
         """returns child node with highest selection_score"""
         assert self.player_type != PlayerType.Chance  # TODO: chance players
-        score, node = max(
+        _, node = max(
             (C.mcts.get_node_selection_score(child), child) for child in self.children
         )
         return node
