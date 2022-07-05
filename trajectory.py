@@ -36,9 +36,6 @@ class TrajectoryState:
 
 
 rng = np.random.default_rng()
-discounts = np.concatenate(
-    ([1], np.cumprod(np.full(C.train.n_step_return - 1, C.train.discount_factor)))
-)
 
 
 class ReplayBuffer:
@@ -48,6 +45,9 @@ class ReplayBuffer:
     def __init__(self, size: int):
         self.lens = deque(maxlen=size)
         self.data = deque(maxlen=size)
+        self.discounts = np.concatenate(
+            ([1], np.cumprod(np.full(C.train.n_step_return - 1, C.train.discount_factor)))
+        )
 
     def add_trajectory(self, traj: list[TrajectoryState], game_terminated: bool):
         rewards = np.fromiter((ts.reward for ts in traj), dtype=float, count=len(traj))
@@ -59,9 +59,11 @@ class ReplayBuffer:
                 value_target = 0
             else:
                 nstep_idx -= 1
-                value_target = traj[nstep_idx].value * discounts[nstep_idx - n]
+                value_target = traj[nstep_idx].value * self.discounts[nstep_idx - n]
 
-            value_target += np.inner(rewards[n:nstep_idx], discounts[: nstep_idx - n])
+            value_target += np.inner(
+                rewards[n:nstep_idx], self.discounts[: nstep_idx - n]
+            )
             train_data.append(evolve(ts, value=value_target))
 
         self.lens.append(len(train_data))
