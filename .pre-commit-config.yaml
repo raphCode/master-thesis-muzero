@@ -11,3 +11,9 @@ repos:
     -   id: black
         name: black (python)
         args: ["--check", "--diff"]
+-   repo: https://github.com/hadialqattan/pycln
+    rev: v1.3.5
+    hooks:
+    -   id: pycln
+        name: pycln (python)
+        args: ["--check", "--diff"]
