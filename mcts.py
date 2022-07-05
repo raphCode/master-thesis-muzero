@@ -69,7 +69,7 @@ class Node:
     def select_child(self) -> "Node":
         """returns child node with highest selection_score"""
         assert self.player_type != PlayerType.Chance  # TODO: chance players
-        score, node = max((node.selection_score, node) for node in self.children)
+        score, node = max((node.selection_score, child) for child in self.children)
         return node
 
     def expand(self):
