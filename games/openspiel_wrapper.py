@@ -73,5 +73,9 @@ class OpenSpielGame(Game):
         return self.game.num_players()
 
     @cached_property
+    def observation_shapes(self) -> tuple[tuple[int]]:
+        return (self.game.observation_tensor_shape(),)
+
+    @cached_property
     def max_num_actions(self) -> int:
         return max(self.game.num_distinct_actions(), self.game.max_chance_outcomes())
