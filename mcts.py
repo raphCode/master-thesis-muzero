@@ -58,6 +58,8 @@ class Node:
 
     @property
     def value(self) -> float:
+        if self.visit_count == 0:
+            return 0
         return self.value_sum / self.visit_count
 
     @property
