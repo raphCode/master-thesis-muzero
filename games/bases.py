@@ -64,6 +64,15 @@ class Game(ABC):
 
     @property
     @abstractmethod
+    def observation_shapes(self) -> tuple[tuple[int]]:
+        """
+        Shape of observation tensors. Outer tuple is for defining multiple tensors.
+        Used to set the size of the prediction network inputs.
+        """
+        pass
+
+    @property
+    @abstractmethod
     def max_num_actions(self) -> int:
         """
         Number of actions or chance outcomes, whichever is higher.
