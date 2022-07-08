@@ -1,3 +1,5 @@
+import operator
+import functools
 import itertools
 from abc import ABC, abstractmethod
 from typing import Optional
@@ -33,3 +35,30 @@ class FcBase(ABC):
             tmp = x
             x = F.relu(x)
         return tmp
+
+
+class FcRepresentation(FcBase, RepresentationNet):
+    def __init__(self, *args, **kwargs):
+        input_width = (
+            sum(
+                functools.reduce(operator.mul, shape, 1)
+                for shape in C.game.instance.observation_shapes
+            )
+            + C.nets.initial_beliefs.numel()
+        )
+        self.output_sizes = (
+            C.nets.initial_beliefs.numel(),
+            C.nets.initial_latent_rep.numel(),
+        )
+        super().__init__(
+            *args,
+            input_width=input_width,
+            output_width=sum(self.output_sizes),
+            **kwargs,
+        )
+
+    def forward(
+        self, observation: tuple[torch.Tensor, ...], beliefs: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        out = super().forward(observation, beliefs)
+        return torch.split(out, self.output_sizes, dim=1)
