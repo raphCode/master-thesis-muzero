@@ -3,26 +3,16 @@ from abc import ABC
 import torch.nn as nn
 
 
-class Network(ABC):
-    model: nn.Module
-
-    def __init__(self, model: nn.Module):
-        self.model = model
-
-    def forward(self, *inputs):
-        return self.model(*inputs)
-
-
-class RepresentationNet(Network):
+class RepresentationNet(nn.Module, ABC):
     # Observation, Beliefs -> LatentRep, Beliefs
     pass
 
 
-class PredictionNet(Network):
+class PredictionNet(nn.Module, ABC):
     # LatentRep, Beliefs -> ValueScalar, Policy, PlayerType
     pass
 
 
-class DynamicsNet(Network):
+class DynamicsNet(nn.Module, ABC):
     # LatentRep, Beliefs, ActionOnehot -> LatentRep, Beliefs, RewardScalar
     pass
