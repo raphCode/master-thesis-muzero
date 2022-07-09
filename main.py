@@ -30,7 +30,7 @@ cs.store(name="base_config", node=BaseConfig)
 
 @hydra.main(version_base=None, config_path="config", config_name="base_config")
 def main(cfg: DictConfig):
-    pass
+    config.populate_config(cfg)
 
 
 if __name__ == "__main__":
