@@ -1,5 +1,10 @@
+import os
+import abc
+import inspect
 import functools
 from types import SimpleNamespace
+from typing import Any
+from collections import defaultdict
 
 import hydra
 import torch
@@ -9,7 +14,7 @@ from hydra.utils import get_method, instantiate
 import games
 from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
 
-__all__ = ["config", "populate_config"]
+__all__ = ["config", "populate_config", "save_source_code"]
 
 # global configuration container
 config = SimpleNamespace()
@@ -46,3 +51,50 @@ def populate_config(hydra_cfg: DictConfig):
 
     # TRAIN namespace
     C.train = SimpleNamespace(**hydra_cfg.training)
+
+
+def save_source_code():
+    # to yield reproducable experiments, save the source code of all functions and
+    # networks referenced in the config, even additional ones not designated in the config
+    # schema
+
+    # {"config namespace": {("config path / origin", "source code")}}
+    sources = defaultdict(set)  # type: defaultdict[set[tuple[str, str]]]
+
+    def save_recursive(item: Any, path: list[str]):
+        if isinstance(item, SimpleNamespace):
+            for name, child in vars(item).items():
+                save_recursive(child, path + [name])
+            return
+
+        namespace = "_".join(path[:-1])
+
+        if inspect.isfunction(item):
+            source = inspect.getsource(item)
+        elif isinstance(item, torch.nn.Module):
+            cls = item.__class__
+            source = inspect.getsource(cls)
+            blacklist = {
+                cls,
+                torch.nn.Module,
+                abc.ABC,
+                object,
+                DynamicsNet,
+                PredictionNet,
+                RepresentationNet,
+            }
+            for superclass in filter(lambda c: c not in blacklist, cls.__mro__):
+                sources[namespace].add(("superclass:", inspect.getsource(superclass)))
+        else:
+            return
+
+        sources[namespace].add(("config path: " + ".".join(path), source))
+
+    save_recursive(config, [])
+
+    directory = "sources"
+    os.mkdir(directory)
+    for namespace, data in sources.items():
+        with open(os.path.join(directory, f"{namespace}.py"), "w") as f:
+            for explanation, sourcecode in sorted(data):
+                f.write(f"# {explanation}\n{sourcecode}\n\n")
