@@ -9,6 +9,7 @@ import config
 from config.schema import GameSchema, MctsSchema, TrainSchema, NetworkSchema
 
 cs = ConfigStore.instance()
+cs.store(name="hydra_job_config", group="hydra.job", node={"chdir": True})
 
 
 @define
@@ -22,6 +23,7 @@ class BaseConfig:
         {"mcts": MISSING},
         {"networks": MISSING},
         {"training": MISSING},
+        {"hydra.job": "hydra_job_config"},
     ]
 
 
