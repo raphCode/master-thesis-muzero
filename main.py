@@ -1,8 +1,34 @@
+from typing import Any
+
 import hydra
-from omegaconf import DictConfig
+from attrs import define
+from omegaconf import MISSING, OmegaConf, DictConfig
+from hydra.core.config_store import ConfigStore
+
+import config
+from config.schema import GameSchema, MctsSchema, TrainSchema, NetworkSchema
+
+cs = ConfigStore.instance()
 
 
-@hydra.main(version_base=None)
+@define
+class BaseConfig:
+    game: GameSchema
+    mcts: MctsSchema
+    networks: NetworkSchema
+    training: TrainSchema
+    defaults: list[Any] = [
+        {"game": MISSING},
+        {"mcts": MISSING},
+        {"networks": MISSING},
+        {"training": MISSING},
+    ]
+
+
+cs.store(name="base_config", node=BaseConfig)
+
+
+@hydra.main(version_base=None, config_name="base_config")
 def main(cfg: DictConfig):
     pass
 
