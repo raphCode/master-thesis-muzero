@@ -6,7 +6,7 @@ from omegaconf import MISSING, OmegaConf, DictConfig
 from hydra.core.config_store import ConfigStore
 
 import config
-from config.schema import GameSchema, MctsSchema, TrainSchema, NetworkSchema
+from config.schema import GameSchema, MctsSchema, TrainSchema, PlayerSchema, NetworkSchema
 
 cs = ConfigStore.instance()
 cs.store(name="hydra_job_config", group="hydra.job", node={"chdir": True})
@@ -18,11 +18,13 @@ class BaseConfig:
     mcts: MctsSchema
     networks: NetworkSchema
     training: TrainSchema
+    players: PlayerSchema
     defaults: list[Any] = [
         {"game": MISSING},
         {"mcts": MISSING},
         {"networks": MISSING},
         {"training": MISSING},
+        {"players": MISSING},
         {"hydra.job": "hydra_job_config"},
     ]
 

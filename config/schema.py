@@ -50,3 +50,13 @@ class TrainSchema:
     discount_factor: float
     n_step_return: int
     replay_buffer_size: int
+
+
+@define
+class Player:
+    _target_: str
+
+
+@define
+class PlayerSchema:
+    agents: list[Player]

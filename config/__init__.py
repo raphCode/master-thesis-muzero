@@ -55,6 +55,18 @@ def populate_config(hydra_cfg: DictConfig):
     # TRAIN namespace
     C.train = SimpleNamespace(**hydra_cfg.training)
 
+    # PLAYER namespace
+    from rl_player import RLPlayer  # this is here to break circular import
+
+    C.player = SimpleNamespace()
+    C.player.agents = tuple(map(instantiate, hydra_cfg.players.agents))
+    msg = "There must be at least one RLPlayer involved to collect training data!"
+    assert any(isinstance(p, RLPlayer) for p in C.player.agents), msg
+    assert all(
+        isinstance(p, games.bases.Player) or isinstance(p, RLPlayer)
+        for p in C.player.agents
+    )
+
 
 def save_source_code():
     # to yield reproducable experiments, save the source code of all functions and
