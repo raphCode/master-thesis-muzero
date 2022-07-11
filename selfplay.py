@@ -11,13 +11,11 @@ from trajectory import PlayerType, ReplayBuffer, TrajectoryState
 rng = np.random.default_rng()
 
 players = ...
-rl_pids = {n for n, p in players.items() if isinstance(p, RLPlayer)}
 replay_buffer = ReplayBuffer(C.train.replay_buffer_size)
 
-state = C.game.instance.new_initial_state()
-trajectories = {n: [] for n in rl_pids}
-
+rl_pids = {n for n, p in players.items() if isinstance(p, RLPlayer)}
 initial_node = Node.from_latents(C.nets.initial_latent_rep, C.nets.initial_beliefs)
+
 mcts_nodes = {n: deepcopy(initial_node) for n in rl_pids}
 
 
@@ -27,6 +25,9 @@ def get_update_mcts_tree(pid: int, action: int) -> Node:
     mcts_nodes[pid] = node
     return node
 
+
+state = C.game.instance.new_initial_state()
+trajectories = {n: [] for n in rl_pids}
 
 for pid in rl_pids:
     players[pid].reset_new_game()
