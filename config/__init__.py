@@ -27,6 +27,9 @@ def populate_config(hydra_cfg: DictConfig):
     C = config
     to_cont = functools.partial(OmegaConf.to_container, resolve=True)
 
+    # verify config schema by touching all values:
+    OmegaConf.to_container(hydra_cfg, throw_on_missing=True)
+
     # GAME namespace
     C.game = SimpleNamespace()
     C.game.instance = instantiate(hydra_cfg.game.instance)
