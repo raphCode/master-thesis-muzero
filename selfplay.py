@@ -28,6 +28,9 @@ def get_update_mcts_tree(pid: int, action: int) -> Node:
     return node
 
 
+for pid in rl_pids:
+    players[pid].reset_new_game()
+
 for _ in range(C.game.instance.max_steps_per_episode):
     # Unsure about how to deal with non-terminal rewards or when exactly they occur
     assert all(r == 0 for r in state.rewards) or state.is_terminal
