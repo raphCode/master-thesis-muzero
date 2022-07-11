@@ -1,5 +1,4 @@
 instance:
     _target_: games.openspiel_wrapper.OpenSpielGame
     game_name: catch
-is_teammate: config.default_functions.no_teammate
 calculate_reward: config.default_functions.default_reward

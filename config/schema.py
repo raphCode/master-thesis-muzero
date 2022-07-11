@@ -10,7 +10,6 @@ class Game:
 @define
 class GameSchema:
     instance: Game
-    is_teammate: str
     calculate_reward: str
 
 
@@ -60,3 +59,4 @@ class Player:
 @define
 class PlayerSchema:
     agents: list[Player]
+    is_teammate: str

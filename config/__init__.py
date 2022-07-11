@@ -34,7 +34,6 @@ def populate_config(hydra_cfg: DictConfig):
     C.game = SimpleNamespace()
     C.game.instance = instantiate(hydra_cfg.game.instance)
     assert isinstance(C.game.instance, games.bases.Game)
-    C.game.is_teammate = get_method(hydra_cfg.game.is_teammate)
     C.game.calculate_reward = get_method(hydra_cfg.game.calculate_reward)
 
     # MCTS namespace
@@ -62,6 +61,7 @@ def populate_config(hydra_cfg: DictConfig):
     from rl_player import RLPlayer  # this is here to break circular import
 
     C.player = SimpleNamespace()
+    C.player.is_teammate = get_method(hydra_cfg.players.is_teammate)
     C.player.agents = tuple(map(instantiate, hydra_cfg.players.agents))
     msg = "There must be at least one RLPlayer involved to collect training data!"
     assert any(isinstance(p, RLPlayer) for p in C.player.agents), msg

@@ -91,7 +91,7 @@ for _ in range(C.game.instance.max_steps_per_episode):
                 old_beliefs=player[tid].beliefs,
                 dyn_beliefs=node.beliefs,
                 player_type=PlayerType.Teammate
-                if C.game.is_teammate(pid, tid)
+                if C.player.is_teammate(pid, tid)
                 else PlayerType.Opponent,
                 action=action,
                 target_policy=move_onehot,
