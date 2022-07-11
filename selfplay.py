@@ -24,7 +24,7 @@ mcts_nodes = {n: deepcopy(initial_node) for n in rl_pids}
 def get_update_mcts_tree(pid: int, action: int) -> Node:
     node = mcts_nodes[pid].get_action_subtree(action)
     ensure_visit_count(node, C.mcts.iterations_value_estimate)
-    mcts_nodes[rid] = node
+    mcts_nodes[pid] = node
     return node
 
 
