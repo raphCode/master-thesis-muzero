@@ -1,6 +1,7 @@
 import os
 import abc
 import inspect
+import logging
 import functools
 from types import SimpleNamespace
 from typing import Any
@@ -15,6 +16,8 @@ import games
 from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
 
 __all__ = ["config", "populate_config", "save_source_code"]
+
+log = logging.getLogger(__name__)
 
 # global configuration container
 config = SimpleNamespace()
@@ -94,7 +97,10 @@ def save_source_code():
 
     directory = "sources"
     os.mkdir(directory)
+    n = 0
     for namespace, data in sources.items():
         with open(os.path.join(directory, f"{namespace}.py"), "w") as f:
             for explanation, sourcecode in sorted(data):
                 f.write(f"# {explanation}\n{sourcecode}\n\n")
+                n += 1
+    log.info(f"Saved source code of {n} objects")
