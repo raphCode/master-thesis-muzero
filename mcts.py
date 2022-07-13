@@ -2,6 +2,7 @@ from typing import Optional
 
 import torch
 
+from config import config as C
 from trajectory import PlayerType
 
 
