@@ -19,7 +19,7 @@ def run_episode(replay_buffer: ReplayBuffer):
     mcts_nodes = {n: deepcopy(initial_node) for n in rl_pids}
 
     def get_and_update_mcts_tree(pid: int, action: int) -> Node:
-        node = mcts_nodes[pid].get_action_subtree(action)
+        node = mcts_nodes[pid].get_action_subtree_and_prune_above(action)
         ensure_visit_count(node, C.mcts.iterations_value_estimate)
         mcts_nodes[pid] = node
         return node

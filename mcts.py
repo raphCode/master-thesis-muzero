@@ -90,7 +90,7 @@ class Node:
         if not self.is_expanded:
             self.expand()
 
-    def get_action_subtree(self, action: int) -> "Node":
+    def get_action_subtree_and_prune_above(self, action: int) -> "Node":
         """
         Returns the child with the given action as a new tree root, discards parent tree.
         The rest of the tree above the returned node is effectively broken after this
