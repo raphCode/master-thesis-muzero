@@ -49,6 +49,7 @@ class TrainSchema:
     discount_factor: float
     n_step_return: int
     replay_buffer_size: int
+    max_steps_per_episode: int
 
 
 @define
