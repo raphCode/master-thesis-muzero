@@ -12,7 +12,6 @@ class OpenSpielGameState(GameState):
     _max_num_actions: int
 
     def __init__(self, state: pyspiel.State, max_num_actions: int):
-        assert state.is_player_node()
         self.state = state
         self.invalid = False
         self._max_num_actions = max_num_actions
