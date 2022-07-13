@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from functools import cached_property
 
 import torch
@@ -38,7 +37,7 @@ class OpenSpielGameState(GameState):
     def current_player(self) -> int:
         return self.state.current_player()
 
-    @abstractmethod
+    @property
     def chance_outcomes(self) -> tuple[float]:
         d = dict(self.state.chance_outcomes())
         return tuple(d.get(a, 0.0) for a in range(self._max_num_actions))
