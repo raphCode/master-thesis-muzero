@@ -42,9 +42,9 @@ class ReplayBuffer:
     lens = Deque[int]
     data = Deque[list[TrajectoryState]]
 
-    def __init__(self, size: int):
-        self.lens = deque(maxlen=size)
-        self.data = deque(maxlen=size)
+    def __init__(self):
+        self.lens = deque(maxlen=C.train.replay_buffer_size)
+        self.data = deque(maxlen=C.train.replay_buffer_size)
         self.discounts = np.concatenate(
             ([1], np.cumprod(np.full(C.train.n_step_return - 1, C.train.discount_factor)))
         )
