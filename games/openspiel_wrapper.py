@@ -68,11 +68,6 @@ class OpenSpielGame(Game):
         return OpenSpielGameState(self.game.new_initial_state(), self.max_num_actions)
 
     @cached_property
-    def num_players(self) -> int:
-        # TODO: make variable number of players per playout possible
-        return self.game.num_players()
-
-    @cached_property
     def observation_shapes(self) -> tuple[tuple[int]]:
         return (self.game.observation_tensor_shape(),)
 

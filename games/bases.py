@@ -53,17 +53,6 @@ class Game(ABC):
 
     @property
     @abstractmethod
-    def num_players(self) -> int:
-        """
-        Number of players in the current playout from the last call to new_initial_state()
-        Since this may keep state, a single Game instance should not be shared across
-        multiple active playouts. In a multiprocess environment, this is less of a concern
-        since by default, everything is copied anyways to the different processes.
-        """
-        pass
-
-    @property
-    @abstractmethod
     def observation_shapes(self) -> tuple[tuple[int]]:
         """
         Shape of observation tensors. Outer tuple is for defining multiple tensors.
