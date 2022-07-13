@@ -29,7 +29,7 @@ class FcBase(ABC):
 
     @abstractmethod
     def forward(self, *inputs: tuple[torch.Tensor, ...]) -> torch.Tensor:
-        x = torch.cat([o.flatten(1) for i in inputs], dim=1)
+        x = torch.cat([i.flatten(1) for i in inputs], dim=1)
         for fc in self.fc_layers:
             x = fc(x)
             tmp = x
