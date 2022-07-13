@@ -61,14 +61,13 @@ for _ in range(C.train.max_steps_per_episode):
         continue
 
     pid = state.current_player
-    player = players[pid]
     if pid in rl_pids:
         obs = state.observation
-        action, old_beliefs, root_node = player.request_action(obs)
+        action, old_beliefs, root_node = players[pid].request_action(obs)
         target_policy = C.mcts.get_node_target_policy(root_node)
         mcts_nodes[pid] = root_node
     else:
-        action = player.request_action(state, C.game.instance)
+        action = players[pid].request_action(state, C.game.instance)
 
     # estimate opponent behavior by averaging over their single moves:
     move_onehot = F.one_hot(torch.tensor(action), C.game.instance.max_num_actions)
