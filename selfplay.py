@@ -10,10 +10,10 @@ from trajectory import PlayerType, ReplayBuffer, TrajectoryState
 
 rng = np.random.default_rng()
 
-players = ...
 replay_buffer = ReplayBuffer(C.train.replay_buffer_size)
 
-rl_pids = {n for n, p in players.items() if isinstance(p, RLPlayer)}
+players = C.player.agents
+rl_pids = {n for n, p in enumerate(players) if isinstance(p, RLPlayer)}
 initial_node = Node.from_latents(C.nets.initial_latent_rep, C.nets.initial_beliefs)
 
 mcts_nodes = {n: deepcopy(initial_node) for n in rl_pids}
