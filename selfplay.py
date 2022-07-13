@@ -18,7 +18,7 @@ def run_episode(replay_buffer: ReplayBuffer):
 
     mcts_nodes = {n: deepcopy(initial_node) for n in rl_pids}
 
-    def get_update_mcts_tree(pid: int, action: int) -> Node:
+    def get_and_update_mcts_tree(pid: int, action: int) -> Node:
         node = mcts_nodes[pid].get_action_subtree(action)
         ensure_visit_count(node, C.mcts.iterations_value_estimate)
         mcts_nodes[pid] = node
@@ -42,7 +42,7 @@ def run_episode(replay_buffer: ReplayBuffer):
             action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
             state.apply_action(action)
             for tid, traj in trajectories.items():
-                node = get_update_mcts_tree(tid, action)
+                node = get_and_update_mcts_tree(tid, action)
                 traj.append(
                     TrajectoryState(
                         observation=None,
@@ -85,7 +85,7 @@ def run_episode(replay_buffer: ReplayBuffer):
                     reward=C.game.calculate_reward(state.rewards, pid),
                 )
             else:
-                node = get_update_mcts_tree(tid, action)
+                node = get_and_update_mcts_tree(tid, action)
                 ts = TrajectoryState(
                     observation=None,
                     latent_rep=node.latent_rep,
