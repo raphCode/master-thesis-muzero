@@ -59,5 +59,5 @@ class Player:
 
 @define
 class PlayerSchema:
-    agents: list[Player]
+    instances: list[Player]
     is_teammate: str

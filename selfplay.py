@@ -12,7 +12,7 @@ rng = np.random.default_rng()
 
 replay_buffer = ReplayBuffer(C.train.replay_buffer_size)
 
-players = C.player.agents
+players = C.player.instances
 rl_pids = {n for n, p in enumerate(players) if isinstance(p, RLPlayer)}
 initial_node = Node.from_latents(C.nets.initial_latent_rep, C.nets.initial_beliefs)
 

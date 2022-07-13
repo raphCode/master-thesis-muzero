@@ -62,12 +62,12 @@ def populate_config(hydra_cfg: DictConfig):
 
     C.player = SimpleNamespace()
     C.player.is_teammate = get_method(hydra_cfg.players.is_teammate)
-    C.player.agents = tuple(map(instantiate, hydra_cfg.players.agents))
+    C.player.instances = tuple(map(instantiate, hydra_cfg.players.instances))
     msg = "There must be at least one RLPlayer involved to collect training data!"
-    assert any(isinstance(p, RLPlayer) for p in C.player.agents), msg
+    assert any(isinstance(p, RLPlayer) for p in C.player.instances), msg
     assert all(
         isinstance(p, games.bases.Player) or isinstance(p, RLPlayer)
-        for p in C.player.agents
+        for p in C.player.instances
     )
 
 
