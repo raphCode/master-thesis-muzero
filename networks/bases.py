@@ -9,6 +9,13 @@ class NetworkBase(nn.Module, ABC):
     def forward(self):
         pass
 
+    def si(self, *inputs: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:
+        """
+        single interference, automatically adds/removes batch dimensions on in/outputs.
+        """
+        results = self(*(torch.unsqueeze(i, 0) for i in inputs))
+        return (torch.squeeze(r, 0) for r in results)
+
 
 class RepresentationNet(NetworkBase):
     # Observation, Beliefs -> LatentRep, Beliefs
