@@ -1,6 +1,7 @@
 from typing import Optional
 
 import torch
+import torch.nn.functional as F
 
 from config import config as C
 from trajectory import PlayerType
@@ -80,7 +81,9 @@ class Node:
         if self.parent is not None:
             # root node gets latent_rep and beliefs set externally
             self.latent_rep, self.beliefs, self.reward = C.nets.dynamics.si(
-                parent.latent_rep, parent.beliefs, self.action
+                self.parent.latent_rep,
+                self.parent.beliefs,
+                F.one_hot(torch.tensor(self.action), C.game.instance.max_num_actions),
             )
         self.value_pred, probs, self.player_type = C.nets.prediction.si(
             self.latent_rep, self.beliefs
