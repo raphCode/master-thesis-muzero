@@ -4,7 +4,13 @@ import torch
 import torch.nn as nn
 
 
-class RepresentationNet(nn.Module, ABC):
+class NetworkBase(nn.Module, ABC):
+    @abstractmethod
+    def forward(self):
+        pass
+
+
+class RepresentationNet(NetworkBase):
     # Observation, Beliefs -> LatentRep, Beliefs
     @abstractmethod
     def forward(
@@ -13,7 +19,7 @@ class RepresentationNet(nn.Module, ABC):
         pass
 
 
-class PredictionNet(nn.Module, ABC):
+class PredictionNet(NetworkBase):
     # LatentRep, Beliefs -> ValueScalar, Policy, PlayerType
     @abstractmethod
     def forward(
@@ -22,7 +28,7 @@ class PredictionNet(nn.Module, ABC):
         pass
 
 
-class DynamicsNet(nn.Module, ABC):
+class DynamicsNet(NetworkBase):
     # LatentRep, Beliefs, ActionOnehot -> LatentRep, Beliefs, RewardScalar
     @abstractmethod
     def forward(

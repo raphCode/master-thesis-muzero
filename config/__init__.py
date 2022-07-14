@@ -13,7 +13,7 @@ from omegaconf import OmegaConf, DictConfig
 from hydra.utils import get_method, instantiate
 
 import games
-from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
+from networks.bases import DynamicsNet, NetworkBase, PredictionNet, RepresentationNet
 
 __all__ = ["config", "populate_config", "save_source_code"]
 
@@ -97,6 +97,7 @@ def save_source_code():
                 torch.nn.Module,
                 abc.ABC,
                 object,
+                NetworkBase,
                 DynamicsNet,
                 PredictionNet,
                 RepresentationNet,
