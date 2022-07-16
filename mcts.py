@@ -1,10 +1,13 @@
 from typing import Optional
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 
 from config import config as C
 from trajectory import PlayerType
+
+rng = np.random.default_rng()
 
 
 class Node:
@@ -66,7 +69,12 @@ class Node:
 
     def select_child(self) -> "Node":
         """returns child node with highest selection_score"""
-        assert self.player_type != PlayerType.Chance  # TODO: chance players
+        if self.player_type == PlayerType.Chance:
+            # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
+            # default. The precision difference leads to the message 'probabilities to not
+            # sum to 1' otherwise.
+            probs = np.array([c.prior for c in self.children], dtype=np.float32)
+            return rng.choice(self.children, p=probs)
         return max(self.children, key=C.mcts.get_node_selection_score)
 
     def expand(self):
