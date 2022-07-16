@@ -80,14 +80,17 @@ class Node:
         """
         if self.parent is not None:
             # root node gets latent_rep and beliefs set externally
-            self.latent_rep, self.beliefs, self.reward = C.nets.dynamics.si(
+            self.latent_rep, self.beliefs, reward = C.nets.dynamics.si(
                 self.parent.latent_rep,
                 self.parent.beliefs,
                 F.one_hot(torch.tensor(self.action), C.game.instance.max_num_actions),
             )
-        self.value_pred, probs, self.player_type = C.nets.prediction.si(
+            self.reward = reward.item()
+        value_pred, probs, player_type = C.nets.prediction.si(
             self.latent_rep, self.beliefs
         )
+        self.value_pred = value_pred.item()
+        self.player_type = PlayerType(player_type.argmax().item())
         self.children = [Node(self, action, p) for action, p in enumerate(probs)]
 
     def ensure_expanded(self):
