@@ -32,7 +32,7 @@ def muzero_node_ucb_selection_score(node: Node) -> float:
             / C.mcts.ucb_prior_log_scale_base
         )
         + C.mcts.ucb_prior_log_scale_init
-    ) * math.sqrt(node.parent.visit_count / node.visit_count)
+    ) * math.sqrt(node.parent.visit_count / (node.visit_count + 1))
     prior_score = node.prior * prior_scale
     value_score = node.reward + node.value * C.train.discount_factor
     return value_score + prior_score
