@@ -88,7 +88,7 @@ class Node:
         )
         self.value_pred = value_pred.item()
         self.player_type = PlayerType(player_type.argmax().item())
-        self.children = [Node(self, action, p) for action, p in enumerate(probs)]
+        self.children = [Node(self, action, p) for action, p in enumerate(probs.tolist())]
 
     def ensure_expanded(self):
         if not self.is_expanded:
