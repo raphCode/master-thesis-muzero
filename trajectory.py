@@ -1,4 +1,4 @@
-from enum import IntEnum, auto
+from enum import IntEnum
 from typing import Deque
 from collections import deque
 
@@ -16,10 +16,10 @@ class PlayerType(IntEnum):
     The chance player models randomness in a game by taking a random action.
     """
 
-    Self = auto()
-    Chance = auto()
-    Opponent = auto()
-    Teammate = auto()
+    Self = 0
+    Chance = 1
+    Opponent = 2
+    Teammate = 3
 
 
 @frozen(kw_only=True)
