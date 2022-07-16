@@ -11,14 +11,15 @@ class OpenSpielGameState(GameState):
     invalid: bool
     _max_num_actions: int
 
-    def __init__(self, state: pyspiel.State, max_num_actions: int):
+    def __init__(self, state: pyspiel.State, max_num_actions: int, obs_shape: tuple[int]):
         self.state = state
         self.invalid = False
         self._max_num_actions = max_num_actions
+        self.obs_shape = obs_shape
 
     @property
     def observation(self) -> torch.Tensor:
-        return NotImplemented
+        return torch.tensor(self.state.observation_tensor()).reshape(self.obs_shape)
 
     @property
     def rewards(self) -> tuple[float]:
@@ -61,9 +62,14 @@ class OpenSpielGame(Game):
 
     def __init__(self, game_name: str):
         self.game = pyspiel.load_game(game_name)
+        assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
 
     def new_initial_state(self) -> OpenSpielGameState:
-        return OpenSpielGameState(self.game.new_initial_state(), self.max_num_actions)
+        return OpenSpielGameState(
+            self.game.new_initial_state(),
+            self.max_num_actions,
+            self.game.observation_tensor_shape(),
+        )
 
     @cached_property
     def observation_shapes(self) -> tuple[tuple[int]]:
