@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 from mcts import Node, ensure_visit_count
 from config import config as C
