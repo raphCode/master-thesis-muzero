@@ -33,7 +33,7 @@ def run_episode(replay_buffer: ReplayBuffer):
 
     for _ in range(C.train.max_steps_per_episode):
         # Unsure about how to deal with non-terminal rewards or when exactly they occur
-        assert all(r == 0 for r in state.rewards) or state.is_terminal
+        assert state.is_chance or state.is_terminal or all(r == 0 for r in state.rewards)
 
         if state.is_terminal:
             break
