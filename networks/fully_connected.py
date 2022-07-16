@@ -87,7 +87,7 @@ class FcPrediction(FcBase, PredictionNet):
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         out = super().forward(latent_rep, beliefs)
         value, policy, player_type = torch.split(out, self.output_sizes, dim=1)
-        return value, F.softmax(policy, dim=1), F.softmax(policy, dim=1)
+        return value, F.softmax(policy, dim=1), F.softmax(player_type, dim=1)
 
 
 class FcDynamics(FcBase, DynamicsNet):
