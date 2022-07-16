@@ -15,8 +15,7 @@ def no_teammate(pid_a: int, pid_b: int) -> bool:
 
 
 def greedy_node_action(node: Node) -> int:
-    _, node = max((child.visit_count, child) for child in node.children)
-    return node
+    return max(enumerate(node.children), key=lambda t: t[1].visit_count)[0]
 
 
 def muzero_node_target_policy(node: Node) -> list[float]:
