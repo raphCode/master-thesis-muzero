@@ -102,5 +102,5 @@ def run_episode(replay_buffer: ReplayBuffer):
                 )
             traj.append(ts)
 
-    for traj in trajectories:
-        replay_buffer.add_trajectory(traj)
+    for traj in trajectories.values():
+        replay_buffer.add_trajectory(traj, game_terminated=state.is_terminal)
