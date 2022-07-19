@@ -3,6 +3,7 @@ import abc
 import inspect
 import logging
 import functools
+import itertools
 from types import SimpleNamespace
 from typing import Any
 from collections import defaultdict
@@ -56,6 +57,14 @@ def populate_config(hydra_cfg: DictConfig):
 
     # TRAIN namespace
     C.train = SimpleNamespace(**hydra_cfg.training)
+    optim_partial = instantiate(hydra_cfg.training.optimizer, _partial_=True)
+    C.train.optimizer = optim_partial(
+        itertools.chain(
+            C.nets.dynamics.parameters(),
+            C.nets.prediction.parameters(),
+            C.nets.representation.parameters(),
+        )
+    )
 
     # PLAYER namespace
     from rl_player import RLPlayer  # this is here to break circular import

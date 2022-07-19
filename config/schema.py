@@ -43,6 +43,12 @@ class NetworkSchema:
 
 
 @define
+class Optimizer:
+    _target_: str
+    lr: float
+
+
+@define
 class TrainSchema:
     batch_game_size: int
     batch_num_games: int
@@ -50,6 +56,7 @@ class TrainSchema:
     n_step_return: int
     replay_buffer_size: int
     max_steps_per_episode: int
+    optimizer: Optimizer
 
 
 @define
