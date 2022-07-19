@@ -24,6 +24,10 @@ class OpenSpielGameState(GameState):
 
     @property
     def rewards(self) -> tuple[float]:
+        if self.invalid:
+            tmp = [0] * self.game.num_players
+            tmp[self.current_player] = self.game.bad_move_reward
+            return tuple(tmp)
         return self.state.rewards()
 
     @property
@@ -57,8 +61,9 @@ class OpenSpielGameState(GameState):
 class OpenSpielGame(Game):
     game: pyspiel.Game
 
-    def __init__(self, game_name: str):
+    def __init__(self, game_name: str, bad_move_reward: float):
         self.game = pyspiel.load_game(game_name)
+        self.bad_move_reward = bad_move_reward
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
 
     def new_initial_state(self) -> OpenSpielGameState:
