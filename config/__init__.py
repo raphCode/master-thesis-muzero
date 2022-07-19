@@ -98,7 +98,7 @@ def save_source_code():
 
         if inspect.isfunction(item):
             source = inspect.getsource(item)
-        elif isinstance(item, torch.nn.Module):
+        elif isinstance(item, NetworkBase):
             cls = item.__class__
             source = inspect.getsource(cls)
             blacklist = {
