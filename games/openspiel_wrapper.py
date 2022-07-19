@@ -8,18 +8,19 @@ from .bases import Game, GameState
 
 class OpenSpielGameState(GameState):
     state: pyspiel.State
+    game: "OpenSpielGame"
     invalid: bool
-    _max_num_actions: int
 
-    def __init__(self, state: pyspiel.State, max_num_actions: int, obs_shape: tuple[int]):
+    def __init__(self, state: pyspiel.State, game: "OpenSpielGame"):
         self.state = state
+        self.game = game
         self.invalid = False
-        self._max_num_actions = max_num_actions
-        self.obs_shape = obs_shape
 
     @property
     def observation(self) -> torch.Tensor:
-        return torch.tensor(self.state.observation_tensor()).reshape(self.obs_shape)
+        return torch.tensor(self.state.observation_tensor()).reshape(
+            self.game.observation_shapes[0]
+        )
 
     @property
     def rewards(self) -> tuple[float]:
@@ -40,7 +41,7 @@ class OpenSpielGameState(GameState):
     @property
     def chance_outcomes(self) -> tuple[float]:
         d = dict(self.state.chance_outcomes())
-        return tuple(d.get(a, 0.0) for a in range(self._max_num_actions))
+        return tuple(d.get(a, 0.0) for a in range(self.game.max_num_actions))
 
     def apply_action(self, action: int):
         if self.invalid or action not in self.state.legal_actions():
@@ -63,8 +64,7 @@ class OpenSpielGame(Game):
     def new_initial_state(self) -> OpenSpielGameState:
         return OpenSpielGameState(
             self.game.new_initial_state(),
-            self.max_num_actions,
-            self.game.observation_tensor_shape(),
+            self,
         )
 
     @cached_property
