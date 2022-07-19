@@ -26,6 +26,8 @@ class FcBase(ABC):
             width = input_width
         widths = [input_width] + [width] * hidden_depth + [output_width]
         self.fc_layers = [nn.Linear(a, b) for a, b in itertools.pairwise(widths)]
+        for n, layer in enumerate(self.fc_layers):
+            self.add_module(f"fc{n}", layer)
 
     @abstractmethod
     def forward(self, *inputs: tuple[torch.Tensor, ...]) -> torch.Tensor:
