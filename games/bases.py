@@ -48,6 +48,11 @@ class Game(ABC):
 
     @property
     @abstractmethod
+    def num_players(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
     def observation_shapes(self) -> tuple[tuple[int]]:
         """
         Shape of observation tensors. Outer tuple is for defining multiple tensors.

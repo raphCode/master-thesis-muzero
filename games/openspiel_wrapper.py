@@ -68,6 +68,10 @@ class OpenSpielGame(Game):
         )
 
     @cached_property
+    def num_players(self) -> int:
+        return self.game.num_players()
+
+    @cached_property
     def observation_shapes(self) -> tuple[tuple[int]]:
         return (self.game.observation_tensor_shape(),)
 
