@@ -42,10 +42,6 @@ class OpenSpielGameState(GameState):
         d = dict(self.state.chance_outcomes())
         return tuple(d.get(a, 0.0) for a in range(self._max_num_actions))
 
-    @property
-    def legal_actions(self) -> list[int]:
-        return self.state.legal_actions()
-
     def apply_action(self, action: int):
         if self.invalid or action not in self.state.legal_actions():
             # also covers terminal states because the legal actions are empty then

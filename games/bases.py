@@ -35,11 +35,6 @@ class GameState(ABC):
     def chance_outcomes(self) -> tuple[float]:
         pass
 
-    @property
-    @abstractmethod
-    def legal_actions(self) -> int:
-        pass
-
     @abstractmethod
     def apply_action(self, action: int):
         pass
