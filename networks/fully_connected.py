@@ -85,10 +85,12 @@ class FcPrediction(FcBase, PredictionNet):
         )
 
     def forward(
-        self, latent_rep: torch.Tensor, beliefs: torch.Tensor
+        self, latent_rep: torch.Tensor, beliefs: torch.Tensor, logits=False
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         out = super().forward(latent_rep, beliefs)
         value, policy, player_type = torch.split(out, self.output_sizes, dim=1)
+        if logits:
+            return value, policy, player_type
         return value, F.softmax(policy, dim=1), F.softmax(player_type, dim=1)
 
 
