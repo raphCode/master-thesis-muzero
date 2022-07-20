@@ -78,3 +78,6 @@ class ReplayBuffer:
             i = rng.integers(len(traj))
             batch.append(traj[i : i + C.train.batch_game_size])
         return batch
+
+    def __len__(self):
+        return len(self.data)
