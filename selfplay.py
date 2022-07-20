@@ -1,3 +1,4 @@
+import logging
 from copy import deepcopy
 
 import numpy as np
@@ -10,6 +11,7 @@ from rl_player import RLPlayer
 from trajectory import PlayerType, ReplayBuffer, TrajectoryState
 
 rng = np.random.default_rng()
+log = logging.getLogger(__name__)
 
 
 def run_episode(replay_buffer: ReplayBuffer):
@@ -31,7 +33,7 @@ def run_episode(replay_buffer: ReplayBuffer):
     for pid in rl_pids:
         players[pid].reset_new_game()
 
-    for _ in range(C.train.max_steps_per_episode):
+    for step in range(C.train.max_steps_per_episode):
         # Unsure about how to deal with non-terminal rewards or when exactly they occur
         assert state.is_chance or state.is_terminal or all(r == 0 for r in state.rewards)
 
@@ -104,3 +106,5 @@ def run_episode(replay_buffer: ReplayBuffer):
 
     for traj in trajectories.values():
         replay_buffer.add_trajectory(traj, game_terminated=state.is_terminal)
+
+    log.info(f"Finished game ({step + 1} steps)")
