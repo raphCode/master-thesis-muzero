@@ -74,7 +74,7 @@ class ReplayBuffer:
         probs = lens / lens.sum()
         batch = []
         for _ in range(C.train.batch_num_games):
-            traj = rng.choice(self.data, p=probs)
+            traj = rng.choice(np.array(self.data, dtype=object), p=probs)
             i = rng.integers(len(traj))
             batch.append(traj[i : i + C.train.batch_game_size])
         return batch
