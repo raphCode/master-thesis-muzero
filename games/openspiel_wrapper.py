@@ -48,6 +48,7 @@ class OpenSpielGameState(GameState):
         return tuple(d.get(a, 0.0) for a in range(self.game.max_num_actions))
 
     def apply_action(self, action: int):
+        assert not self.is_terminal
         if self.invalid or action not in self.state.legal_actions():
             # also covers terminal states because the legal actions are empty then
             # TODO: set bad reward for offending player

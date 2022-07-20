@@ -6,4 +6,11 @@ replay_buffer_size: 1_000
 max_steps_per_episode: 10_000
 optimizer:
     _target_: torch.optim.Adam
-    lr: 0.005
+    lr: 0.001
+loss_weights:
+    latent: 1
+    value: 1
+    reward: 1
+    policy: 1
+    beliefs: 1
+    player_type: 1

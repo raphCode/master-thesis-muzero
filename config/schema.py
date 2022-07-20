@@ -49,6 +49,16 @@ class Optimizer:
 
 
 @define
+class LossWeights:
+    latent: float
+    value: float
+    reward: float
+    policy: float
+    beliefs: float
+    player_type: float
+
+
+@define
 class TrainSchema:
     batch_game_size: int
     batch_num_games: int
@@ -57,6 +67,7 @@ class TrainSchema:
     replay_buffer_size: int
     max_steps_per_episode: int
     optimizer: Optimizer
+    loss_weights: LossWeights
 
 
 @define

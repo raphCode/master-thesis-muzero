@@ -24,6 +24,7 @@ class PlayerType(IntEnum):
 
 @frozen(kw_only=True)
 class TrajectoryState:
+    # TODO: these types might not be right
     observation: torch.Tensor
     latent_rep: torch.Tensor
     old_beliefs: torch.Tensor  # old beliefs prior to the representation inference

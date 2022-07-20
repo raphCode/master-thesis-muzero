@@ -49,9 +49,9 @@ def run_episode(replay_buffer: ReplayBuffer):
                 traj.append(
                     TrajectoryState(
                         observation=None,
-                        latent_rep=node.latent_rep,
-                        old_beliefs=players[tid].beliefs,
-                        dyn_beliefs=node.beliefs,
+                        latent_rep=node.latent_rep.detach(),
+                        old_beliefs=players[tid].beliefs.detach(),
+                        dyn_beliefs=node.beliefs.detach(),
                         player_type=PlayerType.Chance,
                         action=action,
                         target_policy=chance_outcomes,
@@ -77,9 +77,9 @@ def run_episode(replay_buffer: ReplayBuffer):
         for tid, traj in trajectories.items():
             if tid == pid:
                 ts = TrajectoryState(
-                    observation=obs,
+                    observation=obs.detach(),
                     latent_rep=None,
-                    old_beliefs=old_beliefs,
+                    old_beliefs=old_beliefs.detach(),
                     dyn_beliefs=None,
                     player_type=PlayerType.Self,
                     action=action,
@@ -91,9 +91,9 @@ def run_episode(replay_buffer: ReplayBuffer):
                 node = get_and_update_mcts_tree(tid, action)
                 ts = TrajectoryState(
                     observation=None,
-                    latent_rep=node.latent_rep,
-                    old_beliefs=players[tid].beliefs,
-                    dyn_beliefs=node.beliefs,
+                    latent_rep=node.latent_rep.detach(),
+                    old_beliefs=players[tid].beliefs.detach(),
+                    dyn_beliefs=node.beliefs.detach(),
                     player_type=PlayerType.Teammate
                     if C.player.is_teammate(pid, tid)
                     else PlayerType.Opponent,
