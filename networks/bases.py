@@ -9,11 +9,11 @@ class NetworkBase(nn.Module, ABC):
     def forward(self):
         pass
 
-    def si(self, *inputs: torch.Tensor) -> tuple[torch.Tensor, ...]:
+    def si(self, *inputs: torch.Tensor, **kwargs) -> tuple[torch.Tensor, ...]:
         """
         single interference, automatically adds/removes batch dimensions on in/outputs.
         """
-        results = self(*(torch.unsqueeze(i, 0) for i in inputs))
+        results = self(*(torch.unsqueeze(i, 0) for i in inputs), **kwargs)
         return (torch.squeeze(r, 0) for r in results)
 
 
@@ -30,7 +30,7 @@ class PredictionNet(NetworkBase):
     # LatentRep, Beliefs -> ValueScalar, Policy, PlayerType
     @abstractmethod
     def forward(
-        self, latent_rep: torch.Tensor, beliefs: torch.Tensor
+        self, latent_rep: torch.Tensor, beliefs: torch.Tensor, logits=False
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         pass
 
