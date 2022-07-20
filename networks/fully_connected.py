@@ -30,7 +30,7 @@ class FcBase(ABC):
             self.add_module(f"fc{n}", layer)
 
     @abstractmethod
-    def forward(self, *inputs: tuple[torch.Tensor, ...]) -> torch.Tensor:
+    def forward(self, *inputs: torch.Tensor) -> torch.Tensor:
         x = torch.cat([i.flatten(1) for i in inputs], dim=1)
         for fc in self.fc_layers:
             x = fc(x)

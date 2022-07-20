@@ -9,7 +9,7 @@ class NetworkBase(nn.Module, ABC):
     def forward(self):
         pass
 
-    def si(self, *inputs: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:
+    def si(self, *inputs: torch.Tensor) -> tuple[torch.Tensor, ...]:
         """
         single interference, automatically adds/removes batch dimensions on in/outputs.
         """
