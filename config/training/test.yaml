@@ -14,3 +14,4 @@ loss_weights:
     policy: 1
     beliefs: 1
     player_type: 1
+    automatic_adjustment_rate: 0.001

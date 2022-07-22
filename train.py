@@ -1,12 +1,11 @@
 import torch
 import torch.nn.functional as F
-from attrs import Factory, define
+from attrs import define, Factory
 
 from config import config as C
 from trajectory import PlayerType, TrajectoryState
 
-tensor_factory = Factory(lambda: torch.tensor(0.0))
-
+tensor_factory = Factory(lambda:torch.tensor(0.0))
 
 @define
 class Loss:
@@ -36,9 +35,7 @@ def process_trajectory(traj: list[TrajectoryState], loss: Loss):
             beliefs,
             F.one_hot(torch.tensor(ts.action), C.game.instance.max_num_actions),
         )
-        loss.reward += F.mse_loss(
-            reward, torch.tensor(ts.reward, dtype=torch.float).view(1)
-        )
+        loss.reward += F.mse_loss(reward, torch.tensor(ts.reward, dtype=torch.float).view(1))
 
         if ts.observation is not None:
             new_latent_rep, new_beliefs = C.nets.representation.si(
@@ -49,17 +46,12 @@ def process_trajectory(traj: list[TrajectoryState], loss: Loss):
             latent_rep = new_latent_rep
             beliefs = new_beliefs
 
-        value, policy, player_type = C.nets.prediction.si(
-            latent_rep, beliefs, logits=True
-        )
+        value, policy, player_type = C.nets.prediction.si(latent_rep, beliefs, logits=True)
         loss.value += F.mse_loss(value, torch.tensor(ts.value, dtype=torch.float).view(1))
-        loss.policy += F.cross_entropy(
-            policy.unsqueeze(0),
-            torch.tensor(ts.target_policy, dtype=torch.float).unsqueeze(0),
+        loss.policy += F.cross_entropy(policy.unsqueeze(0), torch.tensor(ts.target_policy, dtype=torch.float).unsqueeze(0)
         )
         # TODO: correct for class imbalance?
-        loss.player_type += F.cross_entropy(
-            player_type, torch.tensor(ts.player_type, dtype=int)
+        loss.player_type += F.cross_entropy(player_type, torch.tensor(ts.player_type,dtype=int)
         )
 
 
@@ -70,6 +62,17 @@ def process_batch(batch: list[list[TrajectoryState]]):
         # TODO: batch network inference
         process_trajectory(traj, losses)
 
+    import attrs
+
+    rate = C.train.loss_weights.automatic_adjustment_rate
+    def adj(x, l):
+        return x * (1-rate) + 1/(l+1e-3)* rate
+    
+    for k, loss in attrs.asdict(losses).items():
+        lw=getattr(C.train.loss_weights, k)
+        setattr(C.train.loss_weights, k, adj(lw, loss.item()))
+        print(f"{k}: {lw:.4f}, loss {loss:.4f}")
+
     loss = (
         C.train.loss_weights.latent * losses.latent
         + C.train.loss_weights.value * losses.value
@@ -78,12 +81,12 @@ def process_batch(batch: list[list[TrajectoryState]]):
         + C.train.loss_weights.beliefs * losses.beliefs
         + C.train.loss_weights.player_type * losses.player_type
     )
-    loss.float().backward()
+    loss.backward()
     C.train.optimizer.step()
 
-    import attrs
+    return loss
 
     for k, x in attrs.asdict(losses).items():
-        print(k, 1 / x)
+        print(k, x)
 
     return loss
