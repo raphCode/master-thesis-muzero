@@ -36,7 +36,9 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
             beliefs,
             F.one_hot(torch.tensor(ts.action), C.game.instance.max_num_actions),
         )
-        losses.reward += F.mse_loss(reward, ts.reward)
+        losses.reward += F.mse_loss(
+            reward, torch.tensor(ts.reward, dtype=torch.float).view(1)
+        )
 
         if ts.observation is not None:
             new_latent_rep, new_beliefs = C.nets.representation.si(
@@ -48,9 +50,16 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
             beliefs = new_beliefs
 
         value, policy, player_type = C.nets.prediction.si(
-            latent_rep, beliefs
+            latent_rep, beliefs, logits=True
         )
-        losses.value += F.mse_loss(value, ts.value)
-        losses.policy += F.mse_loss(policy, ts.target_policy)
+        losses.value += F.mse_loss(
+            value, torch.tensor(ts.value, dtype=torch.float).view(1)
+        )
+        losses.policy += F.cross_entropy(
+            policy.unsqueeze(0),
+            torch.tensor(ts.target_policy, dtype=torch.float).unsqueeze(0),
+        )
         # TODO: correct for class imbalance?
-        losses.player_type += F.cross_entropy(player_type, ts.player_type)
+        losses.player_type += F.cross_entropy(
+            player_type, torch.tensor(ts.player_type, dtype=int)
+        )
