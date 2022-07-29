@@ -7,7 +7,7 @@ from config import config as C
 from trajectory import TrajectoryState
 
 
-class Loss(NamedTuple):
+class Losses(NamedTuple):
     latent: torch.Tensor
     value: torch.Tensor
     reward: torch.Tensor
@@ -16,7 +16,7 @@ class Loss(NamedTuple):
     player_type: torch.Tensor
 
 
-def process_trajectory(traj: list[TrajectoryState], loss: Loss):
+def process_trajectory(traj: list[TrajectoryState], losses: Losses):
     # TODO: move tensors to GPU
 
     first = traj[0]
@@ -28,17 +28,17 @@ def process_trajectory(traj: list[TrajectoryState], loss: Loss):
 
     for ts in traj:
         latent_rep, beliefs, reward = C.nets.dynamics(latent_rep, beliefs, ts.action)
-        loss.reward += F.mse_loss(reward, ts.reward)
+        losses.reward += F.mse_loss(reward, ts.reward)
 
         if ts.observation is not None:
             new_latent_rep, new_beliefs = C.nets.representation(ts.observation, beliefs)
-            loss.latent += F.mse_loss(latent_rep, new_latent_rep)
-            loss.beliefs += F.mse_loss(beliefs, new_beliefs)
+            losses.latent += F.mse_loss(latent_rep, new_latent_rep)
+            losses.beliefs += F.mse_loss(beliefs, new_beliefs)
             latent_rep = new_latent_rep
             beliefs = new_beliefs
 
         value, policy, player_type = C.nets.prediction(latent_rep, beliefs)
-        loss.value += F.mse_loss(value, ts.value)
-        loss.policy += F.mse_loss(policy, ts.target_policy)
+        losses.value += F.mse_loss(value, ts.value)
+        losses.policy += F.mse_loss(policy, ts.target_policy)
         # TODO: correct for class imbalance?
-        loss.player_type += F.cross_entropy(player_type, ts.player_type)
+        losses.player_type += F.cross_entropy(player_type, ts.player_type)
