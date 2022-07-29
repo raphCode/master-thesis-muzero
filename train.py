@@ -63,3 +63,21 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
         losses.player_type += F.cross_entropy(
             player_type, torch.tensor(ts.player_type, dtype=int)
         )
+
+
+def process_batch(batch: list[list[TrajectoryState]]):
+    losses = Losses()
+    for traj in batch:
+        # TODO: batch network inference
+        process_trajectory(traj, losses)
+
+    loss = (
+        C.train.loss_weights.latent * losses.latent
+        + C.train.loss_weights.value * losses.value
+        + C.train.loss_weights.reward * losses.reward
+        + C.train.loss_weights.policy * losses.policy
+        + C.train.loss_weights.beliefs * losses.beliefs
+        + C.train.loss_weights.player_type * losses.player_type
+    )
+    loss.backward()
+    C.train.optimizer.step()
