@@ -26,20 +26,30 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
         beliefs = first.dyn_beliefs
         latent_rep = first.latent_rep
     else:
-        latent_rep, beliefs = C.nets.representation(first.observation, first.old_beliefs)
+        latent_rep, beliefs = C.nets.representation.si(
+            first.observation, first.old_beliefs
+        )
 
     for ts in traj:
-        latent_rep, beliefs, reward = C.nets.dynamics(latent_rep, beliefs, ts.action)
+        latent_rep, beliefs, reward = C.nets.dynamics.si(
+            latent_rep,
+            beliefs,
+            F.one_hot(torch.tensor(ts.action), C.game.instance.max_num_actions),
+        )
         losses.reward += F.mse_loss(reward, ts.reward)
 
         if ts.observation is not None:
-            new_latent_rep, new_beliefs = C.nets.representation(ts.observation, beliefs)
+            new_latent_rep, new_beliefs = C.nets.representation.si(
+                ts.observation, beliefs
+            )
             losses.latent += F.mse_loss(latent_rep, new_latent_rep)
             losses.beliefs += F.mse_loss(beliefs, new_beliefs)
             latent_rep = new_latent_rep
             beliefs = new_beliefs
 
-        value, policy, player_type = C.nets.prediction(latent_rep, beliefs)
+        value, policy, player_type = C.nets.prediction.si(
+            latent_rep, beliefs
+        )
         losses.value += F.mse_loss(value, ts.value)
         losses.policy += F.mse_loss(policy, ts.target_policy)
         # TODO: correct for class imbalance?
