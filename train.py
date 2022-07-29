@@ -1,19 +1,21 @@
-from typing import NamedTuple
-
 import torch
 import torch.nn.functional as F
+from attrs import Factory, define
 
 from config import config as C
 from trajectory import TrajectoryState
 
+tensor_factory = Factory(lambda: torch.tensor(0.0))
 
-class Losses(NamedTuple):
-    latent: torch.Tensor
-    value: torch.Tensor
-    reward: torch.Tensor
-    policy: torch.Tensor
-    beliefs: torch.Tensor
-    player_type: torch.Tensor
+
+@define
+class Losses:
+    latent: torch.Tensor = tensor_factory
+    value: torch.Tensor = tensor_factory
+    reward: torch.Tensor = tensor_factory
+    policy: torch.Tensor = tensor_factory
+    beliefs: torch.Tensor = tensor_factory
+    player_type: torch.Tensor = tensor_factory
 
 
 def process_trajectory(traj: list[TrajectoryState], losses: Losses):
