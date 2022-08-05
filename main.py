@@ -1,5 +1,6 @@
 import logging
 import itertools
+import contextlib
 from typing import Any
 
 import hydra
@@ -7,6 +8,7 @@ import torch
 from attrs import define
 from omegaconf import MISSING, OmegaConf, DictConfig
 from hydra.core.config_store import ConfigStore
+from torch.utils.tensorboard import SummaryWriter
 
 import config
 import selfplay
@@ -47,27 +49,27 @@ def main(cfg: DictConfig):
     config.populate_config(cfg)
     config.save_source_code()
     rb = ReplayBuffer()
-    # TODO: try inference mode to speed up things
-    for n in itertools.count(0):
-        with torch.no_grad():
-            selfplay.run_episode(rb)
-            selfplay.run_episode(rb)
-        if len(rb) > 0.001 * C.train.replay_buffer_size:
-            loss = process_batch(rb.sample())
-            log.info(f"Finished batch update (loss: {loss.item():.5f})")
-        if n % 100 == 0:
-            torch.save(
-                {
-                    "nets": {
-                        "prediction": C.nets.prediction.state_dict(),
-                        "representation": C.nets.representation.state_dict(),
-                        "dynamics": C.nets.dynamics.state_dict(),
+    with contextlib.closing(SummaryWriter(log_dir="tb")) as sw:
+        # TODO: try inference mode to speed up things
+        for n in itertools.count(0):
+            with torch.no_grad():
+                selfplay.run_episode(rb, sw, n)
+            if len(rb) > 0.1 * C.train.replay_buffer_size:
+                loss = process_batch(rb.sample(), sw, n)
+                log.info(f"Finished batch update (loss: {loss.item():.5f})")
+            if n % 100 == 0:
+                torch.save(
+                    {
+                        "nets": {
+                            "prediction": C.nets.prediction.state_dict(),
+                            "representation": C.nets.representation.state_dict(),
+                            "dynamics": C.nets.dynamics.state_dict(),
+                        },
+                        "optimizer": C.train.optimizer.state_dict(),
                     },
-                    "optimizer": C.train.optimizer.state_dict(),
-                },
-                f"checkpoint{n:04d}.pt",
-            )
-            log.info(f"Saved checkpoint!")
+                    f"checkpoint{n:04d}.pt",
+                )
+                log.info(f"Saved checkpoint!")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 batch_game_size: 16
-batch_num_games: 4
+batch_num_games: 16
 discount_factor: 0.99
 n_step_return: 20
 replay_buffer_size: 1_000
@@ -12,6 +12,6 @@ loss_weights:
     value: 1
     reward: 1
     policy: 1
-    beliefs: 1
+    beliefs: 0
     player_type: 1
-    automatic_adjustment_rate: 0.001
+    automatic_adjustment_rate: 0.000

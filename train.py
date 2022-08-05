@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from attrs import Factory, define
+from torch.utils.tensorboard import SummaryWriter
 
 from config import config as C
 from trajectory import TrajectoryState
@@ -36,7 +37,7 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
             beliefs,
             F.one_hot(torch.tensor(ts.action), C.game.instance.max_num_actions),
         )
-        losses.reward += F.mse_loss(
+        losses.reward += F.l1_loss(
             reward, torch.tensor(ts.reward, dtype=torch.float).view(1)
         )
 
@@ -44,15 +45,18 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
             new_latent_rep, new_beliefs = C.nets.representation.si(
                 ts.observation, beliefs
             )
-            losses.latent += F.mse_loss(latent_rep, new_latent_rep)
-            losses.beliefs += F.mse_loss(beliefs, new_beliefs)
-            latent_rep = new_latent_rep
-            beliefs = new_beliefs
+            # TODO: cross entropy loss???
+            losses.latent += F.cosine_embedding_loss(latent_rep, new_latent_rep, torch.tensor(1))
+            losses.beliefs += F.cosine_embedding_loss(beliefs, new_beliefs, torch.tensor(1))
+            # TODO: dynamics net should be trained here for correct mcts operation
+            # latent_rep = new_latent_rep
+            # beliefs = new_beliefs
+            # TODO: losses here are not properly averaged: this branch is not taken for all items in the batch
 
         value, policy, player_type = C.nets.prediction.si(
             latent_rep, beliefs, logits=True
         )
-        losses.value += F.mse_loss(
+        losses.value += F.l1_loss(
             value, torch.tensor(ts.value, dtype=torch.float).view(1)
         )
         losses.policy += F.cross_entropy(
@@ -65,7 +69,7 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
         )
 
 
-def process_batch(batch: list[list[TrajectoryState]]):
+def process_batch(batch: list[list[TrajectoryState]], sw: SummaryWriter, n: int):
     torch.autograd.set_detect_anomaly(True)
     losses = Losses()
     for traj in batch:
@@ -75,6 +79,7 @@ def process_batch(batch: list[list[TrajectoryState]]):
     import attrs
 
     rate = C.train.loss_weights.automatic_adjustment_rate
+    bsize = sum(map(len, batch))
 
     def adj(x, l):
         return x * (1 - rate) + 1 / (l + 1e-3) * rate
@@ -82,7 +87,8 @@ def process_batch(batch: list[list[TrajectoryState]]):
     for k, loss in attrs.asdict(losses).items():
         lw = getattr(C.train.loss_weights, k)
         setattr(C.train.loss_weights, k, adj(lw, loss.item()))
-        print(f"{k}: {lw:.4f}, loss {loss:.4f}")
+        sw.add_scalar(f"loss/{k}", loss / bsize, n)
+        sw.add_scalar(f"loss weight/{k}", lw, n)
 
     loss = (
         C.train.loss_weights.latent * losses.latent
@@ -91,9 +97,11 @@ def process_batch(batch: list[list[TrajectoryState]]):
         + C.train.loss_weights.policy * losses.policy
         + C.train.loss_weights.beliefs * losses.beliefs
         + C.train.loss_weights.player_type * losses.player_type
-    )
+    ) / bsize
     loss.backward()
     C.train.optimizer.step()
+
+    sw.add_scalar("loss/total", loss, n)
 
     return loss
 

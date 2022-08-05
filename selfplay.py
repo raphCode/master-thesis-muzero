@@ -1,4 +1,5 @@
 import logging
+import contextlib
 from copy import deepcopy
 
 import numpy as np
@@ -10,11 +11,14 @@ from config import config as C
 from rl_player import RLPlayer
 from trajectory import PlayerType, ReplayBuffer, TrajectoryState
 
+from torch.utils.tensorboard import SummaryWriter
 rng = np.random.default_rng()
 log = logging.getLogger(__name__)
+from typing import Callable
+import matplotlib.pyplot as plt
 
 
-def run_episode(replay_buffer: ReplayBuffer):
+def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
     players = C.player.instances
     rl_pids = {n for n, p in enumerate(players) if isinstance(p, RLPlayer)}
     initial_node = Node.from_latents(C.nets.initial_latent_rep, C.nets.initial_beliefs)
@@ -32,6 +36,8 @@ def run_episode(replay_buffer: ReplayBuffer):
 
     for pid in rl_pids:
         players[pid].reset_new_game()
+
+    actions = []
 
     for step in range(C.train.max_steps_per_episode):
         # Unsure about how to deal with non-terminal rewards or when exactly they occur
@@ -65,8 +71,27 @@ def run_episode(replay_buffer: ReplayBuffer):
         if pid in rl_pids:
             obs = state.observation
             action, old_beliefs, root_node = players[pid].request_action(obs)
+            actions.append(action)
             target_policy = C.mcts.get_node_target_policy(root_node)
             mcts_nodes[pid] = root_node
+
+            def add_mcts_histogram(label:str, f: Callable[Node, int]):
+                fig=plt.figure()
+                plt.bar(range(C.game.instance.max_num_actions), list(map(f, root_node.children)))
+                sw.add_figure(f"mcts step {step}/{label}", fig,  n)
+
+            if n % 20 == 0:
+                with contextlib.suppress(TypeError):
+                    add_mcts_histogram("visit count", lambda n: n.visit_count)
+                    add_mcts_histogram("value", lambda n: n.value)
+                    add_mcts_histogram("reward", lambda n: n.reward)
+                    add_mcts_histogram("prior", lambda n: n.prior)
+                    #add_mcts_histogram("ucb score", C.mcts.get_node_selection_score)
+
+                    sw.add_histogram(f"mcts step {step}/values", np.array([c.value for c in root_node.children]),n)
+                    sw.add_histogram(f"mcts step {step}/visit counts", np.array([c.visit_count for c in root_node.children]),n)
+                    sw.add_histogram(f"mcts step {step}/rewards", np.array([c.reward for c in root_node.children]),n)
+                    sw.add_histogram(f"mcts step {step}/value preds", np.array([c.value_pred for c in root_node.children]),n)
         else:
             action = players[pid].request_action(state, C.game.instance)
 
@@ -108,3 +133,5 @@ def run_episode(replay_buffer: ReplayBuffer):
         replay_buffer.add_trajectory(traj, game_terminated=state.is_terminal)
 
     log.info(f"Finished game ({step + 1} steps)")
+    sw.add_scalar("game/length", step + 1, n)
+    sw.add_histogram("game/actions", np.array(actions), n)

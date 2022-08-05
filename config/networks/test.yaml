@@ -1,11 +1,14 @@
 representation:
     _target_: networks.fully_connected.FcRepresentation
+    hidden_depth: 5
 prediction:
     _target_: networks.fully_connected.FcPrediction
+    hidden_depth: 5
 dynamics:
     _target_: networks.fully_connected.FcDynamics
+    hidden_depth: 5
 initial_beliefs:
-    size: [50]
+    size: [0]
     fill_value: 0.5
 initial_latent_rep:
     size: [50]
