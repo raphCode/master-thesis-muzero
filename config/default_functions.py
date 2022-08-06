@@ -1,9 +1,18 @@
 import math
+from collections.abc import Sequence
 
 import numpy as np
 
 from mcts import Node
 from config import config as C
+
+
+def softmax(dist: Sequence[float], temp: float = 1.0, norm: bool = True) -> np.ndarray:
+    dist = np.array(dist)
+    if norm:
+        temp *= dist.sum()
+    exp = np.exp(dist / temp)
+    return exp / exp.sum()
 
 
 def default_reward(rewards: tuple[float], player_id: int) -> float:
