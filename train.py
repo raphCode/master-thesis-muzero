@@ -44,8 +44,12 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
             new_latent_rep, new_beliefs = C.nets.representation.si(
                 ts.observation, beliefs
             )
-            losses.latent += F.mse_loss(latent_rep, new_latent_rep)
-            losses.beliefs += F.mse_loss(beliefs, new_beliefs)
+            losses.latent += F.cosine_embedding_loss(
+                latent_rep, new_latent_rep, torch.tensor(1)
+            )
+            losses.beliefs += F.cosine_embedding_loss(
+                beliefs, new_beliefs, torch.tensor(1)
+            )
 
         value, policy, player_type = C.nets.prediction.si(
             latent_rep, beliefs, logits=True
