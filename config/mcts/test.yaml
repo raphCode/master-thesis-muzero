@@ -1,5 +1,5 @@
 get_node_action: config.default_functions.action_visit_count
-get_node_target_policy: config.default_functions.muzero_node_target_policy
+get_node_target_policy: config.default_functions.target_policy_visit_count
 get_node_selection_score: config.default_functions.muzero_node_ucb_selection_score
 iterations_move_selection: 200
 iterations_value_estimate: 100
@@ -9,6 +9,9 @@ action_visit_count:
     softmax_temp_end: 0
     num_moves_start: 10
     num_moves_end: 11
+
+target_policy_visit_count:
+    softmax_temp: 0.6
 
 # for muzeros UCB formula:
 ucb_prior_log_scale_base: 10000

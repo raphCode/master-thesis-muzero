@@ -41,11 +41,9 @@ def action_visit_count(node: Node, move_number: int) -> int:
     return rng.choice(C.game.instance.max_num_actions, p=softmax(visit_counts, temp))
 
 
-def muzero_node_target_policy(node: Node) -> list[float]:
-    # softmax of visit counts
+def target_policy_visit_count(node: Node) -> Sequence[float]:
     visit_counts = [child.visit_count for child in node.children]
-    exp = np.exp(visit_counts)
-    return exp / exp.sum()
+    return softmax(visit_counts, C.mcts.target_policy_visit_count.softmax_temp)
 
 
 def muzero_node_ucb_selection_score(node: Node) -> float:
