@@ -28,23 +28,30 @@ def populate_config(hydra_cfg: DictConfig):
     C = config
     to_cont = functools.partial(OmegaConf.to_container, resolve=True)
 
+    def to_namespace_recurse(x) -> SimpleNamespace:
+        if isinstance(x, dict):
+            return SimpleNamespace(**{k: to_namespace_recurse(v) for k, v in x.items()})
+        if isinstance(x, list):
+            return list(map(to_namespace_recurse, x))
+        return x
+
     # verify config schema by touching all values:
     OmegaConf.to_container(hydra_cfg, throw_on_missing=True)
 
     # GAME namespace
-    C.game = SimpleNamespace()
+    C.game = to_namespace_recurse(to_cont(hydra_cfg.game))
     C.game.instance = instantiate(hydra_cfg.game.instance)
     assert isinstance(C.game.instance, games.bases.Game)
     C.game.calculate_reward = get_method(hydra_cfg.game.calculate_reward)
 
     # MCTS namespace
-    C.mcts = SimpleNamespace(**hydra_cfg.mcts)
+    C.mcts = to_namespace_recurse(to_cont(hydra_cfg.mcts))
     C.mcts.get_node_action = get_method(hydra_cfg.mcts.get_node_action)
     C.mcts.get_node_target_policy = get_method(hydra_cfg.mcts.get_node_target_policy)
     C.mcts.get_node_selection_score = get_method(hydra_cfg.mcts.get_node_selection_score)
 
     # NETS namespace
-    C.nets = SimpleNamespace()
+    C.nets = to_namespace_recurse(to_cont(hydra_cfg.networks))
     C.nets.initial_beliefs = torch.full(**to_cont(hydra_cfg.networks.initial_beliefs))
     C.nets.initial_latent_rep = torch.full(**to_cont(hydra_cfg.networks.initial_beliefs))
 
@@ -56,7 +63,7 @@ def populate_config(hydra_cfg: DictConfig):
     assert isinstance(C.nets.representation, RepresentationNet)
 
     # TRAIN namespace
-    C.train = SimpleNamespace(**hydra_cfg.training)
+    C.train = to_namespace_recurse(to_cont(hydra_cfg.training))
     C.train.loss_weights = SimpleNamespace(**hydra_cfg.training.loss_weights)
     optim_partial = instantiate(hydra_cfg.training.optimizer, _partial_=True)
     C.train.optimizer = optim_partial(
@@ -70,7 +77,7 @@ def populate_config(hydra_cfg: DictConfig):
     # PLAYER namespace
     from rl_player import RLPlayer  # this is here to break circular import
 
-    C.player = SimpleNamespace()
+    C.player = to_namespace_recurse(to_cont(hydra_cfg.players))
     C.player.is_teammate = get_method(hydra_cfg.players.is_teammate)
     C.player.instances = tuple(map(instantiate, hydra_cfg.players.instances))
     msg = "There must be at least one RLPlayer involved to collect training data!"
