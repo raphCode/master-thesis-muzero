@@ -20,6 +20,7 @@ class RLPlayer:
     """
 
     beliefs: torch.Tensor
+    move_number: int
 
     def __init__(self):
         self.reset_new_game()
@@ -33,8 +34,10 @@ class RLPlayer:
         latent_rep, self.beliefs = C.nets.representation.si(obs, self.beliefs)
         # TODO: instead of re-running, try to reuse previous tree search from selfplay here
         root_node = run_mcts(latent_rep, self.beliefs)
-        action = C.mcts.get_node_action(root_node)
+        action = C.mcts.get_node_action(root_node, self.move_number)
+        self.move_number += 1
         return RLPResult(action, old_beliefs, root_node)
 
     def reset_new_game(self):
         self.beliefs = C.nets.initial_beliefs.detach().clone()
+        self.move_number = 0
