@@ -36,7 +36,7 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
             beliefs,
             F.one_hot(torch.tensor(ts.action), C.game.instance.max_num_actions),
         )
-        losses.reward += F.mse_loss(
+        losses.reward += F.l1_loss(
             reward, torch.tensor(ts.reward, dtype=torch.float).view(1)
         )
 
@@ -52,7 +52,7 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
         value, policy, player_type = C.nets.prediction.si(
             latent_rep, beliefs, logits=True
         )
-        losses.value += F.mse_loss(
+        losses.value += F.l1_loss(
             value, torch.tensor(ts.value, dtype=torch.float).view(1)
         )
         losses.policy += F.cross_entropy(
