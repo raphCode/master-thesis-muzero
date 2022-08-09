@@ -50,6 +50,7 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
             losses.beliefs += F.cosine_embedding_loss(
                 beliefs, new_beliefs, torch.tensor(1)
             )
+            # TODO: losses here are not properly averaged: this branch is not taken for all items in the batch
 
         value, policy, player_type = C.nets.prediction.si(
             latent_rep, beliefs, logits=True
@@ -80,6 +81,6 @@ def process_batch(batch: list[list[TrajectoryState]]):
         + C.train.loss_weights.policy * losses.policy
         + C.train.loss_weights.beliefs * losses.beliefs
         + C.train.loss_weights.player_type * losses.player_type
-    )
+    ) / bsize
     loss.backward()
     C.train.optimizer.step()
