@@ -46,8 +46,6 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
             )
             losses.latent += F.mse_loss(latent_rep, new_latent_rep)
             losses.beliefs += F.mse_loss(beliefs, new_beliefs)
-            latent_rep = new_latent_rep
-            beliefs = new_beliefs
 
         value, policy, player_type = C.nets.prediction.si(
             latent_rep, beliefs, logits=True
