@@ -50,7 +50,7 @@ class ReplayBuffer:
         )
 
     def add_trajectory(self, traj: list[TrajectoryState], game_terminated: bool):
-        rewards = np.fromiter((ts.reward for ts in traj), dtype=float, count=len(traj))
+        rewards = np.array([ts.reward for ts in traj])
 
         train_data = []
         for n, ts in enumerate(traj):
