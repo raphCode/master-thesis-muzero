@@ -25,13 +25,13 @@ class RLPlayer:
     def __init__(self):
         self.reset_new_game()
 
-    def request_action(self, obs: torch.Tensor) -> RLPResult:
+    def request_action(self, observation: tuple[torch.Tensor]) -> RLPResult:
         """
         Requests an action from RL agent for the current observation.
         Returns an action to choose as well as extra data for recording a game trajectory.
         """
         old_beliefs = self.beliefs.to(device="cpu", copy=True)
-        latent_rep, self.beliefs = C.nets.representation.si(obs, self.beliefs)
+        latent_rep, self.beliefs = C.nets.representation.si(observation, self.beliefs)
         # TODO: instead of re-running, try to reuse previous tree search from selfplay here
         root_node = run_mcts(latent_rep, self.beliefs)
         action = C.mcts.get_node_action(root_node, self.move_number)
