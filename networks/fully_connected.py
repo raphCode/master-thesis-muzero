@@ -49,8 +49,8 @@ class FcRepresentation(FcBase, RepresentationNet):
             + C.nets.initial_beliefs.numel()
         )
         self.output_sizes = (
-            C.nets.initial_beliefs.numel(),
             C.nets.initial_latent_rep.numel(),
+            C.nets.initial_beliefs.numel(),
         )
         super().__init__(
             *args,
