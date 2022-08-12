@@ -49,8 +49,8 @@ class FcRepresentation(FcBase, RepresentationNet):
             + C.nets.initial_beliefs.numel()
         )
         self.output_sizes = (
-            C.nets.initial_beliefs.numel(),
             C.nets.initial_latent_rep.numel(),
+            C.nets.initial_beliefs.numel(),
         )
         super().__init__(
             *args,
@@ -60,9 +60,10 @@ class FcRepresentation(FcBase, RepresentationNet):
         )
 
     def forward(
-        self, observation: tuple[torch.Tensor, ...], beliefs: torch.Tensor
+        self,
+        *inputs: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        out = super().forward(observation, beliefs)
+        out = super().forward(*inputs)
         return torch.split(out, self.output_sizes, dim=1)
 
 

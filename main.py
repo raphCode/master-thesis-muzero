@@ -54,7 +54,7 @@ def main(cfg: DictConfig):
         for n in itertools.count(0):
             with torch.no_grad():
                 selfplay.run_episode(rb, sw, n)
-            if len(rb) > 0.1 * C.train.replay_buffer_size:
+            if len(rb) > 0.001 * C.train.replay_buffer_size:
                 loss = process_batch(rb.sample(), sw, n)
                 log.info(f"Finished batch update (loss: {loss.item():.5f})")
             if n % 100 == 0:

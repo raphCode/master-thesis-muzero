@@ -17,9 +17,11 @@ class OpenSpielGameState(GameState):
         self.invalid = False
 
     @property
-    def observation(self) -> torch.Tensor:
-        return torch.tensor(self.state.observation_tensor()).reshape(
-            self.game.observation_shapes[0]
+    def observation(self) -> tuple[torch.Tensor]:
+        return (
+            torch.tensor(self.state.observation_tensor()).reshape(
+                self.game.observation_shapes[0]
+            ),
         )
 
     @property

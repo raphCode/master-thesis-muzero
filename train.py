@@ -32,41 +32,31 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
         )
 
     for ts in traj:
-        latent_rep, beliefs, reward = C.nets.dynamics.si(
-            latent_rep,
-            beliefs,
-            F.one_hot(torch.tensor(ts.action), C.game.instance.max_num_actions),
-        )
-        losses.reward += F.l1_loss(
-            reward, torch.tensor(ts.reward, dtype=torch.float).view(1)
-        )
+        latent_rep, beliefs, reward = C.nets.dynamics.si(latent_rep, beliefs, ts.action)
+        losses.reward += F.l1_loss(reward, ts.reward.view(1))
 
         if ts.observation is not None:
             new_latent_rep, new_beliefs = C.nets.representation.si(
                 ts.observation, beliefs
             )
-            # TODO: cross entropy loss???
-            losses.latent += F.cosine_embedding_loss(latent_rep, new_latent_rep, torch.tensor(1))
-            losses.beliefs += F.cosine_embedding_loss(beliefs, new_beliefs, torch.tensor(1))
-            # TODO: dynamics net should be trained here for correct mcts operation
-            # latent_rep = new_latent_rep
-            # beliefs = new_beliefs
+            losses.latent += F.cosine_embedding_loss(
+                latent_rep, new_latent_rep, torch.tensor(1)
+            )
+            losses.beliefs += F.cosine_embedding_loss(
+                beliefs, new_beliefs, torch.tensor(1)
+            )
             # TODO: losses here are not properly averaged: this branch is not taken for all items in the batch
 
         value, policy, player_type = C.nets.prediction.si(
             latent_rep, beliefs, logits=True
         )
-        losses.value += F.l1_loss(
-            value, torch.tensor(ts.value, dtype=torch.float).view(1)
-        )
+        losses.value += F.l1_loss(value, ts.value.view(1))
         losses.policy += F.cross_entropy(
             policy.unsqueeze(0),
-            torch.tensor(ts.target_policy, dtype=torch.float).unsqueeze(0),
+            ts.target_policy.unsqueeze(0),
         )
         # TODO: correct for class imbalance?
-        losses.player_type += F.cross_entropy(
-            player_type, torch.tensor(ts.player_type, dtype=int)
-        )
+        losses.player_type += F.cross_entropy(player_type, ts.player_type)
 
 
 def process_batch(batch: list[list[TrajectoryState]], sw: SummaryWriter, n: int):

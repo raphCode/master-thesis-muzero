@@ -1,6 +1,6 @@
 get_node_action: config.default_functions.action_visit_count
 get_node_target_policy: config.default_functions.target_policy_visit_count
-get_node_selection_score: config.default_functions.node_selection_score_muzero_ucb
+get_node_selection_score: config.default_functions.selection_score_muzero_ucb
 iterations_move_selection: 200
 iterations_value_estimate: 100
 
