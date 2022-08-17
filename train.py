@@ -1,10 +1,11 @@
 import torch
 import torch.nn.functional as F
 from attrs import Factory, define
+import attrs
 from torch.utils.tensorboard import SummaryWriter
 
 from config import config as C
-from trajectory import TrajectoryState
+from trajectory import TrainingData
 
 tensor_factory = Factory(lambda: torch.tensor(0.0))
 
@@ -19,66 +20,51 @@ class Losses:
     player_type: torch.Tensor = tensor_factory
 
 
-def process_trajectory(traj: list[TrajectoryState], losses: Losses):
+def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
+    C.nets.dynamics.train()
+    C.nets.representation.train()
     # TODO: move tensors to GPU
 
-    first = traj[0]
-    if first.observation is None:
-        beliefs = first.dyn_beliefs
-        latent_rep = first.latent_rep
-    else:
-        latent_rep, beliefs = C.nets.representation.si(
-            first.observation, first.old_beliefs
-        )
-
-    for ts in traj:
-        latent_rep, beliefs, reward = C.nets.dynamics.si(latent_rep, beliefs, ts.action)
-        losses.reward += F.l1_loss(reward, ts.reward.view(1))
-
-        if ts.observation is not None:
-            new_latent_rep, new_beliefs = C.nets.representation.si(
-                ts.observation, beliefs
-            )
-            losses.latent += F.cosine_embedding_loss(
-                latent_rep, new_latent_rep, torch.tensor(1)
-            )
-            losses.beliefs += F.cosine_embedding_loss(
-                beliefs, new_beliefs, torch.tensor(1)
-            )
-            # TODO: losses here are not properly averaged: this branch is not taken for all items in the batch
-
-        value, policy, player_type = C.nets.prediction.si(
-            latent_rep, beliefs, logits=True
-        )
-        losses.value += F.l1_loss(value, ts.value.view(1))
-        losses.policy += F.cross_entropy(
-            policy.unsqueeze(0),
-            ts.target_policy.unsqueeze(0),
-        )
-        # TODO: correct for class imbalance?
-        losses.player_type += F.cross_entropy(player_type, ts.player_type)
-
-
-def process_batch(batch: list[list[TrajectoryState]], sw: SummaryWriter, n: int):
-    torch.autograd.set_detect_anomaly(True)
     losses = Losses()
-    for traj in batch:
-        # TODO: batch network inference
-        process_trajectory(traj, losses)
+    data_count=0
+    obs_count=0
+    cosine_target=torch.ones( C.train.batch_num_games)
 
-    import attrs
+    first = batch[0]
+    obs_latent_rep, obs_beliefs = C.nets.representation(*first.observation, first. beliefs)
+    latent_rep = obs_latent_rep.where(first.is_observation.unsqueeze(-1), first.latent_rep)
+    beliefs = obs_beliefs.where(first.is_observation.unsqueeze(-1), first.beliefs)
 
-    rate = C.train.loss_weights.automatic_adjustment_rate
-    bsize = sum(map(len, batch))
+    for td in batch:
+        if not td.is_data.any():
+            break
 
-    def adj(x, l):
-        return x * (1 - rate) + 1 / (l + 1e-3) * rate
+        latent_rep, beliefs, reward = C.nets.dynamics(latent_rep, beliefs, td.action_onehot)
+        losses.reward+=F.mse_loss(reward, td.reward, reduction='none')[td.is_data].sum()
+
+        if td.is_observation.any():
+            obs_latent_rep, obs_beliefs = C.nets.representation(*td.observation, td. beliefs)
+            losses.latent+=F.mse_loss(latent_rep, obs_latent_rep, reduction='none').mean(dim=1).masked_select(td.is_observation).sum()
+            # TODO: remove beliefs loss, does work in the general case (or prove otherwise)
+            if C.train.loss_weights.beliefs > 0:
+                losses.beliefs+=F.mse_loss(beliefs, obs_beliefs, reduction='none').mean(dim=1).masked_select(td.is_observation).sum()
+            obs_count += td.is_observation.count_nonzero()
+
+        value, policy_logits, player_type_logits = C.nets.prediction(latent_rep, beliefs, logits=True)
+        losses.value+=F.mse_loss(value, td.value_target, reduction='none')[td.is_data].sum()
+        losses.policy+=F.cross_entropy(policy_logits, td.target_policy, reduction='none')[td.is_data].sum()
+        losses.player_type+=F.cross_entropy(player_type_logits, td.player_type, reduction='none')[td.is_data].sum()
+        data_count += td.is_data.count_nonzero()
+
+    losses.latent /= obs_count
+    losses.beliefs /= obs_count
+    losses.reward /= data_count
+    losses.value /= data_count
+    losses.policy /= data_count
+    losses.player_type /= data_count
 
     for k, loss in attrs.asdict(losses).items():
-        lw = getattr(C.train.loss_weights, k)
-        setattr(C.train.loss_weights, k, adj(lw, loss.item()))
-        sw.add_scalar(f"loss/{k}", loss / bsize, n)
-        sw.add_scalar(f"loss weight/{k}", lw, n)
+        sw.add_scalar(f"loss/{k}", loss, n)
 
     loss = (
         C.train.loss_weights.latent * losses.latent
@@ -87,15 +73,10 @@ def process_batch(batch: list[list[TrajectoryState]], sw: SummaryWriter, n: int)
         + C.train.loss_weights.policy * losses.policy
         + C.train.loss_weights.beliefs * losses.beliefs
         + C.train.loss_weights.player_type * losses.player_type
-    ) / bsize
+    )
     loss.backward()
     C.train.optimizer.step()
 
     sw.add_scalar("loss/total", loss, n)
-
-    return loss
-
-    for k, x in attrs.asdict(losses).items():
-        print(k, x)
 
     return loss

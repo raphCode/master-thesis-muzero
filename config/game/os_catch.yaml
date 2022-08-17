@@ -1,5 +1,5 @@
 instance:
     _target_: games.openspiel_wrapper.OpenSpielGame
     game_name: catch
-    bad_move_reward: -3
+    bad_move_action: 1
 calculate_reward: config.default_functions.default_reward

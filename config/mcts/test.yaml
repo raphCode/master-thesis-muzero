@@ -1,17 +1,21 @@
 get_node_action: config.default_functions.action_visit_count
 get_node_target_policy: config.default_functions.target_policy_visit_count
 get_node_selection_score: config.default_functions.selection_score_muzero_ucb
-iterations_move_selection: 200
-iterations_value_estimate: 100
+iterations_move_selection: 600
+iterations_value_estimate: 300
 
 action_visit_count:
-    softmax_temp_start: 0.6
-    softmax_temp_end: 0
-    num_moves_start: 10
+    softmax_temp_start: 0.5
+    softmax_temp_end: 0.2
+    num_moves_start: 7
     num_moves_end: 11
 
 target_policy_visit_count:
-    softmax_temp: 0.6
+    softmax_temp: 1.2
+
+sane_selection_score:
+    value_scale: 0.1
+    equalisation_prior: 0.05
 
 selection_score_muzero_ucb:
     prior_log_scale_base: 5

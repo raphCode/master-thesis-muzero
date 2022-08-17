@@ -58,13 +58,15 @@ class FcRepresentation(FcBase, RepresentationNet):
             output_width=sum(self.output_sizes),
             **kwargs,
         )
+        self.bn_latent=nn.BatchNorm1d(C.nets.initial_latent_rep.numel(), eps=0, affine=False)
 
     def forward(
         self,
         *inputs: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         out = super().forward(*inputs)
-        return torch.split(out, self.output_sizes, dim=1)
+        latent_rep, beliefs =  torch.split(out, self.output_sizes, dim=1)
+        return self.bn_latent(latent_rep), beliefs
 
 
 class FcPrediction(FcBase, PredictionNet):
@@ -113,9 +115,11 @@ class FcDynamics(FcBase, DynamicsNet):
             output_width=sum(self.output_sizes),
             **kwargs,
         )
+        self.bn_latent=nn.BatchNorm1d(C.nets.initial_latent_rep.numel(), eps=0, affine=False)
 
     def forward(
         self, latent_rep: torch.Tensor, beliefs: torch.Tensor, action_onehot: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         out = super().forward(latent_rep, beliefs, action_onehot)
-        return torch.split(out, self.output_sizes, dim=1)
+        latent_rep, beliefs, reward= torch.split(out, self.output_sizes, dim=1)
+        return self.bn_latent(latent_rep), beliefs, reward

@@ -13,6 +13,8 @@ def softmax(dist: Sequence[float], temp: float = 1.0, norm: bool = True) -> np.n
     dist = np.array(dist)
     if norm:
         temp *= dist.sum()
+    print(dist)
+    print(temp)
     exp = np.exp(dist / temp)
     return exp / exp.sum()
 
@@ -63,3 +65,12 @@ def selection_score_muzero_ucb(node: Node) -> float:
         return prior_score
     value_score = node.reward + node.value * C.train.discount_factor
     return value_score + prior_score
+
+def sane_selection_score(node: Node) -> float:
+    prior_score = (node.prior +C.mcts.sane_selection_score.equalisation_prior)/ (node.visit_count+1)
+    if not node.is_expanded:
+        return prior_score
+    diff_value = (node.value - node.parent.value ) * C.mcts.sane_selection_score.value_scale
+    value_weight = math.sqrt(node.visit_count+1)
+    value_score = node.reward + node.value * C.train.discount_factor
+    return value_weight * value_score + prior_score

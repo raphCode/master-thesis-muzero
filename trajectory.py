@@ -30,6 +30,7 @@ class PlayerType(IntEnum):
 @frozen(kw_only=True)
 class TrajectoryState:
     observation: Optional[tuple[torch.Tensor]]
+    # TODO: latent and beliefs must always be the old version, before the dynamics inference (but may be from / after the representation network)
     latent_rep: Optional[torch.Tensor]
     old_beliefs: Optional[torch.Tensor]  # prior to the representation inference
     dyn_beliefs: Optional[torch.Tensor]  # after the dynamics inference
@@ -151,14 +152,14 @@ class ReplayBuffer:
             for name, batch in zip(field_names, batch_fields):
                 if name == "observation":
                     data=tuple(map(torch.stack, zip(*batch)))
-                elif name == "player_type":
+                elif name in ("is_observation", "is_data", "player_type"):
                     data=torch.stack(batch)
                 else:
                     data=torch.vstack(batch)
                 fields[name]=data
             batch_train_data.append(TrainingData(**fields))
                     
-
+        return batch_train_data
 
     def __len__(self):
         return len(self.data)

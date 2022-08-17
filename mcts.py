@@ -122,12 +122,27 @@ def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
     # this is called only for the player's own moves
     root = Node.from_latents(latent_rep, beliefs)
     root.expand()
+    print("root node type:", root.player_type)
     ensure_visit_count(root, C.mcts.iterations_move_selection)
     return root
 
-
+def a(root, base, init):
+    from copy import deepcopy
+    C.mcts.selection_score_muzero_ucb.prior_log_scale_base = base
+    C.mcts.selection_score_muzero_ucb.prior_log_scale_init = init
+    root2=deepcopy(root)
+    ensure_visit_count2(root2, 200)
+    for c in root2.children:
+        print(f"{c.visit_count}, {c.value:.2f}, {c.prior:.2f}")
+        
 def ensure_visit_count(root: Node, visit_count: int):
+    #a(root, 5, 1.25)
+    ensure_visit_count2(root, visit_count)
+    pass
+
+def ensure_visit_count2(root: Node, visit_count: int):
     """Run the tree search on an already expanded Node until the visit count is reached"""
+    pass
     for _ in range(visit_count - root.visit_count):
         node = root
         while node.is_expanded:
@@ -143,3 +158,4 @@ def ensure_visit_count(root: Node, visit_count: int):
             node = node.parent
             node.value_sum += r
             node.visit_count += 1
+    pass

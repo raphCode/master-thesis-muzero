@@ -1,12 +1,12 @@
-batch_game_size: 13
-batch_num_games: 16
-discount_factor: 0.99
+batch_game_size: 16
+batch_num_games: 128
+discount_factor: 0.95
 n_step_return: 20
-replay_buffer_size: 1_000
+replay_buffer_size: 2_000
 max_steps_per_episode: 10_000
 optimizer:
     _target_: torch.optim.Adam
-    lr: 0.001
+    lr: 0.00006
 loss_weights:
     latent: 1
     value: 1
@@ -14,4 +14,3 @@ loss_weights:
     policy: 1
     beliefs: 0
     player_type: 1
-    automatic_adjustment_rate: 0.000

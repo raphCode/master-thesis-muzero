@@ -48,21 +48,30 @@ log = logging.getLogger("main")
 def main(cfg: DictConfig):
     config.populate_config(cfg)
     config.save_source_code()
+
+    if "load_checkpoint" in cfg:
+        c=torch.load(hydra.utils.to_absolute_path(cfg.load_checkpoint))
+        C.nets.representation.load_state_dict(c["nets"]["representation"])
+        C.nets.prediction.load_state_dict(c["nets"]["prediction"])
+        C.nets.dynamics.load_state_dict(c["nets"]["dynamics"])
+        C.train.optimizer.load_state_dict(c["optimizer"])
+
     rb = ReplayBuffer()
     with contextlib.closing(SummaryWriter(log_dir="tb")) as sw:
         # TODO: try inference mode to speed up things
         for n in itertools.count(0):
             with torch.no_grad():
+                #for _ in range(5):
                 selfplay.run_episode(rb, sw, n)
-            if len(rb) > 0.001 * C.train.replay_buffer_size:
+            if len(rb) > 0.1 * C.train.replay_buffer_size:
                 loss = process_batch(rb.sample(), sw, n)
                 log.info(f"Finished batch update (loss: {loss.item():.5f})")
             if n % 100 == 0:
                 torch.save(
                     {
                         "nets": {
-                            "prediction": C.nets.prediction.state_dict(),
                             "representation": C.nets.representation.state_dict(),
+                            "prediction": C.nets.prediction.state_dict(),
                             "dynamics": C.nets.dynamics.state_dict(),
                         },
                         "optimizer": C.train.optimizer.state_dict(),
