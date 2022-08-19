@@ -59,13 +59,16 @@ def selection_score_muzero_ucb(node: Node) -> float:
             / C.mcts.selection_score_muzero_ucb.prior_log_scale_base
         )
         + C.mcts.selection_score_muzero_ucb.prior_log_scale_init
-    ) * math.sqrt(node.parent.visit_count / (node.visit_count + 1))
+    ) * math.sqrt(node.parent.visit_count) / (node.visit_count + 1)
     prior_score = node.prior * prior_scale
     if not node.is_expanded:
         return prior_score
     value_score = node.reward + node.value * C.train.discount_factor
     return value_score + prior_score
 
+def selection_score_equal_distribution(node: Node) -> float:
+    return 1/(node.visit_count+1)
+    
 def sane_selection_score(node: Node) -> float:
     prior_score = (node.prior +C.mcts.sane_selection_score.equalisation_prior)/ (node.visit_count+1)
     if not node.is_expanded:

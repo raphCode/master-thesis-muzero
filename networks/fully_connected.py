@@ -66,6 +66,7 @@ class FcRepresentation(FcBase, RepresentationNet):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         out = super().forward(*inputs)
         latent_rep, beliefs =  torch.split(out, self.output_sizes, dim=1)
+        return latent_rep, beliefs
         return self.bn_latent(latent_rep), beliefs
 
 
@@ -122,4 +123,5 @@ class FcDynamics(FcBase, DynamicsNet):
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         out = super().forward(latent_rep, beliefs, action_onehot)
         latent_rep, beliefs, reward= torch.split(out, self.output_sizes, dim=1)
+        return latent_rep, beliefs, reward
         return self.bn_latent(latent_rep), beliefs, reward

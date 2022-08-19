@@ -1,4 +1,5 @@
 import logging
+import os
 import itertools
 import contextlib
 from typing import Any
@@ -57,13 +58,14 @@ def main(cfg: DictConfig):
         C.train.optimizer.load_state_dict(c["optimizer"])
 
     rb = ReplayBuffer()
+    os.mkdir("checkpoints")
     with contextlib.closing(SummaryWriter(log_dir="tb")) as sw:
         # TODO: try inference mode to speed up things
         for n in itertools.count(0):
-            with torch.no_grad():
-                #for _ in range(5):
-                selfplay.run_episode(rb, sw, n)
-            if len(rb) > 0.1 * C.train.replay_buffer_size:
+            if n % 10 == 0:
+                with torch.no_grad():
+                    selfplay.run_episode(rb, sw, n)
+            if len(rb) > 0.01 * C.train.replay_buffer_size:
                 loss = process_batch(rb.sample(), sw, n)
                 log.info(f"Finished batch update (loss: {loss.item():.5f})")
             if n % 100 == 0:
@@ -76,7 +78,7 @@ def main(cfg: DictConfig):
                         },
                         "optimizer": C.train.optimizer.state_dict(),
                     },
-                    f"checkpoint{n:04d}.pt",
+                    f"checkpoints/{n:06d}.pt",
                 )
                 log.info(f"Saved checkpoint!")
 

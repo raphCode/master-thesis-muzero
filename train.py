@@ -35,26 +35,26 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
     latent_rep = obs_latent_rep.where(first.is_observation.unsqueeze(-1), first.latent_rep)
     beliefs = obs_beliefs.where(first.is_observation.unsqueeze(-1), first.beliefs)
 
-    for td in batch:
-        if not td.is_data.any():
+    for step in batch:
+        if not step.is_data.any():
             break
 
-        latent_rep, beliefs, reward = C.nets.dynamics(latent_rep, beliefs, td.action_onehot)
-        losses.reward+=F.mse_loss(reward, td.reward, reduction='none')[td.is_data].sum()
-
-        if td.is_observation.any():
-            obs_latent_rep, obs_beliefs = C.nets.representation(*td.observation, td. beliefs)
-            losses.latent+=F.mse_loss(latent_rep, obs_latent_rep, reduction='none').mean(dim=1).masked_select(td.is_observation).sum()
+        if step.is_observation.any() and step is not first:
+            obs_latent_rep, obs_beliefs = C.nets.representation(*step.observation, step. beliefs)
+            losses.latent+=F.mse_loss(latent_rep, obs_latent_rep, reduction='none').mean(dim=1).masked_select(step.is_observation).sum()
             # TODO: remove beliefs loss, does work in the general case (or prove otherwise)
             if C.train.loss_weights.beliefs > 0:
-                losses.beliefs+=F.mse_loss(beliefs, obs_beliefs, reduction='none').mean(dim=1).masked_select(td.is_observation).sum()
-            obs_count += td.is_observation.count_nonzero()
+                losses.beliefs+=F.mse_loss(beliefs, obs_beliefs, reduction='none').mean(dim=1).masked_select(step.is_observation).sum()
+            obs_count += step.is_observation.count_nonzero()
+
+        latent_rep, beliefs, reward = C.nets.dynamics(latent_rep, beliefs, step.action_onehot)
+        losses.reward+=F.mse_loss(reward, step.reward, reduction='none')[step.is_data].sum()
 
         value, policy_logits, player_type_logits = C.nets.prediction(latent_rep, beliefs, logits=True)
-        losses.value+=F.mse_loss(value, td.value_target, reduction='none')[td.is_data].sum()
-        losses.policy+=F.cross_entropy(policy_logits, td.target_policy, reduction='none')[td.is_data].sum()
-        losses.player_type+=F.cross_entropy(player_type_logits, td.player_type, reduction='none')[td.is_data].sum()
-        data_count += td.is_data.count_nonzero()
+        losses.value+=F.mse_loss(value, step.value_target, reduction='none')[step.is_data].sum()
+        losses.policy+=F.cross_entropy(policy_logits, step.target_policy, reduction='none')[step.is_data].sum()
+        losses.player_type+=F.cross_entropy(player_type_logits, step.player_type, reduction='none')[step.is_data].sum()
+        data_count += step.is_data.count_nonzero()
 
     losses.latent /= obs_count
     losses.beliefs /= obs_count

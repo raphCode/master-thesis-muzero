@@ -45,6 +45,7 @@ class TrajectoryState:
 class TrainingData:
     is_observation: torch.Tensor
     is_data: torch.Tensor
+    is_absorbing: torch.Tensor
     observation: tuple[torch.Tensor]
     latent_rep: torch.Tensor
     beliefs: torch.Tensor  # either dyn_beliefs or old_beliefs, depending on observation
@@ -76,6 +77,7 @@ class ReplayBuffer:
             TrainingData(
                 is_observation=torch.tensor(False),
                 is_data=torch.tensor(False),
+                is_absorbing=torch.tensor(False),
                 observation=self.empty_observation,
                 latent_rep=self.empty_latent_rep,
                 beliefs=torch.zeros_like(C.nets.initial_beliefs),
@@ -86,6 +88,19 @@ class ReplayBuffer:
                 reward=torch.tensor(0),
             )
         ] * C.train.batch_game_size
+        self.absorbing_train_data=            TrainingData(
+                is_observation=torch.tensor(False),
+                is_data=torch.tensor(True),
+                is_absorbing=torch.tensor(True),
+                observation=self.empty_observation,
+                latent_rep=self.empty_latent_rep,
+                beliefs=torch.zeros_like(C.nets.initial_beliefs),
+                player_type=torch.tensor(0),
+                action_onehot=torch.zeros(C.game.instance.max_num_actions),
+                target_policy=torch.zeros(C.game.instance.max_num_actions),
+                value_target=torch.tensor(0),
+                reward=torch.tensor(0),
+            )
 
     def add_trajectory(self, traj: list[TrajectoryState], game_terminated: bool):
         int64t = functools.partial(torch.tensor, dtype=torch.int64)
@@ -110,6 +125,7 @@ class ReplayBuffer:
                 TrainingData(
                     is_observation=torch.tensor(is_obs),
                     is_data=torch.tensor(True),
+                    is_absorbing=torch.tensor(False),
                     observation=ts.observation if is_obs else self.empty_observation,
                     latent_rep=ts.latent_rep if not is_obs else self.empty_latent_rep,
                     beliefs=ts.old_beliefs if is_obs else ts.dyn_beliefs,
@@ -150,6 +166,7 @@ class ReplayBuffer:
             batch_fields = zip(*unpacked_steps)
             fields=dict()
             for name, batch in zip(field_names, batch_fields):
+                # TODO: save memory by setting latent_rep = None for all steps expect first
                 if name == "observation":
                     data=tuple(map(torch.stack, zip(*batch)))
                 elif name in ("is_observation", "is_data", "player_type"):
