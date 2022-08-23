@@ -51,6 +51,7 @@ class Optimizer:
 @define
 class LossWeights:
     latent: float
+    absorbing: float
     value: float
     reward: float
     policy: float

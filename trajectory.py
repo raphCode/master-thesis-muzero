@@ -8,7 +8,7 @@ from collections.abc import Sequence
 import numpy as np
 import torch
 import torch.nn.functional as F
-from attrs import  frozen
+from attrs import frozen
 import attrs
 
 from config import config as C
@@ -66,13 +66,11 @@ class ReplayBuffer:
     def __init__(self):
         self.lens = deque(maxlen=C.train.replay_buffer_size)
         self.data = deque(maxlen=C.train.replay_buffer_size)
-        self.discounts = np.concatenate(
-            ([1], np.cumprod(np.full(C.train.n_step_return - 1, C.train.discount_factor)))
-        )
+        self.discounts = np.cumprod(np.full(C.train.n_step_return, C.train.discount_factor))
         self.empty_observation = tuple(
-            torch.zeros(s) for s in C.game.instance.observation_shapes
+            torch.zeros(s, dtype=torch.float32) for s in C.game.instance.observation_shapes
         )
-        self.empty_latent_rep = torch.zeros_like(C.nets.initial_latent_rep)
+        self.empty_latent_rep = torch.zeros_like(C.nets.initial_latent_rep, dtype=torch.float32)
         self.empty_batch_game = [
             TrainingData(
                 is_observation=torch.tensor(False),
@@ -84,41 +82,43 @@ class ReplayBuffer:
                 player_type=torch.tensor(0),
                 action_onehot=torch.zeros(C.game.instance.max_num_actions),
                 target_policy=torch.zeros(C.game.instance.max_num_actions),
-                value_target=torch.tensor(0),
-                reward=torch.tensor(0),
+                value_target=torch.tensor(0.),
+                reward=torch.tensor(0.),
             )
         ] * C.train.batch_game_size
-        self.absorbing_train_data=            TrainingData(
+        self.absorbing_train_data_steps = [
+            TrainingData(
                 is_observation=torch.tensor(False),
                 is_data=torch.tensor(True),
                 is_absorbing=torch.tensor(True),
                 observation=self.empty_observation,
                 latent_rep=self.empty_latent_rep,
-                beliefs=torch.zeros_like(C.nets.initial_beliefs),
+                beliefs=torch.zeros_like(C.nets.initial_beliefs, dtype=torch.float32),
                 player_type=torch.tensor(0),
-                action_onehot=torch.zeros(C.game.instance.max_num_actions),
-                target_policy=torch.zeros(C.game.instance.max_num_actions),
-                value_target=torch.tensor(0),
-                reward=torch.tensor(0),
+                action_onehot=action_onehot,
+                target_policy=torch.ones(C.game.instance.max_num_actions)/C.game.instance.max_num_actions,
+                value_target=torch.tensor(0.),
+                reward=torch.tensor(0.),
             )
+            for action_onehot in torch.eye(C.game.instance.max_num_actions)
+        ]
 
     def add_trajectory(self, traj: list[TrajectoryState], game_terminated: bool):
         int64t = functools.partial(torch.tensor, dtype=torch.int64)
         floatt = functools.partial(torch.tensor, dtype=torch.float)
 
-        rewards = np.array([ts.reward for ts in traj])
+        next_rewards = np.array([ts.reward for ts in traj][1:])
 
         train_data = []
         for n, ts in enumerate(traj):
-            nstep_idx = min(len(traj), n + C.train.n_step_return)
-            if nstep_idx == len(traj) and game_terminated:
+            nstep_idx = min(len(traj)-1, n + C.train.n_step_return)
+            if nstep_idx == len(traj)-1 and game_terminated:
                 value_target = 0
             else:
-                nstep_idx -= 1
                 value_target = traj[nstep_idx].value * self.discounts[nstep_idx - n]
 
             value_target += np.inner(
-                rewards[n:nstep_idx], self.discounts[: nstep_idx - n]
+                next_rewards[n:nstep_idx], self.discounts[: nstep_idx - n]
             )
             is_obs = ts.observation is not None
             train_data.append(
@@ -139,6 +139,8 @@ class ReplayBuffer:
                 )
             )
 
+        #train_data.append(rng.choice(self.absorbing_train_data_steps))
+
         self.lens.append(len(train_data))
         self.data.append(train_data)
 
@@ -155,27 +157,27 @@ class ReplayBuffer:
             )
 
         # transpose: outer dim: batch_num_games -> batch_game_size
-        batch_steps = zip(*batch_trajs) 
+        batch_steps = zip(*batch_trajs)
         field_names = tuple(map(operator.attrgetter("name"), attrs.fields(TrainingData)))
 
-        batch_train_data=[]
+        batch_train_data = []
         for steps in batch_steps:
             # unpack TrainingData classes into tuples
             unpacked_steps = map(attrs.astuple, steps)
             # transpose: outer dim: batch_num_games -> len(field_names)
             batch_fields = zip(*unpacked_steps)
-            fields=dict()
+            fields = dict()
             for name, batch in zip(field_names, batch_fields):
-                # TODO: save memory by setting latent_rep = None for all steps expect first
+                # TODO: save memory by setting latent_rep,beliefs = None for all steps expect first
                 if name == "observation":
-                    data=tuple(map(torch.stack, zip(*batch)))
+                    data = tuple(map(torch.stack, zip(*batch)))
                 elif name in ("is_observation", "is_data", "player_type"):
-                    data=torch.stack(batch)
+                    data = torch.stack(batch)
                 else:
-                    data=torch.vstack(batch)
-                fields[name]=data
+                    data = torch.vstack(batch)
+                fields[name] = data
             batch_train_data.append(TrainingData(**fields))
-                    
+
         return batch_train_data
 
     def __len__(self):

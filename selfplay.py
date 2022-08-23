@@ -119,10 +119,13 @@ def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
                 sw.add_figure(f"game/observation 0", fig, n)
 
                 debug_mcts_node(root_node)
-                for child in root_node.children:
+                for aa, child in enumerate(root_node.children):
                     debug_mcts_node(child)
-                    for cc in child.children:
+                    for nn, cc in enumerate(child.children):
                         debug_mcts_node(cc)
+                        if aa < 3 and nn < 3:
+                            debug_mcts_node(cc.children[0])
+                            debug_mcts_node(cc.children[0].children[0])
 
         else:
             action = players[pid].request_action(state, C.game.instance)

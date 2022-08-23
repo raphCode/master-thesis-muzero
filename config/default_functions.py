@@ -67,6 +67,8 @@ def selection_score_muzero_ucb(node: Node) -> float:
     return value_score + prior_score
 
 def selection_score_equal_distribution(node: Node) -> float:
+    if node.action >= 3 and node.is_expanded:
+        return 0
     return 1/(node.visit_count+1)
     
 def sane_selection_score(node: Node) -> float:
