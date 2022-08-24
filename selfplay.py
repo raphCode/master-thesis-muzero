@@ -36,8 +36,6 @@ def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
         return node, old_latent
 
     state = C.game.instance.new_initial_state()
-    for _ in range(8):
-        state.apply_action(1)
     trajectories = {n: [] for n in rl_pids}
 
     for pid in rl_pids:
@@ -113,7 +111,7 @@ def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
                 add_mcts_histogram("reward", lambda n: n.reward)
                 #add_mcts_histogram("node selection score", C.mcts.get_node_selection_score)
 
-            if step == 0 and n % 1000 == 0:
+            if step == 3 and n % 1000 == 0:
                 fig = plt.figure()
                 plt.imshow(obs[0])
                 sw.add_figure(f"game/observation 0", fig, n)
