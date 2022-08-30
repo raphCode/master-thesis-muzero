@@ -64,11 +64,14 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
         )
 
 
-def process_batch(batch: list[list[TrajectoryState]]):
+def process_batch(batch: list[list[TrajectoryState]], sw: SummaryWriter, n: int):
     losses = Losses()
     for traj in batch:
         # TODO: batch network inference
         process_trajectory(traj, losses)
+
+    for k, loss in attrs.asdict(losses).items():
+        sw.add_scalar(f"loss/{k}", loss, n)
 
     loss = (
         C.train.loss_weights.latent * losses.latent
@@ -80,3 +83,5 @@ def process_batch(batch: list[list[TrajectoryState]]):
     C.train.optimizer.zero_grad()
     loss.backward()
     C.train.optimizer.step()
+
+    sw.add_scalar("loss/total", loss, n)
