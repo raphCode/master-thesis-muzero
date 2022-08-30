@@ -14,7 +14,6 @@ class Losses:
     value: torch.Tensor = tensor_factory
     reward: torch.Tensor = tensor_factory
     policy: torch.Tensor = tensor_factory
-    beliefs: torch.Tensor = tensor_factory
     player_type: torch.Tensor = tensor_factory
 
 
@@ -47,9 +46,6 @@ def process_trajectory(traj: list[TrajectoryState], losses: Losses):
             losses.latent += F.cosine_embedding_loss(
                 latent_rep, new_latent_rep, torch.tensor(1)
             )
-            losses.beliefs += F.cosine_embedding_loss(
-                beliefs, new_beliefs, torch.tensor(1)
-            )
             # TODO: losses here are not properly averaged: this branch is not taken for all items in the batch
 
         value, policy, player_type = C.nets.prediction.si(
@@ -79,7 +75,6 @@ def process_batch(batch: list[list[TrajectoryState]]):
         + C.train.loss_weights.value * losses.value
         + C.train.loss_weights.reward * losses.reward
         + C.train.loss_weights.policy * losses.policy
-        + C.train.loss_weights.beliefs * losses.beliefs
         + C.train.loss_weights.player_type * losses.player_type
     ) / bsize
     C.train.optimizer.zero_grad()
