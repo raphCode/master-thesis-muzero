@@ -82,5 +82,6 @@ def process_batch(batch: list[list[TrajectoryState]]):
         + C.train.loss_weights.beliefs * losses.beliefs
         + C.train.loss_weights.player_type * losses.player_type
     ) / bsize
+    C.train.optimizer.zero_grad()
     loss.backward()
     C.train.optimizer.step()
