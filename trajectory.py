@@ -24,13 +24,13 @@ class PlayerType(IntEnum):
 
 @frozen(kw_only=True)
 class TrajectoryState:
-    observation: torch.Tensor
+    observation: Optional[tuple[torch.Tensor]]
     latent_rep: torch.Tensor
     old_beliefs: torch.Tensor  # old beliefs prior to the representation inference
     dyn_beliefs: torch.Tensor  # beliefs after the dynamics inference
     player_type: PlayerType
     action: int
-    target_policy: torch.Tensor
+    target_policy: Sequence[float]
     value: float  # either mcts estimate (trajectory) or value target (training data)
     reward: float
 
