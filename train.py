@@ -5,16 +5,14 @@ from attrs import Factory, define
 from config import config as C
 from trajectory import TrajectoryState
 
-tensor_factory = Factory(lambda: torch.tensor(0.0))
-
 
 @define
 class Losses:
-    latent: torch.Tensor = tensor_factory
-    value: torch.Tensor = tensor_factory
-    reward: torch.Tensor = tensor_factory
-    policy: torch.Tensor = tensor_factory
-    player_type: torch.Tensor = tensor_factory
+    latent: torch.Tensor = 0
+    value: torch.Tensor = 0
+    reward: torch.Tensor = 0
+    policy: torch.Tensor = 0
+    player_type: torch.Tensor = 0
 
 
 def process_trajectory(traj: list[TrajectoryState], losses: Losses):
