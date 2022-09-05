@@ -52,10 +52,8 @@ def populate_config(hydra_cfg: DictConfig):
 
     # NETS namespace
     C.nets = to_namespace_recurse(to_cont(hydra_cfg.networks))
-    C.nets.initial_beliefs = torch.full(**to_cont(hydra_cfg.networks.initial_beliefs))
-    C.nets.initial_latent_rep = torch.full(
-        **to_cont(hydra_cfg.networks.initial_latent_rep)
-    )
+    C.nets.initial_beliefs = torch.zeros(tuple(hydra_cfg.networks.beliefs_shape))
+    C.nets.initial_latent_rep = torch.zeros(tuple(hydra_cfg.networks.latent_rep_shape))
 
     C.nets.dynamics = instantiate(hydra_cfg.networks.dynamics)
     C.nets.prediction = instantiate(hydra_cfg.networks.prediction)

@@ -38,8 +38,8 @@ class NetworkSchema:
     dynamics: Net
     prediction: Net
     representation: Net
-    initial_beliefs: Tensor
-    initial_latent_rep: Tensor
+    beliefs_shape: list[int]
+    latent_rep_shape: list[int]
 
 
 @define
