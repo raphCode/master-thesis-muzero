@@ -74,7 +74,7 @@ class ReplayBuffer:
         self.lens = deque(maxlen=C.train.replay_buffer_size)
         self.data = deque(maxlen=C.train.replay_buffer_size)
         self.discounts = np.concatenate(
-            ([1], np.cumprod(np.full(C.train.n_step_return - 1, C.train.discount_factor)))
+            ([1], np.cumprod(np.full(C.train.n_step_return, C.train.discount_factor)))
         )
         self.empty_observation = tuple(
             torch.zeros(s, dtype=torch.float) for s in C.game.instance.observation_shapes
@@ -99,19 +99,18 @@ class ReplayBuffer:
         int64t = functools.partial(torch.tensor, dtype=torch.int64)
         floatt = functools.partial(torch.tensor, dtype=torch.float)
 
-        rewards = np.array([ts.reward for ts in traj])
+        next_rewards = np.array([ts.reward for ts in traj][1:])
 
         train_data = []
         for n, ts in enumerate(traj):
-            nstep_idx = min(len(traj), n + C.train.n_step_return)
-            if nstep_idx == len(traj) and game_terminated:
+            nstep_idx = min(len(traj) - 1, n + C.train.n_step_return)
+            if nstep_idx == len(traj) - 1 and game_terminated:
                 value_target = 0
             else:
-                nstep_idx -= 1
-                value_target = traj[nstep_idx].value * self.discounts[nstep_idx - n]
+                value_target = traj[nstep_idx].mcts_value * self.discounts[nstep_idx - n]
 
             value_target += np.inner(
-                rewards[n:nstep_idx], self.discounts[: nstep_idx - n]
+                next_rewards[n:nstep_idx], self.discounts[1 : nstep_idx - n + 1]
             )
             is_obs = isinstance(ts.info, ObservationInfo)
             train_data.append(
