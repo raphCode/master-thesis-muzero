@@ -1,10 +1,14 @@
+import functools
 from enum import IntEnum
 from typing import Deque, Optional
 from collections import deque
+from collections.abc import Sequence
 
+import attrs
 import numpy as np
 import torch
-from attrs import evolve, frozen
+import torch.nn.functional as F
+from attrs import frozen
 
 from config import config as C
 
@@ -40,8 +44,22 @@ class TrajectoryState:
     player_type: PlayerType
     action: int
     target_policy: Sequence[float]
-    value: float  # either mcts estimate (trajectory) or value target (training data)
+    mcts_value: float
     reward: float
+
+
+@frozen(kw_only=True)
+class TrainingData:
+    is_observation: torch.Tensor
+    is_data: torch.Tensor
+    observation: tuple[torch.Tensor]
+    latent_rep: torch.Tensor
+    beliefs: torch.Tensor  # current or previous beliefs, depending on is_observation
+    player_type: torch.Tensor
+    action_onehot: torch.Tensor
+    target_policy: torch.Tensor
+    value_target: torch.Tensor
+    reward: torch.Tensor
 
 
 rng = np.random.default_rng()
@@ -57,8 +75,15 @@ class ReplayBuffer:
         self.discounts = np.concatenate(
             ([1], np.cumprod(np.full(C.train.n_step_return - 1, C.train.discount_factor)))
         )
+        self.empty_observation = tuple(
+            torch.zeros(s, dtype=torch.float) for s in C.game.instance.observation_shapes
+        )
+        self.empty_latent_rep = torch.zeros(C.nets.latent_rep_shape)
 
     def add_trajectory(self, traj: list[TrajectoryState], game_terminated: bool):
+        int64t = functools.partial(torch.tensor, dtype=torch.int64)
+        floatt = functools.partial(torch.tensor, dtype=torch.float)
+
         rewards = np.array([ts.reward for ts in traj])
 
         train_data = []
@@ -73,7 +98,23 @@ class ReplayBuffer:
             value_target += np.inner(
                 rewards[n:nstep_idx], self.discounts[: nstep_idx - n]
             )
-            train_data.append(evolve(ts, value=value_target))
+            is_obs = isinstance(ts.info, ObservationInfo)
+            train_data.append(
+                TrainingData(
+                    is_observation=torch.tensor(is_obs),
+                    is_data=torch.tensor(True),
+                    observation=ts.info.observation if is_obs else self.empty_observation,
+                    latent_rep=self.empty_latent_rep if is_obs else ts.info.latent_rep,
+                    beliefs=ts.info.prev_beliefs if is_obs else ts.info.beliefs,
+                    player_type=int64t(ts.player_type),
+                    action_onehot=F.one_hot(
+                        int64t(ts.action), C.game.instance.max_num_actions
+                    ),
+                    target_policy=floatt(ts.target_policy),
+                    value_target=floatt(value_target),
+                    reward=floatt(ts.reward),
+                )
+            )
 
         self.lens.append(len(train_data))
         self.data.append(train_data)

@@ -59,7 +59,7 @@ def run_episode(replay_buffer: ReplayBuffer):
                         player_type=PlayerType.Chance,
                         action=action,
                         target_policy=chance_outcomes,
-                        value=node.value,
+                        mcts_value=node.value,
                         reward=C.game.calculate_reward(state.rewards, tid),
                     )
                 )
@@ -85,7 +85,7 @@ def run_episode(replay_buffer: ReplayBuffer):
                     player_type=PlayerType.Self,
                     action=action,
                     target_policy=target_policy,
-                    value=root_node.value,
+                    mcts_value=root_node.value,
                     reward=C.game.calculate_reward(state.rewards, pid),
                 )
             else:
@@ -97,7 +97,7 @@ def run_episode(replay_buffer: ReplayBuffer):
                     else PlayerType.Opponent,
                     action=action,
                     target_policy=move_onehot,
-                    value=node.value,
+                    mcts_value=node.value,
                     reward=C.game.calculate_reward(state.rewards, tid),
                 )
             traj.append(ts)
