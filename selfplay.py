@@ -1,5 +1,4 @@
 import logging
-from copy import deepcopy
 
 import numpy as np
 import torch
@@ -17,9 +16,11 @@ log = logging.getLogger(__name__)
 def run_episode(replay_buffer: ReplayBuffer):
     players = C.player.instances
     rl_pids = {n for n, p in enumerate(players) if isinstance(p, RLPlayer)}
-    initial_node = Node.from_latents(C.nets.initial_latent_rep, C.nets.initial_beliefs)
 
-    mcts_nodes = {n: deepcopy(initial_node) for n in rl_pids}
+    mcts_nodes = {
+        n: Node.from_latents(C.nets.initial_latent_rep, C.nets.initial_beliefs)
+        for n in rl_pids
+    }
 
     def get_and_update_mcts_tree(pid: int, action: int) -> Node:
         node = mcts_nodes[pid].get_action_subtree_and_prune_above(action)
