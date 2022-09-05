@@ -7,7 +7,13 @@ import torch.nn.functional as F
 from mcts import Node, ensure_visit_count
 from config import config as C
 from rl_player import RLPlayer
-from trajectory import PlayerType, ReplayBuffer, TrajectoryState
+from trajectory import (
+    LatentInfo,
+    PlayerType,
+    ReplayBuffer,
+    ObservationInfo,
+    TrajectoryState,
+)
 
 rng = np.random.default_rng()
 log = logging.getLogger(__name__)
@@ -49,10 +55,7 @@ def run_episode(replay_buffer: ReplayBuffer):
                 node = get_and_update_mcts_tree(tid, action)
                 traj.append(
                     TrajectoryState(
-                        observation=None,
-                        latent_rep=node.latent_rep,
-                        old_beliefs=players[tid].beliefs,
-                        dyn_beliefs=node.beliefs,
+                        info=LatentInfo(latent_rep=node.latent_rep, beliefs=node.beliefs),
                         player_type=PlayerType.Chance,
                         action=action,
                         target_policy=chance_outcomes,
@@ -78,10 +81,7 @@ def run_episode(replay_buffer: ReplayBuffer):
         for tid, traj in trajectories.items():
             if tid == pid:
                 ts = TrajectoryState(
-                    observation=obs,
-                    latent_rep=None,
-                    old_beliefs=old_beliefs,
-                    dyn_beliefs=None,
+                    info=ObservationInfo(observation=obs, prev_beliefs=old_beliefs),
                     player_type=PlayerType.Self,
                     action=action,
                     target_policy=target_policy,
@@ -91,10 +91,7 @@ def run_episode(replay_buffer: ReplayBuffer):
             else:
                 node = get_and_update_mcts_tree(tid, action)
                 ts = TrajectoryState(
-                    observation=None,
-                    latent_rep=node.latent_rep,
-                    old_beliefs=players[tid].beliefs,
-                    dyn_beliefs=node.beliefs,
+                    info=LatentInfo(latent_rep=node.latent_rep, beliefs=node.beliefs),
                     player_type=PlayerType.Teammate
                     if C.player.is_teammate(pid, tid)
                     else PlayerType.Opponent,

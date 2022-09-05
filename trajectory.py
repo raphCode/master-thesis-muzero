@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Deque
+from typing import Deque, Optional
 from collections import deque
 
 import numpy as np
@@ -23,11 +23,20 @@ class PlayerType(IntEnum):
 
 
 @frozen(kw_only=True)
+class ObservationInfo:
+    observation: tuple[torch.Tensor]
+    prev_beliefs: torch.Tensor  # from previous state, for representation inference
+
+
+@frozen(kw_only=True)
+class LatentInfo:
+    latent_rep: Optional[torch.Tensor]
+    beliefs: Optional[torch.Tensor]
+
+
+@frozen(kw_only=True)
 class TrajectoryState:
-    observation: Optional[tuple[torch.Tensor]]
-    latent_rep: torch.Tensor
-    old_beliefs: torch.Tensor  # old beliefs prior to the representation inference
-    dyn_beliefs: torch.Tensor  # beliefs after the dynamics inference
+    info: ObservationInfo | LatentInfo
     player_type: PlayerType
     action: int
     target_policy: Sequence[float]
