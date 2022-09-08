@@ -52,10 +52,12 @@ class OpenSpielGameState(GameState):
         return tuple(d.get(a, 0.0) for a in range(self.game.max_num_actions))
 
     def apply_action(self, action: int):
-        if self.invalid or action not in self.state.legal_actions():
-            # also covers terminal states because the legal actions are empty then
-            # TODO: set bad reward for offending player
-            self.invalid = True
+        assert not self.is_terminal
+        if action not in self.state.legal_actions():
+            if self.game.bad_move_action is not None:
+                self.state.apply_action_with_legality_check(self.game.bad_move_action)
+            else:
+                self.invalid = True
         else:
             # TODO: remove legality check, this is just a safety measure now
             self.state.apply_action_with_legality_check(action)
@@ -65,9 +67,15 @@ class OpenSpielGameState(GameState):
 class OpenSpielGame(Game):
     game: pyspiel.Game
 
-    def __init__(self, game_name: str, bad_move_reward: float):
+    def __init__(
+        self, game_name: str, bad_move_reward: float = None, bad_move_action: int = None
+    ):
         self.game = pyspiel.load_game(game_name)
         self.bad_move_reward = bad_move_reward
+        self.bad_move_action = bad_move_action
+        assert (bad_move_reward is None) != (
+            bad_move_action is None
+        ), "Exactly one of 'bad_move_reward' or 'bad_move_action' must be given"
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
 
     def new_initial_state(self) -> OpenSpielGameState:
