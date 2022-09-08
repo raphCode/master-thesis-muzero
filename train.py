@@ -21,9 +21,13 @@ class Losses:
 class LossDataCounts:
     fit: int = 0
     latent: int = 0
+    player_type: int = 0
 
 
 def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
+    C.nets.dynamics.train()
+    C.nets.representation.train()
+
     # TODO: move tensors to GPU
     losses = Losses()
     counts = LossDataCounts()
@@ -51,17 +55,19 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
             )
             counts.latent += step.is_observation.count_nonzero()
 
-        counts.fit += step.is_data.count_nonzero()
+        fit_data = step.is_data & (step.player_type != PlayerType.Terminal)
+        counts.fit += fit_data.count_nonzero()
+        counts.player_type += step.is_data.count_nonzero()
 
         value, policy_logits, player_type_logits = C.nets.prediction(
             latent_rep, beliefs, logits=True
         )
         losses.value += F.mse_loss(value, step.value_target, reduction="none")[
-            step.is_data
+            fit_data
         ].sum()
         losses.policy += F.cross_entropy(
             policy_logits, step.target_policy, reduction="none"
-        )[step.is_data].sum()
+        )[fit_data].sum()
         losses.player_type += F.cross_entropy(
             player_type_logits, step.player_type, reduction="none"
         )[step.is_data].sum()
@@ -69,9 +75,7 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
         latent_rep, beliefs, reward = C.nets.dynamics(
             latent_rep, beliefs, step.action_onehot
         )
-        losses.reward += F.mse_loss(reward, step.reward, reduction="none")[
-            step.is_data
-        ].sum()
+        losses.reward += F.mse_loss(reward, step.reward, reduction="none")[fit_data].sum()
 
     if counts.latent > 0:
         losses.latent /= counts.latent
@@ -79,7 +83,7 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
         losses.value /= counts.fit
         losses.policy /= counts.fit
         losses.reward /= counts.fit
-        losses.player_type /= counts.fit
+    losses.player_type /= counts.player_type
 
     for k, loss in attrs.asdict(losses).items():
         sw.add_scalar(f"loss/{k}", loss, n)

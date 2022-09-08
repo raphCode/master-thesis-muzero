@@ -62,6 +62,10 @@ class Node:
         return len(self.children) > 0
 
     @property
+    def is_terminal(self) -> bool:
+        return self.player_type == PlayerType.Terminal
+
+    @property
     def value(self) -> float:
         if self.visit_count == 0:
             return 0
@@ -83,7 +87,21 @@ class Node:
         - populate our latent_rep, reward, node_type via network inference
         - add empty children for all possible actions
         """
+
+        def set_terminal_values(from_parent: bool):
+            if from_parent:
+                self.reward = 0
+            self.value_pred = 0
+            self.player_type = PlayerType.Terminal
+            self.beliefs = torch.zeros_like(C.nets.initial_beliefs)
+            self.children = [
+                Node(self, action, 0) for action in range(C.game.instance.max_num_actions)
+            ]
+
         if self.parent is not None:
+            if self.parent.is_terminal:
+                set_terminal_values(from_parent=True)
+                return
             # root node gets latent_rep and beliefs set externally
             self.latent_rep, self.beliefs, reward = C.nets.dynamics.si(
                 self.parent.latent_rep,
@@ -94,8 +112,11 @@ class Node:
         value_pred, probs, player_type = C.nets.prediction.si(
             self.latent_rep, self.beliefs
         )
-        self.value_pred = value_pred.item()
         self.player_type = PlayerType(player_type.argmax().item())
+        if self.player_type == PlayerType.Terminal:
+            set_terminal_values(from_parent=False)
+            return
+        self.value_pred = value_pred.item()
         self.children = [Node(self, action, p) for action, p in enumerate(probs.tolist())]
 
     def ensure_expanded(self):

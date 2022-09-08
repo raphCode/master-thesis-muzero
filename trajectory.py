@@ -25,6 +25,7 @@ class PlayerType(IntEnum):
     Chance = 1
     Opponent = 2
     Teammate = 3
+    Terminal = 4
 
 
 @frozen(kw_only=True)
@@ -94,6 +95,21 @@ class ReplayBuffer:
                 reward=torch.tensor(0.0),
             )
         ] * C.train.batch_game_size
+        self.terminal_state_steps = [
+            TrainingData(
+                is_observation=torch.tensor(False),
+                is_data=torch.tensor(True),
+                observation=self.empty_observation,
+                latent_rep=self.empty_latent_rep,
+                beliefs=torch.zeros(C.nets.beliefs_shape),
+                player_type=torch.tensor(PlayerType.Terminal),
+                action_onehot=action_onehot,
+                target_policy=torch.zeros(C.game.instance.max_num_actions),
+                value_target=torch.tensor(0.0),
+                reward=torch.tensor(0.0),
+            )
+            for action_onehot in torch.eye(C.game.instance.max_num_actions)
+        ]
 
     def add_trajectory(self, traj: list[TrajectoryState], game_terminated: bool):
         int64t = functools.partial(torch.tensor, dtype=torch.int64)
@@ -129,6 +145,9 @@ class ReplayBuffer:
                     reward=floatt(ts.reward),
                 )
             )
+
+        if game_terminated:
+            train_data.append(rng.choice(self.terminal_state_steps))
 
         self.lens.append(len(train_data))
         self.data.append(train_data)
