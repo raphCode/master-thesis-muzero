@@ -9,14 +9,6 @@ from config import config as C
 rng = np.random.default_rng()
 
 
-def softmax(dist: Sequence[float], temp: float = 1.0, norm: bool = True) -> np.ndarray:
-    dist = np.array(dist)
-    if norm:
-        temp *= dist.sum()
-    exp = np.exp(dist / temp)
-    return exp / exp.sum()
-
-
 def action_visit_count(node: Node, move_number: int) -> int:
     visit_counts = [child.visit_count for child in node.children]
     temp = np.interp(
