@@ -26,6 +26,8 @@ class OpenSpielGameState(GameState):
 
     @property
     def rewards(self) -> tuple[float]:
+        if self.is_chance:
+            return (0,) * self.game.num_players
         if self.invalid:
             tmp = [0] * self.game.num_players
             tmp[self.current_player] = self.game.bad_move_reward
