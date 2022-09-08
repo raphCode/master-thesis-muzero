@@ -124,3 +124,5 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
     C.train.optimizer.step()
 
     sw.add_scalar("loss/total", loss, n)
+
+    return loss
