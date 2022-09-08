@@ -1,5 +1,5 @@
 get_node_action: functions.muzero.visit_count_action
-get_node_target_policy: config.default_functions.target_policy_visit_count
+get_node_target_policy: functions.muzero.visit_count_target
 get_node_selection_score: functions.muzero.ucb_score
 iterations_move_selection: 200
 iterations_value_estimate: 100
@@ -10,7 +10,7 @@ visit_count_action:
     num_moves_start: 10
     num_moves_end: 11
 
-target_policy_visit_count:
+visit_count_target:
     softmax_temp: 0.6
 
 muzero_ucb:

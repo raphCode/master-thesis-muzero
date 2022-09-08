@@ -27,6 +27,11 @@ def visit_count_action(node: Node, move_number: int) -> int:
     return rng.choice(C.game.instance.max_num_actions, p=softmax(visit_counts, temp))
 
 
+def visit_count_target(node: Node) -> Sequence[float]:
+    visit_counts = [child.visit_count for child in node.children]
+    return softmax(visit_counts, C.mcts.visit_count_target.softmax_temp)
+
+
 def ucb_score(node: Node) -> float:
     prior_scale = (
         (
