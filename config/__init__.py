@@ -52,8 +52,12 @@ def populate_config(hydra_cfg: DictConfig):
 
     # NETS namespace
     C.nets = to_namespace_recurse(to_cont(hydra_cfg.networks))
-    C.nets.initial_beliefs = torch.zeros(tuple(hydra_cfg.networks.beliefs_shape))
-    C.nets.initial_latent_rep = torch.zeros(tuple(hydra_cfg.networks.latent_rep_shape))
+    C.nets.initial_beliefs = torch.nn.Parameter(
+        torch.normal(0, 1, tuple(hydra_cfg.networks.beliefs_shape))
+    )
+    C.nets.initial_latent_rep = torch.nn.Parameter(
+        torch.normal(0, 1, tuple(hydra_cfg.networks.latent_rep_shape))
+    )
 
     C.nets.dynamics = instantiate(hydra_cfg.networks.dynamics)
     C.nets.prediction = instantiate(hydra_cfg.networks.prediction)
@@ -75,6 +79,10 @@ def populate_config(hydra_cfg: DictConfig):
             pg(C.nets.dynamics.parameters(), C.train.learning_rates.dynamics),
             pg(C.nets.prediction.parameters(), C.train.learning_rates.prediction),
             pg(C.nets.representation.parameters(), C.train.learning_rates.representation),
+            pg(
+                [C.nets.initial_beliefs, C.nets.initial_latent_rep],
+                C.train.learning_rates.initial_tensors,
+            ),
         ]
     )
 
