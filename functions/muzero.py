@@ -6,6 +6,26 @@ import numpy as np
 from mcts import Node
 from config import config as C
 
+from .util import softmax
+
+rng = np.random.default_rng()
+
+
+def visit_count_action(node: Node, move_number: int) -> int:
+    visit_counts = [child.visit_count for child in node.children]
+    temp = np.interp(
+        move_number,
+        (
+            C.mcts.visit_count_action.num_moves_start,
+            C.mcts.visit_count_action.num_moves_end,
+        ),
+        (
+            C.mcts.visit_count_action.softmax_temp_start,
+            C.mcts.visit_count_action.softmax_temp_end,
+        ),
+    )
+    return rng.choice(C.game.instance.max_num_actions, p=softmax(visit_counts, temp))
+
 
 def ucb_score(node: Node) -> float:
     prior_scale = (
