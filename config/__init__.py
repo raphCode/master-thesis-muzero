@@ -66,12 +66,16 @@ def populate_config(hydra_cfg: DictConfig):
     C.train = to_namespace_recurse(to_cont(hydra_cfg.training))
     C.train.loss_weights = SimpleNamespace(**hydra_cfg.training.loss_weights)
     optim_partial = instantiate(hydra_cfg.training.optimizer, _partial_=True)
+
+    def pg(params, lr: float):
+        return {"params": params, "lr": C.train.learning_rates.base * lr}
+
     C.train.optimizer = optim_partial(
-        itertools.chain(
-            C.nets.dynamics.parameters(),
-            C.nets.prediction.parameters(),
-            C.nets.representation.parameters(),
-        )
+        [
+            pg(C.nets.dynamics.parameters(), C.train.learning_rates.dynamics),
+            pg(C.nets.prediction.parameters(), C.train.learning_rates.prediction),
+            pg(C.nets.representation.parameters(), C.train.learning_rates.representation),
+        ]
     )
 
     # PLAYER namespace

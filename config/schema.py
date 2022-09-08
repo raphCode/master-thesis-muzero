@@ -45,7 +45,14 @@ class NetworkSchema:
 @define
 class Optimizer:
     _target_: str
-    lr: float
+
+
+@define
+class LearningRates:
+    base: float
+    dynamics: float
+    prediction: float
+    representation: float
 
 
 @define
@@ -66,6 +73,7 @@ class TrainSchema:
     replay_buffer_size: int
     max_steps_per_episode: int
     optimizer: Optimizer
+    learning_rates: LearningRates
     loss_weights: LossWeights
 
 

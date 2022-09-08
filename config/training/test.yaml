@@ -6,7 +6,11 @@ replay_buffer_size: 1_000
 max_steps_per_episode: 10_000
 optimizer:
     _target_: torch.optim.Adam
-    lr: 0.005
+learning_rates:
+    base: 1e-5
+    dynamics: 1
+    prediction: 1
+    representation: 1
 loss_weights:
     latent: 1
     value: 1
