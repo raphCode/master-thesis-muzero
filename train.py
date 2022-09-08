@@ -24,6 +24,9 @@ class LossDataCounts:
 
 
 def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
+    C.nets.dynamics.train()
+    C.nets.representation.train()
+
     # TODO: move tensors to GPU
     losses = Losses()
     counts = LossDataCounts()

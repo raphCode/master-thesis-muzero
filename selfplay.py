@@ -24,6 +24,9 @@ log = logging.getLogger(__name__)
 
 
 def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
+    C.nets.dynamics.eval()
+    C.nets.representation.eval()
+
     players = C.player.instances
     rl_pids = {n for n, p in enumerate(players) if isinstance(p, RLPlayer)}
 
