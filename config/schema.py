@@ -54,7 +54,6 @@ class LossWeights:
     value: float
     reward: float
     policy: float
-    beliefs: float
     player_type: float
 
 
