@@ -17,14 +17,6 @@ def softmax(dist: Sequence[float], temp: float = 1.0, norm: bool = True) -> np.n
     return exp / exp.sum()
 
 
-def default_reward(rewards: tuple[float], player_id: int) -> float:
-    return rewards[player_id]
-
-
-def no_teammate(pid_a: int, pid_b: int) -> bool:
-    return False
-
-
 def action_visit_count(node: Node, move_number: int) -> int:
     visit_counts = [child.visit_count for child in node.children]
     temp = np.interp(
