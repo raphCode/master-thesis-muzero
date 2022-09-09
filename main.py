@@ -56,6 +56,8 @@ def main(cfg: DictConfig):
         C.nets.prediction.load_state_dict(c["nets"]["prediction"])
         C.nets.dynamics.load_state_dict(c["nets"]["dynamics"])
         C.train.optimizer.load_state_dict(c["optimizer"])
+        C.nets.initial_latent_rep = c["initial_latent_rep"]
+        C.nets.initial_beliefs = c["initial_beliefs"]
 
     rb = ReplayBuffer()
     os.mkdir("checkpoints")
@@ -84,6 +86,8 @@ def main(cfg: DictConfig):
                             "dynamics": C.nets.dynamics.state_dict(),
                         },
                         "optimizer": C.train.optimizer.state_dict(),
+                        "initial_latent_rep": C.nets.initial_latent_rep,
+                        "initial_beliefs": C.nets.initial_beliefs,
                     },
                     f"checkpoints/{n//100:06d}.pt",
                 )
