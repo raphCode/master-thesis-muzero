@@ -2,4 +2,4 @@ instance:
     _target_: games.openspiel_wrapper.OpenSpielGame
     game_name: catch
     bad_move_reward: -1
-calculate_reward: functions.default.standard_reward
+calculate_reward: fn.default.standard_reward
