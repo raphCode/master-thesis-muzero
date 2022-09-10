@@ -1,6 +1,6 @@
-get_node_action: functions.muzero.visit_count_action
-get_node_target_policy: functions.muzero.visit_count_target
-get_node_selection_score: functions.muzero.ucb_score
+get_node_action: fn.muzero.visit_count_action
+get_node_target_policy: fn.muzero.visit_count_target
+get_node_selection_score: fn.muzero.ucb_score
 iterations_move_selection: 200
 iterations_value_estimate: 100
 

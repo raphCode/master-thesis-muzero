@@ -1,8 +1,12 @@
 import logging
+from typing import Callable
+from contextlib import suppress
 
 import numpy as np
 import torch
+import matplotlib.pyplot as plt
 import torch.nn.functional as F
+from torch.utils.tensorboard import SummaryWriter
 
 from mcts import Node, ensure_visit_count
 from config import config as C
@@ -19,7 +23,10 @@ rng = np.random.default_rng()
 log = logging.getLogger(__name__)
 
 
-def run_episode(replay_buffer: ReplayBuffer):
+def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
+    C.nets.dynamics.eval()
+    C.nets.representation.eval()
+
     players = C.player.instances
     rl_pids = {n for n, p in enumerate(players) if isinstance(p, RLPlayer)}
 
@@ -40,9 +47,15 @@ def run_episode(replay_buffer: ReplayBuffer):
     for pid in rl_pids:
         players[pid].reset_new_game()
 
+    actions = []
+    latents = []
+    reward0 = 0
+
     for step in range(C.train.max_steps_per_episode):
         # Unsure about how to deal with non-terminal rewards or when exactly they occur
         assert state.is_chance or state.is_terminal or all(r == 0 for r in state.rewards)
+
+        reward0 += C.game.calculate_reward(state.rewards, 0)
 
         if state.is_terminal:
             break
@@ -69,8 +82,69 @@ def run_episode(replay_buffer: ReplayBuffer):
         if pid in rl_pids:
             obs = state.observation
             action, old_beliefs, root_node = players[pid].request_action(obs)
+            actions.append(action)
             target_policy = C.mcts.get_node_target_policy(root_node)
             mcts_nodes[pid] = root_node
+
+            latents.append(root_node.latent_rep)
+
+            def debug_mcts_node(node: Node):
+                actions = []
+                nn = node
+                while nn != root_node:
+                    actions.append(str(nn.action))
+                    nn = nn.parent
+                path = "_".join(reversed(actions)) or "root"
+
+                def add_mcts_histogram(label: str, f: Callable[Node, int]):
+                    values = []
+                    actions = []
+                    unexpanded = []
+                    for child in node.children:
+                        if child.is_expanded:
+                            values.append(f(child))
+                            actions.append(child.action)
+                        else:
+                            unexpanded.append(child.action)
+                    fig = plt.figure()
+                    plt.bar(
+                        actions,
+                        values,
+                    )
+                    plt.scatter(
+                        unexpanded,
+                        [0] * len(unexpanded),
+                        s=500,
+                        color="red",
+                        marker="x",
+                        linewidth=5,
+                    )
+                    sw.add_figure(f"mcts plot {path}/{label}", fig, n)
+                    if len(values) > 0:
+                        sw.add_histogram(f"mcts {path}/{label}", np.array(values), n)
+
+                add_mcts_histogram("visit count", lambda n: n.visit_count)
+                add_mcts_histogram("prior", lambda n: n.prior)
+                add_mcts_histogram("value", lambda n: n.value)
+                add_mcts_histogram("combined value", lambda n: n.value + n.reward)
+                add_mcts_histogram(
+                    "target policy",
+                    lambda n: C.mcts.get_node_target_policy(n.parent)[n.action],
+                )
+                add_mcts_histogram("reward", lambda n: n.reward)
+                # add_mcts_histogram("node selection score", C.mcts.get_node_selection_score)
+
+            if step == 7 and n % 200 == 0 and C.tb:
+                fig = plt.figure()
+                plt.imshow(obs[0])
+                sw.add_figure(f"game/observation 0", fig, n)
+
+                debug_mcts_node(root_node)
+                for aa, child in enumerate(root_node.children):
+                    debug_mcts_node(child)
+                    for nn, cc in enumerate(child.children):
+                        debug_mcts_node(cc)
+
         else:
             action = players[pid].request_action(state, C.game.instance)
 
@@ -106,3 +180,11 @@ def run_episode(replay_buffer: ReplayBuffer):
         replay_buffer.add_trajectory(traj, game_terminated=state.is_terminal)
 
     log.info(f"Finished game ({step + 1} steps)")
+    sw.add_scalar("game/length", step + 1, n)
+    sw.add_scalar("game/cumultative reward player 0", reward0, n)
+    sw.add_histogram("game/actions", np.array(actions), n)
+    for i, x in enumerate(torch.stack(latents).T[:10]):
+        with suppress(ValueError):
+            sw.add_histogram(f"latent space throughout game/dim {i}", x, n)
+            sw.add_histogram(f"initials/latent rep", C.nets.initial_latent_rep, n)
+            sw.add_histogram(f"initials/latent rep", C.nets.initial_latent_rep, n)
