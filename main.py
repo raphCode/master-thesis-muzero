@@ -61,6 +61,8 @@ def main(cfg: DictConfig):
     os.mkdir("checkpoints")
 
     log_dir = "tb"
+    if "tb_name" in cfg:
+        log_dir = cfg["tb_name"]
     C.tb = True
     if "no_tb" in cfg:
         C.tb = False
