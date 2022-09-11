@@ -66,7 +66,7 @@ def main(cfg: DictConfig):
         C.tb = False
         log_dir = "/tmp"
 
-    with contextlib.closing(SummaryWriter(log_dir="tb")) as sw:
+    with contextlib.closing(SummaryWriter(log_dir=log_dir)) as sw:
         # TODO: try inference mode to speed up things
         for n in itertools.count(0):
             if n % 10 == 0:
