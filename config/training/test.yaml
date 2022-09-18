@@ -1,19 +1,19 @@
 batch_game_size: 16
 batch_num_games: 64
-discount_factor: 0.95
-n_step_return: 20
-replay_buffer_size: 500
+discount_factor: 0.96
+n_step_return: 100
+replay_buffer_size: 1000
 max_steps_per_episode: 10_000
 optimizer:
     _target_: torch.optim.Adam
 learning_rates:
-    base: 1e-5
+    base: 1e-3
     dynamics: 1
-    prediction: 1
-    representation: 1
+    prediction: 0.5
+    representation: 10
 loss_weights:
-    latent: 0
-    value: 1
-    reward: 5
-    policy: 1
-    player_type: 1
+    latent: 1e-4
+    value: 0.3
+    reward: 0.1
+    policy: 2
+    player_type: 0.6
