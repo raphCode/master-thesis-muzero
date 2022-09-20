@@ -97,31 +97,41 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
     C.train.optimizer.zero_grad()
     loss.backward()
 
-    category_name = "max gradient * lr"
+    category_name = "gradient * lr"
     # TODO: flatten & concat abs tensors, log histogram
-    def log_maxgrad_net(name: str):
+    def log_grads_net(name: str):
         net = getattr(C.nets, name)
         lr = getattr(C.train.learning_rates, name)
         sw.add_scalar(
-            f"{category_name}/{name} network",
+            f"{category_name} max/{name} network",
             lr * max(p.grad.abs().max() for p in net.parameters()),
             n,
         )
+        sw.add_scalar(
+            f"{category_name} avg/{name} network",
+            lr * max(p.grad.abs().mean() for p in net.parameters()),
+            n,
+        )
 
-    def log_maxgrad_tensor(name: str):
+    def log_grads_tensor(name: str):
         tensor = getattr(C.nets, name)
         if tensor.grad is not None:
             sw.add_scalar(
-                f"{category_name}/{name}",
+                f"{category_name} max/{name}",
                 C.train.learning_rates.initial_tensors * tensor.grad.abs().max(),
                 n,
             )
+            sw.add_scalar(
+                f"{category_name} avg/{name}",
+                C.train.learning_rates.initial_tensors * tensor.grad.abs().mean(),
+                n,
+            )
 
-    log_maxgrad_net("dynamics")
-    log_maxgrad_net("prediction")
-    log_maxgrad_net("representation")
-    log_maxgrad_tensor("initial_beliefs")
-    log_maxgrad_tensor("initial_latent_rep")
+    log_grads_net("dynamics")
+    log_grads_net("prediction")
+    log_grads_net("representation")
+    log_grads_tensor("initial_beliefs")
+    log_grads_tensor("initial_latent_rep")
 
     # torch.nn.utils.clip_grad_value_(C.train.optimizer.param_groups[0]['params'], 1)
     C.train.optimizer.step()
