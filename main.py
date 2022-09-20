@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 import itertools
 import contextlib
@@ -47,6 +48,8 @@ log = logging.getLogger("main")
 
 @hydra.main(version_base=None, config_path="config", config_name="base_config")
 def main(cfg: DictConfig):
+    sys.path.append(hydra.utils.get_original_cwd())
+
     config.populate_config(cfg)
     config.save_source_code()
 
