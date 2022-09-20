@@ -139,6 +139,12 @@ def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
                 plt.imshow(obs[0])
                 sw.add_figure(f"game/observation 0", fig, n)
 
+                import pickle
+
+                with open(f"tree_{n:06d}.pk", "wb") as f:
+                    with suppress(RecursionError):
+                        pickle.dump(root_node, f)
+
                 debug_mcts_node(root_node)
                 for aa, child in enumerate(root_node.children):
                     debug_mcts_node(child)
