@@ -189,8 +189,13 @@ def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
     sw.add_scalar("game/length", step + 1, n)
     sw.add_scalar("game/cumultative reward player 0", reward0, n)
     sw.add_histogram("game/actions", np.array(actions), n)
+
+    with suppress(ValueError):
+        sw.add_histogram(f"latent variance", torch.stack(latents).var(dim=0), n)
+        sw.add_scalar(f"latent variance/max", torch.stack(latents).var(dim=0).max(), n)
+        sw.add_scalar(f"latent variance/mean", torch.stack(latents).var(dim=0).mean(), n)
     for i, x in enumerate(torch.stack(latents).T[:10]):
         with suppress(ValueError):
             sw.add_histogram(f"latent space throughout game/dim {i}", x, n)
-            sw.add_histogram(f"initials/latent rep", C.nets.initial_latent_rep, n)
+            sw.add_scalar(f"latent space throughout game variance/dim {i}", x.var(), n)
             sw.add_histogram(f"initials/latent rep", C.nets.initial_latent_rep, n)
