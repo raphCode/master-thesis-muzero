@@ -1,14 +1,16 @@
-get_node_action: fn.muzero.visit_count_action
+get_node_action: fn.action.from_visit_count
 get_node_target_policy: fn.muzero.visit_count_target
 get_node_selection_score: fn.muzero.ucb_score
 iterations_move_selection: 200
 iterations_value_estimate: 100
 
-visit_count_action:
-    softmax_temp_start: 0.6
-    softmax_temp_end: 0
-    num_moves_start: 10
-    num_moves_end: 11
+fn:
+    action:
+        from_visit_count:
+            softmax_temp_start: 0.6
+            softmax_temp_end: 0
+            num_moves_start: 10
+            num_moves_end: 11
 
 visit_count_target:
     softmax_temp: 0.6
