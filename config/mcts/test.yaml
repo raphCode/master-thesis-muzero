@@ -9,8 +9,8 @@ fn:
         from_visit_count:
             softmax_temp_start: 0.6
             softmax_temp_end: 0
-            num_moves_start: 10
-            num_moves_end: 11
+            move_num_start: 10
+            move_num_end: 11
 
 visit_count_target:
     softmax_temp: 0.6
