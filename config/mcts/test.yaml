@@ -1,6 +1,6 @@
 get_node_action: fn.action.from_visit_count
 get_node_target_policy: fn.policy.from_visit_count
-get_node_selection_score: fn.muzero.ucb_score
+get_node_selection_score: fn.selection.ucb_score
 iterations_move_selection: 200
 iterations_value_estimate: 100
 
@@ -16,6 +16,7 @@ fn:
         from_visit_count:
             softmax_temp: 0.6
 
-muzero_ucb:
-    prior_log_scale_base: 5
-    prior_log_scale_init: 1.25
+    selection:
+        ucb_score:
+            prior_log_scale_base: 5
+            prior_log_scale_init: 1.25

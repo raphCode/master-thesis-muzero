@@ -8,10 +8,14 @@ def ucb_score(node: Node) -> float:
     prior_scale = (
         (
             math.log(
-                (node.parent.visit_count + C.mcts.muzero_ucb.prior_log_scale_base + 1)
-                / C.mcts.muzero_ucb.prior_log_scale_base
+                (
+                    node.parent.visit_count
+                    + C.mcts.fn.selection.ucb_score.prior_log_scale_base
+                    + 1
+                )
+                / C.mcts.fn.selection.ucb_score.prior_log_scale_base
             )
-            + C.mcts.muzero_ucb.prior_log_scale_init
+            + C.mcts.fn.selection.ucb_score.prior_log_scale_init
         )
         * math.sqrt(node.parent.visit_count)
         / (node.visit_count + 1)
