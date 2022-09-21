@@ -1,15 +1,7 @@
 import math
-from collections.abc import Sequence
 
 from mcts import Node
 from config import config as C
-
-from .util import softmax
-
-
-def visit_count_target(node: Node) -> Sequence[float]:
-    visit_counts = [child.visit_count for child in node.children]
-    return softmax(visit_counts, C.mcts.visit_count_target.softmax_temp)
 
 
 def ucb_score(node: Node) -> float:
