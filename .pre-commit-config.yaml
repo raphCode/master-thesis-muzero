@@ -16,4 +16,4 @@ repos:
     hooks:
     -   id: pycln
         name: pycln (python)
-        args: ["--check", "--diff"]
+        args: ["--check", "--diff", "--all"]
