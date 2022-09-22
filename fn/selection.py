@@ -25,3 +25,7 @@ def ucb_score(node: Node) -> float:
         return prior_score
     value_score = node.reward + node.value * C.train.discount_factor
     return value_score + prior_score
+
+
+def from_prior(node: Node) -> float:
+    return node.prior / (node.visit_count + 1)
