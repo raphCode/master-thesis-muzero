@@ -7,7 +7,7 @@ from typing import Any
 import hydra
 import torch
 from attrs import define
-from omegaconf import MISSING, OmegaConf, DictConfig
+from omegaconf import MISSING, DictConfig
 from hydra.core.config_store import ConfigStore
 from torch.utils.tensorboard import SummaryWriter
 
