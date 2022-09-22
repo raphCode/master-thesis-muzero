@@ -7,8 +7,8 @@ from mcts import Node
 
 def softmax(dist: Sequence[float], temp: float = 1.0, norm: bool = True) -> np.ndarray:
     dist = np.array(dist)
-    if norm:
-        temp *= dist.sum()
+    if norm and (dist_sum := dist.sum()) > 0:
+        temp *= dist_sum
     exp = np.exp(dist / temp)
     return exp / exp.sum()
 
