@@ -18,3 +18,12 @@ def from_visit_count_expanded(node: Node) -> Sequence[float]:
     probs = np.full(len(node.children), 0.0)
     probs[idx] = softmax(visit_counts, C.mcts.fn.policy.from_visit_count.softmax_temp)
     return probs
+
+
+def from_value_expanded(node: Node) -> Sequence[float]:
+    values, idx = get_values_where_expanded(
+        node.children, lambda n: n.reward + n.value * C.train.discount_factor
+    )
+    policy = np.full(len(node.children), 0.0)
+    policy[idx] = softmax(values, C.mcts.fn.policy.from_value.softmax_temp, norm=False)
+    return policy
