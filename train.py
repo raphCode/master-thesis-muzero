@@ -1,11 +1,11 @@
 import attrs
 import torch
 import torch.nn.functional as F
-from attrs import Factory, define
+from attrs import define
 from torch.utils.tensorboard import SummaryWriter
 
 from config import config as C
-from trajectory import PlayerType, TrainingData
+from trajectory import TrainingData
 
 
 @define

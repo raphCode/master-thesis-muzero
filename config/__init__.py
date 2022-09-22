@@ -3,12 +3,10 @@ import abc
 import inspect
 import logging
 import functools
-import itertools
 from types import SimpleNamespace
 from typing import Any
 from collections import defaultdict
 
-import hydra
 import torch
 from omegaconf import OmegaConf, DictConfig
 from hydra.utils import get_method, instantiate

@@ -1,5 +1,4 @@
 from attrs import define
-from omegaconf import MISSING
 
 
 @define
