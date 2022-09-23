@@ -41,12 +41,12 @@ class FcBase(ABC):
 
 class FcRepresentation(FcBase, RepresentationNet):
     def __init__(self, *args, **kwargs):
-        input_width = (
+        input_sizes = (
             sum(
                 functools.reduce(operator.mul, shape, 1)
                 for shape in C.game.instance.observation_shapes
-            )
-            + C.nets.initial_beliefs.numel()
+            ),
+            C.nets.initial_beliefs.numel(),
         )
         self.output_sizes = (
             C.nets.initial_latent_rep.numel(),
@@ -54,7 +54,7 @@ class FcRepresentation(FcBase, RepresentationNet):
         )
         super().__init__(
             *args,
-            input_width=input_width,
+            input_width=sum(input_sizes),
             output_width=sum(self.output_sizes),
             **kwargs,
         )
