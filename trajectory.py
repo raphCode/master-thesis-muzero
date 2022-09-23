@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 from attrs import frozen
 
-from config import config as C
+from config import C
 
 
 class PlayerType(IntEnum):

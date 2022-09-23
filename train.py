@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from attrs import define
 from torch.utils.tensorboard import SummaryWriter
 
-from config import config as C
+from config import C
 from trajectory import TrainingData
 
 

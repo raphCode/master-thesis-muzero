@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from config import config as C
+from config import C
 from trajectory import PlayerType
 
 rng = np.random.default_rng()

@@ -5,7 +5,7 @@ import torch
 import torch.nn.functional as F
 
 from mcts import Node, ensure_visit_count
-from config import config as C
+from config import C
 from rl_player import RLPlayer
 from trajectory import (
     LatentInfo,

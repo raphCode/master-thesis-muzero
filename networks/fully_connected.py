@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from config import config as C
+from config import C
 from trajectory import PlayerType
 from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
 

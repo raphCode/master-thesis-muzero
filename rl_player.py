@@ -3,7 +3,7 @@ from typing import NamedTuple
 import torch
 
 from mcts import run_mcts
-from config import config as C
+from config import C
 
 
 class RLPResult(NamedTuple):

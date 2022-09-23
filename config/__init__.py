@@ -14,16 +14,15 @@ from hydra.utils import get_method, instantiate
 import games
 from networks.bases import DynamicsNet, NetworkBase, PredictionNet, RepresentationNet
 
-__all__ = ["config", "populate_config", "save_source_code"]
+__all__ = ["C", "populate_config", "save_source_code"]
 
 log = logging.getLogger(__name__)
 
 # global configuration container
-config = SimpleNamespace()
+C = SimpleNamespace()
 
 
 def populate_config(hydra_cfg: DictConfig):
-    C = config
     to_cont = functools.partial(OmegaConf.to_container, resolve=True)
 
     def to_namespace_recurse(x) -> SimpleNamespace:
@@ -128,7 +127,7 @@ def save_source_code():
 
         sources[namespace].add(("config path: " + ".".join(path), source))
 
-    save_recursive(config, [])
+    save_recursive(C, [])
 
     directory = "sources"
     os.mkdir(directory)
