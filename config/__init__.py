@@ -122,7 +122,10 @@ def save_source_code():
 
         namespace = "_".join(path[:-1])
 
-        if inspect.isfunction(item):
+        if isinstance(item, functools.partial):
+            item = item()  # partials are probably factories, instantiate them
+
+        if inspect.isfunction(item) and path[-1] != "optimizer_factory":
             source = inspect.getsource(item)
         elif isinstance(item, NetworkBase):
             cls = item.__class__
