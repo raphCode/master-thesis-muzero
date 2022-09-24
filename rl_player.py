@@ -23,9 +23,6 @@ class RLPlayer:
     beliefs: torch.Tensor
     move_number: int
 
-    def __init__(self):
-        self.reset_new_game()
-
     def request_action(self, observation: tuple[torch.Tensor]) -> RLPResult:
         """
         Requests an action from RL agent for the current observation.
