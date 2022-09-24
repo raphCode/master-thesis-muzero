@@ -118,7 +118,6 @@ def save_source_code():
         if isinstance(item, SimpleNamespace):
             for name, child in vars(item).items():
                 save_recursive(child, path + [name])
-            return
 
         namespace = "_".join(path[:-1])
 
