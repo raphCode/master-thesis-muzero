@@ -5,6 +5,7 @@ from attrs import define
 from torch.utils.tensorboard import SummaryWriter
 
 from config import C
+from globals import G
 from trajectory import TrainingData
 
 
@@ -29,7 +30,7 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
     counts = LossDataCounts()
 
     first = batch[0]
-    obs_latent_rep, obs_beliefs = C.nets.representation(*first.observation, first.beliefs)
+    obs_latent_rep, obs_beliefs = G.nets.representation(*first.observation, first.beliefs)
     latent_rep = obs_latent_rep.where(
         first.is_observation.unsqueeze(-1), first.latent_rep
     )
@@ -40,7 +41,7 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
             break
 
         if step is not first and step.is_observation.any():
-            obs_latent_rep, obs_beliefs = C.nets.representation(
+            obs_latent_rep, obs_beliefs = G.nets.representation(
                 *step.observation, beliefs
             )
             losses.latent += (
@@ -53,7 +54,7 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
 
         counts.fit += step.is_data.count_nonzero()
 
-        value, policy_logits, player_type_logits = C.nets.prediction(
+        value, policy_logits, player_type_logits = G.nets.prediction(
             latent_rep, beliefs, logits=True
         )
         losses.value += F.mse_loss(value, step.value_target, reduction="none")[
@@ -66,7 +67,7 @@ def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
             player_type_logits, step.player_type, reduction="none"
         )[step.is_data].sum()
 
-        latent_rep, beliefs, reward = C.nets.dynamics(
+        latent_rep, beliefs, reward = G.nets.dynamics(
             latent_rep, beliefs, step.action_onehot
         )
         losses.reward += F.mse_loss(reward, step.reward, reduction="none")[

@@ -4,6 +4,7 @@ import torch
 
 from mcts import run_mcts
 from config import C
+from globals import G
 
 
 class RLPResult(NamedTuple):
@@ -31,7 +32,7 @@ class RLPlayer:
         Returns an action to choose as well as extra data for recording a game trajectory.
         """
         old_beliefs = self.beliefs.to(device="cpu", copy=True)
-        latent_rep, self.beliefs = C.nets.representation.si(*observation, self.beliefs)
+        latent_rep, self.beliefs = G.nets.representation.si(*observation, self.beliefs)
         # TODO: instead of re-running, try to reuse previous tree search from selfplay here
         root_node = run_mcts(latent_rep, self.beliefs)
         action = C.mcts.get_node_action(root_node, self.move_number)
@@ -39,5 +40,5 @@ class RLPlayer:
         return RLPResult(action, old_beliefs, root_node)
 
     def reset_new_game(self):
-        self.beliefs = C.nets.initial_beliefs.detach().clone()
+        self.beliefs = G.nets.initial_beliefs.detach().clone()
         self.move_number = 0

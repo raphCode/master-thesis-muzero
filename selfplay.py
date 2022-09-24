@@ -6,6 +6,7 @@ import torch.nn.functional as F
 
 from mcts import Node, ensure_visit_count
 from config import C
+from globals import G
 from rl_player import RLPlayer
 from trajectory import (
     LatentInfo,
@@ -24,7 +25,7 @@ def run_episode(replay_buffer: ReplayBuffer):
     rl_pids = {n for n, p in enumerate(players) if isinstance(p, RLPlayer)}
 
     mcts_nodes = {
-        n: Node.from_latents(C.nets.initial_latent_rep, C.nets.initial_beliefs)
+        n: Node.from_latents(G.nets.initial_latent_rep, G.nets.initial_beliefs)
         for n in rl_pids
     }
 
