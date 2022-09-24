@@ -61,7 +61,6 @@ def populate_config(hydra_cfg: DictConfig):
 
     # TRAIN namespace
     C.train = to_namespace_recurse(to_cont(hydra_cfg.training))
-    C.train.loss_weights = SimpleNamespace(**hydra_cfg.training.loss_weights)
     optim_partial = instantiate(hydra_cfg.training.optimizer, _partial_=True)
 
     def pg(params, lr: float):
