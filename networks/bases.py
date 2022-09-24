@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 import torch
 import torch.nn as nn
+from attrs import define
 
 
 class NetworkBase(nn.Module, ABC):
@@ -42,3 +43,12 @@ class DynamicsNet(NetworkBase):
         self, latent_rep: torch.Tensor, beliefs: torch.Tensor, action_onehot: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         pass
+
+
+@define(kw_only=True)
+class Networks:
+    representation: RepresentationNet
+    prediction: PredictionNet
+    dynamics: DynamicsNet
+    initial_latent_rep: torch.Tensor
+    initial_beliefs: torch.Tensor
