@@ -66,6 +66,8 @@ def main(cfg: DictConfig):
         G.nets.representation.load_state_dict(c["nets"]["representation"])
         G.nets.prediction.load_state_dict(c["nets"]["prediction"])
         G.nets.dynamics.load_state_dict(c["nets"]["dynamics"])
+        G.epoch_num = c["epoch_num"]
+        G.game_num = c["game_num"]
         trainer.optimizer.load_state_dict(c["optimizer"])
 
     rb = ReplayBuffer()
@@ -99,6 +101,8 @@ def main(cfg: DictConfig):
                             "dynamics": G.nets.dynamics.state_dict(),
                         },
                         "optimizer": trainer.optimizer.state_dict(),
+                        "epoch_num": G.epoch_num,
+                        "game_num": G.game_num,
                     },
                     f"checkpoints/{n//100:06d}.pt",
                 )
