@@ -13,10 +13,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 import config
 import selfplay
-from train import process_batch
-from config import config as C
+from train import Trainer
+from config import C
+from globals import G
 from trajectory import ReplayBuffer
 from config.schema import GameSchema, MctsSchema, TrainSchema, PlayerSchema, NetworkSchema
+from networks.bases import Networks
 
 cs = ConfigStore.instance()
 cs.store(name="hydra_job_config", group="hydra.job", node={"chdir": True})
@@ -49,13 +51,22 @@ log = logging.getLogger("main")
 def main(cfg: DictConfig):
     config.populate_config(cfg)
     config.save_source_code()
+    G.nets = Networks(
+        representation=C.nets.factory.representation(),
+        prediction=C.nets.factory.prediction(),
+        dynamics=C.nets.factory.dynamics(),
+        initial_latent_rep=C.nets.factory.initial_latent_rep(),
+        initial_beliefs=C.nets.factory.initial_beliefs(),
+    )
+
+    trainer = Trainer(G.nets)
 
     if "load_checkpoint" in cfg:
         c = torch.load(hydra.utils.to_absolute_path(cfg.load_checkpoint))
-        C.nets.representation.load_state_dict(c["nets"]["representation"])
-        C.nets.prediction.load_state_dict(c["nets"]["prediction"])
-        C.nets.dynamics.load_state_dict(c["nets"]["dynamics"])
-        C.train.optimizer.load_state_dict(c["optimizer"])
+        G.nets.representation.load_state_dict(c["nets"]["representation"])
+        G.nets.prediction.load_state_dict(c["nets"]["prediction"])
+        G.nets.dynamics.load_state_dict(c["nets"]["dynamics"])
+        trainer.optimizer.load_state_dict(c["optimizer"])
 
     rb = ReplayBuffer()
     os.mkdir("checkpoints")
@@ -75,17 +86,17 @@ def main(cfg: DictConfig):
                 with torch.no_grad():
                     selfplay.run_episode(rb, sw, n)
             if len(rb) > 0.1 * C.train.replay_buffer_size:
-                loss = process_batch(rb.sample(), sw, n)
+                loss = trainer.process_batch(rb.sample(), sw, n)
                 log.info(f"Finished batch update (loss: {loss.item():.5f})")
             if n % 100 == 0:
                 torch.save(
                     {
                         "nets": {
-                            "representation": C.nets.representation.state_dict(),
-                            "prediction": C.nets.prediction.state_dict(),
-                            "dynamics": C.nets.dynamics.state_dict(),
+                            "representation": G.nets.representation.state_dict(),
+                            "prediction": G.nets.prediction.state_dict(),
+                            "dynamics": G.nets.dynamics.state_dict(),
                         },
-                        "optimizer": C.train.optimizer.state_dict(),
+                        "optimizer": trainer.optimizer.state_dict(),
                     },
                     f"checkpoints/{n//100:06d}.pt",
                 )

@@ -1,7 +1,7 @@
 import math
 
 from mcts import Node
-from config import config as C
+from config import C
 
 
 def ucb_score(node: Node) -> float:

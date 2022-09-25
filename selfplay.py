@@ -9,7 +9,8 @@ import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 
 from mcts import Node, ensure_visit_count
-from config import config as C
+from config import C
+from globals import G
 from rl_player import RLPlayer
 from trajectory import (
     LatentInfo,
@@ -24,14 +25,14 @@ log = logging.getLogger(__name__)
 
 
 def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
-    C.nets.dynamics.eval()
-    C.nets.representation.eval()
+    G.nets.dynamics.eval()
+    G.nets.representation.eval()
 
     players = C.player.instances
     rl_pids = {n for n, p in enumerate(players) if isinstance(p, RLPlayer)}
 
     mcts_nodes = {
-        n: Node.from_latents(C.nets.initial_latent_rep, C.nets.initial_beliefs)
+        n: Node.from_latents(G.nets.initial_latent_rep, G.nets.initial_beliefs)
         for n in rl_pids
     }
 
@@ -198,4 +199,4 @@ def run_episode(replay_buffer: ReplayBuffer, sw: SummaryWriter, n: int):
         with suppress(ValueError):
             sw.add_histogram(f"latent space throughout game/dim {i}", x, n)
             sw.add_scalar(f"latent space throughout game variance/dim {i}", x.var(), n)
-            sw.add_histogram(f"initials/latent rep", C.nets.initial_latent_rep, n)
+            sw.add_histogram(f"initials/latent rep", G.nets.initial_latent_rep, n)

@@ -4,8 +4,9 @@ import torch.nn.functional as F
 from attrs import define
 from torch.utils.tensorboard import SummaryWriter
 
-from config import config as C
+from config import C
 from trajectory import TrainingData
+from networks.bases import Networks
 
 
 @define
@@ -23,119 +24,121 @@ class LossDataCounts:
     latent: int = 0
 
 
-def process_batch(batch: list[TrainingData], sw: SummaryWriter, n: int):
-    C.nets.dynamics.train()
-    C.nets.representation.train()
+class Trainer:
+    def __init__(self, nets: Networks):
+        self.nets = nets
+        self.optimizer = C.train.optimizer_factory(self.nets)
 
-    # TODO: move tensors to GPU
-    losses = Losses()
-    counts = LossDataCounts()
+    def process_batch(self, batch: list[TrainingData], sw: SummaryWriter, n: int):
+        # TODO: move tensors to GPU
+        losses = Losses()
+        counts = LossDataCounts()
 
-    first = batch[0]
-    obs_latent_rep, obs_beliefs = C.nets.representation(*first.observation, first.beliefs)
-    latent_rep = obs_latent_rep.where(
-        first.is_observation.unsqueeze(-1), first.latent_rep
-    )
-    beliefs = obs_beliefs.where(first.is_observation.unsqueeze(-1), first.beliefs)
+        first = batch[0]
+        obs_latent_rep, obs_beliefs = self.nets.representation(
+            *first.observation, first.beliefs
+        )
+        latent_rep = obs_latent_rep.where(
+            first.is_observation.unsqueeze(-1), first.latent_rep
+        )
+        beliefs = obs_beliefs.where(first.is_observation.unsqueeze(-1), first.beliefs)
 
-    for step in batch:
-        if not step.is_data.any():
-            break
+        for step in batch:
+            if not step.is_data.any():
+                break
 
-        if step is not first and step.is_observation.any():
-            obs_latent_rep, obs_beliefs = C.nets.representation(
-                *step.observation, beliefs
+            if step is not first and step.is_observation.any():
+                obs_latent_rep, obs_beliefs = self.nets.representation(
+                    *step.observation, beliefs
+                )
+                losses.latent += (
+                    F.mse_loss(latent_rep, obs_latent_rep, reduction="none")
+                    .mean(dim=1)
+                    .masked_select(step.is_observation)
+                    .sum()
+                )
+                counts.latent += step.is_observation.count_nonzero()
+
+            counts.fit += step.is_data.count_nonzero()
+
+            value, policy_logits, player_type_logits = self.nets.prediction(
+                latent_rep, beliefs, logits=True
             )
-            losses.latent += (
-                F.mse_loss(latent_rep, obs_latent_rep, reduction="none")
-                .mean(dim=1)
-                .masked_select(step.is_observation)
-                .sum()
+            losses.value += F.mse_loss(value, step.value_target, reduction="none")[
+                step.is_data
+            ].sum()
+            losses.policy += F.cross_entropy(
+                policy_logits, step.target_policy, reduction="none"
+            )[step.is_data].sum()
+            losses.player_type += F.cross_entropy(
+                player_type_logits, step.player_type, reduction="none"
+            )[step.is_data].sum()
+
+            latent_rep, beliefs, reward = self.nets.dynamics(
+                latent_rep, beliefs, step.action_onehot
             )
-            counts.latent += step.is_observation.count_nonzero()
+            losses.reward += F.mse_loss(reward, step.reward, reduction="none")[
+                step.is_data
+            ].sum()
 
-        counts.fit += step.is_data.count_nonzero()
+        if counts.latent > 0:
+            losses.latent /= counts.latent
+        if counts.fit > 0:
+            losses.value /= counts.fit
+            losses.policy /= counts.fit
+            losses.reward /= counts.fit
+            losses.player_type /= counts.fit
 
-        value, policy_logits, player_type_logits = C.nets.prediction(
-            latent_rep, beliefs, logits=True
+        for k, loss in attrs.asdict(losses).items():
+            sw.add_scalar(f"loss/{k}", loss, n)
+
+        loss = (
+            C.train.loss_weights.latent * losses.latent
+            + C.train.loss_weights.value * losses.value
+            + C.train.loss_weights.reward * losses.reward
+            + C.train.loss_weights.policy * losses.policy
+            + C.train.loss_weights.player_type * losses.player_type
         )
-        losses.value += F.mse_loss(value, step.value_target, reduction="none")[
-            step.is_data
-        ].sum()
-        losses.policy += F.cross_entropy(
-            policy_logits, step.target_policy, reduction="none"
-        )[step.is_data].sum()
-        losses.player_type += F.cross_entropy(
-            player_type_logits, step.player_type, reduction="none"
-        )[step.is_data].sum()
+        self.optimizer.zero_grad()
+        loss.backward()
 
-        latent_rep, beliefs, reward = C.nets.dynamics(
-            latent_rep, beliefs, step.action_onehot
-        )
-        losses.reward += F.mse_loss(reward, step.reward, reduction="none")[
-            step.is_data
-        ].sum()
-
-    if counts.latent > 0:
-        losses.latent /= counts.latent
-    if counts.fit > 0:
-        losses.value /= counts.fit
-        losses.policy /= counts.fit
-        losses.reward /= counts.fit
-        losses.player_type /= counts.fit
-
-    for k, loss in attrs.asdict(losses).items():
-        sw.add_scalar(f"loss/{k}", loss, n)
-
-    loss = (
-        C.train.loss_weights.latent * losses.latent
-        + C.train.loss_weights.value * losses.value
-        + C.train.loss_weights.reward * losses.reward
-        + C.train.loss_weights.policy * losses.policy
-        + C.train.loss_weights.player_type * losses.player_type
-    )
-    C.train.optimizer.zero_grad()
-    loss.backward()
-
-    category_name = "gradient * lr"
-    # TODO: flatten & concat abs tensors, log histogram
-    def log_grads_net(name: str):
-        net = getattr(C.nets, name)
-        lr = getattr(C.train.learning_rates, name)
-        sw.add_scalar(
-            f"{category_name} max/{name} network",
-            lr * max(p.grad.abs().max() for p in net.parameters()),
-            n,
-        )
-        sw.add_scalar(
-            f"{category_name} avg/{name} network",
-            lr * max(p.grad.abs().mean() for p in net.parameters()),
-            n,
-        )
-
-    def log_grads_tensor(name: str):
-        tensor = getattr(C.nets, name)
-        if tensor.grad is not None:
+        category_name = "gradient * lr"
+        # TODO: flatten & concat abs tensors, log histogram
+        def log_grads_net(name: str):
+            net = getattr(self.nets, name)
+            lr = getattr(C.train.learning_rates, name)
             sw.add_scalar(
-                f"{category_name} max/{name}",
-                C.train.learning_rates.initial_tensors * tensor.grad.abs().max(),
+                f"{category_name} max/{name} network",
+                lr * max(p.grad.abs().max() for p in net.parameters()),
                 n,
             )
             sw.add_scalar(
-                f"{category_name} avg/{name}",
-                C.train.learning_rates.initial_tensors * tensor.grad.abs().mean(),
+                f"{category_name} avg/{name} network",
+                lr * max(p.grad.abs().mean() for p in net.parameters()),
                 n,
             )
 
-    log_grads_net("dynamics")
-    log_grads_net("prediction")
-    log_grads_net("representation")
-    log_grads_tensor("initial_beliefs")
-    log_grads_tensor("initial_latent_rep")
+        def log_grads_tensor(name: str):
+            tensor = getattr(self.nets, name)
+            if tensor.grad is not None:
+                sw.add_scalar(
+                    f"{category_name} max/{name}",
+                    C.train.learning_rates.initial_tensors * tensor.grad.abs().max(),
+                    n,
+                )
+                sw.add_scalar(
+                    f"{category_name} avg/{name}",
+                    C.train.learning_rates.initial_tensors * tensor.grad.abs().mean(),
+                    n,
+                )
 
-    # torch.nn.utils.clip_grad_value_(C.train.optimizer.param_groups[0]['params'], 1)
-    C.train.optimizer.step()
+        log_grads_net("dynamics")
+        log_grads_net("prediction")
+        log_grads_net("representation")
+        log_grads_tensor("initial_beliefs")
+        log_grads_tensor("initial_latent_rep")
 
-    sw.add_scalar("loss/total", loss, n)
+        self.optimizer.step()
 
-    return loss
+        sw.add_scalar("loss/total", loss, n)
+        return loss

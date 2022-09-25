@@ -1,7 +1,7 @@
 import numpy as np
 
 from mcts import Node
-from config import config as C
+from config import C
 
 from .util import softmax, get_values_where_expanded
 

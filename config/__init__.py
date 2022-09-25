@@ -12,19 +12,25 @@ from omegaconf import OmegaConf, DictConfig
 from hydra.utils import get_method, instantiate
 
 import games
-from networks.bases import DynamicsNet, NetworkBase, PredictionNet, RepresentationNet
+from networks.bases import (
+    Networks,
+    DynamicsNet,
+    NetworkBase,
+    PredictionNet,
+    RepresentationNet,
+)
 
-__all__ = ["config", "populate_config", "save_source_code"]
+__all__ = ["C", "populate_config", "save_source_code"]
 
 log = logging.getLogger(__name__)
 
 # global configuration container
-config = SimpleNamespace()
+C = SimpleNamespace()
 
 
 def populate_config(hydra_cfg: DictConfig):
-    C = config
     to_cont = functools.partial(OmegaConf.to_container, resolve=True)
+    pinstantiate = functools.partial(instantiate, _partial_=True)
 
     def to_namespace_recurse(x) -> SimpleNamespace:
         if isinstance(x, dict):
@@ -50,31 +56,41 @@ def populate_config(hydra_cfg: DictConfig):
 
     # NETS namespace
     C.nets = to_namespace_recurse(to_cont(hydra_cfg.networks))
-    C.nets.initial_beliefs = torch.zeros(tuple(hydra_cfg.networks.beliefs_shape))
-    C.nets.initial_latent_rep = torch.zeros(tuple(hydra_cfg.networks.latent_rep_shape))
-
-    C.nets.dynamics = instantiate(hydra_cfg.networks.dynamics)
-    C.nets.prediction = instantiate(hydra_cfg.networks.prediction)
-    C.nets.representation = instantiate(hydra_cfg.networks.representation)
-    assert isinstance(C.nets.dynamics, DynamicsNet)
-    assert isinstance(C.nets.prediction, PredictionNet)
-    assert isinstance(C.nets.representation, RepresentationNet)
+    del C.nets.dynamics
+    del C.nets.prediction
+    del C.nets.representation
+    C.nets.factory = SimpleNamespace()
+    C.nets.factory.initial_beliefs = functools.partial(
+        torch.zeros, tuple(hydra_cfg.networks.beliefs_shape)
+    )
+    C.nets.factory.initial_latent_rep = functools.partial(
+        torch.zeros, tuple(hydra_cfg.networks.latent_rep_shape)
+    )
+    C.nets.factory.dynamics = pinstantiate(hydra_cfg.networks.dynamics)
+    C.nets.factory.prediction = pinstantiate(hydra_cfg.networks.prediction)
+    C.nets.factory.representation = pinstantiate(hydra_cfg.networks.representation)
+    assert isinstance(C.nets.factory.dynamics(), DynamicsNet)
+    assert isinstance(C.nets.factory.prediction(), PredictionNet)
+    assert isinstance(C.nets.factory.representation(), RepresentationNet)
 
     # TRAIN namespace
     C.train = to_namespace_recurse(to_cont(hydra_cfg.training))
-    C.train.loss_weights = SimpleNamespace(**hydra_cfg.training.loss_weights)
-    optim_partial = instantiate(hydra_cfg.training.optimizer, _partial_=True)
+    del C.train.optimizer
 
-    def pg(params, lr: float):
-        return {"params": params, "lr": C.train.learning_rates.base * lr}
+    def optim_factory(networks: Networks):
+        def pgroup(net: NetworkBase, lr: float):
+            return {"params": net.parameters(), "lr": C.train.learning_rates.base * lr}
 
-    C.train.optimizer = optim_partial(
-        [
-            pg(C.nets.dynamics.parameters(), C.train.learning_rates.dynamics),
-            pg(C.nets.prediction.parameters(), C.train.learning_rates.prediction),
-            pg(C.nets.representation.parameters(), C.train.learning_rates.representation),
-        ]
-    )
+        return instantiate(
+            hydra_cfg.training.optimizer,
+            [
+                pgroup(networks.dynamics, C.train.learning_rates.dynamics),
+                pgroup(networks.prediction, C.train.learning_rates.prediction),
+                pgroup(networks.representation, C.train.learning_rates.representation),
+            ],
+        )
+
+    C.train.optimizer_factory = optim_factory
 
     # PLAYER namespace
     from rl_player import RLPlayer  # this is here to break circular import
@@ -102,11 +118,13 @@ def save_source_code():
         if isinstance(item, SimpleNamespace):
             for name, child in vars(item).items():
                 save_recursive(child, path + [name])
-            return
 
         namespace = "_".join(path[:-1])
 
-        if inspect.isfunction(item):
+        if isinstance(item, functools.partial):
+            item = item()  # partials are probably factories, instantiate them
+
+        if inspect.isfunction(item) and path[-1] != "optimizer_factory":
             source = inspect.getsource(item)
         elif isinstance(item, NetworkBase):
             cls = item.__class__
@@ -128,7 +146,7 @@ def save_source_code():
 
         sources[namespace].add(("config path: " + ".".join(path), source))
 
-    save_recursive(config, [])
+    save_recursive(C, [])
 
     directory = "sources"
     os.mkdir(directory)

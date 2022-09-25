@@ -1,5 +1,4 @@
-import operator
-import functools
+import math
 import itertools
 from abc import ABC, abstractmethod
 from typing import Optional
@@ -8,7 +7,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from config import config as C
+from config import C
 from trajectory import PlayerType
 from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
 
@@ -41,20 +40,17 @@ class FcBase(ABC):
 
 class FcRepresentation(FcBase, RepresentationNet):
     def __init__(self, *args, **kwargs):
-        input_width = (
-            sum(
-                functools.reduce(operator.mul, shape, 1)
-                for shape in C.game.instance.observation_shapes
-            )
-            + C.nets.initial_beliefs.numel()
+        input_sizes = (
+            sum(map(math.prod, C.game.instance.observation_shapes)),
+            math.prod(C.nets.beliefs_shape),
         )
         self.output_sizes = (
-            C.nets.initial_latent_rep.numel(),
-            C.nets.initial_beliefs.numel(),
+            math.prod(C.nets.latent_rep_shape),
+            math.prod(C.nets.beliefs_shape),
         )
         super().__init__(
             *args,
-            input_width=input_width,
+            input_width=sum(input_sizes),
             output_width=sum(self.output_sizes),
             **kwargs,
         )
@@ -70,8 +66,8 @@ class FcRepresentation(FcBase, RepresentationNet):
 class FcPrediction(FcBase, PredictionNet):
     def __init__(self, *args, **kwargs):
         input_sizes = (
-            C.nets.initial_beliefs.numel(),
-            C.nets.initial_latent_rep.numel(),
+            math.prod(C.nets.beliefs_shape),
+            math.prod(C.nets.latent_rep_shape),
         )
         self.output_sizes = (
             1,
@@ -98,13 +94,13 @@ class FcPrediction(FcBase, PredictionNet):
 class FcDynamics(FcBase, DynamicsNet):
     def __init__(self, *args, **kwargs):
         input_sizes = (
-            C.nets.initial_latent_rep.numel(),
-            C.nets.initial_beliefs.numel(),
+            math.prod(C.nets.latent_rep_shape),
+            math.prod(C.nets.beliefs_shape),
             C.game.instance.max_num_actions,
         )
         self.output_sizes = (
-            C.nets.initial_latent_rep.numel(),
-            C.nets.initial_beliefs.numel(),
+            math.prod(C.nets.latent_rep_shape),
+            math.prod(C.nets.beliefs_shape),
             1,
         )
         super().__init__(
