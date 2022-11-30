@@ -1,0 +1,50 @@
+\begin{sile}
+
+\nofoliothispage
+
+% make it look pretty much like in the LaTeX template
+\begin[parameter=shaper.variablespaces, value=false]{set}
+\begin[parameter=document.letterspaceglue, value=-3twip]{set}
+\begin[parameter=document.baselineskip, value=29pt]{set}
+
+\hbox  % prevent the following \skip disappearing at top of the page
+\skip[height=11pt]
+
+\begin{center}
+
+REDACTED \par
+Fakultät für Angewandte Informatik \par
+REDACTED
+
+\skip[height=49mm]
+
+Masterarbeit: \par
+\skip[height=3mm]
+\font[size=20pt]{
+Titel
+} \par
+von \par
+REDACTED
+
+\end{center}
+\end{set}  % baselineskip
+\end{set}  % letterspaceglue
+\end{set}  % variablespaces
+
+\vfill
+
+\begin[parameter=document.baselineskip, value=14pt]{set}
+\begin[size=11pt]{font}
+Semester \par
+Adresse: \par
+Master Informatik, ?-tes Fachsemester \par
+Matrikelnummer: 1443580 \par
+Betreuer: REDACTED \par
+Erstprüfer: Prof. Dr. REDACTED \par
+\end{font}
+\end{set}  % baselineskip
+
+\skip[height=25mm]
+\break
+
+\end{sile}
