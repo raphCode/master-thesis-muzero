@@ -12,18 +12,19 @@
 
 \begin{center}
 
-REDACTED \par
-Fakultät für Angewandte Informatik \par
+REDACTED\par
+Fakultät für Angewandte Informatik\par
 REDACTED
 
 \skip[height=49mm]
 
-Masterarbeit: \par
+Masterarbeit:
+
 \skip[height=3mm]
 \font[size=20pt]{
 Titel
 } \par
-von \par
+von\par
 REDACTED
 
 \end{center}
@@ -37,10 +38,10 @@ REDACTED
 \begin[size=11pt]{font}
 Semester \par
 Adresse: \par
-Master Informatik, ?-tes Fachsemester \par
-Matrikelnummer: 1443580 \par
-Betreuer: REDACTED \par
-Erstprüfer: Prof. Dr. REDACTED \par
+Master Informatik, ?-tes Fachsemester\par
+Matrikelnummer: 1443580\par
+Betreuer: REDACTED\par
+Erstprüfer: Prof. Dr. REDACTED
 \end{font}
 \end{set}  % baselineskip
 
