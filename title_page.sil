@@ -5,10 +5,10 @@
 % make it look pretty much like in the LaTeX template
 \begin[parameter=shaper.variablespaces, value=false]{set}
 \begin[parameter=document.letterspaceglue, value=-3twip]{set}
-\begin[parameter=document.baselineskip, value=29pt]{set}
+\begin[parameter=document.parskip, value=0.6em]{set}
 
-\hbox  % prevent the following \skip disappearing at top of the page
-\skip[height=11pt]
+% the surrounding blank lines add a paragraph at the bottom and I don't know why
+% but this matches the LaTeX template actually better than without, whatever
 
 \begin{center}
 
@@ -16,25 +16,25 @@ REDACTED\par
 Fakultät für Angewandte Informatik\par
 REDACTED
 
-\skip[height=49mm]
+\skip[height=44mm]
 
 Masterarbeit:
 
-\skip[height=3mm]
-\font[size=20pt]{
+\begin[size=20pt]{font}
 Titel
-} \par
+\par
+\end{font}
 von\par
 REDACTED
 
 \end{center}
-\end{set}  % baselineskip
+\end{set}  % parskip
 \end{set}  % letterspaceglue
 \end{set}  % variablespaces
 
 \vfill
 
-\begin[parameter=document.baselineskip, value=14pt]{set}
+\begin[parameter=document.parskip, value=0.1em]{set}
 \begin[size=11pt]{font}
 Semester \par
 Adresse: \par
@@ -43,9 +43,9 @@ Matrikelnummer: 1443580\par
 Betreuer: REDACTED\par
 Erstprüfer: Prof. Dr. REDACTED
 \end{font}
-\end{set}  % baselineskip
+\end{set}  % parskip
 
-\skip[height=25mm]
-\break
+\par
+\pagebreak
 
 \end{sile}
