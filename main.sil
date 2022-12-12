@@ -1,6 +1,9 @@
 \begin[class=thesis]{document}
 
+\loadbibliography[file=bibliography.bib]
 
 \include[src=title_page.sil]
+
+\tableofcontents
 
 \end{document}
