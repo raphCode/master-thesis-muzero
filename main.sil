@@ -1,7 +1,5 @@
-\begin[class=plain]{document}
+\begin[class=thesis]{document}
 
-\font[size=12pt, family=Latin Modern Roman]
-\set[parameter=document.parindent, value=0pt]
 
 \include[src=title_page.sil]
 
