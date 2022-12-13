@@ -1,3 +1,5 @@
+\begin{sile}
+
 \chapter{Introduction}
 % Hier beschreibst du die Idee und Motivation deiner Arbeit. 
 % Ziel ist es zu sagen was du gemacht hast und warum es wichtig ist, dass es jemand
@@ -16,10 +18,10 @@ simulating any number of playouts on a computer.
 
 Different games require problem solving in distinct areas, so it was common to have
 specialized algorithms for each game.
-\question[noinline]{cite here?}
+\question[noinline=true]{cite here?}
 With the advent of reinforcement learning, techniques were discovered that perform well
 when applied to a broader range of games.
-\todo[noinline]{cite}
+\todo[noinline=true]{cite}
 One algorithm that was especially successful in generalizing across multiple complex games
 was MuZero\cite{muzero} by \citeauthor{muzero}.
 
@@ -31,3 +33,4 @@ round-based game which can be considered incomplete information because the move
 agents are only revealed after all made their choice.
 \todo{vey often the word game?}
 
+\end{sile}

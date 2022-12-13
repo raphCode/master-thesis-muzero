@@ -6,4 +6,6 @@
 
 \tableofcontents
 
+\include[src=introduction.sil]
+
 \end{document}
