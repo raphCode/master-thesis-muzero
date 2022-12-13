@@ -17,11 +17,9 @@ because their requirement for huge amounts of training data can easily be satisf
 simulating any number of playouts on a computer.
 
 Different games require problem solving in distinct areas, so it was common to have
-specialized algorithms for each game.
-\question[noinline=true]{cite here?}
+specialized algorithms for each game.\question[noinline=true]{cite here?}
 With the advent of reinforcement learning, techniques were discovered that perform well
-when applied to a broader range of games.
-\todo[noinline=true]{cite}
+when applied to a broader range of games.\todo[noinline=true]{cite}
 One algorithm that was especially successful in generalizing across multiple complex games
 was MuZero\cite{muzero} by \citeauthor{muzero}.
 
