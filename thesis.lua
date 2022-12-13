@@ -27,6 +27,7 @@ class.defaultFrameset = {
 function class:_init(options)
   plain._init(self, options)
   self:loadPackage("tableofcontents")
+  self:loadPackage("bibtex")
   self:loadPackage("footnotes", {
       insertInto = "footnotes",
       stealFrom = { "content" }
@@ -100,6 +101,11 @@ function class:registerCommands ()
   self:registerCommand("thesis:chapterfont", function (_, content)
     SILE.call("font", { family = "Latin Modern Sans", size = "24pt", weight = 10000 }, content)
   end)
+
+  self:registerCommand("question", function (_, _) end)
+  self:registerCommand("todo", function (_, _) end)
+  self:registerCommand("citeauthor", function (_, _) end)
+
 end
 
 return class
