@@ -28,4 +28,36 @@ The network learns to encode knowledge of the game into search, indicating that 
 proposed multiplayer strategy works in principle.
 Performance-wise the algorithm places itself below human experts.
 
+\term{EfficientZero} by \citeauthor{efficientzero} is a modification of MuZero to achieve
+similar performance with less training data.
+To achieve this increase in \term{sample efficiency} they propose three changes:
+
+First, they notice that the dynamics model should map to same \latrep as
+the \rnet for the same game states.
+By adding a similarity term to the loss function, these network outputs are encouraged to
+converge.
+This provides a richer training signal since the \latrep is usually a very
+wide tensor.\cite{efficientzero}
+Compare this to the default MuZero implementation, where the only training signals stem
+from the scalars \term{reward} and \term{value}\cite{muzero}.
+
+% TODO: probably scope these command definitions?
+\define[command=St]{\math{S_t}}
+\define[command=St1]{\math{S_{t+1}}}
+\define[command=Sht1]{\math{S\hat_{t+1}}} % TODO: formula broken
+
+\todo{Add image}
+The current and next game \term{observation} \math{O_t} and \math{O_{t+1}} is fed through
+the \rnet, yielding the \latrep \St respectively \St1.
+From \St and the corresponding action \math{a_t} the \dnet predicts the \latrep \Sht1.
+The similarity loss is now introduced between \St1 and \Sht1, termed as
+\term{Self-Supervised Consistency Loss}.\cite{efficientzero}
+
+A stop-gradient operation is employed in the path of \St1, meaning that the training
+information from the similarity loss are not applied to the \rnet prediction \St1.
+The authors justify this decision by treating \St1 as the more accurate representation and
+therefore using it as a target for the \dnet.\cite{efficientzero}
+In this work, I draw inspiration from this idea, but remove the asymmetry in training
+caused by the stop-gradient operation.\todo{add forward reference to relevant section}
+
 \end{sile}
