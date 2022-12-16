@@ -6,4 +6,26 @@
 % Nach Prof. André ist ein related work perfekt, wenn der Leser keines der referenzierten
 % paper selbst lesen muss um die Ideen darin zu verstehen.
 
+While no multiplayer version for MuZero itself exists, \citeauthor{multiplayer_alphazero}
+extended the predecessor algorithm AlphaZero to multiplayer
+capabilities\cite{multiplayer_alphazero}.
+
+Importantly, they relax the assumption of the game being zero-sum:
+A zero-sum game involves two players where player one's gain comes with an equivalent loss
+for the other player.
+The AlphaZero (and in turn MuZero) algorithm make use of this fact by directly predicting
+how good the current position is for the current player by a scalar \term{value} output of
+the network\cite{alphazero}\cite{muzero}.
+The multiplayer extension predicts a \term{value vector} instead, which provides an
+estimate of the expected utility of the state for each player independently.
+
+Likewise, they also extend the game to return scores for each player at the end instead of
+a single outcome.
+Naturally, the algorithm rotates over the list of all players instead of alternating
+between two players.\cite{alphazero}
+They evaluate their work on multiplayer versions of Connect 4 and Tic-Tac-Toe:
+The network learns to encode knowledge of the game into search, indicating that the
+proposed multiplayer strategy works in principle.
+Performance-wise the algorithm places itself below human experts.
+
 \end{sile}
