@@ -6,4 +6,6 @@
 
 \define[command=latrep]{latent representation}
 
+\define[command=mcts]{monte carlo tree search}
+
 \end{sile}

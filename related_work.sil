@@ -60,4 +60,20 @@ therefore using it as a target for the \dnet.\cite{efficientzero}
 In this work, I draw inspiration from this idea, but remove the asymmetry in training
 caused by the stop-gradient operation.\todo{add forward reference to relevant section}
 
+The second change aims to improve the selection of nodes during the \mcts{}:
+MuZero selects according to the \term{UCT} formula\todo{add reference}, which involves
+summing the predicted rewards\footnote{actually, the rewards are discounted according to
+the \term{discount factor} \math{\gamma}} for each step in the search tree.
+The authors claim that in most cases it is not important at which exact timestep a certain
+reward occurs, only that it eventually occurs.
+They argue for this assumption from the way humans reason about games, and connect it to
+the \term{state aliasing} problem.\cite{efficientzero}
+For a more detailed discussion see\todo{add reference}.
+
+Their suggestion is to introduce a new neural network to predict the sum of rewards for a
+given sequence of states in an end-to-end method.
+This effectively sidesteps the question of \em{when} a certain reward occurs.
+In the paper, this is called \term{End-To-End Prediction of the Value Prefix} and
+implemented with a LSTM architecture.\cite{efficientzero}
+
 \end{sile}
