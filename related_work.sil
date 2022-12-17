@@ -24,7 +24,7 @@ a single outcome.
 Naturally, the algorithm rotates over the list of all players instead of alternating
 between two players.\cite{alphazero}
 They evaluate their work on multiplayer versions of Connect 4 and Tic-Tac-Toe:
-The network learns to encode knowledge of the game into search, indicating that the
+The networks learn to encode knowledge of the game into search, indicating that the
 proposed multiplayer strategy works in principle.
 Performance-wise the algorithm places itself below human experts.
 
