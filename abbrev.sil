@@ -1,0 +1,9 @@
+\begin{sile}
+
+\define[command=rnet]{representation network}
+\define[command=pnet]{prediction network}
+\define[command=dnet]{dynamics network}
+
+\define[command=latrep]{latent representation}
+
+\end{sile}
