@@ -28,11 +28,13 @@ function class:_init(options)
   plain._init(self, options)
   self:loadPackage("tableofcontents")
   self:loadPackage("bibtex")
+  self:loadPackage("math")
   self:loadPackage("footnotes", {
       insertInto = "footnotes",
       stealFrom = { "content" }
     })
   SILE.call("font", { family = "Latin Modern Roman", size = "12pt" })
+  SILE.settings:set("math.font.size", 12)
   SILE.call("neverindent")
   self:redefineCommands()
 end
