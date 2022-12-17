@@ -105,6 +105,7 @@ function class:registerCommands ()
   self:registerCommand("question", function (_, _) end)
   self:registerCommand("todo", function (_, _) end)
   self:registerCommand("citeauthor", function (_, _) end)
+  self:registerCommand("term", function (_, content) SILE.call("em", {}, content) end)
 
 end
 
