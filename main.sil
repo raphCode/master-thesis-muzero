@@ -7,5 +7,6 @@
 \tableofcontents
 
 \include[src=introduction.sil]
+\include[src=related_work.sil]
 
 \end{document}
