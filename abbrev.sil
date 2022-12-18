@@ -1,5 +1,10 @@
 \begin{sile}
 
+\define[command=val]{value}
+\define[command=pol]{policy}
+\define[command=rew]{reward}
+\define[command=rews]{\rew{}s}
+
 \define[command=rnet]{representation network}
 \define[command=pnet]{prediction network}
 \define[command=dnet]{dynamics network}

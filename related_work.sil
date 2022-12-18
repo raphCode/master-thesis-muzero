@@ -14,8 +14,8 @@ Importantly, they relax the assumption of the game being zero-sum:
 A zero-sum game involves two players where player one's gain comes with an equivalent loss
 for the other player.
 The AlphaZero (and in turn MuZero) algorithm make use of this fact by directly predicting
-how good the current position is for the current player by a scalar \term{value} output of
-the network\cite{alphazero}\cite{muzero}.
+how good the current position is for the current player by a scalar \val output of the
+network\cite{alphazero}\cite{muzero}.
 The multiplayer extension predicts a \term{value vector} instead, which provides an
 estimate of the expected utility of the state for each player independently.
 
@@ -39,7 +39,7 @@ converge.
 This provides a richer training signal since the \latrep is usually a very
 wide tensor.\cite{efficientzero}
 Compare this to the default MuZero implementation, where the only training signals stem
-from the scalars \term{reward} and \term{value}\cite{muzero}.
+from the scalars \rew and \val\cite{muzero}.
 
 % TODO: probably scope these command definitions?
 \define[command=St]{\math{S_t}}
@@ -62,17 +62,17 @@ caused by the stop-gradient operation.\todo{add forward reference to relevant se
 
 The second change aims to improve the selection of nodes during the \mcts{}:
 MuZero selects according to the \term{UCT} formula\todo{add reference}, which involves
-summing the predicted rewards\footnote{actually, the rewards are discounted according to
-the \term{discount factor} \math{\gamma}} for each step in the search tree.
+summing the predicted \rews\footnote{actually, the \rews are discounted according to the
+\term{discount factor} \math{\gamma}} for each step in the search tree.
 The authors claim that in most cases it is not important at which exact timestep a certain
-reward occurs, only that it eventually occurs.
+\rew occurs, only that it eventually occurs.
 They argue for this assumption from the way humans reason about games, and connect it to
 the \term{state aliasing} problem.\cite{efficientzero}
 For a more detailed discussion see\todo{add reference}.
 
-Their suggestion is to introduce a new neural network to predict the sum of rewards for a
+Their suggestion is to introduce a new neural network to predict the sum of \rews for a
 given sequence of states in an end-to-end method.
-This effectively sidesteps the question of \em{when} a certain reward occurs.
+This effectively sidesteps the question of \em{when} a certain \rew occurs.
 In the paper, this is called \term{End-To-End Prediction of the Value Prefix} and
 implemented with a LSTM architecture.\cite{efficientzero}
 
