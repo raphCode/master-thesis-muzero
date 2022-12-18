@@ -4,6 +4,7 @@
 \define[command=pol]{policy}
 \define[command=rew]{reward}
 \define[command=rews]{\rew{}s}
+\define[command=vtarget]{value target}
 
 \define[command=rnet]{representation network}
 \define[command=pnet]{prediction network}

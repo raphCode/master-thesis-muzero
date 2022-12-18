@@ -76,4 +76,22 @@ This effectively sidesteps the question of \em{when} a certain \rew occurs.
 In the paper, this is called \term{End-To-End Prediction of the Value Prefix} and
 implemented with a LSTM architecture.\cite{efficientzero}
 
+Third, the authors mitigate \term{off-policy} issues when reusing older game trajectories
+for training, which is crucial to achieve high \term{sample efficiency}.
+The original MuZero paper already presented the \term{Reanalyze} variant which re-runs the
+MCTS on old trajectories with the newest network parameters to provide more accurate
+predictions of the \pol\cite{muzero}.
+The \vtarget is computed by summing future \rews over the \term{n-step} horizon, which are
+fixed due to the recorded trajectory, so it naturally suffers from \term{off-policy}
+issues\cite{muzero}.
+\citeauthor{efficientzero} propose to only use \rews over a smaller horizon, with the size
+decreasing for older trajectories to reduce the off-policy divergence.
+In addition, the \vtarget is \term[key=bootstrapping]{bootstrapped} using a \val
+prediction for the last state in the horizon, which is obtained in MuZero \term{Reanalyze}
+using a raw prediction from the \pnet\cite{muzero}.
+EfficientZero instead runs a full MCTS at the last horizon state, and uses the \val
+estimate from the root node for \term{bootstrapping}.
+This estimate is an average of multiple predictions throughout the search tree and is
+therefore considered a more accurate value.\cite{efficientzero}
+
 \end{sile}
