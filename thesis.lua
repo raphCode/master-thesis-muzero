@@ -84,6 +84,18 @@ function class:redefineCommands ()
     SILE.call("medskip")
     SILE.call("font", { family = "Latin Modern Sans", size = 14, weight = 800 }, content)
   end)
+
+  self:registerCommand("tableofcontents:level2item", function (_, content)
+    SILE.call("smallskip")
+    SILE.call("glue", { width = "15pt" })
+    SILE.process(content)
+  end)
+
+  self:registerCommand("tableofcontents:level3item", function (_, content)
+    SILE.call("smallskip")
+    SILE.call("glue", { width = "30pt" })
+    SILE.process(content)
+  end)
 end
 
 function class:registerCommands ()
