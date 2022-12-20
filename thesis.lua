@@ -51,6 +51,35 @@ function class:redefineCommands ()
     SILE.call("bigskip")
   end)
 
+  local function _linkWrapper (dest, func)
+    if dest and SILE.Commands["pdf:link"] then
+      return function()
+        SILE.call("pdf:link", { dest = dest }, func)
+      end
+    else
+      return func
+    end
+  end
+
+  self:registerCommand("tableofcontents:item", function (options, content)
+    SILE.call("tableofcontents:level" .. options.level .. "item", {
+    }, _linkWrapper(options.link,
+    function ()
+      if options.number then
+        SILE.typesetter:typeset(options.number or "")
+        SILE.call("glue", { width = "2spc" })
+      end
+      SILE.process(content)
+      if options.level == 1 then
+        SILE.call("hfill")
+      else
+        SILE.call("dotfill")
+      end
+      SILE.typesetter:typeset(options.pageno)
+    end)
+    )
+  end)
+
   self:registerCommand("tableofcontents:level1item", function (_, content)
     SILE.call("bigskip")
     local original_dotfill = SILE.Commands["dotfill"]
