@@ -111,6 +111,22 @@ function class:registerCommands ()
     SILE.call("novbreak")
   end, "Begin a new section")
 
+  self:registerCommand("subsection", function (options, content)
+    SILE.typesetter:leaveHmode()
+    SILE.call("goodbreak")
+    SILE.call("medskip")
+    SILE.call("thesis:subsectionfont", {}, function ()
+      sectioning({
+            numbering = options.numbering,
+            toc = options.toc,
+            level = 3
+          }, content)
+    end)
+    SILE.call("novbreak")
+    SILE.call("smallskip")
+    SILE.call("novbreak")
+  end, "Begin a new subsection")
+
   self:registerCommand("thesis:newpage", function (_, content)
     SILE.typesetter:leaveHmode()
     SILE.call("supereject")  -- prevent "underfull frame" warnings by vfilling page
@@ -124,6 +140,10 @@ function class:registerCommands ()
 
   self:registerCommand("thesis:sectionfont", function (_, content)
     SILE.call("font", { family = "Latin Modern Sans", size = "17pt", weight = 10000 }, content)
+  end)
+
+  self:registerCommand("thesis:subsectionfont", function (_, content)
+    SILE.call("font", { family = "Latin Modern Sans", size = "13pt", weight = 10000 }, content)
   end)
 
   self:registerCommand("question", function (_, _) end)
