@@ -43,11 +43,6 @@ function class:_init(options)
 end
 
 function class:redefineCommands ()
-  local original_toc_fn = SILE.Commands["tableofcontents"]
-  self:registerCommand("tableofcontents", function (options, _)
-    SILE.call("thesis:chapterfont", _, function () original_toc_fn(options, _) end)
-  end)
-
   self:registerCommand("tableofcontents:header", function (_, _)
     SILE.call("thesis:newpageskip")
     SILE.call("thesis:chapterfont", {}, function ()
