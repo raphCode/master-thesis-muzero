@@ -78,7 +78,7 @@ function class:registerCommands ()
     if SU.boolean(options.toc, true) then
       SILE.call("tocentry", { level = options.level, number = number }, SU.subContent(content))
     end
-    SILE.process( { " " } )
+    SILE.call("glue", { width = "1.5spc" })
     SILE.process(content)
   end
 
@@ -92,7 +92,6 @@ function class:registerCommands ()
         level = 1,
       }, content)
     end)
-    SILE.call("par")
     SILE.call("bigskip")
   end, "Begin a new chapter")
 
@@ -104,7 +103,7 @@ function class:registerCommands ()
   end)
 
   self:registerCommand("thesis:chapterfont", function (_, content)
-    SILE.call("font", { family = "Latin Modern Sans", size = "24pt", weight = 10000 }, content)
+    SILE.call("font", { family = "Latin Modern Sans", size = "25pt", weight = 10000 }, content)
   end)
 
   self:registerCommand("question", function (_, _) end)
