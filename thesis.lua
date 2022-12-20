@@ -48,7 +48,7 @@ function class:redefineCommands ()
     SILE.call("thesis:chapterfont", {}, function ()
       SILE.call("fluent", {}, { "tableofcontents-title" })
     end)
-    SILE.call("bigskip")
+    SILE.call("medskip")  -- there is an additional medskip before the first item
   end)
 
   local function _linkWrapper (dest, func)
@@ -81,12 +81,8 @@ function class:redefineCommands ()
   end)
 
   self:registerCommand("tableofcontents:level1item", function (_, content)
-    SILE.call("bigskip")
-    local original_dotfill = SILE.Commands["dotfill"]
-    SILE.Commands["dotfill"] = SILE.Commands["hfill"]  -- hack to have a blank hfill
-    SILE.call("font", { size = 14, weight = 800 }, content)
-    SILE.Commands["dotfill"] = original_dotfill
     SILE.call("medskip")
+    SILE.call("font", { family = "Latin Modern Sans", size = 14, weight = 800 }, content)
   end)
 end
 
