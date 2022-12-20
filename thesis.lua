@@ -49,10 +49,11 @@ function class:redefineCommands ()
   end)
 
   self:registerCommand("tableofcontents:header", function (_, _)
+    SILE.call("thesis:newpageskip")
     SILE.call("thesis:chapterfont", {}, function ()
       SILE.call("fluent", {}, { "tableofcontents-title" })
     end)
-    SILE.call("medskip")
+    SILE.call("bigskip")
   end)
 
   self:registerCommand("tableofcontents:level1item", function (_, content)
@@ -130,6 +131,10 @@ function class:registerCommands ()
   self:registerCommand("thesis:newpage", function (_, content)
     SILE.typesetter:leaveHmode()
     SILE.call("supereject")  -- prevent "underfull frame" warnings by vfilling page
+    SILE.call("thesis:newpageskip")
+  end)
+
+  self:registerCommand("thesis:newpageskip", function (_, content)
     SILE.call("hbox")  -- prevents the skip to disappear at the top of the page
     SILE.call("skip", { height = "20mm" } )
   end)
