@@ -6,6 +6,11 @@
 % Nach Prof. André ist ein related work perfekt, wenn der Leser keines der referenzierten
 % paper selbst lesen muss um die Ideen darin zu verstehen.
 
+MuZero and its precursors already inspired several other works, some of which are
+summarized here.
+
+\section{Multiplayer Alphazero}
+
 While no multiplayer version for MuZero itself exists, \citeauthor{multiplayer_alphazero}
 extended the predecessor algorithm AlphaZero to multiplayer
 capabilities\cite{multiplayer_alphazero}.
@@ -27,6 +32,8 @@ They evaluate their work on multiplayer versions of Connect 4 and Tic-Tac-Toe:
 The networks learn to encode knowledge of the game into search, indicating that the
 proposed multiplayer strategy works in principle.
 Performance-wise the algorithm places itself below human experts.
+
+\section{EfficientZero}
 
 \term{EfficientZero} by \citeauthor{efficientzero} is a modification of MuZero to achieve
 similar performance with less training data.
