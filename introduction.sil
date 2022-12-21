@@ -8,27 +8,31 @@
 % was du gemacht hast und was rausgekommen ist (ohne details natürlich).
 % Laut Prof. André eines der wichtigesten Kapitel.
 
-Games always have been an interesting playground for artificial intelligence because of
-the availability of many different types with a wide range of difficulties.  Also, machine
-performance can easily be compared to expert players, providing a human
-baseline.
-Furthermore, machine learning algorithms also often use games as their environments
-because their requirement for huge amounts of training data can easily be satisfied by
-simulating any number of playouts on a computer.
+Machine learning and games play well together, and this is for a variety of reasons:
+The huge number of different games provide a plethora of unique challenges, for humans as
+well as machines.
+The rules are well-defined and often a clear score function exists - for most classic
+games this might be a win / loss / tie outcome or a numeric score for video games.
+This enables unambigous performance metrics for each player.
+Performance of human experts in a game is also particularly interesting because it creates
+a baseline to compare algorithmic performance against.
 
-Different games require problem solving in distinct areas, so it was common to have
-specialized algorithms for each game.\question[noinline=true]{cite here?}
-With the advent of reinforcement learning, techniques were discovered that perform well
-when applied to a broader range of games.\todo[noinline=true]{cite}
-One algorithm that was especially successful in generalizing across multiple complex games
-was MuZero\cite{muzero} by \citeauthor{muzero}.
+The difference in how algorithms and humans approach games also leads to unlike perceived
+"difficulty" - some games are easy to master for humans but pose severe trouble for
+solving algorithmically.
+With the advent of increased computing power machine learning techniques became
+increasingly popular to approach games previously considered too "hard" for computers.
 
-This paper revisits the MuZero algorithm and evaluates its performance on different games,
-ranging from a classic Atari game to more challenging environments that do not exactly fit
-the problem domain originally intended by the authors.
-This includes a game that requires cooperation with other players in order to win and a
-round-based game which can be considered incomplete information because the moves of other
-agents are only revealed after all made their choice.
-\todo{very often the word game?}
+The application to games also facilitate the requirement of ML algorithms for enormous
+amounts of training data:
+Any number of game playouts can be simulated on a computer, even letting the algorithm
+play against itself to improve its performance is possible for most games.
+
+One remarkable algorithm that was successfully applied to multiple complex games was
+MuZero\cite{muzero}.
+This work revisits the MuZero algorithm as well as closely related variants and explains
+their workings.
+I also discuss potential shortcomings, especially in the consideration of games outside
+the originally intended problem domain.
 
 \end{sile}
