@@ -76,7 +76,7 @@ class Node:
             # sum to 1' otherwise.
             probs = np.array([c.prior for c in self.children], dtype=np.float32)
             return rng.choice(self.children, p=probs)
-        return max(self.children, key=C.mcts.get_node_selection_score)
+        return max(self.children, key=C.mcts.node_selection_score_fn)
 
     def expand(self):
         """

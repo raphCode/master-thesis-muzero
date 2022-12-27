@@ -46,13 +46,13 @@ def populate_config(hydra_cfg: DictConfig):
     C.game = to_namespace_recurse(to_cont(hydra_cfg.game))
     C.game.instance = instantiate(hydra_cfg.game.instance)
     assert isinstance(C.game.instance, games.bases.Game)
-    C.game.calculate_reward = get_method(hydra_cfg.game.calculate_reward)
+    C.game.reward_fn = get_method(hydra_cfg.game.reward_fn)
 
     # MCTS namespace
     C.mcts = to_namespace_recurse(to_cont(hydra_cfg.mcts))
-    C.mcts.get_node_action = get_method(hydra_cfg.mcts.get_node_action)
-    C.mcts.get_node_target_policy = get_method(hydra_cfg.mcts.get_node_target_policy)
-    C.mcts.get_node_selection_score = get_method(hydra_cfg.mcts.get_node_selection_score)
+    C.mcts.node_action_fn = get_method(hydra_cfg.mcts.node_action_fn)
+    C.mcts.node_target_policy_fn = get_method(hydra_cfg.mcts.node_target_policy_fn)
+    C.mcts.node_selection_score_fn = get_method(hydra_cfg.mcts.node_selection_score_fn)
 
     # NETS namespace
     C.nets = to_namespace_recurse(to_cont(hydra_cfg.networks))
@@ -96,7 +96,7 @@ def populate_config(hydra_cfg: DictConfig):
     from rl_player import RLPlayer  # this is here to break circular import
 
     C.player = to_namespace_recurse(to_cont(hydra_cfg.players))
-    C.player.is_teammate = get_method(hydra_cfg.players.is_teammate)
+    C.player.is_teammate_fn = get_method(hydra_cfg.players.is_teammate_fn)
     C.player.instances = tuple(map(instantiate, hydra_cfg.players.instances))
     msg = "There must be at least one RLPlayer involved to collect training data!"
     assert any(isinstance(p, RLPlayer) for p in C.player.instances), msg

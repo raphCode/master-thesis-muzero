@@ -32,7 +32,7 @@ class RLPlayer:
         latent_rep, self.beliefs = G.nets.representation.si(*observation, self.beliefs)
         # TODO: instead of re-running, try to reuse previous tree search from selfplay here
         root_node = run_mcts(latent_rep, self.beliefs)
-        action = C.mcts.get_node_action(root_node, self.move_number)
+        action = C.mcts.node_action_fn(root_node, self.move_number)
         self.move_number += 1
         return RLPResult(action, old_beliefs, root_node)
 

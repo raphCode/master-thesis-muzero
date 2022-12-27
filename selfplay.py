@@ -70,7 +70,7 @@ def run_episode(replay_buffer: ReplayBuffer):
         if pid in rl_pids:
             obs = state.observation
             action, old_beliefs, root_node = players[pid].request_action(obs)
-            target_policy = C.mcts.get_node_target_policy(root_node)
+            target_policy = C.mcts.node_target_policy_fn(root_node)
             mcts_nodes[pid] = root_node
         else:
             action = players[pid].request_action(state, C.game.instance)

@@ -1,6 +1,6 @@
-get_node_action: fn.action.from_visit_count
-get_node_target_policy: fn.policy.from_visit_count
-get_node_selection_score: fn.selection.ucb_score
+node_action_fn: fn.action.from_visit_count
+node_target_policy_fn: fn.policy.from_visit_count
+node_selection_score_fn: fn.selection.ucb_score
 iterations_move_selection: 200
 iterations_value_estimate: 100
 

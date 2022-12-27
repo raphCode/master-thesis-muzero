@@ -9,14 +9,14 @@ class Game:
 @define
 class GameSchema:
     instance: Game
-    calculate_reward: str
+    reward_fn: str
 
 
 @define
 class MctsSchema:
-    get_node_action: str
-    get_node_target_policy: str
-    get_node_selection_score: str
+    node_action_fn: str
+    node_target_policy_fn: str
+    node_selection_score_fn: str
     iterations_move_selection: int
     iterations_value_estimate: int
 
@@ -84,4 +84,4 @@ class Player:
 @define
 class PlayerSchema:
     instances: list[Player]
-    is_teammate: str
+    is_teammate_fn: str
