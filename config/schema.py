@@ -27,12 +27,6 @@ class Net:
 
 
 @define
-class Tensor:
-    size: list[int]
-    fill_value: float
-
-
-@define
 class NetworkSchema:
     dynamics: Net
     prediction: Net
