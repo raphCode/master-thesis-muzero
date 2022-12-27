@@ -1,37 +1,15 @@
-from typing import Any
-
 import hydra
-from attrs import define
-from omegaconf import MISSING, DictConfig
+from omegaconf import DictConfig
 from hydra.core.config_store import ConfigStore
 
 import config
 from config import C
 from globals import G
-from config.schema import GameSchema, MctsSchema, TrainSchema, PlayerSchema, NetworkSchema
+from config.schema import BaseConfig
 from networks.bases import Networks
 
 cs = ConfigStore.instance()
 cs.store(name="hydra_job_config", group="hydra.job", node={"chdir": True})
-
-
-@define
-class BaseConfig:
-    game: GameSchema
-    mcts: MctsSchema
-    networks: NetworkSchema
-    training: TrainSchema
-    players: PlayerSchema
-    defaults: list[Any] = [
-        {"game": MISSING},
-        {"mcts": MISSING},
-        {"networks": MISSING},
-        {"training": MISSING},
-        {"players": MISSING},
-        {"hydra.job": "hydra_job_config"},
-    ]
-
-
 cs.store(name="base_config", node=BaseConfig)
 
 

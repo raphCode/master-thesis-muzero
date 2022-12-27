@@ -1,4 +1,5 @@
 from attrs import define
+from omegaconf import MISSING
 
 
 @define
@@ -79,3 +80,20 @@ class Player:
 class PlayerSchema:
     instances: list[Player]
     is_teammate_fn: str
+
+
+@define
+class BaseConfig:
+    game: GameSchema
+    mcts: MctsSchema
+    networks: NetworkSchema
+    training: TrainSchema
+    players: PlayerSchema
+    defaults: list = [
+        {"game": MISSING},
+        {"mcts": MISSING},
+        {"networks": MISSING},
+        {"training": MISSING},
+        {"players": MISSING},
+        {"hydra.job": "hydra_job_config"},
+    ]
