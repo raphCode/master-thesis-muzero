@@ -1,19 +1,19 @@
-from attrs import define
+from attrs import frozen
 from omegaconf import MISSING
 
 
-@define
+@frozen
 class Game:
     _target_: str
 
 
-@define
+@frozen
 class GameSchema:
     instance: Game
     reward_fn: str
 
 
-@define
+@frozen
 class MctsSchema:
     node_action_fn: str
     node_target_policy_fn: str
@@ -22,12 +22,12 @@ class MctsSchema:
     iterations_value_estimate: int
 
 
-@define
+@frozen
 class Net:
     _target_: str
 
 
-@define
+@frozen
 class NetworkSchema:
     dynamics: Net
     prediction: Net
@@ -36,12 +36,12 @@ class NetworkSchema:
     latent_rep_shape: list[int]
 
 
-@define
+@frozen
 class Optimizer:
     _target_: str
 
 
-@define
+@frozen
 class LearningRates:
     base: float
     dynamics: float
@@ -49,7 +49,7 @@ class LearningRates:
     representation: float
 
 
-@define
+@frozen
 class LossWeights:
     latent: float
     value: float
@@ -58,7 +58,7 @@ class LossWeights:
     player_type: float
 
 
-@define
+@frozen
 class TrainSchema:
     batch_game_size: int
     batch_num_games: int
@@ -71,18 +71,18 @@ class TrainSchema:
     loss_weights: LossWeights
 
 
-@define
+@frozen
 class Player:
     _target_: str
 
 
-@define
+@frozen
 class PlayerSchema:
     instances: list[Player]
     is_teammate_fn: str
 
 
-@define
+@frozen
 class BaseConfig:
     game: GameSchema
     mcts: MctsSchema
