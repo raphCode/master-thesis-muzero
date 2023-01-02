@@ -11,3 +11,9 @@ float_to_top = true
 [tool.mypy]
 strict = true
 pretty = true
+
+[[tool.mypy.overrides]]
+module = [
+    "pyspiel",
+]
+ignore_missing_imports = true
