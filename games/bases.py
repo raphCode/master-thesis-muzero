@@ -11,7 +11,7 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def rewards(self) -> tuple[float]:
+    def rewards(self) -> tuple[float, ...]:
         """Tuple of rewards, one for each player, starting at 0 for the first player"""
         pass
 
@@ -32,11 +32,11 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def chance_outcomes(self) -> tuple[float]:
+    def chance_outcomes(self) -> tuple[float, ...]:
         pass
 
     @abstractmethod
-    def apply_action(self, action: int):
+    def apply_action(self, action: int) -> None:
         pass
 
 
@@ -53,7 +53,7 @@ class Game(ABC):
 
     @property
     @abstractmethod
-    def observation_shapes(self) -> tuple[tuple[int]]:
+    def observation_shapes(self) -> tuple[tuple[int, ...], ...]:
         """
         Shape of observation tensors. Outer tuple is for defining multiple tensors.
         Used to set the size of the prediction network inputs.
