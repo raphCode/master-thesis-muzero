@@ -1,3 +1,4 @@
+from typing import Optional
 from functools import cached_property
 
 import torch
@@ -25,14 +26,15 @@ class OpenSpielGameState(GameState):
         )
 
     @property
-    def rewards(self) -> tuple[float]:
+    def rewards(self) -> tuple[float, ...]:
         if self.is_chance:
-            return (0,) * self.game.num_players
+            return (0.0,) * self.game.num_players
         if self.invalid:
-            tmp = [0] * self.game.num_players
+            assert self.game.bad_move_reward is not None
+            tmp = [0.0] * self.game.num_players
             tmp[self.current_player] = self.game.bad_move_reward
             return tuple(tmp)
-        return self.state.rewards()
+        return self.state.rewards()  # type: ignore [no-any-return]
 
     @property
     def is_terminal(self) -> bool:
@@ -40,18 +42,18 @@ class OpenSpielGameState(GameState):
 
     @property
     def is_chance(self) -> bool:
-        return self.state.is_chance_node()
+        return self.state.is_chance_node()  # type: ignore [no-any-return]
 
     @property
     def current_player(self) -> int:
-        return self.state.current_player()
+        return self.state.current_player()  # type: ignore [no-any-return]
 
     @property
-    def chance_outcomes(self) -> tuple[float]:
-        d = dict(self.state.chance_outcomes())
+    def chance_outcomes(self) -> tuple[float, ...]:
+        d = dict(self.state.chance_outcomes())  # type: dict[int, float]
         return tuple(d.get(a, 0.0) for a in range(self.game.max_num_actions))
 
-    def apply_action(self, action: int):
+    def apply_action(self, action: int) -> None:
         assert not self.is_terminal
         if action not in self.state.legal_actions():
             if self.game.bad_move_action is not None:
@@ -67,7 +69,10 @@ class OpenSpielGame(Game):
     game: pyspiel.Game
 
     def __init__(
-        self, game_name: str, bad_move_reward: float = None, bad_move_action: int = None
+        self,
+        game_name: str,
+        bad_move_reward: Optional[float] = None,
+        bad_move_action: Optional[int] = None,
     ):
         self.game = pyspiel.load_game(game_name)
         self.bad_move_reward = bad_move_reward
@@ -85,12 +90,12 @@ class OpenSpielGame(Game):
 
     @cached_property
     def num_players(self) -> int:
-        return self.game.num_players()
+        return self.game.num_players()  # type: ignore [no-any-return]
 
     @cached_property
-    def observation_shapes(self) -> tuple[tuple[int]]:
-        return (self.game.observation_tensor_shape(),)
+    def observation_shapes(self) -> tuple[tuple[int, ...]]:
+        return (tuple(self.game.observation_tensor_shape()),)
 
     @cached_property
     def max_num_actions(self) -> int:
-        return max(self.game.num_distinct_actions(), self.game.max_chance_outcomes())
+        return max(self.game.num_distinct_actions(), self.game.max_chance_outcomes())  # type: ignore [no-any-return]
