@@ -1,7 +1,11 @@
 import math
+from typing import TypeAlias
+from collections.abc import Callable
 
 from mcts import Node
 from config import C
+
+selection_fn: TypeAlias = Callable[[Node], float]
 
 
 def ucb_score(node: Node) -> float:

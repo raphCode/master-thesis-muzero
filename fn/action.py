@@ -1,3 +1,6 @@
+from typing import TypeAlias
+from collections.abc import Callable
+
 import numpy as np
 
 from mcts import Node
@@ -6,6 +9,8 @@ from config import C
 from .util import softmax, get_values_where_expanded
 
 rng = np.random.default_rng()
+
+action_fn: TypeAlias = Callable[[Node, int], int]
 
 
 def _interp_softmax_temp(move_number: int, cfg_name: str) -> float:

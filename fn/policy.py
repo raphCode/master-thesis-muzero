@@ -1,4 +1,5 @@
-from collections.abc import Sequence
+from typing import TypeAlias
+from collections.abc import Callable, Sequence
 
 import numpy as np
 
@@ -6,6 +7,8 @@ from mcts import Node
 from config import C
 
 from .util import softmax, get_values_where_expanded
+
+policy_fn: TypeAlias = Callable[[Node], Sequence[float]]
 
 
 def from_visit_count(node: Node) -> Sequence[float]:
