@@ -9,12 +9,9 @@ from collections import defaultdict
 
 import torch
 from omegaconf import OmegaConf, DictConfig
-from hydra.utils import get_method, instantiate
 
-import games
 from config.schema import BaseConfig
 from networks.bases import (
-    Networks,
     DynamicsNet,
     NetworkBase,
     PredictionNet,
@@ -32,81 +29,10 @@ C = BaseConfig.placeholder()
 
 
 def populate_config(hydra_cfg: DictConfig):
-    to_cont = functools.partial(OmegaConf.to_container, resolve=True)
-    pinstantiate = functools.partial(instantiate, _partial_=True)
-
-    def to_namespace_recurse(x) -> SimpleNamespace:
-        if isinstance(x, dict):
-            return SimpleNamespace(**{k: to_namespace_recurse(v) for k, v in x.items()})
-        if isinstance(x, list):
-            return list(map(to_namespace_recurse, x))
-        return x
-
     # verify config schema by touching all values:
     OmegaConf.to_container(hydra_cfg, throw_on_missing=True)
 
-    # GAME namespace
-    C.game = to_namespace_recurse(to_cont(hydra_cfg.game))
-    C.game.instance = instantiate(hydra_cfg.game.instance)
-    assert isinstance(C.game.instance, games.bases.Game)
-    C.game.reward_fn = get_method(hydra_cfg.game.reward_fn)
-
-    # MCTS namespace
-    C.mcts = to_namespace_recurse(to_cont(hydra_cfg.mcts))
-    C.mcts.node_action_fn = get_method(hydra_cfg.mcts.node_action_fn)
-    C.mcts.node_target_policy_fn = get_method(hydra_cfg.mcts.node_target_policy_fn)
-    C.mcts.node_selection_score_fn = get_method(hydra_cfg.mcts.node_selection_score_fn)
-
-    # NETS namespace
-    C.nets = to_namespace_recurse(to_cont(hydra_cfg.networks))
-    del C.nets.dynamics
-    del C.nets.prediction
-    del C.nets.representation
-    C.nets.factory = SimpleNamespace()
-    C.nets.factory.initial_beliefs = functools.partial(
-        torch.zeros, tuple(hydra_cfg.networks.beliefs_shape)
-    )
-    C.nets.factory.initial_latent_rep = functools.partial(
-        torch.zeros, tuple(hydra_cfg.networks.latent_rep_shape)
-    )
-    C.nets.factory.dynamics = pinstantiate(hydra_cfg.networks.dynamics)
-    C.nets.factory.prediction = pinstantiate(hydra_cfg.networks.prediction)
-    C.nets.factory.representation = pinstantiate(hydra_cfg.networks.representation)
-    assert isinstance(C.nets.factory.dynamics(), DynamicsNet)
-    assert isinstance(C.nets.factory.prediction(), PredictionNet)
-    assert isinstance(C.nets.factory.representation(), RepresentationNet)
-
-    # TRAIN namespace
-    C.train = to_namespace_recurse(to_cont(hydra_cfg.training))
-    del C.train.optimizer
-
-    def optim_factory(networks: Networks):
-        def pgroup(net: NetworkBase, lr: float):
-            return {"params": net.parameters(), "lr": C.train.learning_rates.base * lr}
-
-        return instantiate(
-            hydra_cfg.training.optimizer,
-            [
-                pgroup(networks.dynamics, C.train.learning_rates.dynamics),
-                pgroup(networks.prediction, C.train.learning_rates.prediction),
-                pgroup(networks.representation, C.train.learning_rates.representation),
-            ],
-        )
-
-    C.train.optimizer_factory = optim_factory
-
-    # PLAYER namespace
-    from rl_player import RLPlayer  # this is here to break circular import
-
-    C.player = to_namespace_recurse(to_cont(hydra_cfg.players))
-    C.player.is_teammate_fn = get_method(hydra_cfg.players.is_teammate_fn)
-    C.player.instances = tuple(map(instantiate, hydra_cfg.players.instances))
     msg = "There must be at least one RLPlayer involved to collect training data!"
-    assert any(isinstance(p, RLPlayer) for p in C.player.instances), msg
-    assert all(
-        isinstance(p, games.bases.Player) or isinstance(p, RLPlayer)
-        for p in C.player.instances
-    )
 
 
 def save_source_code():
