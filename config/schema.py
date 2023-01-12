@@ -34,6 +34,13 @@ if TYPE_CHECKING:  # RUNTIME TYPES
 
     from games.bases import Game, Player
     from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
+
+    # isort: split
+    from fn.action import action_fn
+    from fn.policy import policy_fn
+    from fn.reward import reward_fn
+    from fn.teammate import teammate_fn
+    from fn.selection import selection_fn
 else:  # OMEGACONF SCHEMA TYPES
     # For omegaconf, just use a dataclass that requires the _target_ config key
     Game = Instance
@@ -43,18 +50,29 @@ else:  # OMEGACONF SCHEMA TYPES
     PredictionNet = PartialInstance
     RepresentationNet = PartialInstance
 
+    # Functions can be python functions or a callable class instances,
+    # so actually the type should be str | Instance,
+    # but Omegaconf does not support Unions with containers yet.
+    # Overriding the str key with a nested config works tho
+    fn = str
+    action_fn = fn
+    policy_fn = fn
+    reward_fn = fn
+    teammate_fn = fn
+    selection_fn = fn
+
 
 @frozen
 class GameConfig:
     instance: Game
-    reward_fn: str
+    reward_fn: reward_fn
 
 
 @frozen
 class MctsConfig:
-    node_action_fn: str
-    node_target_policy_fn: str
-    node_selection_score_fn: str
+    node_action_fn: action_fn
+    node_target_policy_fn: policy_fn
+    node_selection_score_fn: selection_fn
     iterations_move_selection: int
     iterations_value_estimate: int
 
@@ -114,7 +132,7 @@ class TrainConfig:
 @frozen
 class PlayerConfig:
     instances: list[Player]
-    is_teammate_fn: str
+    is_teammate_fn: teammate_fn
 
 
 @frozen
