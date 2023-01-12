@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from typing import Any, Callable
 from collections import defaultdict
 
+import hydra
 import torch
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
@@ -79,6 +80,18 @@ def populate_config(cfg: DictConfig) -> None:
 
     # transform all configs with _target_ keys into their class instances (or partials)
     cfg = hydra.utils.instantiate(cfg)  # type: DictConfig # type: ignore [no-redef]
+
+    def ensure_callable(cfg: DictConfig, key: str) -> None:
+        val = cfg[key]
+        if not callable(val):
+            cfg[key] = hydra.utils.get_method(val)
+        # otherwise callable class (already instatiated)
+
+    ensure_callable(cfg.game, "reward_fn")
+    ensure_callable(cfg.mcts, "node_action_fn")
+    ensure_callable(cfg.mcts, "node_target_policy_fn")
+    ensure_callable(cfg.mcts, "node_selection_score_fn")
+    ensure_callable(cfg.players, "is_teammate_fn")
 
     msg = "There must be at least one RLPlayer involved to collect training data!"
 
