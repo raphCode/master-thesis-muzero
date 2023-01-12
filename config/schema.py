@@ -150,3 +150,14 @@ class BaseConfig:
         {"players": MISSING},
         {"hydra.job": "hydra_job_config"},
     ]
+
+    @classmethod
+    def placeholder(cls) -> "BaseConfig":
+        return cls(
+            game=None,  # type:ignore [arg-type]
+            mcts=None,  # type:ignore [arg-type]
+            networks=None,  # type:ignore [arg-type]
+            training=None,  # type:ignore [arg-type]
+            players=None,  # type:ignore [arg-type]
+            defaults=None,  # type:ignore [arg-type]
+        )

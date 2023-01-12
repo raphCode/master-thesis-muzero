@@ -12,6 +12,7 @@ from omegaconf import OmegaConf, DictConfig
 from hydra.utils import get_method, instantiate
 
 import games
+from config.schema import BaseConfig
 from networks.bases import (
     Networks,
     DynamicsNet,
@@ -24,8 +25,10 @@ __all__ = ["C", "populate_config", "save_source_code"]
 
 log = logging.getLogger(__name__)
 
-# global configuration container
-C = SimpleNamespace()
+# Global configuration container
+# It is empty at first and later filled in-place by populate_config()
+# So every other module can conveniently import it directly
+C = BaseConfig.placeholder()
 
 
 def populate_config(hydra_cfg: DictConfig):
