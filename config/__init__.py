@@ -4,11 +4,12 @@ import inspect
 import logging
 import functools
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, Callable
 from collections import defaultdict
 
 import torch
-from omegaconf import OmegaConf, DictConfig
+import omegaconf
+from omegaconf import OmegaConf, DictConfig, ListConfig
 
 from config.schema import BaseConfig
 from networks.bases import (
@@ -28,7 +29,51 @@ log = logging.getLogger(__name__)
 C = BaseConfig.placeholder()
 
 
+OConfig = DictConfig | ListConfig
+
+
+def traverse_config(cfg: OConfig, callback: Callable[[OConfig, str], None]) -> None:
+    """
+    Traverse a config depth-first and call a function at each node that has str keys.
+    """
+    if isinstance(cfg, DictConfig):
+        for key in cfg:
+            if not OmegaConf.is_missing(cfg, key):
+                traverse_config(cfg[key], callback)
+
+            assert type(key) is str
+            callback(cfg, key)
+
+    elif isinstance(cfg, ListConfig):
+        for item in cfg:
+            traverse_config(item, callback)
+
+
+def merge_structured_config_defaults(cfg: OConfig) -> None:
+    """
+    This function takes an OmegaConf Config and recursively merges the default values of
+    the underlying structured config classes in-place.
+
+    This is because Omegaconf disabled auto-expanding of nested structured configs:
+    https://github.com/omry/omegaconf/issues/412
+    The proposed solutions are unnecessary verbose (default assignments) and worse, they
+    don't allow for default values to propagate into variable-length lists.
+    """
+
+    def merge_defaults(cfg: OConfig, key: str) -> None:
+        t = OmegaConf.get_type(cfg, key)
+        if omegaconf._utils.is_structured_config(t):
+            d = OmegaConf.to_container(OmegaConf.structured(t))
+            with omegaconf.read_write(cfg):
+                OmegaConf.update(cfg, key, d)
+
+    traverse_config(cfg, merge_defaults)
+
+
 def populate_config(cfg: DictConfig) -> None:
+    # we want the _partial_ keys in our config for the instantiate call later
+    merge_structured_config_defaults(cfg)
+
     # verify config schema by touching all values:
     OmegaConf.to_container(cfg, throw_on_missing=True)
 
