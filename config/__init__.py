@@ -12,8 +12,9 @@ import torch
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
-from config.schema import BaseConfig
+from config.schema import BaseConfig, NetworkConfig, NetworkSchema
 from networks.bases import (
+    Networks,
     DynamicsNet,
     NetworkBase,
     PredictionNet,
@@ -92,6 +93,22 @@ def populate_config(cfg: DictConfig) -> None:
     ensure_callable(cfg.mcts, "node_target_policy_fn")
     ensure_callable(cfg.mcts, "node_selection_score_fn")
     ensure_callable(cfg.players, "is_teammate_fn")
+
+    def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
+        def network_factory() -> Networks:
+            return Networks(
+                representation=net_cfg.representation(),
+                prediction=net_cfg.prediction(),
+                dynamics=net_cfg.dynamics(),
+                initial_latent_rep=torch.zeros(tuple(net_cfg.latent_rep_shape)),
+                initial_beliefs=torch.zeros(tuple(net_cfg.beliefs_shape)),
+            )
+
+        return NetworkConfig(
+            factory=network_factory,
+            beliefs_shape=tuple(net_cfg.beliefs_shape),
+            latent_rep_shape=tuple(net_cfg.latent_rep_shape),
+        )
 
     msg = "There must be at least one RLPlayer involved to collect training data!"
 
