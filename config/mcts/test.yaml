@@ -3,20 +3,3 @@ node_target_policy_fn: fn.policy.from_visit_count
 node_selection_score_fn: fn.selection.ucb_score
 iterations_move_selection: 200
 iterations_value_estimate: 100
-
-fn:
-    action:
-        from_visit_count:
-            softmax_temp_start: 0.6
-            softmax_temp_end: 0
-            move_num_start: 10
-            move_num_end: 11
-
-    policy:
-        from_visit_count:
-            softmax_temp: 0.6
-
-    selection:
-        ucb_score:
-            prior_log_scale_base: 5
-            prior_log_scale_init: 1.25
