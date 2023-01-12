@@ -28,9 +28,9 @@ log = logging.getLogger(__name__)
 C = BaseConfig.placeholder()
 
 
-def populate_config(hydra_cfg: DictConfig):
+def populate_config(cfg: DictConfig) -> None:
     # verify config schema by touching all values:
-    OmegaConf.to_container(hydra_cfg, throw_on_missing=True)
+    OmegaConf.to_container(cfg, throw_on_missing=True)
 
     msg = "There must be at least one RLPlayer involved to collect training data!"
 
