@@ -142,7 +142,7 @@ class BaseConfig:
     networks: NetworkContainer
     training: TrainConfig
     players: PlayerConfig
-    defaults: list = [
+    defaults: list[dict[str, str]] = [
         {"game": MISSING},
         {"mcts": MISSING},
         {"networks": MISSING},
