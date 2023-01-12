@@ -77,6 +77,9 @@ def populate_config(cfg: DictConfig) -> None:
     # verify config schema by touching all values:
     OmegaConf.to_container(cfg, throw_on_missing=True)
 
+    # transform all configs with _target_ keys into their class instances (or partials)
+    cfg = hydra.utils.instantiate(cfg)  # type: DictConfig # type: ignore [no-redef]
+
     msg = "There must be at least one RLPlayer involved to collect training data!"
 
 
