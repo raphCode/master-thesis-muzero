@@ -8,13 +8,13 @@ class Game:
 
 
 @frozen
-class GameSchema:
+class GameConfig:
     instance: Game
     reward_fn: str
 
 
 @frozen
-class MctsSchema:
+class MctsConfig:
     node_action_fn: str
     node_target_policy_fn: str
     node_selection_score_fn: str
@@ -59,7 +59,7 @@ class LossWeights:
 
 
 @frozen
-class TrainSchema:
+class TrainConfig:
     batch_game_size: int
     batch_num_games: int
     discount_factor: float
@@ -77,18 +77,18 @@ class Player:
 
 
 @frozen
-class PlayerSchema:
+class PlayerConfig:
     instances: list[Player]
     is_teammate_fn: str
 
 
 @frozen
 class BaseConfig:
-    game: GameSchema
-    mcts: MctsSchema
+    game: GameConfig
+    mcts: MctsConfig
     networks: NetworkSchema
-    training: TrainSchema
-    players: PlayerSchema
+    training: TrainConfig
+    players: PlayerConfig
     defaults: list = [
         {"game": MISSING},
         {"mcts": MISSING},
