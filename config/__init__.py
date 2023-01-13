@@ -2,8 +2,9 @@ import os
 import abc
 import inspect
 import logging
+import builtins
 import functools
-from types import UnionType, SimpleNamespace
+from types import UnionType
 from typing import Any, Callable, Iterable, cast
 from collections import defaultdict
 
@@ -156,20 +157,27 @@ def save_source_code() -> None:
     # {"config namespace": {("config key / origin", "source code")}}
     sources = defaultdict(set)  # type: defaultdict[str, set[tuple[str, str]]]
 
-    def save_recursive(item: Any, path: list[str]):
-        if isinstance(item, SimpleNamespace):
-            for name, child in vars(item).items():
+    def save_recursive(item: Any, path: list[str]) -> None:
+        if item is C.training.optimizer or item is C.defaults:
+            return
+
+        # partials are probably factories, instantiate them
+        # also, C.networks.factory creates the attrs class Networks
+        if isinstance(item, functools.partial) or item is C.networks.factory:
+            item = item()
+
+        if attrs.has(item):
+            for name, child in attrs.asdict(item, recurse=False).items():
                 save_recursive(child, path + [name])
+            return  # attrs classes are not interesting to save
 
         namespace = "_".join(path[:-1])
 
-        if isinstance(item, functools.partial):
-            item = item()  # partials are probably factories, instantiate them
-
-        if inspect.isfunction(item) and path[-1] != "optimizer_factory":
+        if inspect.isfunction(item):
             source = inspect.getsource(item)
-        elif isinstance(item, NetworkBase):
-            cls = item.__class__
+        elif inspect.isclass(cls := type(item)) and not (
+            cls is torch.Tensor or hasattr(builtins, cls.__name__)
+        ):
             source = inspect.getsource(cls)
             blacklist = {
                 cls,
@@ -180,6 +188,7 @@ def save_source_code() -> None:
                 DynamicsNet,
                 PredictionNet,
                 RepresentationNet,
+                Game,
             }
             for superclass in filter(lambda c: c not in blacklist, cls.__mro__):
                 sources[namespace].add(("superclass:", inspect.getsource(superclass)))
