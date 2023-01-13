@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, TypeAlias
 from collections.abc import Callable
 
+import attrs
 from attrs import frozen
 from omegaconf import MISSING
 
@@ -161,3 +162,7 @@ class BaseConfig:
             players=None,  # type:ignore [arg-type]
             defaults=None,  # type:ignore [arg-type]
         )
+
+    def fill_from(self, instance: "BaseConfig") -> None:
+        for field_name in attrs.fields_dict(type(self)):
+            object.__setattr__(self, field_name, getattr(instance, field_name))

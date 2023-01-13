@@ -4,9 +4,10 @@ import inspect
 import logging
 import functools
 from types import SimpleNamespace
-from typing import Any, Callable
+from typing import Any, Callable, cast
 from collections import defaultdict
 
+import attrs
 import hydra
 import torch
 import omegaconf
@@ -109,6 +110,17 @@ def populate_config(cfg: DictConfig) -> None:
             beliefs_shape=tuple(net_cfg.beliefs_shape),
             latent_rep_shape=tuple(net_cfg.latent_rep_shape),
         )
+
+    # casts are necessary because here the omegaconf schema types co-exist with the
+    # runtime container types - we have to undo some of the type hackery in config.schema
+    cfg_obj = cast(BaseConfig, OmegaConf.to_object(cfg))
+    C.fill_from(
+        attrs.evolve(
+            cfg_obj,
+            networks=create_runtime_network_config(cast(NetworkSchema, cfg_obj.networks)),
+            defaults=None,
+        )
+    )
 
     msg = "There must be at least one RLPlayer involved to collect training data!"
 
