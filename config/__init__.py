@@ -149,13 +149,12 @@ def populate_config(cfg: DictConfig) -> None:
     assert all(check_player_instances(Player | RLPlayer))
 
 
-def save_source_code():
-    # to yield reproducable experiments, save the source code of all functions and
-    # networks referenced in the config, even additional ones not designated in the config
-    # schema
+def save_source_code() -> None:
+    # to yield reproducable experiments, save the source code of all functions and classes
+    # and its superclasses referenced in the config
 
-    # {"config namespace": {("config path / origin", "source code")}}
-    sources = defaultdict(set)  # type: defaultdict[set[tuple[str, str]]]
+    # {"config namespace": {("config key / origin", "source code")}}
+    sources = defaultdict(set)  # type: defaultdict[str, set[tuple[str, str]]]
 
     def save_recursive(item: Any, path: list[str]):
         if isinstance(item, SimpleNamespace):
