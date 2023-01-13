@@ -3,8 +3,8 @@ import abc
 import inspect
 import logging
 import functools
-from types import SimpleNamespace
-from typing import Any, Callable, cast
+from types import UnionType, SimpleNamespace
+from typing import Any, Callable, Iterable, cast
 from collections import defaultdict
 
 import attrs
@@ -13,6 +13,7 @@ import torch
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
+from games.bases import Game, Player
 from config.schema import BaseConfig, NetworkConfig, NetworkSchema
 from networks.bases import (
     Networks,
@@ -122,7 +123,30 @@ def populate_config(cfg: DictConfig) -> None:
         )
     )
 
+    # finally, check for correct class instances:
+    # this can only be done after the game instance is in place since network creation may
+    # access game-specific data like observation sizes
+
+    assert isinstance(C.game.instance, Game)
+
+    nets = C.networks.factory()
+
+    def net_msg(net_type: str) -> str:
+        return f"{net_type} must be subclass of {net_type.upper()}Net!"
+
+    assert isinstance(nets.representation, RepresentationNet), net_msg("representation")
+    assert isinstance(nets.prediction, PredictionNet), net_msg("prediction")
+    assert isinstance(nets.dynamics, DynamicsNet), net_msg("dynamics")
+
+    def check_player_instances(cls: type | UnionType) -> Iterable[bool]:
+        return map(lambda i: isinstance(i, cls), C.players.instances)
+
+    # avoid circular imports:
+    from rl_player import RLPlayer
+
     msg = "There must be at least one RLPlayer involved to collect training data!"
+    assert any(check_player_instances(RLPlayer)), msg
+    assert all(check_player_instances(Player | RLPlayer))
 
 
 def save_source_code():
