@@ -9,6 +9,7 @@ length_sort = true
 float_to_top = true
 
 [tool.mypy]
+python_executable = "venv/bin/python"
 strict = true
 pretty = true
 
