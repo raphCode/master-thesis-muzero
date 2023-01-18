@@ -101,28 +101,29 @@ class Node(NodeBase):
         return Node(latent, reward.item(), nets)
 
 
-def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
+def run_mcts(latent: torch.Tensor, nets: Networks) -> Node:
     # this is called only for the player's own moves
-    root = Node.from_latents(latent_rep, beliefs)
-    root.expand()
-    ensure_visit_count(root, C.mcts.iterations_move_selection)
+    root = Node(latent, 0.0, nets)
+    ensure_visit_count(root, C.mcts.iterations_move_selection, nets)
     return root
 
 
-def ensure_visit_count(root: Node, visit_count: int):
-    """Run the tree search on an already expanded Node until the visit count is reached"""
+def ensure_visit_count(root: Node, visit_count: int, nets: Networks) -> None:
+    """
+    Run the tree search on a Node until the visit count is reached
+    """
     for _ in range(visit_count - root.visit_count):
         node = root
-        while node.is_expanded:
-            node = node.select_child()
-        node.expand()
+        search_path = []
+        was_expanded = True
+        while was_expanded:
+            search_path.append(node)
+            action = node.select_action()
+            was_expanded = action in node.children
+            node = node.get_create_child(action, nets)
 
         # backpropagate
-        # TODO: move this into a configurable function
         r = node.value_pred
-        while node != root:
-            # Accumulate reward predictions in the parents's value_sum
-            r = r * C.train.discount_factor + node.reward
-            node = node.parent
-            node.value_sum += r
-            node.visit_count += 1
+        for node in reversed(search_path):
+            r = r * C.training.discount_factor + node.reward
+            node.add_value(r)
