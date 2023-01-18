@@ -4,4 +4,4 @@ prediction:
     _target_: networks.fully_connected.FcPrediction
 dynamics:
     _target_: networks.fully_connected.FcDynamics
-latent_rep_shape: [50]
+latent_shape: [50]

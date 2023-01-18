@@ -81,7 +81,7 @@ class MctsConfig:
 @frozen(kw_only=True)
 class NetworkConfig:  # runtime config container
     factory: Callable[[], Networks]
-    latent_rep_shape: tuple[int, ...]
+    latent_shape: tuple[int, ...]
 
 
 @frozen
@@ -89,7 +89,7 @@ class NetworkSchema:  # omegaconf schema
     dynamics: DynamicsNet
     prediction: PredictionNet
     representation: RepresentationNet
-    latent_rep_shape: list[int]
+    latent_shape: list[int]
 
 
 if TYPE_CHECKING:  # RUNTIME TYPES

@@ -29,7 +29,7 @@ class RepresentationNet(NetworkBase):
     @abstractmethod
     def forward(
         self,
-        latent_rep: Optional[torch.Tensor],
+        latent: Optional[torch.Tensor],
         *observations: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         pass
@@ -39,7 +39,7 @@ class PredictionNet(NetworkBase):
     # Latent -> ValueScalar, Policy, PlayerType
     @abstractmethod
     def forward(
-        self, latent_rep: torch.Tensor, logits: bool = False
+        self, latent: torch.Tensor, logits: bool = False
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         pass
 
@@ -48,7 +48,7 @@ class DynamicsNet(NetworkBase):
     # Latent, ActionOnehot -> Latent, RewardScalar
     @abstractmethod
     def forward(
-        self, latent_rep: torch.Tensor, action_onehot: torch.Tensor
+        self, latent: torch.Tensor, action_onehot: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         pass
 
@@ -58,4 +58,4 @@ class Networks:
     representation: RepresentationNet
     prediction: PredictionNet
     dynamics: DynamicsNet
-    initial_latent_rep: torch.Tensor
+    initial_latent: torch.Tensor

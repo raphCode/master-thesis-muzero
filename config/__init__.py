@@ -103,12 +103,12 @@ def populate_config(cfg: DictConfig) -> None:
                 representation=net_cfg.representation(),
                 prediction=net_cfg.prediction(),
                 dynamics=net_cfg.dynamics(),
-                initial_latent_rep=torch.zeros(tuple(net_cfg.latent_rep_shape)),
+                initial_latent=torch.zeros(tuple(net_cfg.latent_shape)),
             )
 
         return NetworkConfig(
             factory=network_factory,
-            latent_rep_shape=tuple(net_cfg.latent_rep_shape),
+            latent_shape=tuple(net_cfg.latent_shape),
         )
 
     # casts are necessary because here the omegaconf schema types co-exist with the
