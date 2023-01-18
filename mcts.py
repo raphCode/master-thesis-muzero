@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import cast
+from typing import Any, cast
+from collections.abc import Iterable
 
 import numpy as np
 import torch
@@ -54,6 +55,29 @@ class NodeBase(ABC):
     @abstractmethod
     def _create_child_at(self, action: int, nets: Networks) -> "Node":
         pass
+
+
+class LatentsNode(NodeBase):
+    """
+    Node for randomly selecting between multiple latents, usually used as tree root.
+    """
+
+    latents: tuple[torch.Tensor, ...]
+    probs: np.ndarray[Any, np.dtype[np.float32]]
+
+    def __init__(self, latents_with_probs: Iterable[tuple[torch.Tensor, float]]):
+        super().__init__()
+        self.latents, probs = zip(*latents_with_probs)
+        # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
+        # default. The precision difference leads to the message 'probabilities to not
+        # sum to 1' otherwise.
+        self.probs = np.array(probs, dtype=np.float32)
+
+    def select_action(self) -> int:
+        return rng.choice(len(self.latents), p=self.probs)
+
+    def _create_child_at(self, action: int, nets: Networks) -> "Node":
+        return Node(self.latents[action], 0.0, nets)
 
 
 class Node(NodeBase):
