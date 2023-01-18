@@ -4,7 +4,6 @@ import torch
 
 from mcts import run_mcts
 from config import C
-from globals import G
 
 
 class RLPResult(NamedTuple):

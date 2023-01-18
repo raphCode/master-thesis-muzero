@@ -5,7 +5,6 @@ import torch
 import torch.nn.functional as F
 
 from config import C
-from globals import G
 from trajectory import PlayerType
 
 rng = np.random.default_rng()
