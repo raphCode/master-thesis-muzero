@@ -104,12 +104,10 @@ def populate_config(cfg: DictConfig) -> None:
                 prediction=net_cfg.prediction(),
                 dynamics=net_cfg.dynamics(),
                 initial_latent_rep=torch.zeros(tuple(net_cfg.latent_rep_shape)),
-                initial_beliefs=torch.zeros(tuple(net_cfg.beliefs_shape)),
             )
 
         return NetworkConfig(
             factory=network_factory,
-            beliefs_shape=tuple(net_cfg.beliefs_shape),
             latent_rep_shape=tuple(net_cfg.latent_rep_shape),
         )
 

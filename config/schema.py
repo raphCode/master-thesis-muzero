@@ -81,7 +81,6 @@ class MctsConfig:
 @frozen(kw_only=True)
 class NetworkConfig:  # runtime config container
     factory: Callable[[], Networks]
-    beliefs_shape: tuple[int, ...]
     latent_rep_shape: tuple[int, ...]
 
 
@@ -90,7 +89,6 @@ class NetworkSchema:  # omegaconf schema
     dynamics: DynamicsNet
     prediction: PredictionNet
     representation: RepresentationNet
-    beliefs_shape: list[int]
     latent_rep_shape: list[int]
 
 

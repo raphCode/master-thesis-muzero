@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -19,28 +20,30 @@ class NetworkBase(nn.Module, ABC):
 
 
 class RepresentationNet(NetworkBase):
-    # Observation, Beliefs -> LatentRep, Beliefs
+    # Observation, Latent -> Latent
+    # Giving the representation network access to the previous state's latent enables to
+    # carry on hidden information and saved computations from earlier
     @abstractmethod
     def forward(
-        self, observation: tuple[torch.Tensor, ...], beliefs: torch.Tensor
+        self, observation: tuple[torch.Tensor, ...], latent_rep: Optional[torch.Tensor]
     ) -> tuple[torch.Tensor, torch.Tensor]:
         pass
 
 
 class PredictionNet(NetworkBase):
-    # LatentRep, Beliefs -> ValueScalar, Policy, PlayerType
+    # Latent -> ValueScalar, Policy, PlayerType
     @abstractmethod
     def forward(
-        self, latent_rep: torch.Tensor, beliefs: torch.Tensor, logits=False
+        self, latent_rep: torch.Tensor, logits=False
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         pass
 
 
 class DynamicsNet(NetworkBase):
-    # LatentRep, Beliefs, ActionOnehot -> LatentRep, Beliefs, RewardScalar
+    # Latent, ActionOnehot -> Latent, RewardScalar
     @abstractmethod
     def forward(
-        self, latent_rep: torch.Tensor, beliefs: torch.Tensor, action_onehot: torch.Tensor
+        self, latent_rep: torch.Tensor, action_onehot: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         pass
 
@@ -51,4 +54,3 @@ class Networks:
     prediction: PredictionNet
     dynamics: DynamicsNet
     initial_latent_rep: torch.Tensor
-    initial_beliefs: torch.Tensor
