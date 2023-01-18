@@ -1,11 +1,11 @@
 import math
 from typing import TypeAlias
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 
 from mcts import Node
 from config import C
 
-selection_fn: TypeAlias = Callable[[Node], float]
+selection_fn: TypeAlias = Callable[[Node], Sequence[float]]
 
 
 def ucb_score(node: Node) -> float:

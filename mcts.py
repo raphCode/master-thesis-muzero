@@ -1,4 +1,5 @@
-from typing import Optional
+from abc import ABC, abstractmethod
+from typing import cast
 
 import numpy as np
 import torch
@@ -6,60 +7,24 @@ import torch.nn.functional as F
 
 from config import C
 from trajectory import PlayerType
+from networks.bases import Networks
 
 rng = np.random.default_rng()
 
 
-class Node:
+class NodeBase(ABC):
     """
-    Represents a game state in the mcts search tree.
-    A node is unexpanded after its creation, and can be expanded.
-    That means some values of the node are calculated and for every possible action childs
-    nodes are created.
-    Some node attributes do not refer to the node itself, but to the action transition
-    leading from the parent to this node.
+    Common functionality for different Node types.
     """
 
-    parent: "Node"
     value_sum: float
     visit_count: int
-    reward: Optional[float]
-    value_pred: Optional[float]
-    beliefs: Optional[torch.Tensor]
-    player_type: Optional[PlayerType]
-    latent_rep: Optional[torch.Tensor]
-    children: list["Node"]  # list index corresponds to action number
+    children: dict[int, "Node"]  # list index corresponds to action number
 
-    # The following attributes refer to the transition from the parent to this node
-    action: int
-    prior: float
-    reward: Optional[float]
-
-    def __init__(self, parent: "Node", action: int, prior: float):
-        self.parent = parent
-        self.action = action
-        self.prior = prior
-        self.children = []
+    def __init__(self) -> None:
+        self.children = dict()
         self.visit_count = 0
         self.value_sum = 0
-        self.reward = None
-        self.beliefs = None
-        self.value_pred = None
-        self.latent_rep = None
-        self.player_type = None
-
-    @classmethod
-    def from_latents(cls, latent_rep: torch.Tensor, beliefs: torch.Tensor) -> "Node":
-        """Construct a Node from latent_rep and beliefs, suitable as a new tree root"""
-        self = cls(None, None, None)
-        self.latent_rep = latent_rep
-        self.beliefs = beliefs
-        self.reward = 0
-        return self
-
-    @property
-    def is_expanded(self) -> bool:
-        return len(self.children) > 0
 
     @property
     def value(self) -> float:
@@ -67,55 +32,73 @@ class Node:
             return 0
         return self.value_sum / self.visit_count
 
-    def select_child(self) -> "Node":
-        """returns child node with highest selection_score"""
+    def add_value(self, value: float) -> None:
+        self.value_sum += value
+        self.visit_count += 1
+
+    @abstractmethod
+    def select_action(self) -> int:
+        """
+        Returns the action with the highest selection score.
+        """
+        pass
+
+    def get_create_child(self, action: int, nets: Networks) -> "Node":
+        """
+        Returns the child node for the given action, creating it first if necessary.
+        """
+        if action not in self.children:
+            self.children[action] = self._create_child_at(action, nets)
+        return self.children[action]
+
+    @abstractmethod
+    def _create_child_at(self, action: int, nets: Networks) -> "Node":
+        pass
+
+
+class Node(NodeBase):
+    """
+    Represents a game state in the monte carlo search tree.
+    Contrary to the MuZero original implementation, nodes are always expanded.
+    Reasons:
+    - avoids that a bunch of attributes could be None
+    - selection score function is only called once instead of every child node
+      node)
+    - see at a glance which children are expanded (node.children is a dict/sparse array)
+    """
+
+    reward: float
+    value_pred: float
+    latent: torch.Tensor
+    player_type: PlayerType
+    probs: tuple[float, ...]
+
+    def __init__(self, latent: torch.Tensor, reward: float, nets: Networks):
+        super().__init__()
+        self.latent = latent
+        self.reward = reward
+        value_pred, probs, player_type = nets.prediction.si(self.latent)
+        self.value_pred = value_pred.item()
+        self.probs = tuple(probs)
+        self.player_type = PlayerType(cast(int, player_type.argmax().item()))
+
+    def select_action(self) -> int:
         if self.player_type == PlayerType.Chance:
             # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
             # default. The precision difference leads to the message 'probabilities to not
             # sum to 1' otherwise.
-            probs = np.array([c.prior for c in self.children], dtype=np.float32)
-            return rng.choice(self.children, p=probs)
-        return max(self.children, key=C.mcts.node_selection_score_fn)
-
-    def expand(self):
-        """
-        expands this node, that is:
-        - populate our latent_rep, reward, node_type via network inference
-        - add empty children for all possible actions
-        """
-        if self.parent is not None:
-            # root node gets latent_rep and beliefs set externally
-            self.latent_rep, self.beliefs, reward = G.nets.dynamics.si(
-                self.parent.latent_rep,
-                self.parent.beliefs,
-                F.one_hot(torch.tensor(self.action), C.game.instance.max_num_actions),
+            return rng.choice(
+                len(self.children), p=np.array(self.probs, dtype=np.float32)
             )
-            self.reward = reward.item()
-        value_pred, probs, player_type = G.nets.prediction.si(
-            self.latent_rep, self.beliefs
+        scores = C.mcts.node_selection_score_fn(self)
+        return scores.index(max(scores))
+
+    def _create_child_at(self, action: int, nets: Networks) -> "Node":
+        latent, reward = nets.dynamics.si(
+            self.latent,
+            F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
-        self.value_pred = value_pred.item()
-        self.player_type = PlayerType(player_type.argmax().item())
-        self.children = [Node(self, action, p) for action, p in enumerate(probs.tolist())]
-
-    def ensure_expanded(self):
-        if not self.is_expanded:
-            self.expand()
-
-    def get_action_subtree_and_prune_above(self, action: int) -> "Node":
-        """
-        Returns the child with the given action as a new tree root, discards parent tree.
-        The rest of the tree above the returned node is effectively broken after this
-        operation and should not be used anymore.
-        All data in the subtree below the returned node is retained and can still be used.
-        """
-        self.ensure_expanded()
-        node = self.children[action]
-        node.ensure_expanded()
-        node.parent = None
-        node.action = None
-        node.reward = 0
-        return node
+        return Node(latent, reward.item(), nets)
 
 
 def run_mcts(latent_rep: torch.Tensor, beliefs: torch.Tensor) -> Node:
