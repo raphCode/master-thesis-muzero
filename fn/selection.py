@@ -38,5 +38,12 @@ class UCBScore:
 assert_fn_type(UCBScore())
 
 
-def from_prior(node: Node) -> float:
-    return node.prior / (node.visit_count + 1)
+def from_prior(node: Node) -> list[float]:
+    result = []
+    for action, prior in enumerate(node.probs):
+        vc = node.children[action].visit_count + 1 if action in node.children else 1
+        result.append(prior / vc)
+    return result
+
+
+assert_fn_type(from_prior)
