@@ -17,6 +17,8 @@ class NodeBase(ABC):
     """
     A Node represents a game state in the monte carlo search tree.
     This class provides common functionality for different Node types.
+    Child Nodes are never ObservationNodes, because in game states with observations a new
+    search is started.
 
     Contrary to the MuZero original implementation, nodes are always expanded.
     Reasons:
@@ -65,17 +67,35 @@ class NodeBase(ABC):
         pass
 
 
-class LatentsNode(NodeBase):
+class ObservationNode(NodeBase):
     """
-    Node for randomly selecting between multiple latents, usually used as tree root.
+    Create child Nodes using the observation network, based on:
+    - an observation
+    - a random latent drawn from a list (usually from previous searches)
+
+    Only used as the tree root.
     """
 
     latents: tuple[torch.Tensor, ...]
     probs: np.ndarray[Any, np.dtype[np.float32]]
 
-    def __init__(self, latents_with_probs: Iterable[tuple[torch.Tensor, float]]):
+    def __init__(
+        self,
+        latents_with_probs: Iterable[tuple[torch.Tensor, float]],
+        *observations: torch.Tensor,
+        nets: Networks,
+    ):
         super().__init__()
-        self.latents, probs = zip(*latents_with_probs)
+        latents, probs = zip(*latents_with_probs)
+
+        # compute all the latents right away: it is very likely that all of them are
+        # acessed at some time, because this is the tree root Node
+        # single observation, multiple latents: might improve performance in some networks
+        latents = nets.representation(
+            torch.stack(latents), *(o.unsqueeze(0) for o in observations)
+        )
+        self.latents = tuple(latents)
+
         # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
         # default. The precision difference leads to the message 'probabilities to not
         # sum to 1' otherwise.
