@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional, cast
+from typing import Optional, cast
 from collections.abc import Iterable
 
 import numpy as np
@@ -30,9 +30,11 @@ class NodeBase(ABC):
 
     value_sum: float
     visit_count: int
+    probs: tuple[float, ...]
     children: dict[int, "Node"]
 
-    def __init__(self) -> None:
+    def __init__(self, probs: Iterable[float]) -> None:
+        self.probs = tuple(probs)
         self.children = dict()
         self.visit_count = 0
         self.value_sum = 0
@@ -53,6 +55,12 @@ class NodeBase(ABC):
         Returns the action with the highest selection score.
         """
         pass
+
+    def _chance_select(self) -> int:
+        # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
+        # default. The precision difference leads to the message 'probabilities to not
+        # sum to 1' otherwise.
+        return rng.choice(len(self.probs), p=np.array(self.probs, dtype=np.float32))
 
     def get_create_child(self, action: int, nets: Networks) -> "Node":
         """
@@ -77,7 +85,6 @@ class ObservationNode(NodeBase):
     """
 
     latents: tuple[torch.Tensor, ...]
-    probs: np.ndarray[Any, np.dtype[np.float32]]
 
     def __init__(
         self,
@@ -85,7 +92,6 @@ class ObservationNode(NodeBase):
         *observations: torch.Tensor,
         nets: Networks,
     ):
-        super().__init__()
         if latents_with_probs is not None:
             latent_tuple, probs = zip(*latents_with_probs)
             latents = torch.stack(latent_tuple)
@@ -100,13 +106,10 @@ class ObservationNode(NodeBase):
             latents, *(o.unsqueeze(0) for o in observations)
         )
         self.latents = tuple(child_latents)
-        # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
-        # default. The precision difference leads to the message 'probabilities to not
-        # sum to 1' otherwise.
-        self.probs = np.array(probs, dtype=np.float32)
+        super().__init__(probs=probs)
 
     def select_action(self) -> int:
-        return rng.choice(len(self.latents), p=self.probs)
+        return self._chance_select()
 
     def _create_child_at(self, action: int, nets: Networks) -> "Node":
         return Node(self.latents[action], 0.0, nets)
@@ -122,25 +125,18 @@ class Node(NodeBase):
     value_pred: float
     latent: torch.Tensor
     player_type: PlayerType
-    probs: tuple[float, ...]
 
     def __init__(self, latent: torch.Tensor, reward: float, nets: Networks):
-        super().__init__()
         self.latent = latent
         self.reward = reward
         value_pred, probs, player_type = nets.prediction.si(self.latent)
         self.value_pred = value_pred.item()
-        self.probs = tuple(probs)
         self.player_type = PlayerType(cast(int, player_type.argmax().item()))
+        super().__init__(probs=probs)
 
     def select_action(self) -> int:
         if self.player_type == PlayerType.Chance:
-            # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
-            # default. The precision difference leads to the message 'probabilities to not
-            # sum to 1' otherwise.
-            return rng.choice(
-                len(self.children), p=np.array(self.probs, dtype=np.float32)
-            )
+            return self._chance_select()
         scores = C.mcts.node_selection_score_fn(self)
         return scores.index(max(scores))
 
