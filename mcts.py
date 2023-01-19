@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, cast
+from typing import Any, Optional, cast
 from collections.abc import Iterable
 
 import numpy as np
@@ -81,21 +81,25 @@ class ObservationNode(NodeBase):
 
     def __init__(
         self,
-        latents_with_probs: Iterable[tuple[torch.Tensor, float]],
+        latents_with_probs: Optional[Iterable[tuple[torch.Tensor, float]]],
         *observations: torch.Tensor,
         nets: Networks,
     ):
         super().__init__()
-        latents, probs = zip(*latents_with_probs)
+        if latents_with_probs is not None:
+            latent_tuple, probs = zip(*latents_with_probs)
+            latents = torch.stack(latent_tuple)
+        else:
+            latents = None
+            probs = (1,)
 
         # compute all the latents right away: it is very likely that all of them are
         # acessed at some time, because this is the tree root Node
         # single observation, multiple latents: might improve performance in some networks
-        latents = nets.representation(
-            torch.stack(latents), *(o.unsqueeze(0) for o in observations)
+        child_latents = nets.representation(
+            latents, *(o.unsqueeze(0) for o in observations)
         )
-        self.latents = tuple(latents)
-
+        self.latents = tuple(child_latents)
         # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
         # default. The precision difference leads to the message 'probabilities to not
         # sum to 1' otherwise.
