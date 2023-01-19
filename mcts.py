@@ -15,7 +15,15 @@ rng = np.random.default_rng()
 
 class NodeBase(ABC):
     """
-    Common functionality for different Node types.
+    A Node represents a game state in the monte carlo search tree.
+    This class provides common functionality for different Node types.
+
+    Contrary to the MuZero original implementation, nodes are always expanded.
+    Reasons:
+    - avoids that a bunch of attributes could be None
+    - selection score function is only called once instead of every child node
+      node)
+    - see at a glance which children are expanded (node.children is a dict/sparse array)
     """
 
     value_sum: float
@@ -82,13 +90,8 @@ class LatentsNode(NodeBase):
 
 class Node(NodeBase):
     """
-    Represents a game state in the monte carlo search tree.
-    Contrary to the MuZero original implementation, nodes are always expanded.
-    Reasons:
-    - avoids that a bunch of attributes could be None
-    - selection score function is only called once instead of every child node
-      node)
-    - see at a glance which children are expanded (node.children is a dict/sparse array)
+    Create child Nodes using the dynamics network, based on:
+    - an action
     """
 
     reward: float
