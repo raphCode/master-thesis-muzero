@@ -12,27 +12,30 @@ def assert_fn_type(fn: selection_fn) -> None:
     pass
 
 
-def ucb_score(node: Node) -> float:
-    prior_scale = (
-        (
-            math.log(
-                (
-                    node.parent.visit_count
-                    + C.mcts.fn.selection.ucb_score.prior_log_scale_base
-                    + 1
-                )
-                / C.mcts.fn.selection.ucb_score.prior_log_scale_base
-            )
-            + C.mcts.fn.selection.ucb_score.prior_log_scale_init
-        )
-        * math.sqrt(node.parent.visit_count)
-        / (node.visit_count + 1)
-    )
-    prior_score = node.prior * prior_scale
-    if not node.is_expanded:
-        return prior_score
-    value_score = node.reward + node.value * C.train.discount_factor
-    return value_score + prior_score
+class UCBScore:
+    def __init__(
+        self, prior_log_scale_base: float = 5, prior_log_scale_init: float = 1.25
+    ):
+        self.base = prior_log_scale_base
+        self.init = prior_log_scale_init
+
+    def __call__(self, node: Node) -> list[float]:
+        prior_scale_half = (
+            math.log((node.visit_count + self.base + 1) / self.base) + self.init
+        ) * math.sqrt(node.visit_count)
+        result = []
+        for action, prior in enumerate(node.probs):
+            if action in node.children:
+                child = node.children[action]
+                prior_score = prior * prior_scale_half / (child.visit_count + 1)
+                value_score = child.reward + child.value * C.training.discount_factor
+                result.append(value_score + prior_score)
+            else:
+                result.append(prior_scale_half)
+        return result
+
+
+assert_fn_type(UCBScore())
 
 
 def from_prior(node: Node) -> float:
