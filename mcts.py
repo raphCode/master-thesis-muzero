@@ -30,7 +30,7 @@ class NodeBase(ABC):
 
     value_sum: float
     visit_count: int
-    children: dict[int, "Node"]  # list index corresponds to action number
+    children: dict[int, "Node"]
 
     def __init__(self) -> None:
         self.children = dict()
