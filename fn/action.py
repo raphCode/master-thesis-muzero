@@ -13,6 +13,10 @@ rng = np.random.default_rng()
 action_fn: TypeAlias = Callable[[Node, int], int]
 
 
+def assert_fn_type(fn: action_fn) -> None:
+    pass
+
+
 def _interp_softmax_temp(move_number: int, cfg_name: str) -> float:
     cfg = getattr(C.mcts.fn.action, cfg_name)
     return np.interp(

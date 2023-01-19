@@ -8,6 +8,10 @@ from config import C
 selection_fn: TypeAlias = Callable[[Node], Sequence[float]]
 
 
+def assert_fn_type(fn: selection_fn) -> None:
+    pass
+
+
 def ucb_score(node: Node) -> float:
     prior_scale = (
         (

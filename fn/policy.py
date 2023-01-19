@@ -11,6 +11,10 @@ from .util import softmax, get_values_where_expanded
 policy_fn: TypeAlias = Callable[[Node], Sequence[float]]
 
 
+def assert_fn_type(fn: policy_fn) -> None:
+    pass
+
+
 def from_visit_count(node: Node) -> Sequence[float]:
     visit_counts = [child.visit_count for child in node.children]
     return softmax(visit_counts, C.mcts.fn.policy.from_visit_count.softmax_temp)
