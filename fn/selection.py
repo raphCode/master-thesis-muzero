@@ -31,7 +31,7 @@ class UCBScore:
                 value_score = child.reward + child.value * C.training.discount_factor
                 result.append(value_score + prior_score)
             else:
-                result.append(prior_scale_half)
+                result.append(prior * prior_scale_half)
         return result
 
 
