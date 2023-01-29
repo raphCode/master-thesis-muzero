@@ -1,5 +1,7 @@
 import itertools
 from abc import ABC, abstractmethod
+from typing import Optional
+from functools import cached_property
 from collections.abc import Collection
 
 import torch
@@ -59,12 +61,7 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def is_chance(self) -> bool:
-        pass
-
-    @property
-    @abstractmethod
-    def current_player(self) -> int:
+    def current_player_id(self) -> int:
         pass
 
     @property
@@ -125,6 +122,23 @@ class Game(ABC):
         outputs.
         """
         pass
+
+    @property
+    @abstractmethod
+    def has_chance_player(self) -> bool:
+        """
+        Returns wheter the game models a chance player.
+        The prediction network output should then be sized to max_num_players + 1.
+        """
+        pass
+
+    @cached_property
+    def chance_player_id(self) -> Optional[int]:
+        """
+        The chance player id, if it exists.
+        By default the highest id possible to avoid interfering with the zero-based player ids.
+        """
+        return self.max_num_players if self.has_chance_player else None
 
 
 class Player(ABC):
