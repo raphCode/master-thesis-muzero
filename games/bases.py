@@ -6,7 +6,7 @@ import torch
 class GameState(ABC):
     @property
     @abstractmethod
-    def observation(self) -> tuple[torch.Tensor]:
+    def observation(self) -> tuple[torch.Tensor, ...]:
         pass
 
     @property
