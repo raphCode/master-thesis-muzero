@@ -1,6 +1,26 @@
+import itertools
 from abc import ABC, abstractmethod
+from collections.abc import Collection
 
 import torch
+
+
+class MatchData:
+    """
+    Data which is static for a single match / playout.
+    """
+
+    num_players: int
+    teammates: frozenset[tuple[int, int]]
+
+    def __init__(self, num_players: int, teams: Collection[Collection[int]]):
+        self.num_players = num_players
+        for a, b in itertools.combinations(teams, 2):
+            assert set(a).isdisjoint(b), f"Teams are not disjoint: {a} and {b}"
+        make_team_tuples = lambda t: itertools.permutations(t, 2)
+        self.teammates = frozenset(
+            itertools.chain.from_iterable(map(make_team_tuples, teams))  # type: ignore [arg-type]
+        )
 
 
 class GameState(ABC):
@@ -8,6 +28,13 @@ class GameState(ABC):
     A state in an active game / match. It keeps all the information necessary for all
     players and is mutated on moves.
     """
+
+    match_data: MatchData
+    game: "Game"
+
+    def __init__(self, game: "Game", match_data: MatchData):
+        self.game = game
+        self.match_data = match_data
 
     @property
     @abstractmethod
