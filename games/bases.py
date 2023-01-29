@@ -4,15 +4,25 @@ import torch
 
 
 class GameState(ABC):
+    """
+    A state in an active game / match. It keeps all the information necessary for all
+    players and is mutated on moves.
+    """
+
     @property
     @abstractmethod
     def observation(self) -> tuple[torch.Tensor, ...]:
+        """
+        Return observation tensors. Multiple tensors are possible for different shapes.
+        """
         pass
 
     @property
     @abstractmethod
     def rewards(self) -> tuple[float, ...]:
-        """Tuple of rewards, one for each player, starting at 0 for the first player"""
+        """
+        Tuple of rewards, one for each player, starting at 0 for the first player
+        """
         pass
 
     @property
@@ -33,17 +43,32 @@ class GameState(ABC):
     @property
     @abstractmethod
     def chance_outcomes(self) -> tuple[float, ...]:
+        """
+        On chance events, this can be called to get the action probabilities.
+        Length of returned tuple should be game.max_num_actions
+        """
         pass
 
     @abstractmethod
     def apply_action(self, action: int) -> None:
+        """
+        Mutate the game state and advance the game by making the given move.
+        """
         pass
 
 
 class Game(ABC):
+    """
+    Factory for game matches / playouts. Holds information valid across different matches.
+    Matches may differ in player count or team groups, allowing the network to generalize
+    across different player configurations.
+    """
+
     @abstractmethod
     def new_initial_state(self) -> GameState:
-        """Return a GameState which represents a new game at intial state"""
+        """
+        Return a new GameState which represents a game / match at intial state
+        """
         pass
 
     @property
@@ -65,7 +90,7 @@ class Game(ABC):
     def max_num_actions(self) -> int:
         """
         Number of actions or chance outcomes, whichever is higher.
-        Used to set the size of the Action network in/outputs.
+        Used to set the size of the dynamics network inputs.
         """
         pass
 
