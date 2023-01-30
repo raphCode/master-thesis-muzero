@@ -14,6 +14,7 @@ import torch
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
+from utils import optional_map
 from games.bases import Game, Player
 from config.schema import BaseConfig, NetworkConfig, NetworkSchema
 from networks.bases import (
@@ -98,17 +99,22 @@ def populate_config(cfg: DictConfig) -> None:
     ensure_callable(cfg.players, "is_teammate_fn")
 
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
+        # empty list [] in config creates None values for belief
+        belief_shape = optional_map(tuple)(net_cfg.belief_shape or None)
+
         def network_factory() -> Networks:
             return Networks(
                 representation=net_cfg.representation(),
                 prediction=net_cfg.prediction(),
                 dynamics=net_cfg.dynamics(),
                 initial_latent=torch.zeros(tuple(net_cfg.latent_shape)),
+                initial_belief=optional_map(torch.zeros)(belief_shape),
             )
 
         return NetworkConfig(
             factory=network_factory,
             latent_shape=tuple(net_cfg.latent_shape),
+            belief_shape=belief_shape,
         )
 
     # casts are necessary because here the omegaconf schema types co-exist with the

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING, Optional, TypeAlias
 from collections.abc import Callable
 
 import attrs
@@ -76,12 +76,14 @@ class MctsConfig:
     node_selection_score_fn: selection_fn
     iterations_move_selection: int
     iterations_value_estimate: int
+    use_previous_latents: bool
 
 
 @frozen(kw_only=True)
 class NetworkConfig:  # runtime config container
     factory: Callable[[], Networks]
     latent_shape: tuple[int, ...]
+    belief_shape: Optional[tuple[int, ...]]
 
 
 @frozen
@@ -90,6 +92,7 @@ class NetworkSchema:  # omegaconf schema
     prediction: PredictionNet
     representation: RepresentationNet
     latent_shape: list[int]
+    belief_shape: list[int]  # to disable beliefs, use an empty list []
 
 
 if TYPE_CHECKING:  # RUNTIME TYPES
