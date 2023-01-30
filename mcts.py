@@ -8,6 +8,7 @@ import torch.nn.functional as F
 
 from config import C
 from trajectory import PlayerType
+from fn.selection import selection_fn
 from networks.bases import Networks
 
 rng = np.random.default_rng()
@@ -48,13 +49,6 @@ class NodeBase(ABC):
     def add_value(self, value: float) -> None:
         self.value_sum += value
         self.visit_count += 1
-
-    @abstractmethod
-    def select_action(self) -> int:
-        """
-        Returns the action with the highest selection score.
-        """
-        pass
 
     def _chance_select(self) -> int:
         # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
@@ -108,9 +102,6 @@ class ObservationNode(NodeBase):
         self.latents = tuple(child_latents)
         super().__init__(probs=probs)
 
-    def select_action(self) -> int:
-        return self._chance_select()
-
     def _create_child_at(self, action: int, nets: Networks) -> "Node":
         return Node(self.latents[action], 0.0, nets)
 
@@ -134,12 +125,6 @@ class Node(NodeBase):
         self.player_type = PlayerType(cast(int, player_type.argmax().item()))
         super().__init__(probs=probs)
 
-    def select_action(self) -> int:
-        if self.player_type == PlayerType.Chance:
-            return self._chance_select()
-        scores = C.mcts.node_selection_score_fn(self)
-        return scores.index(max(scores))
-
     def _create_child_at(self, action: int, nets: Networks) -> "Node":
         latent, reward = nets.dynamics.si(
             self.latent,
@@ -148,7 +133,9 @@ class Node(NodeBase):
         return Node(latent, reward.item(), nets)
 
 
-def ensure_visit_count(root: Node, visit_count: int, nets: Networks) -> None:
+def ensure_visit_count(
+    root: Node, visit_count: int, selection_fn: selection_fn, nets: Networks
+) -> None:
     """
     Run the tree search on a Node until the visit count is reached
     """
@@ -158,7 +145,7 @@ def ensure_visit_count(root: Node, visit_count: int, nets: Networks) -> None:
         was_expanded = True
         while was_expanded:
             search_path.append(node)
-            action = node.select_action()
+            action = selection_fn(node)
             was_expanded = action in node.children
             node = node.get_create_child(action, nets)
 

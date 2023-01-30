@@ -1,11 +1,11 @@
 import math
 from typing import TypeAlias
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 
 from mcts import Node
 from config import C
 
-selection_fn: TypeAlias = Callable[[Node], Sequence[float]]
+selection_fn: TypeAlias = Callable[[Node], int]
 
 
 def assert_fn_type(fn: selection_fn) -> None:
