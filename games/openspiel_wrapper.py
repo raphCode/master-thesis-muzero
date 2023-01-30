@@ -1,10 +1,10 @@
-from typing import Optional
+from typing import Unpack, Optional
 from functools import cached_property
 
 import torch
 import pyspiel
 
-from .bases import Game, GameState
+from .bases import Game, GameState, MatchData, GameStateInit
 
 
 class OpenSpielGameState(GameState):
@@ -12,10 +12,10 @@ class OpenSpielGameState(GameState):
     game: "OpenSpielGame"
     invalid: bool
 
-    def __init__(self, state: pyspiel.State, game: "OpenSpielGame"):
+    def __init__(self, state: pyspiel.State, **kwargs: Unpack[GameStateInit]):
         self.state = state
-        self.game = game
         self.invalid = False
+        super().__init__(**kwargs)
 
     @property
     def observation(self) -> tuple[torch.Tensor]:
@@ -28,11 +28,11 @@ class OpenSpielGameState(GameState):
     @property
     def rewards(self) -> tuple[float, ...]:
         if self.is_chance:
-            return (0.0,) * self.game.num_players
+            return (0.0,) * self.game.max_num_players
         if self.invalid:
             assert self.game.bad_move_reward is not None
-            tmp = [0.0] * self.game.num_players
-            tmp[self.current_player] = self.game.bad_move_reward
+            tmp = [0.0] * self.game.max_num_players
+            tmp[self.current_player_id] = self.game.bad_move_reward
             return tuple(tmp)
         return self.state.rewards()  # type: ignore [no-any-return]
 
@@ -45,7 +45,7 @@ class OpenSpielGameState(GameState):
         return self.state.is_chance_node()  # type: ignore [no-any-return]
 
     @property
-    def current_player(self) -> int:
+    def current_player_id(self) -> int:
         return self.state.current_player()  # type: ignore [no-any-return]
 
     @property
@@ -73,6 +73,7 @@ class OpenSpielGame(Game):
         game_name: str,
         bad_move_reward: Optional[float] = None,
         bad_move_action: Optional[int] = None,
+        teams: list[list[int]] = [],
     ):
         self.game = pyspiel.load_game(game_name)
         self.bad_move_reward = bad_move_reward
@@ -80,17 +81,23 @@ class OpenSpielGame(Game):
         assert (bad_move_reward is None) != (
             bad_move_action is None
         ), "Exactly one of 'bad_move_reward' or 'bad_move_action' must be given"
+        self.teams = teams
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
 
     def new_initial_state(self) -> OpenSpielGameState:
         return OpenSpielGameState(
             self.game.new_initial_state(),
-            self,
+            game=self,
+            match_data=MatchData(self.game.num_players(), self.teams),
         )
 
     @cached_property
-    def num_players(self) -> int:
+    def max_num_players(self) -> int:
         return self.game.num_players()  # type: ignore [no-any-return]
+
+    @cached_property
+    def has_chance_player(self) -> bool:
+        return True
 
     @cached_property
     def observation_shapes(self) -> tuple[tuple[int, ...]]:

@@ -1,6 +1,6 @@
 import itertools
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, TypedDict
 from functools import cached_property
 from collections.abc import Collection
 
@@ -23,6 +23,11 @@ class MatchData:
         self.teammates = frozenset(
             itertools.chain.from_iterable(map(make_team_tuples, teams))  # type: ignore [arg-type]
         )
+
+
+class GameStateInit(TypedDict):
+    game: "Game"
+    match_data: MatchData
 
 
 class GameState(ABC):
