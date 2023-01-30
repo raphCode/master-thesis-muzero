@@ -23,33 +23,33 @@ class NetworkBase(nn.Module, ABC):
 
 
 class RepresentationNet(NetworkBase):
-    # Observation, Latent -> Latent
-    # Giving the representation network access to the previous state's latent enables to
-    # carry on hidden information and saved computations from earlier
+    # Observations (may include NumberPlayers, CurrentPlayer, TeamInfo) -> Latent
     @abstractmethod
     def forward(
         self,
-        latent: Optional[torch.Tensor],
         *observations: torch.Tensor,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> torch.Tensor:
         pass
 
 
 class PredictionNet(NetworkBase):
-    # Latent -> ValueScalar, Policy, PlayerType
+    # Latent, Belief -> Value, Policy, CurrentPlayer
     @abstractmethod
     def forward(
-        self, latent: torch.Tensor, logits: bool = False
+        self, latent: torch.Tensor, belief: Optional[torch.Tensor], logits: bool = False
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         pass
 
 
 class DynamicsNet(NetworkBase):
-    # Latent, ActionOnehot -> Latent, RewardScalar
+    # Latent, Belief, Action -> Latent, Belief, Reward
     @abstractmethod
     def forward(
-        self, latent: torch.Tensor, action_onehot: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        self,
+        latent: torch.Tensor,
+        belief: Optional[torch.Tensor],
+        action_onehot: torch.Tensor,
+    ) -> tuple[torch.Tensor, Optional[torch.Tensor], torch.Tensor]:
         pass
 
 
@@ -59,3 +59,4 @@ class Networks:
     prediction: PredictionNet
     dynamics: DynamicsNet
     initial_latent: torch.Tensor
+    initial_belief: Optional[torch.Tensor]
