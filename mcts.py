@@ -148,13 +148,6 @@ class Node(NodeBase):
         return Node(latent, reward.item(), nets)
 
 
-def run_mcts(latent: torch.Tensor, nets: Networks) -> Node:
-    # this is called only for the player's own moves
-    root = Node(latent, 0.0, nets)
-    ensure_visit_count(root, C.mcts.iterations_move_selection, nets)
-    return root
-
-
 def ensure_visit_count(root: Node, visit_count: int, nets: Networks) -> None:
     """
     Run the tree search on a Node until the visit count is reached
