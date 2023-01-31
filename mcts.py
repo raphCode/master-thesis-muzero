@@ -5,6 +5,7 @@ from collections.abc import Iterable
 import numpy as np
 import torch
 import torch.nn.functional as F
+from torch import Tensor
 
 from config import C
 from trajectory import PlayerType
@@ -78,12 +79,12 @@ class ObservationNode(NodeBase):
     Only used as the tree root.
     """
 
-    latents: tuple[torch.Tensor, ...]
+    latents: tuple[Tensor, ...]
 
     def __init__(
         self,
-        latents_with_probs: Optional[Iterable[tuple[torch.Tensor, float]]],
-        *observations: torch.Tensor,
+        latents_with_probs: Optional[Iterable[tuple[Tensor, float]]],
+        *observations: Tensor,
         nets: Networks,
     ):
         if latents_with_probs is not None:
@@ -114,10 +115,10 @@ class Node(NodeBase):
 
     reward: float
     value_pred: float
-    latent: torch.Tensor
+    latent: Tensor
     player_type: PlayerType
 
-    def __init__(self, latent: torch.Tensor, reward: float, nets: Networks):
+    def __init__(self, latent: Tensor, reward: float, nets: Networks):
         self.latent = latent
         self.reward = reward
         value_pred, probs, player_type = nets.prediction.si(self.latent)
