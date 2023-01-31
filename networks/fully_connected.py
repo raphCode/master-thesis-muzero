@@ -1,18 +1,24 @@
 import math
 import itertools
-from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Any, Optional
 
 import torch
 import torch.nn.functional as F
-from torch import nn
+from torch import Tensor, nn
 
+from utils import optional_map
 from config import C
-from trajectory import PlayerType
-from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
+from networks.bases import (
+    DynamicsNet,
+    PredictionNet,
+    DynamicsReturn,
+    PredictionReturn,
+    RepresentationNet,
+    RepresentationReturn,
+)
 
 
-class FcBase(ABC):
+class FcBase(nn.Module):
     def __init__(
         self,
         input_width: int,
@@ -28,9 +34,8 @@ class FcBase(ABC):
         for n, layer in enumerate(self.fc_layers):
             self.add_module(f"fc{n}", layer)
 
-    @abstractmethod
-    def forward(self, *inputs: torch.Tensor) -> torch.Tensor:
-        x = torch.cat([i.flatten(1) for i in inputs], dim=1)
+    def fc_forward(self, *inputs: Optional[Tensor]) -> Tensor:
+        x = torch.cat([i.flatten(1) for i in filter(None, inputs)], dim=1)
         for fc in self.fc_layers:
             x = fc(x)
             tmp = x
@@ -39,79 +44,70 @@ class FcBase(ABC):
 
 
 class FcRepresentation(FcBase, RepresentationNet):
-    def __init__(self, *args, **kwargs):
-        input_sizes = (
-            sum(map(math.prod, C.game.instance.observation_shapes)),
-            math.prod(C.nets.beliefs_shape),
-        )
-        self.output_sizes = (
-            math.prod(C.nets.latent_rep_shape),
-            math.prod(C.nets.beliefs_shape),
-        )
+    def __init__(self, **kwargs: Any):
         super().__init__(
-            *args,
-            input_width=sum(input_sizes),
-            output_width=sum(self.output_sizes),
+            input_width=sum(map(math.prod, C.game.instance.observation_shapes)),
+            output_width=math.prod(C.networks.latent_shape),
             **kwargs,
         )
 
     def forward(
         self,
-        *inputs: torch.Tensor,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        out = super().forward(*inputs)
-        return torch.split(out, self.output_sizes, dim=1)
+        *observations: Tensor,
+        **kwargs: Any,
+    ) -> RepresentationReturn:
+        return self.fc_forward(*observations)
 
 
 class FcPrediction(FcBase, PredictionNet):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs: Any):
         input_sizes = (
-            math.prod(C.nets.beliefs_shape),
-            math.prod(C.nets.latent_rep_shape),
+            optional_map(math.prod)(C.networks.belief_shape) or 0,
+            math.prod(C.networks.latent_shape),
         )
-        self.output_sizes = (
+        self.output_sizes = [
             1,
             C.game.instance.max_num_actions,
-            len(PlayerType),
-        )
+            C.game.instance.max_num_players + C.game.instance.has_chance_player,
+        ]
         super().__init__(
-            *args,
             input_width=sum(input_sizes),
             output_width=sum(self.output_sizes),
             **kwargs,
         )
 
     def forward(
-        self, latent_rep: torch.Tensor, beliefs: torch.Tensor, logits=False
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        out = super().forward(latent_rep, beliefs)
-        value, policy, player_type = torch.split(out, self.output_sizes, dim=1)
+        self, latent: Tensor, belief: Optional[Tensor], logits: bool = False
+    ) -> PredictionReturn:
+        result = self.fc_forward(latent, belief)
+        value, policy, player_type = torch.split(result, self.output_sizes, dim=1)
         if logits:
             return value, policy, player_type
         return value, F.softmax(policy, dim=1), F.softmax(player_type, dim=1)
 
 
 class FcDynamics(FcBase, DynamicsNet):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs: Any):
+        belief_size = optional_map(math.prod)(C.networks.belief_shape) or 0
         input_sizes = (
-            math.prod(C.nets.latent_rep_shape),
-            math.prod(C.nets.beliefs_shape),
+            math.prod(C.networks.latent_shape),
+            belief_size,
             C.game.instance.max_num_actions,
         )
-        self.output_sizes = (
-            math.prod(C.nets.latent_rep_shape),
-            math.prod(C.nets.beliefs_shape),
+        self.output_sizes = [
+            math.prod(C.networks.latent_shape),
+            belief_size,
             1,
-        )
+        ]
         super().__init__(
-            *args,
             input_width=sum(input_sizes),
             output_width=sum(self.output_sizes),
             **kwargs,
         )
 
     def forward(
-        self, latent_rep: torch.Tensor, beliefs: torch.Tensor, action_onehot: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        out = super().forward(latent_rep, beliefs, action_onehot)
-        return torch.split(out, self.output_sizes, dim=1)
+        self, latent: Tensor, belief: Optional[Tensor], action_onehot: Tensor
+    ) -> DynamicsReturn:
+        result = self.fc_forward(latent, belief, action_onehot)
+        latent, belief, reward = torch.split(result, self.output_sizes, dim=1)
+        return latent, belief if belief.numel() > 0 else None, reward
