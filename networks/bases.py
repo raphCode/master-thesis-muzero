@@ -4,16 +4,15 @@ from typing import Any, Optional
 import torch
 import torch.nn as nn
 from attrs import define
+from torch import Tensor
 
 
 class NetworkBase(nn.Module, ABC):
     @abstractmethod
-    def forward(self, *args: Any, **kwargs: Any) -> tuple[torch.Tensor, ...]:
+    def forward(self, *args: Any, **kwargs: Any) -> tuple[Tensor, ...]:
         pass
 
-    def si(
-        self, *inputs: Optional[torch.Tensor], **kwargs: Any
-    ) -> tuple[torch.Tensor, ...]:
+    def si(self, *inputs: Optional[Tensor], **kwargs: Any) -> tuple[Tensor, ...]:
         """
         single interference, automatically adds/removes batch dimensions on in/outputs.
         """
@@ -27,8 +26,8 @@ class RepresentationNet(NetworkBase):
     @abstractmethod
     def forward(
         self,
-        *observations: torch.Tensor,
-    ) -> torch.Tensor:
+        *observations: Tensor,
+    ) -> Tensor:
         pass
 
 
@@ -36,8 +35,8 @@ class PredictionNet(NetworkBase):
     # Latent, Belief -> Value, Policy, CurrentPlayer
     @abstractmethod
     def forward(
-        self, latent: torch.Tensor, belief: Optional[torch.Tensor], logits: bool = False
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        self, latent: Tensor, belief: Optional[Tensor], logits: bool = False
+    ) -> tuple[Tensor, Tensor, Tensor]:
         pass
 
 
@@ -46,10 +45,10 @@ class DynamicsNet(NetworkBase):
     @abstractmethod
     def forward(
         self,
-        latent: torch.Tensor,
-        belief: Optional[torch.Tensor],
-        action_onehot: torch.Tensor,
-    ) -> tuple[torch.Tensor, Optional[torch.Tensor], torch.Tensor]:
+        latent: Tensor,
+        belief: Optional[Tensor],
+        action_onehot: Tensor,
+    ) -> tuple[Tensor, Optional[Tensor], Tensor]:
         pass
 
 
@@ -58,5 +57,5 @@ class Networks:
     representation: RepresentationNet
     prediction: PredictionNet
     dynamics: DynamicsNet
-    initial_latent: torch.Tensor
-    initial_belief: Optional[torch.Tensor]
+    initial_latent: Tensor
+    initial_belief: Optional[Tensor]
