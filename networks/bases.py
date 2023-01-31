@@ -1,18 +1,20 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any, Generic, TypeVar, Optional, TypeAlias
 
 import torch
 import torch.nn as nn
 from attrs import define
 from torch import Tensor
 
+Return = TypeVar("Return", bound=Tensor | tuple[Optional[Tensor], ...])
 
-class NetworkBase(nn.Module, ABC):
+
+class NetworkBase(nn.Module, ABC, Generic[Return]):
     @abstractmethod
-    def forward(self, *args: Any, **kwargs: Any) -> tuple[Tensor, ...]:
+    def forward(self, *args: Any, **kwargs: Any) -> Return:
         pass
 
-    def si(self, *inputs: Optional[Tensor], **kwargs: Any) -> tuple[Tensor, ...]:
+    def si(self, *inputs: Any, **kwargs: Any) -> Return:
         """
         single interference, automatically adds/removes batch dimensions on in/outputs.
         """
@@ -21,26 +23,35 @@ class NetworkBase(nn.Module, ABC):
         return tuple(torch.squeeze(r, 0) for r in results)
 
 
-class RepresentationNet(NetworkBase):
+RepresentationReturn: TypeAlias = Tensor
+
+
+class RepresentationNet(NetworkBase[RepresentationReturn]):
     # Observations (may include NumberPlayers, CurrentPlayer, TeamInfo) -> Latent
     @abstractmethod
     def forward(
         self,
         *observations: Tensor,
-    ) -> Tensor:
+    ) -> RepresentationReturn:
         pass
 
 
-class PredictionNet(NetworkBase):
+PredictionReturn: TypeAlias = tuple[Tensor, Tensor, Tensor]
+
+
+class PredictionNet(NetworkBase[PredictionReturn]):
     # Latent, Belief -> Value, Policy, CurrentPlayer
     @abstractmethod
     def forward(
         self, latent: Tensor, belief: Optional[Tensor], logits: bool = False
-    ) -> tuple[Tensor, Tensor, Tensor]:
+    ) -> PredictionReturn:
         pass
 
 
-class DynamicsNet(NetworkBase):
+DynamicsReturn: TypeAlias = tuple[Tensor, Optional[Tensor], Tensor]
+
+
+class DynamicsNet(NetworkBase[DynamicsReturn]):
     # Latent, Belief, Action -> Latent, Belief, Reward
     @abstractmethod
     def forward(
@@ -48,7 +59,7 @@ class DynamicsNet(NetworkBase):
         latent: Tensor,
         belief: Optional[Tensor],
         action_onehot: Tensor,
-    ) -> tuple[Tensor, Optional[Tensor], Tensor]:
+    ) -> DynamicsReturn:
         pass
 
 
