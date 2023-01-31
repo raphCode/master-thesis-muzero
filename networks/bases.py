@@ -1,10 +1,13 @@
+import functools
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar, Optional, TypeAlias
+from typing import Any, Generic, TypeVar, Callable, Optional, TypeAlias
 
 import torch
 import torch.nn as nn
 from attrs import define
 from torch import Tensor
+
+from utils import optional_map
 
 Return = TypeVar("Return", bound=Tensor | tuple[Optional[Tensor], ...])
 
@@ -18,9 +21,19 @@ class NetworkBase(nn.Module, ABC, Generic[Return]):
         """
         single interference, automatically adds/removes batch dimensions on in/outputs.
         """
-        maybe_unsqueeze = lambda x: torch.unsqueeze(x, 0) if x is not None else None
-        results = self(*map(maybe_unsqueeze, inputs), **kwargs)
-        return tuple(torch.squeeze(r, 0) for r in results)
+
+        def build_fn(
+            fn: Callable[[Tensor, int], Tensor]
+        ) -> Callable[[Optional[Tensor]], Optional[Tensor]]:
+            return optional_map(functools.partial(fn, dim=0))
+
+        unsqueeze = build_fn(torch.unsqueeze)
+        squeeze = build_fn(torch.squeeze)
+
+        result = self(*map(unsqueeze, inputs), **kwargs)
+        if isinstance(result, tuple):
+            return map(squeeze, result)  # type: ignore [return-value]
+        return squeeze(result)  # type: ignore [return-value]
 
 
 RepresentationReturn: TypeAlias = Tensor
