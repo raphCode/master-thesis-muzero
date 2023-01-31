@@ -133,7 +133,7 @@ class Game(ABC):
     def has_chance_player(self) -> bool:
         """
         Returns wheter the game models a chance player.
-        The prediction network output should then be sized to max_num_players + 1.
+        The prediction output CurrentPlayer should then be sized to max_num_players + 1.
         """
         pass
 
