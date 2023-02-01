@@ -1,28 +1,59 @@
 import itertools
 from abc import ABC, abstractmethod
 from typing import Optional, TypedDict
-from functools import cached_property
-from collections.abc import Collection
+from functools import lru_cache, cached_property
+from collections import defaultdict
+from collections.abc import Sequence, Collection
 
 import torch
+from attrs import frozen
 
 
+class Teams:
+    """
+    Contains information about which players are in a team.
+    """
+
+    teams: defaultdict[int, set[int]]
+
+    def __init__(self, team_definitions: Collection[Collection[int]]):
+        assert all(
+            len(t) > 1 for t in team_definitions
+        ), "All teams must have at least 2 players"
+        for ta, tb in itertools.combinations(team_definitions, 2):
+            assert set(ta).isdisjoint(tb), f"Teams are not disjoint: {ta} and {tb}"
+        self.teams = defaultdict(set)
+        for team in team_definitions:
+            for a, b in itertools.permutations(set(team), 2):
+                self.teams[a].add(b)
+
+    @lru_cache(maxsize=1024)
+    def __contains__(self, item: object) -> bool:
+        """
+        Tests wheter the given sequence of player ids are in the same team.
+        """
+        assert isinstance(item, Sequence)
+        assert len(item) > 1
+        assert all(isinstance(x, int) for x in item)
+        member, *rest = item
+        return self.teams[member].issuperset(rest)
+
+    def __getitem__(self, item: object) -> frozenset[int]:
+        """
+        Return the other team members for this player id.
+        """
+        assert isinstance(item, int)
+        return frozenset(self.teams[item])
+
+
+@frozen
 class MatchData:
     """
     Data which is static for a single match / playout.
     """
 
     num_players: int
-    teammates: frozenset[tuple[int, int]]
-
-    def __init__(self, num_players: int, teams: Collection[Collection[int]]):
-        self.num_players = num_players
-        for a, b in itertools.combinations(teams, 2):
-            assert set(a).isdisjoint(b), f"Teams are not disjoint: {a} and {b}"
-        make_team_tuples = lambda t: itertools.permutations(t, 2)
-        self.teammates = frozenset(
-            itertools.chain.from_iterable(map(make_team_tuples, teams))  # type: ignore [arg-type]
-        )
+    teams: Teams
 
 
 class GameStateInit(TypedDict):
