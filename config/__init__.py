@@ -96,7 +96,6 @@ def populate_config(cfg: DictConfig) -> None:
     ensure_callable(cfg.mcts, "node_action_fn")
     ensure_callable(cfg.mcts, "node_target_policy_fn")
     ensure_callable(cfg.mcts, "node_selection_score_fn")
-    ensure_callable(cfg.players, "is_teammate_fn")
 
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
         # empty list [] in config creates None values for belief

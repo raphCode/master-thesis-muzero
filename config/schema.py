@@ -40,7 +40,6 @@ if TYPE_CHECKING:  # RUNTIME TYPES
     from fn.action import action_fn
     from fn.policy import policy_fn
     from fn.reward import reward_fn
-    from fn.teammate import teammate_fn
     from fn.selection import selection_fn
 else:  # OMEGACONF SCHEMA TYPES
     # For omegaconf, just use a dataclass that requires the _target_ config key
@@ -59,7 +58,6 @@ else:  # OMEGACONF SCHEMA TYPES
     action_fn = fn
     policy_fn = fn
     reward_fn = fn
-    teammate_fn = fn
     selection_fn = fn
 
 
@@ -134,7 +132,6 @@ class TrainConfig:
 @frozen
 class PlayerConfig:
     instances: list[Player]
-    is_teammate_fn: teammate_fn
 
 
 @frozen

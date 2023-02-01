@@ -1,3 +1,1 @@
-instances:
-    - _target_: rl_player.RLPlayer
-is_teammate_fn: fn.teammate.no
+
