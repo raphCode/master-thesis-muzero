@@ -3,12 +3,12 @@ from collections.abc import Callable, Sequence
 
 import numpy as np
 
-from mcts import ObservationNode
+from mcts import Node
 from config import C
 
 from .util import softmax, get_values_where_expanded
 
-policy_fn: TypeAlias = Callable[[ObservationNode], Sequence[float]]
+policy_fn: TypeAlias = Callable[[Node], Sequence[float]]
 
 
 def assert_fn_type(fn: policy_fn) -> None:

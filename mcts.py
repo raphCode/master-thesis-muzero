@@ -69,43 +69,6 @@ class NodeBase(ABC):
         pass
 
 
-class ObservationNode(NodeBase):
-    """
-    Create child Nodes using the observation network, based on:
-    - an observation
-    - a random latent drawn from a list (usually from previous searches)
-
-    Only used as the tree root.
-    """
-
-    latents: tuple[Tensor, ...]
-
-    def __init__(
-        self,
-        latents_with_probs: Optional[Iterable[tuple[Tensor, float]]],
-        *observations: Tensor,
-        nets: Networks,
-    ):
-        if latents_with_probs is not None:
-            latent_tuple, probs = zip(*latents_with_probs)
-            latents = torch.stack(latent_tuple)
-        else:
-            latents = None
-            probs = (1,)
-
-        # compute all the latents right away: it is very likely that all of them are
-        # acessed at some time, because this is the tree root Node
-        # single observation, multiple latents: might improve performance in some networks
-        child_latents = nets.representation(
-            latents, *(o.unsqueeze(0) for o in observations)
-        )
-        self.latents = tuple(child_latents)
-        super().__init__(probs=probs)
-
-    def _create_child_at(self, action: int, nets: Networks) -> "Node":
-        return Node(self.latents[action], 0.0, nets)
-
-
 class Node(NodeBase):
     """
     Create child Nodes using the dynamics network, based on:

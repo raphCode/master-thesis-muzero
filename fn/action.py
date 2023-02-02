@@ -3,14 +3,14 @@ from collections.abc import Callable
 
 import numpy as np
 
-from mcts import ObservationNode
+from mcts import Node
 from config import C
 
 from .util import softmax, get_values_where_expanded
 
 rng = np.random.default_rng()
 
-action_fn: TypeAlias = Callable[[ObservationNode, int], int]
+action_fn: TypeAlias = Callable[[Node, int], int]
 
 
 def assert_fn_type(fn: action_fn) -> None:
