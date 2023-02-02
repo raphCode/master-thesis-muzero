@@ -4,7 +4,7 @@ from functools import cached_property
 import torch
 import pyspiel
 
-from .bases import Game, GameState, MatchData, GameStateInit
+from .bases import Game, Teams, GameState, MatchData, GameStateInit
 
 
 class OpenSpielGameState(GameState):
@@ -67,6 +67,7 @@ class OpenSpielGameState(GameState):
 
 class OpenSpielGame(Game):
     game: pyspiel.Game
+    teams: Teams
 
     def __init__(
         self,
@@ -81,7 +82,7 @@ class OpenSpielGame(Game):
         assert (bad_move_reward is None) != (
             bad_move_action is None
         ), "Exactly one of 'bad_move_reward' or 'bad_move_action' must be given"
-        self.teams = teams
+        self.teams = Teams(teams)
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
 
     def new_initial_state(self) -> OpenSpielGameState:
