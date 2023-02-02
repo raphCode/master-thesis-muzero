@@ -22,4 +22,4 @@ repos:
     hooks:
     -   id: mypy
         name: mypy (python)
-        args: ["--follow-imports", "silent"]
+        args: ["--follow-imports=silent"]
