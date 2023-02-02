@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, cast
+from typing import Optional
 from collections.abc import Iterable
 
 import numpy as np
@@ -8,7 +8,6 @@ import torch.nn.functional as F
 from torch import Tensor
 
 from config import C
-from trajectory import PlayerType
 from fn.selection import selection_fn
 from networks.bases import Networks
 
@@ -115,23 +114,28 @@ class Node(NodeBase):
 
     reward: float
     value_pred: float
+    current_player: int
     latent: Tensor
-    player_type: PlayerType
+    belief: Optional[Tensor]
 
-    def __init__(self, latent: Tensor, reward: float, nets: Networks):
+    def __init__(
+        self, latent: Tensor, belief: Optional[Tensor], reward: float, nets: Networks
+    ):
         self.latent = latent
+        self.belief = belief
         self.reward = reward
-        value_pred, probs, player_type = nets.prediction.si(self.latent)
+        value_pred, probs, current_player = nets.prediction.si(latent, belief)
         self.value_pred = value_pred.item()
-        self.player_type = PlayerType(cast(int, player_type.argmax().item()))
+        self.current_player = current_player.argmax().item()  # type:ignore [assignment]
         super().__init__(probs=probs)
 
     def _create_child_at(self, action: int, nets: Networks) -> "Node":
-        latent, reward = nets.dynamics.si(
+        latent, belief, reward = nets.dynamics.si(
             self.latent,
+            self.belief,
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
-        return Node(latent, reward.item(), nets)
+        return Node(latent, belief, reward.item(), nets)
 
 
 def ensure_visit_count(
