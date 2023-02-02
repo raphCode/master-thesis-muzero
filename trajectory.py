@@ -1,6 +1,5 @@
 import operator
 import functools
-from enum import IntEnum
 from typing import Deque, Optional
 from collections import deque
 from collections.abc import Sequence
@@ -12,19 +11,6 @@ import torch.nn.functional as F
 from attrs import frozen
 
 from config import C
-
-
-class PlayerType(IntEnum):
-    """
-    Reprents whose turn it is as seen by a specific player.
-    This is important in the recorded trajectories and in the tree search.
-    The chance player models randomness in a game by taking a random action.
-    """
-
-    Self = 0
-    Chance = 1
-    Opponent = 2
-    Teammate = 3
 
 
 @frozen(kw_only=True)
