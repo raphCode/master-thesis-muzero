@@ -68,6 +68,8 @@ class OpenSpielGameState(GameState):
 class OpenSpielGame(Game):
     game: pyspiel.Game
     teams: Teams
+    bad_move_reward: Optional[float]
+    bad_move_action: Optional[int]
 
     def __init__(
         self,
