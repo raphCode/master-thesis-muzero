@@ -4,7 +4,7 @@ from functools import cached_property
 import torch
 import pyspiel
 
-from .bases import Game, Teams, GameState, MatchData, GameStateInit
+from .bases import Game, Teams, GameState, MatchData, GameStateInitKwArgs
 
 
 class OpenSpielGameState(GameState):
@@ -12,7 +12,7 @@ class OpenSpielGameState(GameState):
     game: "OpenSpielGame"
     invalid: bool
 
-    def __init__(self, state: pyspiel.State, **kwargs: Unpack[GameStateInit]):
+    def __init__(self, state: pyspiel.State, **kwargs: Unpack[GameStateInitKwArgs]):
         self.state = state
         self.invalid = False
         super().__init__(**kwargs)

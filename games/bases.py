@@ -56,7 +56,7 @@ class MatchData:
     teams: Teams
 
 
-class GameStateInit(TypedDict):
+class GameStateInitKwArgs(TypedDict):
     game: "Game"
     match_data: MatchData
 
