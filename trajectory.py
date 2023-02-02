@@ -1,6 +1,6 @@
 import operator
 import functools
-from typing import Deque, Optional
+from typing import Deque, Optional, TypeAlias
 from collections import deque
 from collections.abc import Sequence
 
@@ -9,26 +9,42 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from attrs import frozen
+from torch import Tensor
 
 from config import C
 
 
-@frozen(kw_only=True)
+@frozen
+class InitialTensor:
+    """
+    Indicates that the initial belief or latent should be used.
+    This must be encoded in a special type because information may get sent between
+    multiple processes, so sentinel values in form of object instances won't necessarily
+    compare equals in different processes.
+    """
+
+    pass
+
+
+@frozen
 class ObservationInfo:
-    observation: tuple[torch.Tensor]
-    prev_beliefs: torch.Tensor  # from previous state, for representation inference
+    observations: tuple[Tensor, ...]
+    belief: Optional[Tensor | InitialTensor]
 
 
-@frozen(kw_only=True)
+@frozen
 class LatentInfo:
-    latent_rep: Optional[torch.Tensor]
-    beliefs: Optional[torch.Tensor]
+    latent: Tensor | InitialTensor
+    belief: Optional[Tensor | InitialTensor]
+
+
+InfoType: TypeAlias = ObservationInfo | LatentInfo
 
 
 @frozen(kw_only=True)
 class TrajectoryState:
-    info: ObservationInfo | LatentInfo
-    player_type: PlayerType
+    info: InfoType
+    current_player: int
     action: int
     target_policy: Sequence[float]
     mcts_value: float
