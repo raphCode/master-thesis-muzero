@@ -1,5 +1,5 @@
 from typing import TypeAlias
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 
 import numpy as np
 
@@ -10,7 +10,7 @@ from .util import softmax, get_values_where_expanded
 
 rng = np.random.default_rng()
 
-action_fn: TypeAlias = Callable[[Node, int], int]
+action_fn: TypeAlias = Callable[[Node], int]
 
 
 def assert_fn_type(fn: action_fn) -> None:
