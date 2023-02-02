@@ -1,9 +1,16 @@
-from typing import NamedTuple
+from collections.abc import Sequence
 
-import torch
+from attrs import frozen
+
+from trajectory import InfoType
 
 
-class RLPResult(NamedTuple):
-    action: int
-    old_beliefs: torch.Tensor
+@frozen(kw_only=True)
+class TrainingInfo:
+    """
+    Information recorded by the RLPlayers to enable training.
+    """
+
+    info: InfoType
+    target_policy: Sequence[float]
     mcts_value: float
