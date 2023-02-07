@@ -125,3 +125,15 @@ class PerfectInformationRLPlayer(RLBase):
     def other_player_move(self, action: int) -> None:
         self.root_node = self.root_node.get_create_child(action, self.nets)
         self.info = LatentInfo(self.root_node.latent, self.root_node.belief)
+
+
+class NoBeliefsRLPlayer(PerfectInformationRLPlayer):
+    """
+    Like the original MuZero, uses no beliefs, runs new tree search on each observation.
+    Disabling beliefs means the agent does not make use of intermediate actions in the
+    next own move. This means the implementation is safe for imperfect-information games.
+    """
+
+    def __init__(self, *args: Unpack[RLBaseInitArgs], **kwargs: Unpack[RLBaseInitKwArgs]):
+        super().__init__(*args, **kwargs)
+        assert C.networks.belief_shape is None
