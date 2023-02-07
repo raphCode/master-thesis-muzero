@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Unpack, Optional, TypeAlias, TypedDict
 from collections.abc import Sequence
 
 import torch
@@ -7,7 +7,7 @@ from attrs import frozen
 
 from mcts import Node, ensure_visit_count
 from config import C
-from trajectory import InfoType, LatentInfo, InitialTensor
+from trajectory import InfoType, LatentInfo, InitialTensor, ObservationInfo
 from config.schema import MctsConfig
 from networks.bases import Networks
 
@@ -21,6 +21,13 @@ class TrainingInfo:
     info: InfoType
     target_policy: Sequence[float]
     mcts_value: float
+
+
+RLBaseInitArgs: TypeAlias = tuple[Networks]
+
+
+class RLBaseInitKwArgs(TypedDict):
+    mcts_cfg: Optional[MctsConfig]
 
 
 class RLBase(ABC):
@@ -89,3 +96,32 @@ class RLBase(ABC):
             target_policy=self.mcts_cfg.node_target_policy_fn(self.root_node),
             mcts_value=self.root_node.value,
         )
+
+
+class PerfectInformationRLPlayer(RLBase):
+    """
+    Uses beliefs to propagate information to new observations.
+    To find the correct belief at the next own move, the tree search / dynamics network
+    follows along the actual game trajectory with all actions of other players.
+    This behaviour is only sound if the game is of perfect information, as any
+    intermediate moves would be revealed in the next observation anyways.
+    """
+
+    def __init__(self, *args: Unpack[RLBaseInitArgs], **kwargs: Unpack[RLBaseInitKwArgs]):
+        super().__init__(*args, **kwargs)
+
+    def own_move(self, *observations: torch.Tensor) -> int:
+        self.info = ObservationInfo(observations, self.root_node.belief)
+        latent, belief = self.nets.representation.si(None, *observations)
+        self.root_node = Node(latent, belief, 0, self.nets)
+        ensure_visit_count(
+            self.root_node,
+            self.mcts_cfg.iterations_move_selection,
+            self.mcts_cfg.node_selection_score_fn,
+            self.nets,
+        )
+        return self.mcts_cfg.node_action_fn(self.root_node)
+
+    def other_player_move(self, action: int) -> None:
+        self.root_node = self.root_node.get_create_child(action, self.nets)
+        self.info = LatentInfo(self.root_node.latent, self.root_node.belief)
