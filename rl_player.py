@@ -1,8 +1,15 @@
+from abc import ABC, abstractmethod
+from typing import Optional
 from collections.abc import Sequence
 
+import torch
 from attrs import frozen
 
-from trajectory import InfoType
+from mcts import Node, ensure_visit_count
+from config import C
+from trajectory import InfoType, LatentInfo, InitialTensor
+from config.schema import MctsConfig
+from networks.bases import Networks
 
 
 @frozen(kw_only=True)
@@ -14,3 +21,71 @@ class TrainingInfo:
     info: InfoType
     target_policy: Sequence[float]
     mcts_value: float
+
+
+class RLBase(ABC):
+    """
+    Base class for reinforcement learning agents that use MCTS with neural nets.
+    Throughout a game, they collect information that can be used to create training data.
+    """
+
+    nets: Networks
+    mcts_cfg: MctsConfig
+    root_node: Node
+    info: InfoType
+
+    def __init__(self, nets: Networks, mcts_cfg: Optional[MctsConfig] = None):
+        self.nets = nets
+        self.mcts_cfg = mcts_cfg or C.mcts
+        self.reset_new_game()
+
+    def reset_new_game(self) -> None:
+        """
+        Called whenever a new game starts.
+        """
+        self.info = LatentInfo(
+            InitialTensor(),
+            InitialTensor() if C.networks.belief_shape is not None else None,
+        )
+        self.root_node = Node(
+            self.nets.initial_latent, self.nets.initial_belief, 0, self.nets
+        )
+
+    @abstractmethod
+    def own_move(self, *observations: torch.Tensor) -> int:
+        """
+        Called when agent is at turn with current observations, returns action to take.
+        Must set self.info.
+        """
+        pass
+
+    @abstractmethod
+    def other_player_move(self, action: int) -> None:
+        """
+        Called when any other player made their move of the provided action.
+        The information which action the other players took is intended be used only to
+        create an accurate training trajectory, it must not be used for advantage in
+        future own moves.
+        Must set self.info.
+        """
+        pass
+
+    def create_training_info(self) -> TrainingInfo:
+        """
+        Called after each move, to record information for training.
+        Uses self.info so it is important this attribute is correcty set on own or other
+        players' moves.
+        """
+        # This expands the part of the tree more that represents the actual trajectory.
+        # This is an information leak when beliefs are searched in the tree in the next move.
+        ensure_visit_count(
+            self.root_node,
+            self.mcts_cfg.iterations_value_estimate,
+            self.mcts_cfg.node_selection_score_fn,
+            self.nets,
+        )
+        return TrainingInfo(
+            info=self.info,
+            target_policy=self.mcts_cfg.node_target_policy_fn(self.root_node),
+            mcts_value=self.root_node.value,
+        )
