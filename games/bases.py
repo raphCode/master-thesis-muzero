@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import itertools
 from abc import ABC, abstractmethod
 from typing import Optional, TypedDict
@@ -57,7 +59,7 @@ class MatchData:
 
 
 class GameStateInitKwArgs(TypedDict):
-    game: "Game"
+    game: Game
     match_data: MatchData
 
 
@@ -68,9 +70,9 @@ class GameState(ABC):
     """
 
     match_data: MatchData
-    game: "Game"
+    game: Game
 
-    def __init__(self, game: "Game", match_data: MatchData):
+    def __init__(self, game: Game, match_data: MatchData):
         self.game = game
         self.match_data = match_data
 

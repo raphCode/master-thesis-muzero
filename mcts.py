@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Optional
 from collections.abc import Iterable
@@ -32,7 +34,7 @@ class NodeBase(ABC):
     value_sum: float
     visit_count: int
     probs: tuple[float, ...]
-    children: dict[int, "Node"]
+    children: dict[int, Node]
 
     def __init__(self, probs: Iterable[float]) -> None:
         self.probs = tuple(probs)
@@ -56,7 +58,7 @@ class NodeBase(ABC):
         # sum to 1' otherwise.
         return rng.choice(len(self.probs), p=np.array(self.probs, dtype=np.float32))
 
-    def get_create_child(self, action: int, nets: Networks) -> "Node":
+    def get_create_child(self, action: int, nets: Networks) -> Node:
         """
         Returns the child node for the given action, creating it first if necessary.
         """
@@ -65,7 +67,7 @@ class NodeBase(ABC):
         return self.children[action]
 
     @abstractmethod
-    def _create_child_at(self, action: int, nets: Networks) -> "Node":
+    def _create_child_at(self, action: int, nets: Networks) -> Node:
         pass
 
 
