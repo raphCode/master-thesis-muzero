@@ -111,8 +111,8 @@ class PerfectInformationRLPlayer(RLBase):
 
     def own_move(self, *observations: torch.Tensor) -> int:
         self.representation = Observation(observations)
-        latent, belief = self.nets.representation.si(None, *observations)
-        self.root_node = Node(latent, belief, 0, self.nets)
+        latent = self.nets.representation.si(None, *observations)
+        self.root_node = Node(latent, self.root_node.belief, 0, self.nets)
         ensure_visit_count(
             self.root_node,
             self.mcts_cfg.iterations_move_selection,
