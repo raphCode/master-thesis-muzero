@@ -7,7 +7,7 @@ from attrs import frozen
 
 from mcts import Node, ensure_visit_count
 from config import C
-from trajectory import InfoType, LatentInfo, InitialTensor, ObservationInfo
+from trajectory import Latent, Observation, InitialTensor
 from config.schema import MctsConfig
 from networks.bases import Networks
 
@@ -18,7 +18,7 @@ class TrainingInfo:
     Information recorded by the RLPlayers to enable training.
     """
 
-    info: InfoType
+    representation: Observation | Latent
     target_policy: Sequence[float]
     mcts_value: float
 
@@ -39,7 +39,7 @@ class RLBase(ABC):
     nets: Networks
     mcts_cfg: MctsConfig
     root_node: Node
-    info: InfoType
+    representation: Observation | Latent
 
     def __init__(self, nets: Networks, mcts_cfg: Optional[MctsConfig] = None):
         self.nets = nets
@@ -50,7 +50,7 @@ class RLBase(ABC):
         """
         Called whenever a new game starts.
         """
-        self.info = LatentInfo(
+        self.representation = Latent(
             InitialTensor(),
             InitialTensor() if C.networks.belief_shape is not None else None,
         )
@@ -62,7 +62,7 @@ class RLBase(ABC):
     def own_move(self, *observations: torch.Tensor) -> int:
         """
         Called when agent is at turn with current observations, returns action to take.
-        Must set self.info.
+        Must set self.representation.
         """
         pass
 
@@ -73,15 +73,15 @@ class RLBase(ABC):
         The information which action the other players took is intended be used only to
         create an accurate training trajectory, it must not be used for advantage in
         future own moves.
-        Must set self.info.
+        Must set self.representation.
         """
         pass
 
     def create_training_info(self) -> TrainingInfo:
         """
         Called after each move, to record information for training.
-        Uses self.info so it is important this attribute is correcty set on own or other
-        players' moves.
+        Uses self.representation so it is important this attribute is correcty set on own
+        or other players' moves.
         """
         # This expands the part of the tree more that represents the actual trajectory.
         # This is an information leak when beliefs are searched in the tree in the next move.
@@ -92,7 +92,7 @@ class RLBase(ABC):
             self.nets,
         )
         return TrainingInfo(
-            info=self.info,
+            representation=self.representation,
             target_policy=self.mcts_cfg.node_target_policy_fn(self.root_node),
             mcts_value=self.root_node.value,
         )
@@ -111,7 +111,7 @@ class PerfectInformationRLPlayer(RLBase):
         super().__init__(*args, **kwargs)
 
     def own_move(self, *observations: torch.Tensor) -> int:
-        self.info = ObservationInfo(observations, self.root_node.belief)
+        self.representation = Observation(observations, self.root_node.belief)
         latent, belief = self.nets.representation.si(None, *observations)
         self.root_node = Node(latent, belief, 0, self.nets)
         ensure_visit_count(
@@ -124,7 +124,7 @@ class PerfectInformationRLPlayer(RLBase):
 
     def other_player_move(self, action: int) -> None:
         self.root_node = self.root_node.get_create_child(action, self.nets)
-        self.info = LatentInfo(self.root_node.latent, self.root_node.belief)
+        self.representation = Latent(self.root_node.latent, self.root_node.belief)
 
 
 class NoBeliefsRLPlayer(PerfectInformationRLPlayer):

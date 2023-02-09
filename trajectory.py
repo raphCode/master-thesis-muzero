@@ -1,6 +1,6 @@
 import operator
 import functools
-from typing import Deque, Optional, TypeAlias
+from typing import Deque, Optional
 from collections import deque
 from collections.abc import Sequence
 
@@ -27,23 +27,20 @@ class InitialTensor:
 
 
 @frozen
-class ObservationInfo:
+class Observation:
     observations: tuple[Tensor, ...]
     belief: Optional[Tensor | InitialTensor]
 
 
 @frozen
-class LatentInfo:
+class Latent:
     latent: Tensor | InitialTensor
     belief: Optional[Tensor | InitialTensor]
 
 
-InfoType: TypeAlias = ObservationInfo | LatentInfo
-
-
 @frozen(kw_only=True)
 class TrajectoryState:
-    info: InfoType
+    representation: Observation | Latent
     current_player: int
     action: int
     target_policy: Sequence[float]
