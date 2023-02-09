@@ -35,6 +35,12 @@ class RLBase(ABC):
     """
     Base class for reinforcement learning agents that use MCTS with neural nets.
     Throughout a game, they collect information that can be used to create training data.
+
+    The class keeps track of the game state by storing either the current Observation or a
+    Latent representation. This state is used to return a TrainingInfo instance on
+    create_training_info().
+    The state is only ever advanced by calling advance_game_state(), not by own_move().
+    The latter only stores the current observation.
     """
 
     nets: Networks
@@ -60,18 +66,20 @@ class RLBase(ABC):
     def own_move(self, *observations: torch.Tensor) -> int:
         """
         Called when agent is at turn with current observations, returns action to take.
-        Must set self.representation.
+        This must not advance the internal game state with the returned action, only store
+        the observation.
+        Must set self.representation to an Observation instance.
         """
         pass
 
     @abstractmethod
-    def other_player_move(self, action: int) -> None:
+    def advance_game_state(self, action: int) -> None:
         """
-        Called when any other player made their move of the provided action.
+        Called after any player (even this one) made their move of the provided action.
         The information which action the other players took is intended be used only to
         create an accurate training trajectory, it must not be used for advantage in
         future own moves.
-        Must set self.representation.
+        Must set self.representation to a Latent instance.
         """
         pass
 
@@ -79,7 +87,7 @@ class RLBase(ABC):
         """
         Called after each move, to record information for training.
         Uses self.representation so it is important this attribute is correcty set on own
-        or other players' moves.
+        and other players' moves.
         """
         # This expands the part of the tree more that represents the actual trajectory.
         # This is an information leak when beliefs are searched in the tree in the next move.
@@ -121,7 +129,7 @@ class PerfectInformationRLPlayer(RLBase):
         )
         return self.mcts_cfg.node_action_fn(self.root_node)
 
-    def other_player_move(self, action: int) -> None:
+    def advance_game_state(self, action: int) -> None:
         self.root_node = self.root_node.get_create_child(action, self.nets)
         self.representation = Latent(self.root_node.latent)
 
