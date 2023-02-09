@@ -7,7 +7,7 @@ from attrs import frozen
 
 from mcts import Node, ensure_visit_count
 from config import C
-from trajectory import Latent, Observation, InitialTensor
+from trajectory import Latent, Observation
 from config.schema import MctsConfig
 from networks.bases import Networks
 
@@ -19,6 +19,7 @@ class TrainingInfo:
     """
 
     representation: Observation | Latent
+    belief: Optional[torch.Tensor]
     target_policy: Sequence[float]
     mcts_value: float
 
@@ -50,10 +51,7 @@ class RLBase(ABC):
         """
         Called whenever a new game starts.
         """
-        self.representation = Latent(
-            InitialTensor(),
-            InitialTensor() if C.networks.belief_shape is not None else None,
-        )
+        self.representation = Latent(self.nets.initial_latent)
         self.root_node = Node(
             self.nets.initial_latent, self.nets.initial_belief, 0, self.nets
         )
@@ -93,6 +91,7 @@ class RLBase(ABC):
         )
         return TrainingInfo(
             representation=self.representation,
+            belief=self.root_node.belief,
             target_policy=self.mcts_cfg.node_target_policy_fn(self.root_node),
             mcts_value=self.root_node.value,
         )
@@ -111,7 +110,7 @@ class PerfectInformationRLPlayer(RLBase):
         super().__init__(*args, **kwargs)
 
     def own_move(self, *observations: torch.Tensor) -> int:
-        self.representation = Observation(observations, self.root_node.belief)
+        self.representation = Observation(observations)
         latent, belief = self.nets.representation.si(None, *observations)
         self.root_node = Node(latent, belief, 0, self.nets)
         ensure_visit_count(
@@ -124,7 +123,7 @@ class PerfectInformationRLPlayer(RLBase):
 
     def other_player_move(self, action: int) -> None:
         self.root_node = self.root_node.get_create_child(action, self.nets)
-        self.representation = Latent(self.root_node.latent, self.root_node.belief)
+        self.representation = Latent(self.root_node.latent)
 
 
 class NoBeliefsRLPlayer(PerfectInformationRLPlayer):

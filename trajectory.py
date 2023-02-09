@@ -15,32 +15,20 @@ from config import C
 
 
 @frozen
-class InitialTensor:
-    """
-    Indicates that the initial belief or latent should be used.
-    This must be encoded in a special type because information may get sent between
-    multiple processes, so sentinel values in form of object instances won't necessarily
-    compare equals in different processes.
-    """
-
-    pass
-
-
-@frozen
 class Observation:
     observations: tuple[Tensor, ...]
-    belief: Optional[Tensor | InitialTensor]
 
 
 @frozen
 class Latent:
-    latent: Tensor | InitialTensor
-    belief: Optional[Tensor | InitialTensor]
+    latent: Tensor
 
 
 @frozen(kw_only=True)
 class TrajectoryState:
+    # the first TrajectoryState in a list is assumed to be with initial tensors
     representation: Observation | Latent
+    belief: Optional[Tensor]
     current_player: int
     action: int
     target_policy: Sequence[float]
