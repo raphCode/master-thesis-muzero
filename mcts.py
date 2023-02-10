@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from collections.abc import Iterable
 
 import numpy as np
@@ -10,8 +10,11 @@ import torch.nn.functional as F
 from torch import Tensor
 
 from config import C
-from fn.selection import selection_fn
 from networks.bases import Networks
+
+if TYPE_CHECKING:
+    # only needed for type annotations, can't import uncondionally due to import cycles
+    from fn.selection import selection_fn
 
 rng = np.random.default_rng()
 
