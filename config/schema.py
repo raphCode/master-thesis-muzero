@@ -1,3 +1,4 @@
+import functools
 from typing import TYPE_CHECKING, Optional, TypeAlias
 from collections.abc import Callable
 
@@ -29,13 +30,19 @@ class PartialInstance(Instance):
 if TYPE_CHECKING:  # RUNTIME TYPES
     # During runtime, the dataclasses are used as containers for the config data.
     # Some of the classes are replaced with instances with actual functionality,
-    # so during typechecking use these classes
-    from torch.optim import Optimizer
-
+    # so during typechecking use the instance or partial types
     from games.bases import Game, Player
-    from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
 
     # isort: split
+    from torch.optim import Optimizer
+
+    OptimizerPartial = functools.partial[Optimizer]
+    from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
+
+    DynamicsNetPartial = functools.partial[DynamicsNet]
+    PredictionNetPartial = functools.partial[PredictionNet]
+    RepresentationNetPartial = functools.partial[RepresentationNet]
+
     from fn.action import action_fn
     from fn.policy import policy_fn
     from fn.reward import reward_fn
@@ -44,10 +51,11 @@ else:  # OMEGACONF SCHEMA TYPES
     # For omegaconf, just use a dataclass that requires the _target_ config key
     Game = Instance
     Player = PartialInstance
-    Optimizer = PartialInstance
-    DynamicsNet = PartialInstance
-    PredictionNet = PartialInstance
-    RepresentationNet = PartialInstance
+    OptimizerPartial = PartialInstance
+
+    DynamicsNetPartial = PartialInstance
+    PredictionNetPartial = PartialInstance
+    RepresentationNetPartial = PartialInstance
 
     # Functions can be python functions or a callable class instances,
     # so actually the type should be str | Instance,
@@ -85,9 +93,9 @@ class NetworkConfig:  # runtime config container
 
 @frozen
 class NetworkSchema:  # omegaconf schema
-    dynamics: DynamicsNet
-    prediction: PredictionNet
-    representation: RepresentationNet
+    dynamics: DynamicsNetPartial
+    prediction: PredictionNetPartial
+    representation: RepresentationNetPartial
     latent_shape: list[int]
     belief_shape: list[int]  # to disable beliefs, use an empty list []
 
@@ -123,7 +131,7 @@ class TrainConfig:
     n_step_return: int
     replay_buffer_size: int
     max_steps_per_episode: int
-    optimizer: Optimizer
+    optimizer: OptimizerPartial
     learning_rates: LearningRates
     loss_weights: LossWeights
 
