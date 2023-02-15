@@ -142,15 +142,18 @@ def populate_config(cfg: DictConfig) -> None:
     assert isinstance(nets.prediction, PredictionNet), net_msg("prediction")
     assert isinstance(nets.dynamics, DynamicsNet), net_msg("dynamics")
 
-    def check_player_instances(cls: type | UnionType) -> Iterable[bool]:
-        return map(lambda i: isinstance(i, cls), C.players.instances)
+    def check_players(cls: type | UnionType) -> Iterable[bool]:
+        return (
+            isinstance(p.func, type) and issubclass(p.func, cls)
+            for p in C.players.instances
+        )
 
     # avoid circular imports:
-    from rl_player import RLPlayer
+    from rl_player import RLBase
 
-    msg = "There must be at least one RLPlayer involved to collect training data!"
-    assert any(check_player_instances(RLPlayer)), msg
-    assert all(check_player_instances(Player | RLPlayer))
+    assert all(check_players(Player | RLBase))
+    msg = "There must be at least one RLBase player involved to collect training data!"
+    assert any(check_players(RLBase)), msg
 
 
 def save_source_code() -> None:
