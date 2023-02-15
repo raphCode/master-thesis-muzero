@@ -22,8 +22,7 @@ class Instance:
 
 
 @frozen
-class PartialInstance:
-    _target_: str
+class PartialInstance(Instance):
     _partial_: bool = True
 
 
