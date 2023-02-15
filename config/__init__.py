@@ -35,10 +35,9 @@ log = logging.getLogger(__name__)
 C = BaseConfig.placeholder()
 
 
-OConfig = DictConfig | ListConfig
-
-
-def traverse_config(cfg: OConfig, callback: Callable[[OConfig, str], None]) -> None:
+def traverse_config(
+    cfg: DictConfig | ListConfig, callback: Callable[[DictConfig | ListConfig, str], None]
+) -> None:
     """
     Traverse a config depth-first and call a function at each node that has str keys.
     """
@@ -55,7 +54,7 @@ def traverse_config(cfg: OConfig, callback: Callable[[OConfig, str], None]) -> N
             traverse_config(item, callback)
 
 
-def merge_structured_config_defaults(cfg: OConfig) -> None:
+def merge_structured_config_defaults(cfg: DictConfig | ListConfig) -> None:
     """
     This function takes an OmegaConf Config and recursively merges the default values of
     the underlying structured config classes in-place.
@@ -66,7 +65,7 @@ def merge_structured_config_defaults(cfg: OConfig) -> None:
     don't allow for default values to propagate into variable-length lists.
     """
 
-    def merge_defaults(cfg: OConfig, key: str) -> None:
+    def merge_defaults(cfg: DictConfig | ListConfig, key: str) -> None:
         t = OmegaConf.get_type(cfg, key)
         if omegaconf._utils.is_structured_config(t):
             d = OmegaConf.to_container(OmegaConf.structured(t))
