@@ -37,6 +37,12 @@ if TYPE_CHECKING:  # RUNTIME TYPES
     from torch.optim import Optimizer
 
     OptimizerPartial = functools.partial[Optimizer]
+
+    from rl_player import RLBase
+    from games.bases import Player
+
+    PlayerPartial: TypeAlias = functools.partial[Player] | functools.partial[RLBase]
+
     from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
 
     DynamicsNetPartial = functools.partial[DynamicsNet]
@@ -50,7 +56,7 @@ if TYPE_CHECKING:  # RUNTIME TYPES
 else:  # OMEGACONF SCHEMA TYPES
     # For omegaconf, just use a dataclass that requires the _target_ config key
     Game = Instance
-    Player = PartialInstance
+    PlayerPartial = PartialInstance
     OptimizerPartial = PartialInstance
 
     DynamicsNetPartial = PartialInstance
@@ -138,7 +144,7 @@ class TrainConfig:
 
 @frozen
 class PlayerConfig:
-    instances: list[Player]
+    instances: list[PlayerPartial]
 
 
 @frozen
