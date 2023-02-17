@@ -36,23 +36,22 @@ C = BaseConfig.placeholder()
 
 
 def traverse_config(
-    cfg: Any,
-    callback: Callable[[DictConfig | ListConfig, Any], None],
+    cfg: DictConfig | ListConfig, callback: Callable[[DictConfig | ListConfig, str], None]
 ) -> None:
     """
-    Traverse a config in postorder and call a function for each entry.
+    Traverse a config depth-first and call a function at each node that has str keys.
     """
-
     if isinstance(cfg, DictConfig):
         for key in cfg:
             if not OmegaConf.is_missing(cfg, key):
                 traverse_config(cfg[key], callback)
+
+            assert type(key) is str
             callback(cfg, key)
 
     elif isinstance(cfg, ListConfig):
-        for key, item in enumerate(cfg):
+        for item in cfg:
             traverse_config(item, callback)
-            callback(cfg, key)
 
 
 def merge_structured_config_defaults(cfg: DictConfig | ListConfig) -> None:
@@ -66,7 +65,7 @@ def merge_structured_config_defaults(cfg: DictConfig | ListConfig) -> None:
     don't allow for default values to propagate into variable-length lists.
     """
 
-    def merge_defaults(cfg: DictConfig | ListConfig, key: Any) -> None:
+    def merge_defaults(cfg: DictConfig | ListConfig, key: str) -> None:
         t = OmegaConf.get_type(cfg, key)
         if omegaconf._utils.is_structured_config(t):
             d = OmegaConf.to_container(OmegaConf.structured(t))
