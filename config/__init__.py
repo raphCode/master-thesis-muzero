@@ -5,7 +5,7 @@ import logging
 import builtins
 import functools
 from types import UnionType
-from typing import Any, Callable, Iterable, cast
+from typing import Any, Iterable, cast
 from collections import defaultdict
 
 import attrs
@@ -35,44 +35,38 @@ log = logging.getLogger(__name__)
 C = BaseConfig.placeholder()
 
 
-def traverse_config(
-    cfg: DictConfig | ListConfig, callback: Callable[[DictConfig | ListConfig, str], None]
-) -> None:
+def merge_structured_config_defaults(cfg: Any) -> None:
     """
-    Traverse a config depth-first and call a function at each node that has str keys.
-    """
-    if isinstance(cfg, DictConfig):
-        for key in cfg:
-            if not OmegaConf.is_missing(cfg, key):
-                traverse_config(cfg[key], callback)
+    This function takes an OmegaConf Config and recursively merges the non-optional
+    default values of the underlying structured config classes in-place.
+    This is necessary because the user config may override important keys in the schema,
+    like _partial_ that control instantiation. Merging the schema defaults ensures the
+    correct values of these keys.
+    Keys set to None in the schema are Optional and may be overridden by the user, so
+    these are not replaced.
 
-            assert type(key) is str
-            callback(cfg, key)
-
-    elif isinstance(cfg, ListConfig):
-        for item in cfg:
-            traverse_config(item, callback)
-
-
-def merge_structured_config_defaults(cfg: DictConfig | ListConfig) -> None:
-    """
-    This function takes an OmegaConf Config and recursively merges the default values of
-    the underlying structured config classes in-place.
-
-    This is because Omegaconf disabled auto-expanding of nested structured configs:
+    This manual implementation is necessary because Omegaconf disabled auto-expanding of
+    nested structured configs, otherwise merging the schema on top of the user config
+    would do the trick:
     https://github.com/omry/omegaconf/issues/412
     The proposed solutions are unnecessary verbose (default assignments) and worse, they
     don't allow for default values to propagate into variable-length lists.
     """
+    if isinstance(cfg, DictConfig):
+        for key in cfg:
+            if not OmegaConf.is_missing(cfg, key):
+                merge_structured_config_defaults(cfg[key])
 
-    def merge_defaults(cfg: DictConfig | ListConfig, key: str) -> None:
-        t = OmegaConf.get_type(cfg, key)
+        t = OmegaConf.get_type(cfg)
         if omegaconf._utils.is_structured_config(t):
-            d = OmegaConf.to_container(OmegaConf.structured(t))
-            with omegaconf.read_write(cfg):
-                OmegaConf.update(cfg, key, d)
+            defaults = OmegaConf.structured(t)
+            for key in cfg:
+                if key in defaults and defaults[key] is not None:
+                    OmegaConf.update(cfg, key, defaults[key])  # type: ignore [arg-type]
 
-    traverse_config(cfg, merge_defaults)
+    elif isinstance(cfg, ListConfig):
+        for item in cfg:
+            merge_structured_config_defaults(item)
 
 
 def populate_config(cfg: DictConfig) -> None:
