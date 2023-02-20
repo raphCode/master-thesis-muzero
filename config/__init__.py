@@ -49,8 +49,7 @@ def merge_structured_config_defaults(cfg: Any) -> None:
     nested structured configs, otherwise merging the schema on top of the user config
     would do the trick:
     https://github.com/omry/omegaconf/issues/412
-    The proposed solutions are unnecessary verbose (default assignments) and worse, they
-    don't allow for default values to propagate into variable-length lists.
+    This manual solution also provides better control over which values are reset.
     """
     if isinstance(cfg, DictConfig):
         for key in cfg:
