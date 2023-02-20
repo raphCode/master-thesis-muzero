@@ -3,7 +3,7 @@ from omegaconf import DictConfig
 from hydra.core.config_store import ConfigStore
 
 import config
-from config.schema import BaseConfig
+from config.schema import BaseConfig, monkeypatch_dictconfig
 
 cs = ConfigStore.instance()
 cs.store(name="hydra_job_config", group="hydra.job", node={"chdir": True})
@@ -17,4 +17,5 @@ def main(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
+    monkeypatch_dictconfig()
     main()

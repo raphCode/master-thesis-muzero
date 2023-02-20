@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 import attrs
 import gorilla
-from attrs import frozen
+from attrs import define, frozen
 from omegaconf import MISSING, DictConfig
 
 from networks.bases import Networks
@@ -16,6 +16,13 @@ The dataclasses are also repurposed to function as containers for the global con
 commonly imported as C, so that static typecheckers can reason about C.
 This also means a bit of hackery by switching types based on TYPE_CHECKING.
 """
+
+if not TYPE_CHECKING:
+    # with the schema merged first, omegaconf needs the structured config to be writeable:
+    # https://github.com/omry/omegaconf/issues/815
+    # This hack of redefining frozen is so that the typechecker knows the config is
+    # supposed to be immutable
+    frozen = define
 
 
 @frozen
@@ -155,7 +162,8 @@ class BaseConfig:
     networks: NetworkContainer
     training: TrainConfig
     players: PlayerConfig
-    defaults: list[dict[str, str]] = [
+    defaults: list[Any] = [
+        "_self_",
         {"game": MISSING},
         {"mcts": MISSING},
         {"networks": MISSING},
