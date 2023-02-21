@@ -10,10 +10,10 @@ from .util import softmax, get_values_where_expanded
 
 rng = np.random.default_rng()
 
-action_fn: TypeAlias = Callable[[Node], int]
+ActionFn: TypeAlias = Callable[[Node], int]
 
 
-def assert_fn_type(fn: action_fn) -> None:
+def assert_fn_type(fn: ActionFn) -> None:
     pass
 
 

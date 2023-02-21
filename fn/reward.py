@@ -1,10 +1,10 @@
 from typing import TypeAlias
 from collections.abc import Callable
 
-reward_fn: TypeAlias = Callable[[tuple[float, ...], int], float]
+RewardFn: TypeAlias = Callable[[tuple[float, ...], int], float]
 
 
-def assert_fn_type(fn: reward_fn) -> None:
+def assert_fn_type(fn: RewardFn) -> None:
     pass
 
 

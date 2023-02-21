@@ -8,10 +8,10 @@ from config import C
 
 from .util import softmax, get_values_where_expanded
 
-policy_fn: TypeAlias = Callable[[Node], Sequence[float]]
+PolicyFn: TypeAlias = Callable[[Node], Sequence[float]]
 
 
-def assert_fn_type(fn: policy_fn) -> None:
+def assert_fn_type(fn: PolicyFn) -> None:
     pass
 
 

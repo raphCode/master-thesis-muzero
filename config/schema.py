@@ -57,10 +57,10 @@ if TYPE_CHECKING:  # RUNTIME TYPES
     PredictionNetPartial = functools.partial[PredictionNet]
     RepresentationNetPartial = functools.partial[RepresentationNet]
 
-    from fn.action import action_fn
-    from fn.policy import policy_fn
-    from fn.reward import reward_fn
-    from fn.selection import selection_fn
+    from fn.action import ActionFn
+    from fn.policy import PolicyFn
+    from fn.reward import RewardFn
+    from fn.selection import SelectionFn
 else:  # OMEGACONF SCHEMA TYPES
     # For omegaconf, just use a dataclass that requires the _target_ config key
     Game = Instance
@@ -76,23 +76,23 @@ else:  # OMEGACONF SCHEMA TYPES
     # but Omegaconf does not support Unions with containers yet.
     # Overriding the str key with a nested config works tho
     fn = str
-    action_fn = fn
-    policy_fn = fn
-    reward_fn = fn
-    selection_fn = fn
+    ActionFn = fn
+    PolicyFn = fn
+    RewardFn = fn
+    SelectionFn = fn
 
 
 @frozen
 class GameConfig:
     instance: Game
-    reward_fn: reward_fn
+    reward_fn: RewardFn
 
 
 @frozen
 class MctsConfig:
-    node_action_fn: action_fn
-    node_target_policy_fn: policy_fn
-    node_selection_score_fn: selection_fn
+    node_action_fn: ActionFn
+    node_target_policy_fn: PolicyFn
+    node_selection_score_fn: SelectionFn
     iterations_move_selection: int
     iterations_value_estimate: int
     use_previous_latents: bool

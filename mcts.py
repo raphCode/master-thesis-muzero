@@ -14,7 +14,7 @@ from networks.bases import Networks
 
 if TYPE_CHECKING:
     # only needed for type annotations, can't import uncondionally due to import cycles
-    from fn.selection import selection_fn
+    from fn.selection import SelectionFn
 
 rng = np.random.default_rng()
 
@@ -107,7 +107,7 @@ class Node(NodeBase):
 
 
 def ensure_visit_count(
-    root: Node, visit_count: int, selection_fn: selection_fn, nets: Networks
+    root: Node, visit_count: int, selection_fn: SelectionFn, nets: Networks
 ) -> None:
     """
     Run the tree search on a Node until the visit count is reached
