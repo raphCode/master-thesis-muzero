@@ -12,6 +12,7 @@ PolicyFn: TypeAlias = Callable[[Node], Sequence[float]]
 
 
 def assert_fn_type(fn: PolicyFn) -> None:
+    """For typechecking."""
     pass
 
 

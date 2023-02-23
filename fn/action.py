@@ -14,6 +14,7 @@ ActionFn: TypeAlias = Callable[[Node], int]
 
 
 def assert_fn_type(fn: ActionFn) -> None:
+    """For typechecking."""
     pass
 
 

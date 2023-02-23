@@ -9,6 +9,7 @@ SelectionFn: TypeAlias = Callable[[Node], int]
 
 
 def assert_fn_type(fn: SelectionFn) -> None:
+    """For typechecking."""
     pass
 
 
