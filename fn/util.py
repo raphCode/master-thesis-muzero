@@ -1,5 +1,6 @@
 from typing import Any, TypeVar
-from collections.abc import Callable, Iterator, Sequence
+from operator import itemgetter
+from collections.abc import Callable, Iterable, Iterator, Sequence
 
 import numpy as np
 
@@ -17,6 +18,10 @@ def softmax(
 
 
 T = TypeVar("T")
+
+
+def argmax(values: Iterable[Any]) -> int:
+    return max(enumerate(values), key=itemgetter(1))[0]
 
 
 def map_actions_callback(

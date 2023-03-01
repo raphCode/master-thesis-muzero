@@ -5,31 +5,14 @@ from collections.abc import Callable
 from mcts import Node
 from config import C
 
+from .util import argmax, map_actions_callback
+
 SelectionFn: TypeAlias = Callable[[Node], int]
 
 
 def assert_fn_type(fn: SelectionFn) -> None:
     """For typechecking."""
     pass
-
-
-def map_actions_best(
-    node: Node,
-    score_fn_child: Callable[[float, Node], float],  # prior, child -> score
-    score_fn_nochild: Callable[[float], float],  # prior -> score
-) -> int:
-    """
-    Call the score functions for all actions and return the action with the highest score.
-    One score function is called for each expanded action (with child Nodes), the other is
-    called for unexpanded ones.
-    """
-    best = tuple()  # type: tuple[float, int]  # type: ignore [assignment]
-    for action, prior in enumerate(node.probs):
-        if action in node.children:
-            best = max(best, (score_fn_child(prior, node.children[action]), action))
-        else:
-            best = max(best, (score_fn_nochild(prior), action))
-    return best[1]
 
 
 class UCBScore:
@@ -49,15 +32,23 @@ class UCBScore:
             value_score = child.reward + child.value * C.training.discount_factor
             return value_score + prior_score
 
-        return map_actions_best(node, child_score, lambda prior: prior * prior_scale_half)
+        return argmax(
+            map_actions_callback(
+                node, child_score, lambda prior: prior * prior_scale_half
+            )
+        )
 
 
 assert_fn_type(UCBScore())
 
 
 def from_prior(node: Node) -> int:
-    return map_actions_best(
-        node, lambda prior, child: prior / (child.visit_count + 1), lambda prior: prior
+    return argmax(
+        map_actions_callback(
+            node,
+            lambda prior, child: prior / (child.visit_count + 1),
+            lambda prior: prior,
+        )
     )
 
 
