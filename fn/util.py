@@ -38,3 +38,8 @@ def map_actions_callback(
             yield callback_child(prior, node.children[action])
         else:
             yield callback_nochild(prior)
+
+
+class SoftmaxTemp:
+    def __init__(self, softmax_temp: float = 1):
+        self.temp = softmax_temp
