@@ -1,3 +1,4 @@
+from typing import Any
 from collections.abc import Callable, Iterable, Sequence
 
 import numpy as np
@@ -5,12 +6,14 @@ import numpy as np
 from mcts import Node
 
 
-def softmax(dist: Sequence[float], temp: float = 1.0, norm: bool = True) -> np.ndarray:
-    dist = np.array(dist)
+def softmax(
+    values: Sequence[float], temp: float = 1.0, norm: bool = True
+) -> np.ndarray[Any, np.dtype[np.float64]]:
+    dist = np.array(values)
     if norm and (dist_sum := dist.sum()) > 0:
         temp *= dist_sum
     exp = np.exp(dist / temp)
-    return exp / exp.sum()
+    return exp / exp.sum()  # type: ignore [no-any-return]
 
 
 def get_values_where_expanded(
