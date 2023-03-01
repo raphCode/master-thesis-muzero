@@ -1,5 +1,5 @@
-from typing import Any
-from collections.abc import Callable, Iterable, Sequence
+from typing import Any, TypeVar
+from collections.abc import Callable, Iterator, Sequence
 
 import numpy as np
 
@@ -16,13 +16,20 @@ def softmax(
     return exp / exp.sum()  # type: ignore [no-any-return]
 
 
-def get_values_where_expanded(
-    nodes: Iterable[Node], value_fn: Callable[[Node], float | int]
-) -> tuple[np.ndarray, np.ndarray]:
-    indices = []
-    values = []
-    for n, node in enumerate(nodes):
-        if node.is_expanded:
-            values.append(value_fn(node))
-            indices.append(n)
-    return np.array(values), np.array(indices)
+T = TypeVar("T")
+
+
+def map_actions_callback(
+    node: Node,
+    callback_child: Callable[[float, Node], T],  # prior, child
+    callback_nochild: Callable[[float], T],  # prior
+) -> Iterator[T]:
+    """
+    Map each possible action to one of the callbacks and yield the results.
+    The callback is chosen based on wheter the action is expanded, i.e. has a child node.
+    """
+    for action, prior in enumerate(node.probs):
+        if action in node.children:
+            yield callback_child(prior, node.children[action])
+        else:
+            yield callback_nochild(prior)
