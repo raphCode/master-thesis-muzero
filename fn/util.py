@@ -10,8 +10,8 @@ from mcts import Node
 def softmax(
     values: Sequence[float], temp: float = 1.0
 ) -> np.ndarray[Any, np.dtype[np.float64]]:
-    dist = np.array(values)
-    exp = np.exp(dist / temp)
+    vals = np.array(values)
+    exp = np.exp(vals / temp)
     return exp / exp.sum()  # type: ignore [no-any-return]
 
 
