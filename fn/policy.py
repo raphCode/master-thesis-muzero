@@ -6,7 +6,7 @@ import numpy as np
 from mcts import Node
 from config import C
 
-from .util import softmax
+from .util import SoftmaxTemp, softmax
 
 PolicyFn: TypeAlias = Callable[[Node], Sequence[float]]
 
@@ -28,10 +28,18 @@ def from_visit_count_expanded(node: Node) -> Sequence[float]:
     return probs
 
 
-def from_value_expanded(node: Node) -> Sequence[float]:
-    values, idx = get_values_where_expanded(
-        node.children, lambda n: n.reward + n.value * C.train.discount_factor
-    )
-    policy = np.full(len(node.children), 0.0)
-    policy[idx] = softmax(values, C.mcts.fn.policy.from_value.softmax_temp, norm=False)
-    return policy
+class FromExpandedValues(SoftmaxTemp):
+    """
+    Creates a policy by applying a softmax to the child mcts value estimates.
+    Unexpanded actions are excluded from the softmax und become a policy value of zero.
+    """
+
+    def __call__(self, node: Node) -> Sequence[float]:
+        assert len(node.children) > 0
+        values = [child.value for child in node.children.values()]
+        policy = np.full(len(node.children), 0.0)
+        policy[node.children.keys()] = softmax(values, self.temp)
+        return policy  # type: ignore [return-value]
+
+
+assert_fn_type(FromExpandedValues())
