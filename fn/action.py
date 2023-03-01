@@ -1,12 +1,11 @@
 from typing import TypeAlias
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 
 import numpy as np
 
 from mcts import Node
-from config import C
 
-from .util import softmax
+from .policy import PolicyFn
 
 rng = np.random.default_rng()
 
@@ -18,30 +17,14 @@ def assert_fn_type(fn: ActionFn) -> None:
     pass
 
 
-def _interp_softmax_temp(move_number: int, cfg_name: str) -> float:
-    cfg = getattr(C.mcts.fn.action, cfg_name)
-    return np.interp(
-        move_number,
-        (
-            cfg.move_num_start,
-            cfg.move_num_end,
-        ),
-        (
-            cfg.softmax_temp_start,
-            cfg.softmax_temp_end,
-        ),
-    )
+class DrawFromPolicyFn:
+    """
+    Repurposes a policy fn by drawing an action from the returned distribution.
+    """
 
+    def __init__(self, policy_fn: PolicyFn):
+        self.policy_fn = policy_fn
 
-def from_visit_count(node: Node, move_number: int) -> int:
-    visit_counts = [child.visit_count for child in node.children]
-    temp = _interp_softmax_temp(move_number, "from_visit_count")
-    return rng.choice(C.game.instance.max_num_actions, p=softmax(visit_counts, temp))
-
-
-def from_visit_count_expanded(node: Node, move_number: int) -> int:
-    visit_counts, idx = get_values_where_expanded(node.children, lambda n: n.visit_count)
-    temp = _interp_softmax_temp(move_number, "from_visit_count")
-    probs = np.full(len(node.children), 0.0)
-    probs[idx] = softmax(visit_counts, temp)
-    return rng.choice(C.game.instance.max_num_actions, p=probs)
+    def __call__(self, node: Node) -> int:
+        probs = self.policy_fn(node)
+        return rng.choice(len(probs), p=probs)
