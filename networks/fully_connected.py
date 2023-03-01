@@ -35,7 +35,7 @@ class FcBase(nn.Module):
             self.add_module(f"fc{n}", layer)
 
     def fc_forward(self, *inputs: Optional[Tensor]) -> Tensor:
-        x = torch.cat([i.flatten(1) for i in filter(None, inputs)], dim=1)
+        x = torch.cat([i.flatten(1) for i in inputs if i is not None], dim=1)
         for fc in self.fc_layers:
             x = fc(x)
             tmp = x
