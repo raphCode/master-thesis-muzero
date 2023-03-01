@@ -4,9 +4,8 @@ from collections.abc import Callable, Sequence
 import numpy as np
 
 from mcts import Node
-from config import C
 
-from .util import SoftmaxTemp, softmax
+from .util import SoftmaxTemp, softmax, get_visit_counts
 
 PolicyFn: TypeAlias = Callable[[Node], Sequence[float]]
 
@@ -16,16 +15,16 @@ def assert_fn_type(fn: PolicyFn) -> None:
     pass
 
 
-def from_visit_count(node: Node) -> Sequence[float]:
-    visit_counts = [child.visit_count for child in node.children]
-    return softmax(visit_counts, C.mcts.fn.policy.from_visit_count.softmax_temp)
+def from_visit_counts(node: Node) -> Sequence[float]:
+    """
+    Linearly scales the child visit counts into a probability distribution.
+    """
+    assert len(node.children) > 0
+    visit_counts = np.fromiter(get_visit_counts(node), dtype=int)
+    return visit_counts / visit_counts.sum()  # type: ignore [no-any-return]
 
 
-def from_visit_count_expanded(node: Node) -> Sequence[float]:
-    visit_counts, idx = get_values_where_expanded(node.children, lambda n: n.visit_count)
-    probs = np.full(len(node.children), 0.0)
-    probs[idx] = softmax(visit_counts, C.mcts.fn.policy.from_visit_count.softmax_temp)
-    return probs
+assert_fn_type(from_visit_counts)
 
 
 class FromExpandedValues(SoftmaxTemp):

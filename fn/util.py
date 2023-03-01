@@ -8,11 +8,9 @@ from mcts import Node
 
 
 def softmax(
-    values: Sequence[float], temp: float = 1.0, norm: bool = True
+    values: Sequence[float], temp: float = 1.0
 ) -> np.ndarray[Any, np.dtype[np.float64]]:
     dist = np.array(values)
-    if norm and (dist_sum := dist.sum()) > 0:
-        temp *= dist_sum
     exp = np.exp(dist / temp)
     return exp / exp.sum()  # type: ignore [no-any-return]
 
@@ -38,6 +36,10 @@ def map_actions_callback(
             yield callback_child(prior, node.children[action])
         else:
             yield callback_nochild(prior)
+
+
+def get_visit_counts(node: Node) -> Iterator[int]:
+    yield from map_actions_callback(node, lambda _, child: child.visit_count, lambda _: 0)
 
 
 class SoftmaxTemp:
