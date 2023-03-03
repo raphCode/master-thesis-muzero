@@ -75,8 +75,7 @@ else:  # OMEGACONF SCHEMA TYPES
     # Functions can be python functions or a callable class instances,
     # so actually the type should be str | Instance,
     # but Omegaconf does not support Unions with containers yet.
-    # Overriding the str key with a nested config works tho
-    fn = str
+    fn = Any
     ActionFn = fn
     PolicyFn = fn
     RewardFn = fn
