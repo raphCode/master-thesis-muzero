@@ -72,9 +72,9 @@ else:  # OMEGACONF SCHEMA TYPES
     PredictionNetPartial = PartialInstance
     RepresentationNetPartial = PartialInstance
 
-    # Functions can be python functions or a callable class instances,
-    # so actually the type should be str | Instance,
-    # but Omegaconf does not support Unions with containers yet.
+    # Functions can be python functions or class instances, so actually the type should be
+    # str | Instance
+    # but Omegaconf does not support Unions with containers yet:
     fn = Any
     ActionFn = fn
     PolicyFn = fn
