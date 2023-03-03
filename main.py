@@ -2,7 +2,7 @@ import hydra
 from omegaconf import DictConfig
 from hydra.core.config_store import ConfigStore
 
-import config
+from config.impl import populate_config, save_source_code
 from config.schema import BaseConfig, monkeypatch_dictconfig
 
 cs = ConfigStore.instance()
@@ -12,8 +12,8 @@ cs.store(name="base_config", node=BaseConfig)
 
 @hydra.main(version_base=None, config_path="config", config_name="base_config")
 def main(cfg: DictConfig) -> None:
-    config.populate_config(cfg)
-    config.save_source_code()
+    populate_config(cfg)
+    save_source_code()
 
 
 if __name__ == "__main__":
