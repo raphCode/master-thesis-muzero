@@ -5,12 +5,13 @@ import logging
 import builtins
 import functools
 from types import UnionType
-from typing import Any, Iterable, cast
+from typing import Any, Iterable, Optional, cast
 from collections import defaultdict
 
 import attrs
 import hydra
 import torch
+import gorilla
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
@@ -25,9 +26,43 @@ from networks.bases import (
     RepresentationNet,
 )
 
-from . import C
+from . import C, schema
 
 log = logging.getLogger(__name__)
+
+
+def monkeypatch_dictconfig() -> None:
+    """
+    By default, OmegaConf does not allow merging new keys on top of structured configs.
+    This is, OmegaConf.merge(structured, config) will error when 'config' adds new keys.
+    This merge order is required in this application to propagate the type information
+    from the structured config into the player instances list. Merging the other way
+    around is currently buggy:
+    https://github.com/omry/omegaconf/issues/1058
+    However, new keys can be added when the struct flag is unset on the DictConfig
+    instances corresponding to the structured configs. Since the DictConfig instances are
+    only created in the merge, the flag can't be set beforehand.
+    This therefore monkeypatches DictConfig.__init__() to set the struct flag when a
+    structured config of an Instance subclass is to be created. This way the user may add
+    new keyword arguments for class instantiation in the config.
+    """
+
+    def init_shim(
+        self: DictConfig,
+        *args: Any,
+        flags: Optional[dict[str, bool]] = None,
+        ref_type: Any = Any,
+        **kwargs: Any,
+    ) -> Any:
+        if isinstance(ref_type, type) and issubclass(ref_type, schema.Instance):
+            flags = flags or {}
+            flags["struct"] = False
+        return original_init(self, *args, flags=flags, ref_type=ref_type, **kwargs)
+
+    gorilla.apply(
+        gorilla.Patch(DictConfig, "__init__", init_shim, gorilla.Settings(allow_hit=True))
+    )
+    original_init = gorilla.get_original_attribute(DictConfig, "__init__")
 
 
 def merge_structured_config_defaults(cfg: Any) -> None:

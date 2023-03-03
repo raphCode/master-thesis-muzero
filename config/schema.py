@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import functools
 from typing import TYPE_CHECKING, Any, Optional, TypeAlias
 from collections.abc import Callable
 
 import attrs
-import gorilla
 from attrs import define, frozen
-from omegaconf import MISSING, DictConfig
+from omegaconf import MISSING
 
 from networks.bases import Networks
 
@@ -186,37 +187,3 @@ class BaseConfig:
     def fill_from(self, instance: "BaseConfig") -> None:
         for field_name in attrs.fields_dict(type(self)):
             object.__setattr__(self, field_name, getattr(instance, field_name))
-
-
-def monkeypatch_dictconfig() -> None:
-    """
-    By default, OmegaConf does not allow merging new keys on top of structured configs.
-    This is, OmegaConf.merge(structured, config) will error when 'config' adds new keys.
-    This merge order is required in this application to propagate the type information
-    from the structured config into the player instances list. Merging the other way
-    around is currently buggy:
-    https://github.com/omry/omegaconf/issues/1058
-    However, new keys can be added when the struct flag is unset on the DictConfig
-    instances corresponding to the structured configs. Since the DictConfig instances are
-    only created in the merge, the flag can't be set beforehand.
-    This therefore monkeypatches DictConfig.__init__() to set the struct flag when a
-    structured config of an Instance subclass is to be created. This way the user may add
-    new keyword arguments for class instantiation in the config.
-    """
-
-    def init_shim(
-        self: DictConfig,
-        *args: Any,
-        flags: Optional[dict[str, bool]] = None,
-        ref_type: Any = Any,
-        **kwargs: Any,
-    ) -> Any:
-        if isinstance(ref_type, type) and issubclass(ref_type, Instance):
-            flags = flags or {}
-            flags["struct"] = False
-        return original_init(self, *args, flags=flags, ref_type=ref_type, **kwargs)
-
-    gorilla.apply(
-        gorilla.Patch(DictConfig, "__init__", init_shim, gorilla.Settings(allow_hit=True))
-    )
-    original_init = gorilla.get_original_attribute(DictConfig, "__init__")
