@@ -1,5 +1,8 @@
-node_action_fn: fn.action.from_visit_count
-node_target_policy_fn: fn.policy.from_visit_count
-node_selection_score_fn: fn.selection.ucb_score
+node_action_fn:
+    _target_: fn.action.DrawFromPolicyFn
+    policy_fn: fn.policy.from_visit_counts
+node_target_policy_fn:
+    _target_: fn.policy.FromExpandedValues
+node_selection_score_fn: fn.selection.from_prior
 iterations_move_selection: 200
 iterations_value_estimate: 100
