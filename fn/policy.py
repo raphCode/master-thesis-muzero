@@ -37,7 +37,7 @@ class FromExpandedValues(SoftmaxTemp):
         assert len(node.children) > 0
         values = [child.value for child in node.children.values()]
         policy = np.full(len(node.children), 0.0)
-        policy[node.children.keys()] = softmax(values, self.temp)
+        policy[list(node.children.keys())] = softmax(values, self.temp)
         return policy  # type: ignore [return-value]
 
 
