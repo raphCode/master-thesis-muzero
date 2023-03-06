@@ -46,7 +46,11 @@ class OpenSpielGameState(GameState):
 
     @property
     def current_player_id(self) -> int:
-        return self.state.current_player()  # type: ignore [no-any-return]
+        pid = self.state.current_player()
+        if pid == pyspiel.PlayerId.CHANCE:
+            # openspiel always has a chance player, so chance_player_id never returns None
+            return self.game.chance_player_id  # type: ignore [return-value]
+        return pid  # type: ignore [no-any-return]
 
     @property
     def chance_outcomes(self) -> tuple[float, ...]:
