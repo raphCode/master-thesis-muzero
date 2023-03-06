@@ -4,6 +4,7 @@ from collections.abc import Callable
 import numpy as np
 
 from mcts import Node
+from config.impl import assert_callable
 
 from .policy import PolicyFn
 
@@ -23,6 +24,7 @@ class DrawFromPolicyFn:
     """
 
     def __init__(self, policy_fn: PolicyFn):
+        assert_callable(policy_fn)
         self.policy_fn = policy_fn
 
     def __call__(self, node: Node) -> int:

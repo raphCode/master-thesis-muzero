@@ -31,6 +31,22 @@ from . import C, schema
 log = logging.getLogger(__name__)
 
 
+def assert_callable(obj: Any) -> None:
+    """
+    Assert that the given object is callable.
+    This is intended to check items from the config, so it provides helpful messages it
+    the check fails.
+    """
+    try:
+        assert callable(obj)
+    except AssertionError as e:
+        msg = f"Expected a callable python object, found {type(obj)}:\n{repr(obj)}"
+        if isinstance(obj, str):
+            msg += "\nIf you wanted to specify the fully qualified name of a function, \
+            wrap it in ${fn:...} to resolve it to the python function."
+        raise ValueError(msg) from e
+
+
 def monkeypatch_dictconfig() -> None:
     """
     By default, OmegaConf does not allow merging new keys on top of structured configs.
@@ -113,16 +129,10 @@ def populate_config(cfg: DictConfig) -> None:
     # transform all configs with _target_ keys into their class instances (or partials)
     cfg = hydra.utils.instantiate(cfg)  # type: DictConfig # type: ignore [no-redef]
 
-    def ensure_callable(cfg: DictConfig, key: str) -> None:
-        val = cfg[key]
-        if not callable(val):
-            cfg[key] = hydra.utils.get_method(val)
-        # otherwise callable class (already instatiated)
-
-    ensure_callable(cfg.game, "reward_fn")
-    ensure_callable(cfg.mcts, "node_action_fn")
-    ensure_callable(cfg.mcts, "node_target_policy_fn")
-    ensure_callable(cfg.mcts, "node_selection_score_fn")
+    assert_callable(cfg.game.reward_fn)
+    assert_callable(cfg.mcts.node_action_fn)
+    assert_callable(cfg.mcts.node_target_policy_fn)
+    assert_callable(cfg.mcts.node_selection_score_fn)
 
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
         # empty list [] in config creates None values for belief
