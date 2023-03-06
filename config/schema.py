@@ -144,7 +144,7 @@ class TrainConfig:
     discount_factor: float
     n_step_return: int
     replay_buffer_size: int
-    max_steps_per_episode: int
+    max_moves_per_game: int
     optimizer: OptimizerPartial
     learning_rates: LearningRates
     loss_weights: LossWeights
