@@ -65,6 +65,11 @@ def monkeypatch_dictconfig() -> None:
     original_init = gorilla.get_original_attribute(DictConfig, "__init__")
 
 
+def register_omegaconf_resolvers() -> None:
+    # This resolver allows accessing python functions by their fully qualified name:
+    OmegaConf.register_new_resolver("fn", hydra.utils.get_method)
+
+
 def merge_structured_config_defaults(cfg: Any) -> None:
     """
     This function takes an OmegaConf Config and recursively merges the non-optional
