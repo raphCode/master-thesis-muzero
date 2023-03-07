@@ -40,19 +40,15 @@ if TYPE_CHECKING:  # RUNTIME TYPES
     # During runtime, the dataclasses are used as containers for the config data.
     # Some of the classes are replaced with instances with actual functionality,
     # so during typechecking use the instance or partial types
-    from games.bases import Game, Player
+    from games.bases import Game
 
     # isort: split
     from torch.optim import Optimizer
 
     OptimizerPartial = functools.partial[Optimizer]
 
-    from rl_player import RLBase
-    from games.bases import Player
-
-    PlayerPartial: TypeAlias = functools.partial[Player] | functools.partial[RLBase]
-
     from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
+    from player_controller import PlayerPartial
 
     DynamicsNetPartial = functools.partial[DynamicsNet]
     PredictionNetPartial = functools.partial[PredictionNet]
