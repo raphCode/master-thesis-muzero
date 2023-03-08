@@ -51,7 +51,6 @@ class RLBase(ABC):
     def __init__(self, nets: Networks, mcts_cfg: Optional[MctsConfig] = None):
         self.nets = nets
         self.mcts_cfg = mcts_cfg or C.mcts
-        self.reset_new_game()
 
     def reset_new_game(self) -> None:
         """
