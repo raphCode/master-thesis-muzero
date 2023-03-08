@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import TypeAlias
 from collections.abc import Sequence
 
+from config import C
 from rl_player import RLBase
 from games.bases import Player, MatchData
 from networks.bases import Networks
@@ -38,4 +39,27 @@ class PCBase(ABC):
         """
         Update network parameters of RLPlayers with new information from training.
         """
+        pass
+
+
+class SinglePC(PCBase):
+    """
+    Simple Player Controller for one RLPlayer in single-player games.
+    """
+
+    net: Networks
+    player: RLBase
+
+    def __init__(self, player_partials: Sequence[PlayerPartial]):
+        assert len(player_partials) == 1
+        assert C.game.instance.max_num_players == 1
+        self.net = C.networks.factory()
+        player = player_partials[0](self.net)
+        assert isinstance(player, RLBase)
+        self.player = player
+
+    def get_players(self, _: MatchData) -> list[RLBase]:
+        return [self.player]
+
+    def update_networks(self, new_networks: Networks) -> None:
         pass
