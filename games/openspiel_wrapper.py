@@ -2,7 +2,7 @@ from typing import Unpack, Optional
 from functools import cached_property
 
 import torch
-import pyspiel
+import pyspiel  # type: ignore
 
 from .bases import Game, Teams, GameState, MatchData, GameStateInitKwArgs
 

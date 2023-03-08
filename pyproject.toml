@@ -12,10 +12,3 @@ float_to_top = true
 python_executable = "venv/bin/python"
 strict = true
 pretty = true
-
-[[tool.mypy.overrides]]
-module = [
-    "pyspiel",
-    "gorilla",
-]
-ignore_missing_imports = true
