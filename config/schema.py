@@ -36,6 +36,11 @@ class PartialInstance(Instance):
     _partial_: bool = True
 
 
+@frozen
+class PlayerPartialInstance(PartialInstance):
+    mcts_cfg: Optional[MctsConfig] = None
+
+
 if TYPE_CHECKING:  # RUNTIME TYPES
     # During runtime, the dataclasses are used as containers for the config data.
     # Some of the classes are replaced with instances with actual functionality,
@@ -61,7 +66,7 @@ if TYPE_CHECKING:  # RUNTIME TYPES
 else:  # OMEGACONF SCHEMA TYPES
     # For omegaconf, just use a dataclass that requires the _target_ config key
     Game = Instance
-    PlayerPartial = PartialInstance
+    PlayerPartial = PlayerPartialInstance
     OptimizerPartial = PartialInstance
 
     DynamicsNetPartial = PartialInstance
