@@ -1,108 +1,88 @@
-import logging
+from collections.abc import Iterable, Sequence
 
 import numpy as np
-import torch
-import torch.nn.functional as F
+from attrs import frozen
 
-from mcts import Node, ensure_visit_count
 from config import C
-from rl_player import RLPlayer
-from trajectory import (
-    LatentInfo,
-    PlayerType,
-    ReplayBuffer,
-    ObservationInfo,
-    TrajectoryState,
-)
+from rl_player import RLBase
+from trajectory import TrajectoryState
+from games.bases import Player
+from player_controller import PCBase
 
 rng = np.random.default_rng()
-log = logging.getLogger(__name__)
 
 
-def run_episode(replay_buffer: ReplayBuffer):
-    players = C.player.instances
-    rl_pids = {n for n, p in enumerate(players) if isinstance(p, RLPlayer)}
+@frozen
+class SelfplayResult:
+    moves: int
+    game_terminated: bool
+    trajectories: Sequence[list[TrajectoryState]]
 
-    mcts_nodes = {
-        n: Node.from_latents(G.nets.initial_latent_rep, G.nets.initial_beliefs)
-        for n in rl_pids
-    }
 
-    def get_and_update_mcts_tree(pid: int, action: int) -> Node:
-        node = mcts_nodes[pid].get_action_subtree_and_prune_above(action)
-        ensure_visit_count(node, C.mcts.iterations_value_estimate)
-        mcts_nodes[pid] = node
-        return node
+class RLPlayers:
+    """
+    Small helper class to bundle RLPlayers instances, their player ids and trajectories.
+    """
 
+    pids: tuple[int]
+    players: tuple[RLBase]
+    trajectories: tuple[list[TrajectoryState]]
+
+    def __init__(self, all_players: Iterable[RLBase | Player]):
+        self.pids, self.players = zip(  # type: ignore [assignment]
+            *((pid, p) for pid, p in enumerate(all_players) if isinstance(p, RLBase))
+        )
+        self.trajectories = tuple([] for _ in self.players)  # type: ignore [assignment]
+
+
+def run_episode(player_controller: PCBase) -> SelfplayResult:
     state = C.game.instance.new_initial_state()
-    trajectories = {n: [] for n in rl_pids}
+    players = player_controller.get_players(state.match_data)
+    assert len(players) == state.match_data.num_players
+    rlp = RLPlayers(players)
 
-    for pid in rl_pids:
-        players[pid].reset_new_game()
+    for player in rlp.players:
+        player.reset_new_game()
 
-    for step in range(C.train.max_steps_per_episode):
-        # Unsure about how to deal with non-terminal rewards or when exactly they occur
-        assert state.is_chance or state.is_terminal or all(r == 0 for r in state.rewards)
-
+    for n_move in range(C.training.max_moves_per_game):
         if state.is_terminal:
             break
 
-        if state.is_chance:
+        if state.current_player_id == C.game.instance.chance_player_id:
             chance_outcomes = state.chance_outcomes
             action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
             state.apply_action(action)
-            for tid, traj in trajectories.items():
-                node = get_and_update_mcts_tree(tid, action)
+            for player, pid, traj in zip(rlp.players, rlp.pids, rlp.trajectories):
                 traj.append(
-                    TrajectoryState(
-                        info=LatentInfo(latent_rep=node.latent_rep, beliefs=node.beliefs),
-                        player_type=PlayerType.Chance,
-                        action=action,
+                    TrajectoryState.from_training_info(
+                        player.create_training_info(),
                         target_policy=chance_outcomes,
-                        mcts_value=node.value,
-                        reward=C.game.calculate_reward(state.rewards, tid),
+                        current_player=C.game.instance.chance_player_id,
+                        action=action,
+                        reward=C.game.reward_fn(state, pid),
                     )
                 )
+                player.advance_game_state(action)
             continue
 
-        pid = state.current_player
-        if pid in rl_pids:
-            obs = state.observation
-            action, old_beliefs, root_node = players[pid].request_action(obs)
-            target_policy = C.mcts.node_target_policy_fn(root_node)
-            mcts_nodes[pid] = root_node
+        curr_pid = state.current_player_id
+        curr_player = players[curr_pid]
+        if isinstance(curr_player, RLBase):
+            action = curr_player.own_move(*state.observation)
         else:
-            action = players[pid].request_action(state, C.game.instance)
+            action = curr_player.request_action(state, C.game.instance)
 
-        # estimate opponent behavior by averaging over their single moves:
-        move_onehot = F.one_hot(torch.tensor(action), C.game.instance.max_num_actions)
         state.apply_action(action)
 
-        for tid, traj in trajectories.items():
-            if tid == pid:
-                ts = TrajectoryState(
-                    info=ObservationInfo(observation=obs, prev_beliefs=old_beliefs),
-                    player_type=PlayerType.Self,
+        for player, pid, traj in zip(rlp.players, rlp.pids, rlp.trajectories):
+            traj.append(
+                TrajectoryState.from_training_info(
+                    player.create_training_info(),
+                    current_player=curr_pid,
                     action=action,
-                    target_policy=target_policy,
-                    mcts_value=root_node.value,
-                    reward=C.game.calculate_reward(state.rewards, pid),
+                    reward=C.game.reward_fn(state, pid),
                 )
-            else:
-                node = get_and_update_mcts_tree(tid, action)
-                ts = TrajectoryState(
-                    info=LatentInfo(latent_rep=node.latent_rep, beliefs=node.beliefs),
-                    player_type=PlayerType.Teammate
-                    if C.player.is_teammate(pid, tid)
-                    else PlayerType.Opponent,
-                    action=action,
-                    target_policy=move_onehot,
-                    mcts_value=node.value,
-                    reward=C.game.calculate_reward(state.rewards, tid),
-                )
-            traj.append(ts)
+            )
+            player.advance_game_state(action)
 
-    for traj in trajectories.values():
-        replay_buffer.add_trajectory(traj, game_terminated=state.is_terminal)
-
-    log.info(f"Finished game ({step + 1} steps)")
+    return SelfplayResult(n_move, state.is_terminal, rlp.trajectories)
