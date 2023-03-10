@@ -1,9 +1,15 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Self, Optional
 from collections.abc import Sequence
 
 import torch
 from attrs import frozen
 from torch import Tensor
+
+if TYPE_CHECKING:
+    # only needed for type annotations, can't import uncondionally due to import cycles
+    from rl_player import TrainingInfo
 
 
 @frozen
@@ -26,6 +32,26 @@ class TrajectoryState:
     target_policy: Sequence[float]
     mcts_value: float
     reward: float
+
+    @classmethod
+    def from_training_info(
+        cls,
+        info: TrainingInfo,
+        *args: Any,
+        target_policy: Optional[Sequence[float]] = None,
+        current_player: int,
+        action: int,
+        reward: float,
+    ) -> Self:
+        return cls(
+            representation=info.representation,
+            belief=info.belief,
+            current_player=current_player,
+            action=action,
+            target_policy=target_policy or info.target_policy,
+            mcts_value=info.mcts_value,
+            reward=reward,
+        )
 
 
 @frozen(kw_only=True)
