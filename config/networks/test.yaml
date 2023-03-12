@@ -5,4 +5,3 @@ prediction:
 dynamics:
     _target_: networks.fully_connected.FcDynamics
 latent_shape: [50]
-belief_shape: []

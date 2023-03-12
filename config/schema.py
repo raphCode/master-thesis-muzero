@@ -112,7 +112,8 @@ class NetworkSchema:  # omegaconf schema
     prediction: PredictionNetPartial
     representation: RepresentationNetPartial
     latent_shape: list[int]
-    belief_shape: list[int]  # to disable beliefs, use an empty list []
+    # to disable beliefs, use an empty list [] or remove config key
+    belief_shape: Optional[list[int]] = None
 
 
 if TYPE_CHECKING:  # RUNTIME TYPES
