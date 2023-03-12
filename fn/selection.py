@@ -74,3 +74,26 @@ def sample_from_prior(node: Node) -> int:
 
 
 assert_fn_type(sample_from_prior)
+
+
+class SwitchOnChanceNodes:
+    """
+    Switches between two selection fns depending on the Node being a chance event.
+    Effectively makes other selection fns compatible with chance nodes.
+    """
+
+    def __init__(
+        self,
+        normal_selection_fn: SelectionFn,
+        chance_selection_fn: SelectionFn = from_prior_deterministic,
+    ):
+        self.normal_fn = normal_selection_fn
+        self.chance_fn = chance_selection_fn
+
+    def __call__(self, node: Node) -> int:
+        if node.current_player == C.game.instance.chance_player_id:
+            return self.chance_fn(node)
+        return self.normal_fn(node)
+
+
+assert_fn_type(SwitchOnChanceNodes(from_prior_deterministic))
