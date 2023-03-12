@@ -42,7 +42,11 @@ class UCBScore:
 assert_fn_type(UCBScore())
 
 
-def from_prior(node: Node) -> int:
+def from_prior_deterministic(node: Node) -> int:
+    """
+    Deterministic selection according to prior probability distribution.
+    No randomness is involved, which reduces variance.
+    """
     return argmax(
         map_actions_callback(
             node,
@@ -52,4 +56,4 @@ def from_prior(node: Node) -> int:
     )
 
 
-assert_fn_type(from_prior)
+assert_fn_type(from_prior_deterministic)
