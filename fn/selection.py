@@ -2,12 +2,16 @@ import math
 from typing import TypeAlias
 from collections.abc import Callable
 
+import numpy as np
+
 from mcts import Node
 from config import C
 
 from .util import argmax, map_actions_callback
 
 SelectionFn: TypeAlias = Callable[[Node], int]
+
+rng = np.random.default_rng()
 
 
 def assert_fn_type(fn: SelectionFn) -> None:
@@ -57,3 +61,16 @@ def from_prior_deterministic(node: Node) -> int:
 
 
 assert_fn_type(from_prior_deterministic)
+
+
+def sample_from_prior(node: Node) -> int:
+    """
+    Draw a random action from the prior probability distribution.
+    """
+    # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
+    # default. The precision difference leads to the message 'probabilities to not
+    # sum to 1' otherwise.
+    return rng.choice(len(node.probs), p=np.array(node.probs, dtype=np.float32))
+
+
+assert_fn_type(sample_from_prior)

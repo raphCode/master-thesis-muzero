@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional
 from collections.abc import Iterable
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import Tensor
@@ -15,8 +14,6 @@ from networks.bases import Networks
 if TYPE_CHECKING:
     # only needed for type annotations, can't import uncondionally due to import cycles
     from fn.selection import SelectionFn
-
-rng = np.random.default_rng()
 
 
 class NodeBase(ABC):
@@ -54,12 +51,6 @@ class NodeBase(ABC):
     def add_value(self, value: float) -> None:
         self.value_sum += value
         self.visit_count += 1
-
-    def _chance_select(self) -> int:
-        # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
-        # default. The precision difference leads to the message 'probabilities to not
-        # sum to 1' otherwise.
-        return rng.choice(len(self.probs), p=np.array(self.probs, dtype=np.float32))
 
     def get_create_child(self, action: int, nets: Networks) -> Node:
         """
