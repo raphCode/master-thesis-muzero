@@ -65,11 +65,13 @@ class TrajectoryState:
 @frozen(kw_only=True)
 class TrainingData:
     is_observation: Tensor
+    is_initial: Tensor
     is_data: Tensor
-    observation: tuple[Tensor]
-    latent_rep: Tensor
-    beliefs: Tensor  # current or previous beliefs, depending on is_observation
-    player_type: Tensor
+
+    observations: tuple[Tensor, ...]
+    belief: Optional[Tensor]
+    latent: Tensor
+    current_player: Tensor
     action_onehot: Tensor
     target_policy: Tensor
     value_target: Tensor
