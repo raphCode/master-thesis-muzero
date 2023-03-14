@@ -24,7 +24,16 @@ class Latent:
 
 @frozen(kw_only=True)
 class TrajectoryState:
-    # the first TrajectoryState in a list is assumed to be with initial tensors
+    """
+    A list of TrajectoryStates represents a game trajectory a RLPlayer experienced.
+    The data is intended to train a reinforcement learning agent and is thus
+    agent-centric, e.g. recorded rewards are only valid for the agent which recorded the
+    trajectory. In a multiplayer scenario therefore each agent has its own list of
+    TrajectoryStates.
+    The first TrajectoryState in a list is assumed to be the initial game state and thus
+    should use inital tensors during network training.
+    """
+
     representation: Observation | Latent
     belief: Optional[Tensor]
     current_player: int
