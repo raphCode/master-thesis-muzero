@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Self, Optional
 from collections.abc import Sequence
 
-import torch
 from attrs import frozen
 from torch import Tensor
 
@@ -65,13 +64,13 @@ class TrajectoryState:
 
 @frozen(kw_only=True)
 class TrainingData:
-    is_observation: torch.Tensor
-    is_data: torch.Tensor
-    observation: tuple[torch.Tensor]
-    latent_rep: torch.Tensor
-    beliefs: torch.Tensor  # current or previous beliefs, depending on is_observation
-    player_type: torch.Tensor
-    action_onehot: torch.Tensor
-    target_policy: torch.Tensor
-    value_target: torch.Tensor
-    reward: torch.Tensor
+    is_observation: Tensor
+    is_data: Tensor
+    observation: tuple[Tensor]
+    latent_rep: Tensor
+    beliefs: Tensor  # current or previous beliefs, depending on is_observation
+    player_type: Tensor
+    action_onehot: Tensor
+    target_policy: Tensor
+    value_target: Tensor
+    reward: Tensor
