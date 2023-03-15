@@ -80,10 +80,10 @@ class FcPrediction(FcBase, PredictionNet):
         self, latent: Tensor, belief: Optional[Tensor], logits: bool = False
     ) -> PredictionReturn:
         result = self.fc_forward(latent, belief)
-        value, policy, player_type = torch.split(result, self.output_sizes, dim=1)
+        value, policy, current_player = torch.split(result, self.output_sizes, dim=1)
         if logits:
-            return value, policy, player_type
-        return value, F.softmax(policy, dim=1), F.softmax(player_type, dim=1)
+            return value, policy, current_player
+        return value, F.softmax(policy, dim=1), F.softmax(current_player, dim=1)
 
 
 class FcDynamics(FcBase, DynamicsNet):
