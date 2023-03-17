@@ -15,7 +15,7 @@ rng = np.random.default_rng()
 @frozen
 class SelfplayResult:
     moves: int
-    game_terminated: bool
+    game_completed: bool
     trajectories: Sequence[list[TrajectoryState]]
 
 

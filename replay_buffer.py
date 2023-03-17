@@ -43,7 +43,7 @@ class ReplayBuffer:
             )
         ] * C.train.batch_game_size
 
-    def add_trajectory(self, traj: list[TrajectoryState], game_terminated: bool):
+    def add_trajectory(self, traj: list[TrajectoryState], game_completed: bool):
         int64t = functools.partial(torch.tensor, dtype=torch.int64)
         floatt = functools.partial(torch.tensor, dtype=torch.float)
 
@@ -52,7 +52,7 @@ class ReplayBuffer:
         train_data = []
         for n, ts in enumerate(traj):
             nstep_idx = min(len(traj) - 1, n + C.train.n_step_return)
-            if nstep_idx == len(traj) - 1 and game_terminated:
+            if nstep_idx == len(traj) - 1 and game_completed:
                 value_target = 0
             else:
                 value_target = traj[nstep_idx].mcts_value * self.discounts[nstep_idx - n]
