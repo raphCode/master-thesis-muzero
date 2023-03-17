@@ -19,10 +19,13 @@ class ReplayBuffer:
     data = Deque[list[TrajectoryState]]
 
     def __init__(self):
-        self.lens = deque(maxlen=C.train.replay_buffer_size)
-        self.data = deque(maxlen=C.train.replay_buffer_size)
+        self.lens = deque(maxlen=C.training.replay_buffer_size)
+        self.data = deque(maxlen=C.training.replay_buffer_size)
         self.discounts = np.concatenate(
-            ([1], np.cumprod(np.full(C.train.n_step_return, C.train.discount_factor)))
+            (
+                [1],
+                np.cumprod(np.full(C.training.n_step_return, C.training.discount_factor)),
+            )
         )
         self.empty_observation = tuple(
             torch.zeros(s, dtype=torch.float) for s in C.game.instance.observation_shapes
@@ -41,7 +44,7 @@ class ReplayBuffer:
                 value_target=torch.tensor(0.0),
                 reward=torch.tensor(0.0),
             )
-        ] * C.train.batch_game_size
+        ] * C.training.batch_game_size
 
     def add_trajectory(self, traj: list[TrajectoryState], game_completed: bool):
         int64t = functools.partial(torch.tensor, dtype=torch.int64)
@@ -51,7 +54,7 @@ class ReplayBuffer:
 
         train_data = []
         for n, ts in enumerate(traj):
-            nstep_idx = min(len(traj) - 1, n + C.train.n_step_return)
+            nstep_idx = min(len(traj) - 1, n + C.training.n_step_return)
             if nstep_idx == len(traj) - 1 and game_completed:
                 value_target = 0
             else:
@@ -87,10 +90,10 @@ class ReplayBuffer:
         batch_trajs = []
         data = np.empty(len(self.data), dtype=object)
         data[:] = self.data
-        for traj in rng.choice(data, size=C.train.batch_num_games, p=probs):
+        for traj in rng.choice(data, size=C.training.batch_num_games, p=probs):
             i = rng.integers(len(traj))
             batch_trajs.append(
-                (traj + self.empty_batch_game)[i : i + C.train.batch_game_size]
+                (traj + self.empty_batch_game)[i : i + C.training.batch_game_size]
             )
 
         # transpose: outer dim: batch_num_games -> batch_game_size
