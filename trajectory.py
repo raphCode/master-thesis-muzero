@@ -71,7 +71,7 @@ class TrainingData:
     The list length is trajectory_length, and the stacked height inside each tensor of a
     single TrainingData is batch_size.
 
-                         list  index
+                    timestep / list index
     list[TrainingData]    0 1 2 3 4
                          |         |
                     trajectory move number
@@ -82,8 +82,15 @@ class TrainingData:
                       trajectory_length
 
     D = dummy TrainingData to pad trajectories beyond their end up to trajectory_length
+
+    Due to the nature of batching, each timestep is processed at once, but may contain
+    different types of trajectory states (initial state, observation / own move, other
+    player move).
+    To select the correct behavior during training for each trajectory, this requires the
+    use of boolean masks.
     """
 
+    # masks:
     is_observation: Tensor
     is_initial: Tensor
     is_data: Tensor
