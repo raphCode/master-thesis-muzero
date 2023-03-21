@@ -141,8 +141,8 @@ class LossWeights:
 
 @frozen
 class TrainConfig:
-    batch_game_size: int
-    batch_num_games: int
+    batch_size: int
+    trajectory_length: int
     discount_factor: float
     n_step_return: int
     replay_buffer_size: int

@@ -1,5 +1,5 @@
-batch_game_size: 16
-batch_num_games: 4
+batch_size: 4
+trajectory_length: 16
 discount_factor: 0.99
 n_step_return: 20
 replay_buffer_size: 1_000

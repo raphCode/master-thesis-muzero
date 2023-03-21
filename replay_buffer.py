@@ -44,7 +44,7 @@ class ReplayBuffer:
                 value_target=torch.tensor(0.0),
                 reward=torch.tensor(0.0),
             )
-        ] * C.training.batch_game_size
+        ] * C.training.trajectory_length
 
     def add_trajectory(self, traj: list[TrajectoryState], game_completed: bool):
         int64t = functools.partial(torch.tensor, dtype=torch.int64)
@@ -90,13 +90,13 @@ class ReplayBuffer:
         batch_trajs = []
         data = np.empty(len(self.data), dtype=object)
         data[:] = self.data
-        for traj in rng.choice(data, size=C.training.batch_num_games, p=probs):
+        for traj in rng.choice(data, size=C.training.batch_size, p=probs):
             i = rng.integers(len(traj))
             batch_trajs.append(
-                (traj + self.empty_batch_game)[i : i + C.training.batch_game_size]
+                (traj + self.empty_batch_game)[i : i + C.training.trajectory_length]
             )
 
-        # transpose: outer dim: batch_num_games -> batch_game_size
+        # transpose: outer dim: batch_size -> trajectory_length
         batch_steps = zip(*batch_trajs)
         field_names = tuple(map(operator.attrgetter("name"), attrs.fields(TrainingData)))
 
@@ -104,7 +104,7 @@ class ReplayBuffer:
         for steps in batch_steps:
             # unpack TrainingData classes into tuples
             unpacked_steps = map(attrs.astuple, steps)
-            # transpose: outer dim: batch_num_games -> len(field_names)
+            # transpose: outer dim: batch_size -> len(field_names)
             batch_fields = zip(*unpacked_steps)
             fields = dict()
             for name, batch in zip(field_names, batch_fields):

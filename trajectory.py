@@ -68,20 +68,20 @@ class TrainingData:
     Similar to TrajectoryState, but in a form more convenient for network training.
     A list of TrainingData is a complete training batch, it stores multiple continous
     sections of game trajectories stacked in the batch dimension.
-    The list length is batch_game_size, and the stacked height inside each tensor of a
-    single TrainingData is batch_num_games.
+    The list length is trajectory_length, and the stacked height inside each tensor of a
+    single TrainingData is batch_size.
 
                          list  index
     list[TrainingData]    0 1 2 3 4
                          |         |
                     trajectory move number
     trajectory a  0 1 2 3|4 5 6 7 8|9 ...      ^
-    trajectory b         |0 1 2 3 4|5 6 7 8 9  | batch_num_games
+    trajectory b         |0 1 2 3 4|5 6 7 8 9  | batch_size
     trajectory c      0 1|2 3 4 D D|           v
                           <------->
-                       batch_game_size
+                      trajectory_length
 
-    D = dummy TrainingData to pad trajectories beyond their end up to batch_game_size
+    D = dummy TrainingData to pad trajectories beyond their end up to trajectory_length
     """
 
     is_observation: Tensor
