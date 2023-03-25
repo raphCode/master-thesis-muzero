@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
-from utils import optional_map
+from util import optional_map
 from config import C
 from networks.bases import (
     DynamicsNet,

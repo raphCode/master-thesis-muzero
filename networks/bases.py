@@ -7,7 +7,7 @@ import torch.nn as nn
 from attrs import define
 from torch import Tensor
 
-from utils import optional_map
+from util import optional_map
 
 Return = TypeVar("Return", bound=Tensor | tuple[Optional[Tensor], ...])
 

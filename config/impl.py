@@ -15,7 +15,7 @@ import gorilla  # type: ignore
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
-from utils import optional_map
+from util import optional_map
 from games.bases import Game, Player
 from config.schema import BaseConfig, NetworkConfig, NetworkSchema
 from networks.bases import (
