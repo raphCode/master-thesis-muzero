@@ -1,13 +1,12 @@
 import operator
 import functools
-from typing import Deque
-from collections import deque
 
 import attrs
 import numpy as np
 import torch
 import torch.nn.functional as F
 
+from util import RingBuffer, TensorCache
 from config import C
 from trajectory import TrainingData, TrajectoryState
 
@@ -15,36 +14,22 @@ rng = np.random.default_rng()
 
 
 class ReplayBuffer:
-    lens = Deque[int]
-    data = Deque[list[TrajectoryState]]
+    """
+    Stores the latest trajectory states in a buffer and samples training batches from it.
+    The trajectory states are stored in a contiguous buffer, together with an unique id to
+    detect when a trajectory ends and a new one starts.
+    """
 
-    def __init__(self):
-        self.lens = deque(maxlen=C.training.replay_buffer_size)
-        self.data = deque(maxlen=C.training.replay_buffer_size)
+    def __init__(self) -> None:
+        # the integer is a unique id to differentiate different trajectories
+        self.buffer = RingBuffer[tuple[int, TrainingData]](C.training.replay_buffer_size)
+        self.cache = TensorCache()
         self.discounts = np.concatenate(
             (
                 [1],
                 np.cumprod(np.full(C.training.n_step_return, C.training.discount_factor)),
             )
         )
-        self.empty_observation = tuple(
-            torch.zeros(s, dtype=torch.float) for s in C.game.instance.observation_shapes
-        )
-        self.empty_latent_rep = torch.zeros(C.nets.latent_rep_shape)
-        self.empty_batch_game = [
-            TrainingData(
-                is_observation=torch.tensor(False),
-                is_data=torch.tensor(False),
-                observation=self.empty_observation,
-                latent_rep=self.empty_latent_rep,
-                beliefs=torch.zeros(C.nets.beliefs_shape),
-                player_type=torch.tensor(0),
-                action_onehot=torch.zeros(C.game.instance.max_num_actions),
-                target_policy=torch.zeros(C.game.instance.max_num_actions),
-                value_target=torch.tensor(0.0),
-                reward=torch.tensor(0.0),
-            )
-        ] * C.training.trajectory_length
 
     def add_trajectory(self, traj: list[TrajectoryState], game_completed: bool):
         int64t = functools.partial(torch.tensor, dtype=torch.int64)
@@ -120,5 +105,5 @@ class ReplayBuffer:
 
         return batch_train_data
 
-    def __len__(self):
-        return len(self.data)
+    def __len__(self) -> int:
+        return len(self.buffer)
