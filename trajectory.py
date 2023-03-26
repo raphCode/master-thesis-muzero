@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import functools
 from typing import TYPE_CHECKING, Any, Self, Optional
 from collections.abc import Sequence
 
+import torch
 from attrs import frozen
 from torch import Tensor
+
+from util import TensorCache, optional_map
+from config import C
 
 if TYPE_CHECKING:
     # only needed for type annotations, can't import uncondionally due to import cycles
@@ -103,3 +108,28 @@ class TrainingData:
     target_policy: Tensor
     value_target: Tensor
     reward: Tensor
+
+    @classmethod  # type: ignore [misc]
+    @property
+    @functools.cache
+    def dummy(cls) -> Self:
+        """
+        Dummy data for padding trajectories ending early inside the batch.
+        Designed to use as little memory as possible:
+        - tensor instances with identical data reused internally
+        - returned TrainingData instance cached for future calls
+        """
+        cache = TensorCache()
+        return cls(
+            is_observation=cache.tensor(False),
+            is_initial=cache.tensor(False),
+            is_data=cache.tensor(False),
+            observations=tuple(map(torch.zeros, C.game.instance.observation_shapes)),
+            belief=optional_map(cache.zeros)(C.networks.belief_shape),
+            latent=cache.zeros(C.networks.latent_shape),
+            current_player=cache.tensor(0, dtype=torch.long),  # index tensor needs long
+            action_onehot=cache.zeros(C.game.instance.max_num_actions, dtype=torch.long),
+            target_policy=cache.zeros(C.game.instance.max_num_actions),
+            value_target=cache.tensor(0),
+            reward=cache.tensor(0.0),
+        )
