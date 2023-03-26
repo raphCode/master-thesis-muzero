@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import functools
-from typing import TYPE_CHECKING, Any, Self, Optional
+from typing import TYPE_CHECKING, Any, Self, Optional, cast
 from collections.abc import Sequence
 
 import torch
@@ -132,4 +132,38 @@ class TrainingData:
             target_policy=cache.zeros(C.game.instance.max_num_actions),
             value_target=cache.tensor(0),
             reward=cache.tensor(0.0),
+        )
+
+    @classmethod
+    def from_trajectory_state(
+        cls,
+        ts: TrajectoryState,
+        value_target: float,
+        is_initial: bool,
+        cache: Optional[TensorCache] = None,
+    ) -> Self:
+        if cache is None:
+            cache = TensorCache()
+        is_obs = isinstance(ts.representation, Observation)
+        return cls(
+            is_observation=cache.tensor(is_obs),
+            is_initial=cache.tensor(is_initial),
+            is_data=cache.tensor(True),
+            observations=cast(
+                Self | Observation,
+                ts.representation if is_obs else cls.dummy,
+            ).observations,
+            latent=cast(
+                Self | Latent,
+                ts.representation if not is_obs else cls.dummy,
+            ).latent,
+            belief=ts.belief,
+            current_player=cache.tensor(ts.current_player, dtype=torch.long),
+            action_onehot=cache.onehot(
+                ts.action,
+                C.game.instance.max_num_actions,
+            ),
+            target_policy=torch.tensor(ts.target_policy),
+            value_target=torch.tensor(value_target),
+            reward=cache.tensor(ts.reward),
         )
