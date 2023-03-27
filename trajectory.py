@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import functools
-from typing import TYPE_CHECKING, Any, Self, Optional, cast
+from typing import TYPE_CHECKING, Any, Self, Iterable, Optional, TypeAlias, cast
 from collections.abc import Sequence
 
+import attrs
 import torch
 from attrs import frozen
 from torch import Tensor
@@ -168,3 +169,33 @@ class TrainingData:
             value_target=torch.tensor(value_target),
             reward=cache.tensor(ts.reward),
         )
+
+    @classmethod
+    def stack_batch(cls, instances: Iterable[Self]) -> Self:
+        """
+        Stacks the tensors of all instances in the first (batch) dimension.
+        """
+        FieldTypesUnion: TypeAlias = Optional[Tensor] | tuple[Tensor, ...]
+        stacked_data: FieldTypesUnion
+        stacked_fields = dict[str, FieldTypesUnion]()
+
+        field_names = [f.name for f in attrs.fields(cls)]
+        field_data = zip(*map(attrs.astuple, instances))
+        for name, data in zip(field_names, field_data):
+            if name == "observations":
+                stacked_data = tuple(map(torch.stack, zip(*data)))
+            elif name == "belief" and C.networks.belief_shape is None:
+                stacked_data = None
+            elif name.startswith("is_") or name == "current_player":
+                # only stack these single items in the batch dimension to get a 1D tensor
+                # - is_*: boolean masks, processed specially in the training
+                # - current_player: cross entropy loss takes class indices directly
+                stacked_data = torch.stack(data)
+            else:
+                # Networks are expected to return data at least 1D (disregarding batch
+                # dim), so do not make an exception for single data items (reward, value).
+                # To match the shapes returned by the networks, create atleast a 2D
+                # tensor, with the batch dimension first.
+                stacked_data = torch.vstack(data)
+            stacked_fields[name] = stacked_data
+        return cls(**stacked_fields)  # type: ignore [arg-type]
