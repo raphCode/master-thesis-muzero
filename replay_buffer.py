@@ -1,10 +1,8 @@
 import operator
-import functools
 
 import attrs
 import numpy as np
 import torch
-import torch.nn.functional as F
 
 from util import RingBuffer, TensorCache
 from config import C
@@ -31,13 +29,17 @@ class ReplayBuffer:
             )
         )
 
-    def add_trajectory(self, traj: list[TrajectoryState], game_completed: bool):
-        int64t = functools.partial(torch.tensor, dtype=torch.int64)
-        floatt = functools.partial(torch.tensor, dtype=torch.float)
-
+    def add_trajectory(self, traj: list[TrajectoryState], game_completed: bool) -> None:
+        # The unique trajectory id could also be an increasing number, but I don't like a
+        # counter growing indefinitely.
+        # An id is derived from the start index in the buffer and the trajectory length.
+        # Effectively this calculates the end index in the buffer (actually the index
+        # after the trajectory end, and without modulo len(buffer)).
+        # In a ring buffer all entries leading up to the end index are written to, a
+        # trajectory with the same id as an existing one overwrites the old one fully,
+        # ensuring the id is indeed unique.
+        traj_id = self.buffer.position + len(traj)
         next_rewards = np.array([ts.reward for ts in traj][1:])
-
-        train_data = []
         for n, ts in enumerate(traj):
             nstep_idx = min(len(traj) - 1, n + C.training.n_step_return)
             if nstep_idx == len(traj) - 1 and game_completed:
@@ -48,26 +50,14 @@ class ReplayBuffer:
             value_target += np.inner(
                 next_rewards[n:nstep_idx], self.discounts[1 : nstep_idx - n + 1]
             )
-            is_obs = isinstance(ts.info, ObservationInfo)
-            train_data.append(
-                TrainingData(
-                    is_observation=torch.tensor(is_obs),
-                    is_data=torch.tensor(True),
-                    observation=ts.info.observation if is_obs else self.empty_observation,
-                    latent_rep=self.empty_latent_rep if is_obs else ts.info.latent_rep,
-                    beliefs=ts.info.prev_beliefs if is_obs else ts.info.beliefs,
-                    player_type=int64t(ts.player_type),
-                    action_onehot=F.one_hot(
-                        int64t(ts.action), C.game.instance.max_num_actions
+            self.buffer.append(
+                (
+                    traj_id,
+                    TrainingData.from_trajectory_state(
+                        ts, value_target, is_initial=(n == 0), cache=self.cache
                     ),
-                    target_policy=floatt(ts.target_policy),
-                    value_target=floatt(value_target),
-                    reward=floatt(ts.reward),
                 )
             )
-
-        self.lens.append(len(train_data))
-        self.data.append(train_data)
 
     def sample(self) -> list[list[TrajectoryState]]:
         lens = np.array(self.lens)
