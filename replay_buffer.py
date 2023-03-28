@@ -1,14 +1,14 @@
-import operator
+import random
+import logging
+from typing import cast
 
-import attrs
 import numpy as np
-import torch
 
 from util import RingBuffer, TensorCache
 from config import C
 from trajectory import TrainingData, TrajectoryState
 
-rng = np.random.default_rng()
+log = logging.getLogger(__name__)
 
 
 class ReplayBuffer:
@@ -59,41 +59,48 @@ class ReplayBuffer:
                 )
             )
 
-    def sample(self) -> list[list[TrajectoryState]]:
-        lens = np.array(self.lens)
-        probs = lens / lens.sum()
-        batch_trajs = []
-        data = np.empty(len(self.data), dtype=object)
-        data[:] = self.data
-        for traj in rng.choice(data, size=C.training.batch_size, p=probs):
-            i = rng.integers(len(traj))
-            batch_trajs.append(
-                (traj + self.empty_batch_game)[i : i + C.training.trajectory_length]
+    def sample(self) -> list[TrainingData]:
+        """
+        Return a training batch composed of random subsections of the stored trajectories.
+        See the docs for TrainingData for an ascii art visualisation of the returned data.
+        """
+        # Select random start indices in the buffer for the trajectory subsections.
+        # A subsection is only accepted when when the remaining trajectory has the the
+        # required minimum length.
+        # This makes it necessary to retry the sampling until the batch size is filled.
+        retry_limit = 10
+        sampled_starts = set()
+        for _ in range(retry_limit * C.training.batch_size):
+            start_index = random.randrange(len(self.buffer))
+            traj_id, _ = self.buffer[start_index]
+            minlen_id, _ = self.buffer[start_index + C.training.min_trajectory_length]
+            if traj_id == minlen_id:
+                sampled_starts.add((start_index, traj_id))
+            if len(sampled_starts) == C.training.batch_size:
+                break
+        else:
+            log.warning(
+                f"Underfull batch size: {len(sampled_starts)}/{C.training.batch_size}"
             )
 
-        # transpose: outer dim: batch_size -> trajectory_length
-        batch_steps = zip(*batch_trajs)
-        field_names = tuple(map(operator.attrgetter("name"), attrs.fields(TrainingData)))
-
-        batch_train_data = []
-        for steps in batch_steps:
-            # unpack TrainingData classes into tuples
-            unpacked_steps = map(attrs.astuple, steps)
-            # transpose: outer dim: batch_size -> len(field_names)
-            batch_fields = zip(*unpacked_steps)
-            fields = dict()
-            for name, batch in zip(field_names, batch_fields):
-                # TODO: save memory by setting latent_rep,beliefs = None for all steps expect first
-                if name == "observation":
-                    data = tuple(map(torch.stack, zip(*batch)))
-                elif name in ("is_observation", "is_data", "player_type"):
-                    data = torch.stack(batch)
+        # Walk forward in the buffer from the start indices, collecting the trajectory
+        # states until the maximum length is reached or all trajectories ended.
+        batch = []
+        for n in range(C.training.max_trajectory_length):
+            batch_step = []
+            is_data = False
+            for start_index, start_traj_id in sorted(sampled_starts):
+                traj_id, data = self.buffer[start_index + n]
+                if traj_id == start_traj_id:
+                    is_data = True
                 else:
-                    data = torch.vstack(batch)
-                fields[name] = data
-            batch_train_data.append(TrainingData(**fields))
-
-        return batch_train_data
+                    data = cast(TrainingData, TrainingData.dummy)
+                batch_step.append(data)
+            if not is_data:
+                # all trajectories ended early
+                break
+            batch.append(TrainingData.stack_batch(batch_step))
+        return batch
 
     def __len__(self) -> int:
         return len(self.buffer)
