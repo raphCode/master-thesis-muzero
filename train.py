@@ -1,4 +1,5 @@
 import functools
+import itertools
 
 import attrs
 import torch
@@ -37,7 +38,13 @@ class LossCounts:
 class Trainer:
     def __init__(self, nets: Networks):
         self.nets = nets
-        self.optimizer = C.train.optimizer_factory(self.nets)
+        self.optimizer = C.training.optimizer(
+            itertools.chain(
+                nets.representation.parameters(),
+                nets.prediction.parameters(),
+                nets.dynamics.parameters(),
+            )
+        )
 
     def process_batch(self, batch: list[TrainingData], sw: SummaryWriter, n: int):
         # TODO: move tensors to GPU
