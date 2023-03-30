@@ -136,7 +136,10 @@ def populate_config(cfg: DictConfig) -> None:
 
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
         # empty list [] in config creates None values for belief
-        belief_shape = optional_map(tuple)(net_cfg.belief_shape or None)  # type: ignore [arg-type]
+        belief_shape = cast(
+            Optional[tuple[int, ...]],
+            optional_map(tuple)(net_cfg.belief_shape or None),  # type: ignore [arg-type]
+        )
 
         def network_factory() -> Networks:
             return Networks(
@@ -144,13 +147,13 @@ def populate_config(cfg: DictConfig) -> None:
                 prediction=net_cfg.prediction(),
                 dynamics=net_cfg.dynamics(),
                 initial_latent=torch.zeros(tuple(net_cfg.latent_shape)),
-                initial_belief=optional_map(torch.zeros)(belief_shape),  # type: ignore [arg-type]
+                initial_belief=optional_map(torch.zeros)(belief_shape),
             )
 
         return NetworkConfig(
             factory=network_factory,
             latent_shape=tuple(net_cfg.latent_shape),
-            belief_shape=belief_shape,  # type: ignore [arg-type]
+            belief_shape=belief_shape,
         )
 
     # casts are necessary because here the omegaconf schema types co-exist with the
