@@ -20,6 +20,11 @@ class Losses:
 
 @define
 class LossDataCounts:
+    """
+    Counts how many losses were calculated in the batch.
+    For calculating averages independent of batch size and trajectory length.
+    """
+
     fit: int = 0
     latent: int = 0
 
