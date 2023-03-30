@@ -43,6 +43,8 @@ class Trainer:
                 nets.representation.parameters(),
                 nets.prediction.parameters(),
                 nets.dynamics.parameters(),
+                [nets.initial_latent],
+                [nets.initial_belief] if nets.initial_belief is not None else [],
             )
         )
 

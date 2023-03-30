@@ -140,14 +140,15 @@ def populate_config(cfg: DictConfig) -> None:
             Optional[tuple[int, ...]],
             optional_map(tuple)(net_cfg.belief_shape or None),  # type: ignore [arg-type]
         )
+        initial_tensor = functools.partial(torch.rand, requires_grad=True)
 
         def network_factory() -> Networks:
             return Networks(
                 representation=net_cfg.representation(),
                 prediction=net_cfg.prediction(),
                 dynamics=net_cfg.dynamics(),
-                initial_latent=torch.zeros(tuple(net_cfg.latent_shape)),
-                initial_belief=optional_map(torch.zeros)(belief_shape),
+                initial_latent=initial_tensor(net_cfg.latent_shape),
+                initial_belief=optional_map(initial_tensor)(belief_shape),
             )
 
         return NetworkConfig(
