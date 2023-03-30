@@ -1,21 +1,26 @@
+import functools
+
 import attrs
 import torch
 import torch.nn.functional as F
-from attrs import define
+from attrs import Factory, define
+from torch import Tensor
 from torch.utils.tensorboard import SummaryWriter
 
 from config import C
 from trajectory import TrainingData
 from networks.bases import Networks
 
+zero_tensor = Factory(functools.partial(torch.zeros, 1))
+
 
 @define
 class Losses:
-    latent: torch.Tensor = 0
-    value: torch.Tensor = 0
-    reward: torch.Tensor = 0
-    policy: torch.Tensor = 0
-    player_type: torch.Tensor = 0
+    latent: Tensor = zero_tensor
+    value: Tensor = zero_tensor
+    reward: Tensor = zero_tensor
+    policy: Tensor = zero_tensor
+    player_type: Tensor = zero_tensor
 
 
 @define
