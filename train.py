@@ -19,13 +19,13 @@ class Losses:
 
 
 @define
-class LossDataCounts:
+class LossCounts:
     """
     Counts how many losses were calculated in the batch.
     For calculating averages independent of batch size and trajectory length.
     """
 
-    fit: int = 0
+    data: int = 0
     latent: int = 0
 
 
@@ -37,7 +37,7 @@ class Trainer:
     def process_batch(self, batch: list[TrainingData], sw: SummaryWriter, n: int):
         # TODO: move tensors to GPU
         losses = Losses()
-        counts = LossDataCounts()
+        counts = LossCounts()
 
         first = batch[0]
         obs_latent_rep, obs_beliefs = self.nets.representation(
@@ -64,7 +64,7 @@ class Trainer:
                 )
                 counts.latent += step.is_observation.count_nonzero()
 
-            counts.fit += step.is_data.count_nonzero()
+            counts.data += step.is_data.count_nonzero()
 
             value, policy_logits, player_type_logits = self.nets.prediction(
                 latent_rep, beliefs, logits=True
@@ -88,11 +88,11 @@ class Trainer:
 
         if counts.latent > 0:
             losses.latent /= counts.latent
-        if counts.fit > 0:
-            losses.value /= counts.fit
-            losses.policy /= counts.fit
-            losses.reward /= counts.fit
-            losses.player_type /= counts.fit
+        if counts.data > 0:
+            losses.value /= counts.data
+            losses.policy /= counts.data
+            losses.reward /= counts.data
+            losses.player_type /= counts.data
 
         for k, loss in attrs.asdict(losses).items():
             sw.add_scalar(f"loss/{k}", loss, n)
