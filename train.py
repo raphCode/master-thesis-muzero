@@ -98,11 +98,11 @@ class Trainer:
             sw.add_scalar(f"loss/{k}", loss, n)
 
         loss = (
-            C.train.loss_weights.latent * losses.latent
-            + C.train.loss_weights.value * losses.value
-            + C.train.loss_weights.reward * losses.reward
-            + C.train.loss_weights.policy * losses.policy
-            + C.train.loss_weights.player_type * losses.player_type
+            C.training.loss_weights.latent * losses.latent
+            + C.training.loss_weights.value * losses.value
+            + C.training.loss_weights.reward * losses.reward
+            + C.training.loss_weights.policy * losses.policy
+            + C.training.loss_weights.player_type * losses.player_type
         )
         self.optimizer.zero_grad()
         loss.backward()
