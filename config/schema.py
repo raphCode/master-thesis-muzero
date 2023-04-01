@@ -96,7 +96,6 @@ class MctsConfig:
     node_selection_score_fn: SelectionFn
     iterations_move_selection: int
     iterations_value_estimate: int
-    use_previous_latents: bool
 
 
 @frozen(kw_only=True)
