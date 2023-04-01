@@ -21,7 +21,7 @@ class Losses:
     value: Tensor = zero_tensor
     reward: Tensor = zero_tensor
     policy: Tensor = zero_tensor
-    player_type: Tensor = zero_tensor
+    player: Tensor = zero_tensor
 
 
 @define
@@ -63,9 +63,7 @@ class Trainer:
 
         for step in batch:
             if step is not first and step.is_observation.any():
-                obs_latent, obs_belief = self.nets.representation(
-                    *step.observation, belief
-                )
+                obs_latent = self.nets.representation(*step.observations)
                 losses.latent += (
                     F.mse_loss(latent, obs_latent, reduction="none")
                     .mean(dim=1)
@@ -76,7 +74,7 @@ class Trainer:
 
             counts.data += step.is_data.count_nonzero()
 
-            value, policy_logits, player_type_logits = self.nets.prediction(
+            value, policy_logits, curr_player_logits = self.nets.prediction(
                 latent, belief, logits=True
             )
             losses.value += F.mse_loss(value, step.value_target, reduction="none")[
@@ -85,8 +83,8 @@ class Trainer:
             losses.policy += F.cross_entropy(
                 policy_logits, step.target_policy, reduction="none"
             )[step.is_data].sum()
-            losses.player_type += F.cross_entropy(
-                player_type_logits, step.player_type, reduction="none"
+            losses.player += F.cross_entropy(
+                curr_player_logits, step.current_player, reduction="none"
             )[step.is_data].sum()
 
             latent, belief, reward = self.nets.dynamics(
@@ -102,7 +100,7 @@ class Trainer:
             losses.value /= counts.data
             losses.policy /= counts.data
             losses.reward /= counts.data
-            losses.player_type /= counts.data
+            losses.player /= counts.data
 
         for k, loss in attrs.asdict(losses).items():
             sw.add_scalar(f"loss/{k}", loss, n)
@@ -112,7 +110,7 @@ class Trainer:
             + C.training.loss_weights.value * losses.value
             + C.training.loss_weights.reward * losses.reward
             + C.training.loss_weights.policy * losses.policy
-            + C.training.loss_weights.player_type * losses.player_type
+            + C.training.loss_weights.player * losses.player
         )
         self.optimizer.zero_grad()
         loss.backward()

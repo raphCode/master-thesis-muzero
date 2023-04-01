@@ -17,4 +17,4 @@ loss_weights:
     value: 1
     reward: 1
     policy: 1
-    player_type: 1
+    player: 1

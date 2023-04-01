@@ -136,7 +136,7 @@ class LossWeights:
     value: float
     reward: float
     policy: float
-    player_type: float
+    player: float
 
 
 @frozen
