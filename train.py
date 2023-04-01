@@ -1,12 +1,13 @@
 import functools
 import itertools
+from typing import cast
 
 import attrs
 import torch
 import torch.nn.functional as F
 from attrs import Factory, define
 from torch import Tensor
-from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter  # type: ignore [attr-defined]
 
 from config import C
 from trajectory import TrainingData
@@ -48,7 +49,7 @@ class Trainer:
             )
         )
 
-    def process_batch(self, batch: list[TrainingData], sw: SummaryWriter, n: int):
+    def process_batch(self, batch: list[TrainingData], sw: SummaryWriter, n: int) -> None:
         # TODO: move tensors to GPU
         losses = Losses()
         counts = LossCounts()
@@ -71,13 +72,13 @@ class Trainer:
                         .masked_select(step.is_observation)
                         .sum()
                     )
-                    counts.latent += step.is_observation.count_nonzero()
+                    counts.latent += cast(int, step.is_observation.count_nonzero().item())
                     # latent came from the dynamics network,
                     # it might be a tensor view where direct assignment is not possible
                     latent = latent.contiguous()
                 latent[step.is_observation] = obs_latent[step.is_observation]
 
-            counts.data += step.is_data.count_nonzero()
+            counts.data += cast(int, step.is_data.count_nonzero().item())
 
             value, policy_logits, curr_player_logits = self.nets.prediction(
                 latent, belief, logits=True
@@ -108,9 +109,9 @@ class Trainer:
             losses.player /= counts.data
 
         for k, loss in attrs.asdict(losses).items():
-            sw.add_scalar(f"loss/{k}", loss, n)
+            sw.add_scalar(f"loss/{k}", loss, n)  # type: ignore [no-untyped-call]
 
-        loss = (
+        total_loss = (
             C.training.loss_weights.latent * losses.latent
             + C.training.loss_weights.value * losses.value
             + C.training.loss_weights.reward * losses.reward
@@ -118,7 +119,6 @@ class Trainer:
             + C.training.loss_weights.player * losses.player
         )
         self.optimizer.zero_grad()
-        loss.backward()
+        total_loss.backward()  # type: ignore [no-untyped-call]
         self.optimizer.step()
-
-        sw.add_scalar("loss/total", loss, n)
+        sw.add_scalar("loss/total", total_loss, n)  # type: ignore [no-untyped-call]
