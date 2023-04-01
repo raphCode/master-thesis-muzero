@@ -62,9 +62,6 @@ class Trainer:
             belief[first.is_initial] = self.nets.initial_belief
 
         for step in batch:
-            if not step.is_data.any():
-                break
-
             if step is not first and step.is_observation.any():
                 obs_latent, obs_belief = self.nets.representation(
                     *step.observation, belief
