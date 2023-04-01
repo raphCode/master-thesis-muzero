@@ -66,11 +66,11 @@ class Trainer:
                 break
 
             if step is not first and step.is_observation.any():
-                obs_latent_rep, obs_beliefs = self.nets.representation(
-                    *step.observation, beliefs
+                obs_latent, obs_belief = self.nets.representation(
+                    *step.observation, belief
                 )
                 losses.latent += (
-                    F.mse_loss(latent_rep, obs_latent_rep, reduction="none")
+                    F.mse_loss(latent, obs_latent, reduction="none")
                     .mean(dim=1)
                     .masked_select(step.is_observation)
                     .sum()
@@ -80,7 +80,7 @@ class Trainer:
             counts.data += step.is_data.count_nonzero()
 
             value, policy_logits, player_type_logits = self.nets.prediction(
-                latent_rep, beliefs, logits=True
+                latent, belief, logits=True
             )
             losses.value += F.mse_loss(value, step.value_target, reduction="none")[
                 step.is_data
@@ -92,8 +92,8 @@ class Trainer:
                 player_type_logits, step.player_type, reduction="none"
             )[step.is_data].sum()
 
-            latent_rep, beliefs, reward = self.nets.dynamics(
-                latent_rep, beliefs, step.action_onehot
+            latent, belief, reward = self.nets.dynamics(
+                latent, belief, step.action_onehot
             )
             losses.reward += F.mse_loss(reward, step.reward, reduction="none")[
                 step.is_data
