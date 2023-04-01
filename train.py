@@ -62,15 +62,20 @@ class Trainer:
             belief[first.is_initial] = self.nets.initial_belief
 
         for step in batch:
-            if step is not first and step.is_observation.any():
+            if step.is_observation.any():
                 obs_latent = self.nets.representation(*step.observations)
-                losses.latent += (
-                    F.mse_loss(latent, obs_latent, reduction="none")
-                    .mean(dim=1)
-                    .masked_select(step.is_observation)
-                    .sum()
-                )
-                counts.latent += step.is_observation.count_nonzero()
+                if step is not first:
+                    losses.latent += (
+                        F.mse_loss(latent, obs_latent, reduction="none")
+                        .mean(dim=1)
+                        .masked_select(step.is_observation)
+                        .sum()
+                    )
+                    counts.latent += step.is_observation.count_nonzero()
+                    # latent came from the dynamics network,
+                    # it might be a tensor view where direct assignment is not possible
+                    latent = latent.contiguous()
+                latent[step.is_observation] = obs_latent[step.is_observation]
 
             counts.data += step.is_data.count_nonzero()
 
