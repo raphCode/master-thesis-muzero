@@ -54,13 +54,12 @@ class Trainer:
         counts = LossCounts()
 
         first = batch[0]
-        obs_latent_rep, obs_beliefs = self.nets.representation(
-            *first.observation, first.beliefs
-        )
-        latent_rep = obs_latent_rep.where(
-            first.is_observation.unsqueeze(-1), first.latent_rep
-        )
-        beliefs = obs_beliefs.where(first.is_observation.unsqueeze(-1), first.beliefs)
+        latent = first.latent
+        latent[first.is_initial] = self.nets.initial_latent
+        belief = first.belief
+        if belief is not None:
+            assert self.nets.initial_belief is not None
+            belief[first.is_initial] = self.nets.initial_belief
 
         for step in batch:
             if not step.is_data.any():
