@@ -24,4 +24,4 @@ repos:
         language: python
         language_version: python3.11
         name: mypy (python)
-        args: ["--follow-imports=silent", "--enable-incomplete-feature=Unpack"]
+        args: ["--enable-incomplete-feature=Unpack"]
