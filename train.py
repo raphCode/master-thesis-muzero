@@ -1,6 +1,6 @@
 import functools
 import itertools
-from typing import cast
+from typing import Callable, Optional, cast
 
 import attrs
 import torch
@@ -51,6 +51,21 @@ class Trainer:
 
     def process_batch(self, batch: list[TrainingData], sw: SummaryWriter, n: int) -> None:
         # TODO: move tensors to GPU
+
+        def ml(
+            loss_fn: Callable[[Tensor, Tensor], Tensor],
+            prediction: Tensor,
+            target: Tensor,
+            mask: Optional[Tensor] = None,
+        ) -> Tensor:
+            """
+            Masked loss function which excludes invalid data.
+            """
+            if mask is None:
+                mask = step.is_data
+            loss = loss_fn(prediction, target, reduction="none")  # type: ignore [call-arg]
+            return loss[mask].sum(dim=0).mean()
+
         losses = Losses()
         counts = LossCounts()
 
@@ -66,11 +81,8 @@ class Trainer:
             if step.is_observation.any():
                 obs_latent = self.nets.representation(*step.observations)
                 if step is not first:
-                    losses.latent += (
-                        F.mse_loss(latent, obs_latent, reduction="none")
-                        .mean(dim=1)
-                        .masked_select(step.is_observation)
-                        .sum()
+                    losses.latent += ml(
+                        F.mse_loss, latent, obs_latent, mask=step.is_observation
                     )
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
                     # latent came from the dynamics network,
@@ -83,22 +95,14 @@ class Trainer:
             value, policy_logits, curr_player_logits = self.nets.prediction(
                 latent, belief, logits=True
             )
-            losses.value += F.mse_loss(value, step.value_target, reduction="none")[
-                step.is_data
-            ].sum()
-            losses.policy += F.cross_entropy(
-                policy_logits, step.target_policy, reduction="none"
-            )[step.is_data].sum()
-            losses.player += F.cross_entropy(
-                curr_player_logits, step.current_player, reduction="none"
-            )[step.is_data].sum()
+            losses.value += ml(F.mse_loss, value, step.value_target)
+            losses.policy += ml(F.cross_entropy, policy_logits, step.target_policy)
+            losses.player += ml(F.cross_entropy, curr_player_logits, step.current_player)
 
             latent, belief, reward = self.nets.dynamics(
                 latent, belief, step.action_onehot
             )
-            losses.reward += F.mse_loss(reward, step.reward, reduction="none")[
-                step.is_data
-            ].sum()
+            losses.reward += ml(F.mse_loss, reward, step.reward)
 
         if counts.latent > 0:
             losses.latent /= counts.latent
