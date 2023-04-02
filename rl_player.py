@@ -96,10 +96,12 @@ class RLBase(ABC):
             self.mcts_cfg.node_selection_score_fn,
             self.nets,
         )
+        policy = self.mcts_cfg.node_target_policy_fn(self.root_node)
+        assert len(policy) == C.game.instance.max_num_actions
         return TrainingInfo(
             representation=self.representation,
             belief=self.root_node.belief,
-            target_policy=self.mcts_cfg.node_target_policy_fn(self.root_node),
+            target_policy=policy,
             mcts_value=self.root_node.value,
         )
 
