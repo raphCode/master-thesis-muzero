@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, TypeVar, cast
 from operator import itemgetter
 from collections.abc import Callable, Iterable, Iterator, Sequence
@@ -5,6 +6,7 @@ from collections.abc import Callable, Iterable, Iterator, Sequence
 import numpy as np
 
 from mcts import Node
+from util import NaNWarning
 
 
 def softmax(
@@ -13,6 +15,20 @@ def softmax(
     vals = np.array(values)
     exp = np.exp(vals / temp)
     result = exp / exp.sum()
+    if np.isnan(result).any():
+        warnings.warn(
+            f"NaN values encountered in softmax!\n"
+            + f"{len(vals)} values, temperature: {temp}\n"
+            + "input, temp applied, result\n"
+            + np.array2string(
+                np.column_stack((vals, vals / temp, result)),
+                max_line_width=None,
+                precision=4,
+                suppress_small=True,
+            ),
+            NaNWarning,
+            stacklevel=2,
+        )
     return cast(np.ndarray[Any, np.dtype[np.float64]], result)
 
 

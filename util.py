@@ -12,6 +12,10 @@ def optional_map(f: Callable[[A], B]) -> Callable[[Optional[A]], Optional[B]]:
     return lambda x: f(x) if x is not None else None
 
 
+class NaNWarning(RuntimeWarning):
+    pass
+
+
 T = TypeVar("T")
 
 
