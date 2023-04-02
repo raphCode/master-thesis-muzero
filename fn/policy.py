@@ -4,6 +4,7 @@ from collections.abc import Callable, Sequence
 import numpy as np
 
 from mcts import Node
+from config import C
 
 from .util import SoftmaxTemp, softmax, get_visit_counts
 
@@ -36,7 +37,7 @@ class FromExpandedValues(SoftmaxTemp):
     def __call__(self, node: Node) -> Sequence[float]:
         assert len(node.children) > 0
         values = [child.value for child in node.children.values()]
-        policy = np.full(len(node.children), 0.0)
+        policy = np.full(C.game.instance.max_num_actions, 0.0)
         policy[list(node.children.keys())] = softmax(values, self.temp)
         return policy  # type: ignore [return-value]
 
