@@ -1,3 +1,5 @@
+import logging
+
 import hydra
 from omegaconf import DictConfig
 from hydra.core.config_store import ConfigStore
@@ -17,6 +19,7 @@ cs.store(name="base_config", node=BaseConfig)
 
 @hydra.main(version_base=None, config_path="config", config_name="base_config")
 def main(cfg: DictConfig) -> None:
+    logging.captureWarnings(True)
     populate_config(cfg)
     save_source_code()
 
