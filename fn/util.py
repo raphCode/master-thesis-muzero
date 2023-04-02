@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 from operator import itemgetter
 from collections.abc import Callable, Iterable, Iterator, Sequence
 
@@ -12,7 +12,8 @@ def softmax(
 ) -> np.ndarray[Any, np.dtype[np.float64]]:
     vals = np.array(values)
     exp = np.exp(vals / temp)
-    return exp / exp.sum()  # type: ignore [no-any-return]
+    result = exp / exp.sum()
+    return cast(np.ndarray[Any, np.dtype[np.float64]], result)
 
 
 T = TypeVar("T")
