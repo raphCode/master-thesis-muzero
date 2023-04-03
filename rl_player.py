@@ -88,8 +88,8 @@ class RLBase(ABC):
         Uses self.representation so it is important this attribute is correcty set on own
         and other players' moves.
         """
-        # This expands the part of the tree more that represents the actual trajectory.
-        # This is an information leak when beliefs are searched in the tree in the next move.
+        # Expand the part of the tree that represents the actual trajectory.
+        # This may be an information leak if the next own move uses results from this tree
         ensure_visit_count(
             self.root_node,
             self.mcts_cfg.iterations_value_estimate,
