@@ -3,13 +3,13 @@ repos:
     rev: 5.12.0
     hooks:
     -   id: isort
-        name: isort (python)
+        name: isort
         args: ["--check", "--diff"]
 -   repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
     -   id: black
-        name: black (python)
+        name: black
         args: ["--check", "--diff"]
 -   repo: https://github.com/pycqa/flake8
     rev: 6.0.0
@@ -22,5 +22,5 @@ repos:
     -   id: mypy
         language: python
         language_version: python3.11
-        name: mypy (python)
+        name: mypy
         args: ["--enable-incomplete-feature=Unpack"]
