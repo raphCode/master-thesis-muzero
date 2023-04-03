@@ -12,3 +12,7 @@ float_to_top = true
 python_executable = "venv/bin/python"
 strict = true
 pretty = true
+
+[tool.flake8]
+max-line-length = 90
+show-source = true

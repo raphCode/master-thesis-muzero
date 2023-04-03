@@ -11,12 +11,11 @@ repos:
     -   id: black
         name: black (python)
         args: ["--check", "--diff"]
--   repo: https://github.com/hadialqattan/pycln
-    rev: v2.1.3
+-   repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
     hooks:
-    -   id: pycln
-        name: pycln (python)
-        args: ["--check", "--diff", "--all"]
+    -   id: flake8
+        additional_dependencies: [flake8-pyproject]
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.1.1
     hooks:
