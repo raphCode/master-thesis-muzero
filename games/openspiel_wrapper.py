@@ -112,4 +112,4 @@ class OpenSpielGame(Game):
 
     @cached_property
     def max_num_actions(self) -> int:
-        return max(self.game.num_distinct_actions(), self.game.max_chance_outcomes())  # type: ignore [no-any-return]
+        return max(self.game.num_distinct_actions(), self.game.max_chance_outcomes())  # type: ignore [no-any-return] # noqa: E501

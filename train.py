@@ -63,7 +63,7 @@ class Trainer:
             """
             if mask is None:
                 mask = step.is_data
-            loss = loss_fn(prediction, target, reduction="none")  # type: ignore [call-arg]
+            loss = loss_fn(prediction, target, reduction="none")  # type: ignore [call-arg] # noqa: E501
             return loss[mask].sum(dim=0).mean()
 
         losses = Losses()

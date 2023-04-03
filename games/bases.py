@@ -174,7 +174,8 @@ class Game(ABC):
     def chance_player_id(self) -> Optional[int]:
         """
         The chance player id, if it exists.
-        By default the highest id possible to avoid interfering with the zero-based player ids.
+        By default the highest id possible to avoid interfering with the zero-based player
+        ids.
         """
         return self.max_num_players if self.has_chance_player else None
 

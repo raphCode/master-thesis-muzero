@@ -17,7 +17,7 @@ def softmax(
     result = exp / exp.sum()
     if np.isnan(result).any():
         warnings.warn(
-            f"NaN values encountered in softmax!\n"
+            "NaN values encountered in softmax!\n"
             + f"{len(vals)} values, temperature: {temp}\n"
             + "input, temp applied, result\n"
             + np.array2string(

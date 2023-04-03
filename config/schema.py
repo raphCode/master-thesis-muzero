@@ -23,7 +23,7 @@ if not TYPE_CHECKING:
     # https://github.com/omry/omegaconf/issues/815
     # This hack of redefining frozen is so that the typechecker knows the config is
     # supposed to be immutable
-    frozen = define
+    frozen = define  # noqa: F811
 
 
 @frozen
