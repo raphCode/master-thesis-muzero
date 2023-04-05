@@ -22,6 +22,8 @@ class ReplayBuffer:
         # the integer is a unique id to differentiate different trajectories
         self.buffer = RingBuffer[tuple[int, TrainingData]](C.training.replay_buffer_size)
         self.cache = TensorCache()
+        # These are pre-raised discount factors:
+        # discounts[x] = pow(discount_factor, x)
         self.discounts = np.concatenate(
             (
                 [1],
@@ -39,17 +41,34 @@ class ReplayBuffer:
         # trajectory with the same id as an existing one overwrites the old one fully,
         # ensuring the id is indeed unique.
         traj_id = self.buffer.position + len(traj)
-        next_rewards = np.array([ts.reward for ts in traj][1:])
-        for n, ts in enumerate(traj):
-            nstep_idx = min(len(traj) - 1, n + C.training.n_step_return)
-            if nstep_idx == len(traj) - 1 and game_completed:
-                value_target = 0
-            else:
-                value_target = traj[nstep_idx].mcts_value * self.discounts[nstep_idx - n]
 
-            value_target += np.inner(
-                next_rewards[n:nstep_idx], self.discounts[1 : nstep_idx - n + 1]
+        rewards = np.array([ts.reward for ts in traj])
+        for n, ts in enumerate(traj):
+            # The target for the prediction network value head is the bootstrapped n step
+            # return. It is calculated by adding future rewards over the n step horizon
+            # and a final value estimate:
+            # - sum up the next n rewards:
+            #   beginning with the current state s_0, up to s_(n-1)
+            # - add the value estimate of the ensuing state s_n:
+            #   - terminal states have a value estimate of zero and can be omitted,
+            #     freeing up the last state to be included in the reward sum.
+            #   - if the game was aborted prematurely, the last state is not terminal:
+            #     we need to use its value estimate, so we may only sum up the rewards up
+            #     to the second to last state
+            remaining_nstep_len = len(traj) - n - (not game_completed)
+            nstep_len = min(C.training.n_step_return, remaining_nstep_len)
+
+            # All summands are discounted with the discount factor, raised to how many
+            # steps in the future they appear.
+            value_target = np.inner(
+                rewards[n : n + nstep_len], self.discounts[:nstep_len]
             )
+            # The nstep horizon length is calculated carefully: When the game completed
+            # normally, the horizon end may lie outside the trajectory, ensuring the value
+            # estimate is not added on terminal states:
+            if n + nstep_len < len(traj):
+                value_target += traj[n + nstep_len].mcts_value * self.discounts[nstep_len]
+
             self.buffer.append(
                 (
                     traj_id,
