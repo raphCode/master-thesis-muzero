@@ -144,7 +144,7 @@ class TrainConfig:
     min_trajectory_length: int
     max_trajectory_length: int
     discount_factor: float
-    n_step_return: int
+    n_step_horizon: int
     replay_buffer_size: int
     max_moves_per_game: int
     optimizer: OptimizerPartial

@@ -27,7 +27,9 @@ class ReplayBuffer:
         self.discounts = np.concatenate(
             (
                 [1],
-                np.cumprod(np.full(C.training.n_step_return, C.training.discount_factor)),
+                np.cumprod(
+                    np.full(C.training.n_step_horizon, C.training.discount_factor)
+                ),
             )
         )
 
@@ -56,7 +58,7 @@ class ReplayBuffer:
             #     we need to use its value estimate, so we may only sum up the rewards up
             #     to the second to last state
             remaining_nstep_len = len(traj) - n - (not game_completed)
-            nstep_len = min(C.training.n_step_return, remaining_nstep_len)
+            nstep_len = min(C.training.n_step_horizon, remaining_nstep_len)
 
             # All summands are discounted with the discount factor, raised to how many
             # steps in the future they appear.
