@@ -80,15 +80,13 @@ class Trainer:
         for step in batch:
             if step.is_observation.any():
                 obs_latent = self.nets.representation(*step.observations)
-                if step is not first:
+                if step is first:
+                    latent[step.is_observation] = obs_latent[step.is_observation]
+                else:
                     losses.latent += ml(
                         F.mse_loss, latent, obs_latent, mask=step.is_observation
                     )
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
-                    # latent came from the dynamics network,
-                    # it might be a tensor view where direct assignment is not possible
-                    latent = latent.contiguous()
-                latent[step.is_observation] = obs_latent[step.is_observation]
 
             counts.data += cast(int, step.is_data.count_nonzero().item())
 
