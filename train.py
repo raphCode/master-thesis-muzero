@@ -60,11 +60,14 @@ class Trainer:
         ) -> Tensor:
             """
             Masked loss function which excludes invalid data.
+            loss_fn is expected to not perform any data reduction:
             """
             if mask is None:
                 mask = step.is_data
-            loss = loss_fn(prediction, target, reduction="none")  # type: ignore [call-arg] # noqa: E501
-            return loss[mask].sum(dim=0).mean()
+            return loss_fn(prediction[mask], target[mask]).sum(dim=0).mean()
+
+        l_cross = functools.partial(F.cross_entropy, reduction="none")
+        l_mse = functools.partial(F.mse_loss, reduction="none")
 
         losses = Losses()
         counts = LossCounts()
@@ -84,7 +87,7 @@ class Trainer:
                     latent[step.is_observation] = obs_latent[step.is_observation]
                 else:
                     losses.latent += ml(
-                        F.mse_loss, latent, obs_latent, mask=step.is_observation
+                        l_mse, latent, obs_latent, mask=step.is_observation
                     )
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
 
@@ -93,14 +96,14 @@ class Trainer:
             value, policy_logits, curr_player_logits = self.nets.prediction(
                 latent, belief, logits=True
             )
-            losses.value += ml(F.mse_loss, value, step.value_target)
-            losses.policy += ml(F.cross_entropy, policy_logits, step.target_policy)
-            losses.player += ml(F.cross_entropy, curr_player_logits, step.current_player)
+            losses.value += ml(l_mse, value, step.value_target)
+            losses.policy += ml(l_cross, policy_logits, step.target_policy)
+            losses.player += ml(l_cross, curr_player_logits, step.current_player)
 
             latent, belief, reward = self.nets.dynamics(
                 latent, belief, step.action_onehot
             )
-            losses.reward += ml(F.mse_loss, reward, step.reward)
+            losses.reward += ml(l_mse, reward, step.reward)
 
         if counts.latent > 0:
             losses.latent /= counts.latent
