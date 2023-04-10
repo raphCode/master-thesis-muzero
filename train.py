@@ -67,7 +67,8 @@ class Trainer:
             """
             if mask is None:
                 mask = step.is_data
-            return loss_fn(prediction[mask], target[mask]).sum(dim=0).mean()
+            loss = loss_fn(prediction[mask], target[mask])
+            return loss.view(loss.shape[0], -1).mean(dim=1).sum()
 
         l_cross = functools.partial(F.cross_entropy, reduction="none")
         l_mse = functools.partial(F.mse_loss, reduction="none")
