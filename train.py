@@ -70,6 +70,7 @@ class Trainer:
             loss = loss_fn(prediction[mask], target[mask])
             return loss.view(loss.shape[0], -1).mean(dim=1).sum()
 
+        l_pdist = functools.partial(F.pairwise_distance, p=C.training.latent_dist_pnorm)
         l_cross = functools.partial(F.cross_entropy, reduction="none")
         l_mse = functools.partial(F.mse_loss, reduction="none")
 
@@ -91,7 +92,10 @@ class Trainer:
                     latent[step.is_observation] = obs_latent[step.is_observation]
                 else:
                     losses.latent += ml(
-                        l_mse, latent, obs_latent, mask=step.is_observation
+                        l_pdist,
+                        latent.flatten(start_dim=1),
+                        obs_latent.flatten(start_dim=1),
+                        mask=step.is_observation,
                     )
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
 
