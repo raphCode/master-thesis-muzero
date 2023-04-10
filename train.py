@@ -59,8 +59,11 @@ class Trainer:
             mask: Optional[Tensor] = None,
         ) -> Tensor:
             """
-            Masked loss function which excludes invalid data.
+            Masked loss, with the mask defaulting to the current step's is_data.
             loss_fn is expected to not perform any data reduction:
+            The results are summed over the batch dimension to calculate a final average
+            after summing all unroll steps.
+            The average is calculated over the remaining dimensions.
             """
             if mask is None:
                 mask = step.is_data
