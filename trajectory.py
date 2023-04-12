@@ -149,7 +149,7 @@ class TrainingData:
         is_obs = isinstance(ts.representation, Observation)
         return cls(
             is_observation=cache.tensor(is_obs),
-            is_initial=cache.tensor(is_initial),
+            is_initial=cache.tensor(bool(is_initial)),
             is_data=cache.tensor(True),
             observations=cast(
                 Self | Observation,
@@ -166,8 +166,8 @@ class TrainingData:
                 C.game.instance.max_num_actions,
             ),
             target_policy=torch.tensor(ts.target_policy),
-            value_target=torch.tensor(value_target),
-            reward=cache.tensor(ts.reward),
+            value_target=torch.tensor(float(value_target)),
+            reward=cache.tensor(float(ts.reward)),
         )
 
     @classmethod
