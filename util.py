@@ -1,5 +1,6 @@
 import functools
 from typing import Generic, TypeVar, Callable, Optional, cast
+from collections.abc import Iterator
 
 import torch
 import torch.nn.functional as F
@@ -57,6 +58,10 @@ class RingBuffer(Generic[T]):
         Index 0 returns the oldest item, -1 the newest.
         """
         return self.data[(index + self.position) % len(self.data)]
+
+    def __iter__(self) -> Iterator[T]:
+        wrapped_pos = self.position % len(self.data)
+        yield from self.data[wrapped_pos:] + self.data[:wrapped_pos]
 
     def __len__(self) -> int:
         return len(self.data)
