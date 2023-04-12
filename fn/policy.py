@@ -36,7 +36,7 @@ class FromExpandedValues(SoftmaxTemp):
 
     def __call__(self, node: Node) -> Sequence[float]:
         assert len(node.children) > 0
-        values = [child.value for child in node.children.values()]
+        values = [child.reward + child.value for child in node.children.values()]
         policy = np.full(C.game.instance.max_num_actions, 0.0)
         policy[list(node.children.keys())] = softmax(values, self.temp)
         return policy  # type: ignore [return-value]
