@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Unpack, Optional
 from functools import cached_property
 
@@ -9,7 +11,7 @@ from .bases import Game, Teams, GameState, MatchData, GameStateInitKwArgs
 
 class OpenSpielGameState(GameState):
     state: pyspiel.State
-    game: "OpenSpielGame"
+    game: OpenSpielGame
     invalid: bool
 
     def __init__(self, state: pyspiel.State, **kwargs: Unpack[GameStateInitKwArgs]):
