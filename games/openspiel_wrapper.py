@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from typing import Unpack, Optional, cast
+from typing import Any, Unpack, Optional, cast
 from functools import cached_property
 
 import torch
 import pyspiel  # type: ignore
+
+from util import optional_map
 
 from .bases import Game, Teams, GameState, MatchData, GameStateInitKwArgs
 
@@ -80,13 +82,13 @@ class OpenSpielGame(Game):
     def __init__(
         self,
         game_name: str,
-        bad_move_reward: Optional[float] = None,
-        bad_move_action: Optional[int] = None,
+        bad_move_reward: Optional[Any] = None,
+        bad_move_action: Optional[Any] = None,
         teams: list[list[int]] = [],
     ):
         self.game = pyspiel.load_game(game_name)
-        self.bad_move_reward = bad_move_reward
-        self.bad_move_action = bad_move_action
+        self.bad_move_reward = optional_map(float)(bad_move_reward)
+        self.bad_move_action = optional_map(int)(bad_move_action)
         assert (bad_move_reward is None) != (
             bad_move_action is None
         ), "Exactly one of 'bad_move_reward' or 'bad_move_action' must be given"
