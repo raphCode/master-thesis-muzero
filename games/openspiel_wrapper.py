@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Unpack, Optional
+from typing import Unpack, Optional, cast
 from functools import cached_property
 
 import torch
@@ -36,7 +36,7 @@ class OpenSpielGameState(GameState):
             tmp = [0.0] * self.game.max_num_players
             tmp[self.current_player_id] = self.game.bad_move_reward
             return tuple(tmp)
-        return self.state.rewards()  # type: ignore [no-any-return]
+        return cast(tuple[float, ...], self.state.rewards())
 
     @property
     def is_terminal(self) -> bool:
@@ -44,15 +44,15 @@ class OpenSpielGameState(GameState):
 
     @property
     def is_chance(self) -> bool:
-        return self.state.is_chance_node()  # type: ignore [no-any-return]
+        return cast(bool, self.state.is_chance_node())
 
     @property
     def current_player_id(self) -> int:
         pid = self.state.current_player()
         if pid == pyspiel.PlayerId.CHANCE:
-            # openspiel always has a chance player, so chance_player_id never returns None
-            return self.game.chance_player_id  # type: ignore [return-value]
-        return pid  # type: ignore [no-any-return]
+            assert self.game.chance_player_id is not None
+            return self.game.chance_player_id
+        return cast(int, pid)
 
     @property
     def chance_outcomes(self) -> tuple[float, ...]:
@@ -102,7 +102,7 @@ class OpenSpielGame(Game):
 
     @cached_property
     def max_num_players(self) -> int:
-        return self.game.num_players()  # type: ignore [no-any-return]
+        return cast(int, self.game.num_players())
 
     @cached_property
     def has_chance_player(self) -> bool:
@@ -114,4 +114,7 @@ class OpenSpielGame(Game):
 
     @cached_property
     def max_num_actions(self) -> int:
-        return max(self.game.num_distinct_actions(), self.game.max_chance_outcomes())  # type: ignore [no-any-return] # noqa: E501
+        return max(
+            cast(int, self.game.num_distinct_actions()),
+            cast(int, self.game.max_chance_outcomes()),
+        )
