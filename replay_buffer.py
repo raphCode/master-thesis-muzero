@@ -94,7 +94,7 @@ class ReplayBuffer:
         for _ in range(retry_limit * C.training.batch_size):
             start_index = random.randrange(len(self.buffer))
             traj_id, _ = self.buffer[start_index]
-            minlen_id, _ = self.buffer[start_index + C.training.min_trajectory_length]
+            minlen_id, _ = self.buffer[start_index + C.training.min_trajectory_length - 1]
             if traj_id == minlen_id:
                 sampled_starts.add((start_index, traj_id))
             if len(sampled_starts) == C.training.batch_size:
