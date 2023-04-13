@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import functools
-from typing import TYPE_CHECKING, Any, Self, Iterable, Optional, TypeAlias, cast
+from typing import TYPE_CHECKING, Any, Iterable, Optional, TypeAlias, cast
 from collections.abc import Sequence
 
 import attrs
@@ -56,7 +56,7 @@ class TrajectoryState:
         current_player: int,
         action: int,
         reward: float,
-    ) -> Self:
+    ) -> TrajectoryState:
         return cls(
             representation=info.representation,
             belief=info.belief,
@@ -114,7 +114,7 @@ class TrainingData:
     @classmethod  # type: ignore [misc]
     @property
     @functools.cache
-    def dummy(cls) -> Self:
+    def dummy(cls) -> TrainingData:
         """
         Dummy data for padding trajectories ending early inside the batch.
         Designed to use as little memory as possible:
@@ -143,7 +143,7 @@ class TrainingData:
         value_target: float,
         is_initial: bool,
         cache: Optional[TensorCache] = None,
-    ) -> Self:
+    ) -> TrainingData:
         if cache is None:
             cache = TensorCache()
         is_obs = isinstance(ts.representation, Observation)
@@ -152,11 +152,11 @@ class TrainingData:
             is_initial=cache.tensor(bool(is_initial)),
             is_data=cache.tensor(True),
             observations=cast(
-                Self | Observation,
+                TrainingData | Observation,
                 ts.representation if is_obs else cls.dummy,
             ).observations,
             latent=cast(
-                Self | Latent,
+                TrainingData | Latent,
                 ts.representation if not is_obs else cls.dummy,
             ).latent,
             belief=ts.belief,
@@ -171,7 +171,7 @@ class TrainingData:
         )
 
     @classmethod
-    def stack_batch(cls, instances: Iterable[Self]) -> Self:
+    def stack_batch(cls, instances: Iterable[TrainingData]) -> TrainingData:
         """
         Stacks the tensors of all instances in the first (batch) dimension.
         """
