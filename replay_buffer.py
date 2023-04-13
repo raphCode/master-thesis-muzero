@@ -1,6 +1,5 @@
 import random
 import logging
-from typing import cast
 
 import numpy as np
 
@@ -115,7 +114,7 @@ class ReplayBuffer:
                 if traj_id == start_traj_id:
                     is_data = True
                 else:
-                    data = cast(TrainingData, TrainingData.dummy)
+                    data = TrainingData.dummy
                 batch_step.append(data)
             if not is_data:
                 # all trajectories ended early

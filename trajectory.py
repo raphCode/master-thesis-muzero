@@ -113,7 +113,7 @@ class TrainingData:
 
     @classmethod  # type: ignore [misc]
     @property
-    @functools.cache
+    @cast("functools._lru_cache_wrapper[TrainingData]", functools.cache)
     def dummy(cls) -> TrainingData:
         """
         Dummy data for padding trajectories ending early inside the batch.
