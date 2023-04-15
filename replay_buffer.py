@@ -46,29 +46,42 @@ class ReplayBuffer:
         rewards = np.array([ts.reward for ts in traj])
         for n, ts in enumerate(traj):
             # The target for the prediction network value head is the bootstrapped n step
-            # return. It is calculated by adding future rewards over the n step horizon
-            # and a final value estimate:
-            # - sum up the next n rewards:
-            #   beginning with the current state s_0, up to s_(n-1)
-            # - add the value estimate of the ensuing state s_n:
-            #   - terminal states have a value estimate of zero and can be omitted,
-            #     freeing up the last state to be included in the reward sum.
-            #   - if the game was aborted prematurely, the last state is not terminal:
-            #     we need to use its value estimate, so we may only sum up the rewards up
-            #     to the second to last state
-            remaining_nstep_len = len(traj) - n - (not game_completed)
+            # return. In general, it is calculated by adding future rewards over the n
+            # step horizon and a final value estimate.
+            # In MuZero, the summands are a bit different than in classical RL because
+            # reward and value are predicted separately.
+            # Terminology:
+            # - trajectory state at time t: s_t
+            # - mcts root node value of s_t: v_t
+            # - experienced reward after taking action in s_t: r_t
+            # - discount factor d raised to power x: d^x
+            # Value target for s_t with horizon size n:
+            # - sum up n future rewards:
+            #   - r_(t+1), r_(t+2), ..., r_(t+n) with discounts d^0, d^1, ..., d^(n-1)
+            #   - unlike traditional RL, the reward r_t for the current state is NOT
+            #     included: it is already directly learned / predicted by the dynamics
+            #     network
+            # - bootstrap by adding value estimate v_(t+n):
+            #   - includes all 'remaining' future rewards r_(t+n+1), r_(t+n+2), ...
+            #   - discounted with d^n: follows the reward discounting series
+            #   - can be omitted if s_(t+n) is terminal: terminal states have a value
+            #     estimate of zero
+            # In general, the calculations have to be the same like the ones performed
+            # during the tree search.
+            nstep_start = n + 1
+            remaining_nstep_len = len(traj) - nstep_start
             nstep_len = min(C.training.n_step_horizon, remaining_nstep_len)
 
-            # All summands are discounted with the discount factor, raised to how many
-            # steps in the future they appear.
             value_target = np.inner(
-                rewards[n : n + nstep_len], self.discounts[:nstep_len]
+                rewards[nstep_start : nstep_start + nstep_len], self.discounts[:nstep_len]
             )
-            # The nstep horizon length is calculated carefully: When the game completed
-            # normally, the horizon end may lie outside the trajectory, ensuring the value
-            # estimate is not added on terminal states:
-            if n + nstep_len < len(traj):
-                value_target += traj[n + nstep_len].mcts_value * self.discounts[nstep_len]
+
+            nstep_end_terminal = game_completed and nstep_start + nstep_len == len(traj)
+            if not nstep_end_terminal:
+                value_target += (
+                    traj[nstep_start + nstep_len - 1].mcts_value
+                    * self.discounts[nstep_len]
+                )
 
             self.buffer.append(
                 (
