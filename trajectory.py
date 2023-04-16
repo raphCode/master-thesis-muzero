@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import operator
 import functools
 from typing import TYPE_CHECKING, Any, Iterable, Optional, TypeAlias, cast
 from collections.abc import Sequence
@@ -180,7 +181,8 @@ class TrainingData:
         stacked_fields = dict[str, FieldTypesUnion]()
 
         field_names = [f.name for f in attrs.fields(cls)]
-        field_data = zip(*map(attrs.astuple, instances))
+        get_fields = operator.attrgetter(*field_names)
+        field_data = zip(*map(get_fields, instances))
         for name, data in zip(field_names, field_data):
             if name == "observations":
                 stacked_data = tuple(map(torch.stack, zip(*data)))
