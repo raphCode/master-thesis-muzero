@@ -47,6 +47,17 @@ class LossCounts:
     data: int = 0
     latent: int = 0
 
+    def __rtruediv__(self, losses: Losses) -> Losses:
+        """
+        Divides loss components by the same-named count, or as a fallback the data count.
+        Returns a new Losses instance with new tensors.
+        """
+        values = attrs.asdict(losses)
+        for name, loss in values.items():
+            divisor = getattr(self, name, self.data)
+            values[name] = loss / max(1, divisor)
+        return Losses(**values)
+
 
 class Trainer:
     def __init__(self, nets: Networks):
@@ -125,13 +136,7 @@ class Trainer:
             )
             losses.reward += ml(l_mse, reward, step.reward)
 
-        if counts.latent > 0:
-            losses.latent /= counts.latent
-        if counts.data > 0:
-            losses.value /= counts.data
-            losses.policy /= counts.data
-            losses.reward /= counts.data
-            losses.player /= counts.data
+        losses /= counts
 
         for k, loss in attrs.asdict(losses).items():
             sw.add_scalar(f"loss/{k}", loss, n)  # type: ignore [no-untyped-call]
