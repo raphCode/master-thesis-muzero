@@ -20,8 +20,8 @@ zero_tensor = Factory(functools.partial(torch.zeros, 1))
 
 @define
 class Losses:
-    latent: Tensor = zero_tensor
     value: Tensor = zero_tensor
+    latent: Tensor = zero_tensor
     reward: Tensor = zero_tensor
     policy: Tensor = zero_tensor
     player: Tensor = zero_tensor

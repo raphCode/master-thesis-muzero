@@ -131,8 +131,8 @@ class LearningRates:
 
 @frozen
 class LossWeights:
-    latent: float
     value: float
+    latent: float
     reward: float
     policy: float
     player: float
