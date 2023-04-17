@@ -16,4 +16,4 @@ pretty = true
 [tool.flake8]
 max-line-length = 90
 show-source = true
-extend-ignore = ["E203"]
+extend-ignore = ["E203", "E741"]

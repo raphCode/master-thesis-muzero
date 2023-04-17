@@ -1,3 +1,4 @@
+import operator
 import functools
 import itertools
 from typing import Callable, Optional, cast
@@ -11,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter  # type: ignore [attr-defined]
 
 from config import C
 from trajectory import TrainingData
+from config.schema import LossWeights
 from networks.bases import Networks
 
 zero_tensor = Factory(functools.partial(torch.zeros, 1))
@@ -23,6 +25,16 @@ class Losses:
     reward: Tensor = zero_tensor
     policy: Tensor = zero_tensor
     player: Tensor = zero_tensor
+
+    def weighted_sum(self, weights: LossWeights) -> Tensor:
+        """
+        Multiplies each loss component with the same-named weight and returns the sum.
+        """
+        field_names = [f.name for f in attrs.fields(type(self))]
+        get_fields = operator.attrgetter(*field_names)  # access fields in same order
+        return cast(
+            Tensor, sum(l * w for l, w in zip(get_fields(self), get_fields(weights)))
+        )
 
 
 @define
@@ -124,13 +136,7 @@ class Trainer:
         for k, loss in attrs.asdict(losses).items():
             sw.add_scalar(f"loss/{k}", loss, n)  # type: ignore [no-untyped-call]
 
-        total_loss = (
-            C.training.loss_weights.latent * losses.latent
-            + C.training.loss_weights.value * losses.value
-            + C.training.loss_weights.reward * losses.reward
-            + C.training.loss_weights.policy * losses.policy
-            + C.training.loss_weights.player * losses.player
-        )
+        total_loss = losses.weighted_sum(C.training.loss_weights)
         self.optimizer.zero_grad()
         total_loss.backward()  # type: ignore [no-untyped-call]
         self.optimizer.step()
