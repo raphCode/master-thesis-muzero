@@ -37,9 +37,12 @@ class FcBase(nn.Module):
     def fc_forward(self, *inputs: Optional[Tensor]) -> Tensor:
         x = torch.cat([i.flatten(1) for i in inputs if i is not None], dim=1)
         for fc in self.fc_layers:
+            orig_x = x
             x = fc(x)
             tmp = x
             x = F.relu(x)
+            if orig_x.shape == x.shape:
+                x = x + orig_x  # skip connection / ResNet
         return tmp
 
 
