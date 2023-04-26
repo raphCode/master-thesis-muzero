@@ -165,7 +165,7 @@ class BaseConfig:
     networks: NetworkContainer
     training: TrainConfig
     players: PlayerConfig
-    defaults: list[Any] = [
+    defaults: Optional[list[Any]] = [
         "_self_",
         {"game": MISSING},
         {"mcts": MISSING},
@@ -183,7 +183,7 @@ class BaseConfig:
             networks=None,  # type:ignore [arg-type]
             training=None,  # type:ignore [arg-type]
             players=None,  # type:ignore [arg-type]
-            defaults=None,  # type:ignore [arg-type]
+            defaults=None,
         )
 
     def fill_from(self, instance: "BaseConfig") -> None:
