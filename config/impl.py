@@ -18,13 +18,7 @@ from omegaconf import OmegaConf, DictConfig, ListConfig
 from util import optional_map
 from games.bases import Game, Player
 from config.schema import BaseConfig, NetworkConfig, NetworkSchema
-from networks.bases import (
-    Networks,
-    DynamicsNet,
-    NetworkBase,
-    PredictionNet,
-    RepresentationNet,
-)
+from networks.bases import Networks, DynamicsNet, PredictionNet, RepresentationNet
 
 from . import C, schema
 
@@ -231,7 +225,6 @@ def save_source_code() -> None:
                 torch.nn.Module,
                 abc.ABC,
                 object,
-                NetworkBase,
                 DynamicsNet,
                 PredictionNet,
                 RepresentationNet,
