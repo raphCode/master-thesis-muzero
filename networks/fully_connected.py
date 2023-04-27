@@ -8,14 +8,7 @@ from torch import Tensor, nn
 
 from util import optional_map
 from config import C
-from networks.bases import (
-    DynamicsNet,
-    PredictionNet,
-    DynamicsReturn,
-    PredictionReturn,
-    RepresentationNet,
-    RepresentationReturn,
-)
+from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
 
 
 class FcBase(nn.Module):
@@ -58,7 +51,7 @@ class FcRepresentation(FcBase, RepresentationNet):
         self,
         *observations: Tensor,
         **kwargs: Any,
-    ) -> RepresentationReturn:
+    ) -> Tensor:
         return self.fc_forward(*observations)
 
 
@@ -81,7 +74,7 @@ class FcPrediction(FcBase, PredictionNet):
 
     def forward(
         self, latent: Tensor, belief: Optional[Tensor], logits: bool = False
-    ) -> PredictionReturn:
+    ) -> tuple[Tensor, Tensor, Tensor]:
         result = self.fc_forward(latent, belief)
         value, policy, current_player = torch.split(result, self.output_sizes, dim=1)
         if logits:
@@ -110,7 +103,7 @@ class FcDynamics(FcBase, DynamicsNet):
 
     def forward(
         self, latent: Tensor, belief: Optional[Tensor], action_onehot: Tensor
-    ) -> DynamicsReturn:
+    ) -> tuple[Tensor, Optional[Tensor], Tensor]:
         result = self.fc_forward(latent, belief, action_onehot)
         latent, belief, reward = torch.split(result, self.output_sizes, dim=1)
         return latent, belief if belief.numel() > 0 else None, reward
