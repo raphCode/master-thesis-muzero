@@ -1,5 +1,5 @@
 import functools
-from typing import Generic, TypeVar, Callable, Optional, cast
+from typing import Any, Generic, TypeVar, Callable, Optional, cast
 from collections.abc import Iterator
 
 import torch
@@ -15,6 +15,18 @@ def optional_map(f: Callable[[A], B]) -> Callable[[Optional[A]], Optional[B]]:
 
 class NaNWarning(RuntimeWarning):
     pass
+
+
+Fn = TypeVar("Fn", bound=Callable[..., Any])
+
+
+# taken from: https://github.com/python/typing/issues/270#issuecomment-555966301
+class copy_type_signature(Generic[Fn]):
+    def __init__(self, target: Fn):
+        pass
+
+    def __call__(self, wrapped: Callable[..., Any]) -> Fn:
+        return cast(Fn, wrapped)
 
 
 class TensorCache:
