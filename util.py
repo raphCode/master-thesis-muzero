@@ -17,9 +17,6 @@ class NaNWarning(RuntimeWarning):
     pass
 
 
-T = TypeVar("T")
-
-
 class TensorCache:
     """
     Creates and caches tensors to reduce memory and garbage collector pressure.
@@ -33,6 +30,9 @@ class TensorCache:
     @functools.cache
     def onehot(self, index: int | torch.Tensor, num_classes: int) -> torch.LongTensor:
         return cast(torch.LongTensor, F.one_hot(self.tensor(index), num_classes))
+
+
+T = TypeVar("T")
 
 
 class RingBuffer(Generic[T]):
