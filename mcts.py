@@ -105,16 +105,16 @@ def ensure_visit_count(
     """
     for _ in range(visit_count - root.visit_count):
         node = root
-        search_path = []
+        search_path = [root]
         was_expanded = True
         while was_expanded:
-            search_path.append(node)
             action = selection_fn(node)
             was_expanded = action in node.children
             node = node.get_create_child(action, nets)
+            search_path.append(node)
 
         # backpropagate
         r = node.value_pred
         for node in reversed(search_path):
-            r = r * C.training.discount_factor + node.reward
             node.add_value(r)
+            r = r * C.training.discount_factor + node.reward
