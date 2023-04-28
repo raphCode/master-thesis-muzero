@@ -19,15 +19,12 @@ if TYPE_CHECKING:
 class NodeBase(ABC):
     """
     A Node represents a game state in the monte carlo search tree.
-    This class provides common functionality for different Node types.
-    Child Nodes are never ObservationNodes, because in game states with observations a new
-    search is started.
 
-    Contrary to the MuZero original implementation, nodes are always expanded.
+    Contrary to the MuZero original implementation, nodes are always expanded and children
+    are attached as needed.
     Reasons:
     - avoids that a bunch of attributes could be None
-    - selection score function is only called once instead of every child node
-      node)
+    - selection score function is only called once instead of for every child node node
     - see at a glance which children are expanded (node.children is a dict/sparse array)
     """
 
