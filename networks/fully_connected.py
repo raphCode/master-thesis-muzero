@@ -73,7 +73,10 @@ class FcPrediction(FcBase, PredictionNet):
         )
 
     def forward(
-        self, latent: Tensor, belief: Optional[Tensor], logits: bool = False
+        self,
+        latent: Tensor,
+        belief: Optional[Tensor],
+        logits: bool = False,
     ) -> tuple[Tensor, Tensor, Tensor]:
         result = self.fc_forward(latent, belief)
         value, policy, current_player = torch.split(result, self.output_sizes, dim=1)
@@ -102,7 +105,10 @@ class FcDynamics(FcBase, DynamicsNet):
         )
 
     def forward(
-        self, latent: Tensor, belief: Optional[Tensor], action_onehot: Tensor
+        self,
+        latent: Tensor,
+        belief: Optional[Tensor],
+        action_onehot: Tensor,
     ) -> tuple[Tensor, Optional[Tensor], Tensor]:
         result = self.fc_forward(latent, belief, action_onehot)
         latent, belief, reward = torch.split(result, self.output_sizes, dim=1)

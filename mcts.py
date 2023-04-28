@@ -33,7 +33,10 @@ class NodeBase(ABC):
     probs: tuple[float, ...]
     children: dict[int, Node]
 
-    def __init__(self, probs: Iterable[float]) -> None:
+    def __init__(
+        self,
+        probs: Iterable[float],
+    ) -> None:
         self.probs = tuple(probs)
         self.children = dict()
         self.visit_count = 0
@@ -75,7 +78,11 @@ class Node(NodeBase):
     belief: Optional[Tensor]
 
     def __init__(
-        self, latent: Tensor, belief: Optional[Tensor], reward: float, nets: Networks
+        self,
+        latent: Tensor,
+        belief: Optional[Tensor],
+        reward: float,
+        nets: Networks,
     ):
         self.latent = latent
         self.belief = belief

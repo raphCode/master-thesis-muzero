@@ -125,14 +125,18 @@ class Trainer:
             counts.data += cast(int, step.is_data.count_nonzero().item())
 
             value, policy_logits, curr_player_logits = self.nets.prediction(
-                latent, belief, logits=True
+                latent,
+                belief,
+                logits=True,
             )
             losses.value += ml(l_mse, value, step.value_target)
             losses.policy += ml(l_cross, policy_logits, step.target_policy)
             losses.player += ml(l_cross, curr_player_logits, step.current_player)
 
             latent, belief, reward = self.nets.dynamics(
-                latent, belief, step.action_onehot
+                latent,
+                belief,
+                step.action_onehot,
             )
             losses.reward += ml(l_mse, reward, step.reward)
 

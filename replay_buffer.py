@@ -87,7 +87,10 @@ class ReplayBuffer:
                 (
                     traj_id,
                     TrainingData.from_trajectory_state(
-                        ts, value_target, is_initial=(n == 0), cache=self.cache
+                        ts,
+                        value_target,
+                        is_initial=(n == 0),
+                        cache=self.cache,
                     ),
                 )
             )

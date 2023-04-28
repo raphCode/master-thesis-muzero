@@ -33,7 +33,10 @@ def single_inference(
 class RepresentationNet(ABC, nn.Module):
     # Observations (may include NumberPlayers, CurrentPlayer, TeamInfo) -> Latent
     @abstractmethod
-    def forward(self, *observations: Tensor) -> Tensor:
+    def forward(
+        self,
+        *observations: Tensor,
+    ) -> Tensor:
         pass
 
     @copy_type_signature(forward)
@@ -49,7 +52,10 @@ class PredictionNet(ABC, nn.Module):
     # Latent, Belief -> Value, Policy, CurrentPlayer
     @abstractmethod
     def forward(
-        self, latent: Tensor, belief: Optional[Tensor], logits: bool = False
+        self,
+        latent: Tensor,
+        belief: Optional[Tensor],
+        logits: bool = False,
     ) -> tuple[Tensor, Tensor, Tensor]:
         pass
 
