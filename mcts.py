@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, cast
 from collections.abc import Iterable
 
 import torch
@@ -82,10 +82,10 @@ class Node(NodeBase):
         self.reward = reward
         value_pred, probs, current_player = nets.prediction.si(latent, belief)
         self.value_pred = value_pred.item()
-        self.current_player = current_player.argmax().item()  # type:ignore [assignment]
+        self.current_player = cast(int, current_player.argmax().item())
         super().__init__(probs=probs)
 
-    def _create_child_at(self, action: int, nets: Networks) -> "Node":
+    def _create_child_at(self, action: int, nets: Networks) -> Node:
         latent, belief, reward = nets.dynamics.si(
             self.latent,
             self.belief,
