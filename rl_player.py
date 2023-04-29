@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import torch
 from attrs import frozen
 
-from mcts import Node, ensure_visit_count
+from mcts import Node, StateNode, ensure_visit_count
 from config import C
 from trajectory import Latent, Observation
 from config.schema import MctsConfig
@@ -57,7 +57,7 @@ class RLBase(ABC):
         Called whenever a new game starts.
         """
         self.representation = Latent(self.nets.initial_latent)
-        self.root_node = Node(
+        self.root_node = StateNode(
             self.nets.initial_latent, self.nets.initial_belief, 0, self.nets
         )
 
@@ -121,7 +121,7 @@ class PerfectInformationRLPlayer(RLBase):
     def own_move(self, *observations: torch.Tensor) -> int:
         self.representation = Observation(observations)
         latent = self.nets.representation.si(*observations)
-        self.root_node = Node(latent, self.root_node.belief, 0, self.nets)
+        self.root_node = StateNode(latent, self.root_node.belief, 0, self.nets)
         ensure_visit_count(
             self.root_node,
             self.mcts_cfg.iterations_move_selection,

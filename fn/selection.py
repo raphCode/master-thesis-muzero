@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 import numpy as np
 
-from mcts import Node
+from mcts import Node, StateNode
 from config import C
 
 from .util import argmax, map_actions_callback
@@ -78,8 +78,9 @@ assert_fn_type(sample_from_prior)
 
 class SwitchOnChanceNodes:
     """
-    Switches between two selection fns depending on the Node being a chance event.
+    Switches between two selection fns depending on the StateNode being a chance event.
     Effectively makes other selection fns compatible with chance nodes.
+    Node types other than StateNode are handled with the normal function.
     """
 
     def __init__(
@@ -91,7 +92,10 @@ class SwitchOnChanceNodes:
         self.chance_fn = chance_selection_fn
 
     def __call__(self, node: Node) -> int:
-        if node.current_player == C.game.instance.chance_player_id:
+        if (
+            isinstance(node, StateNode)
+            and node.current_player == C.game.instance.chance_player_id
+        ):
             return self.chance_fn(node)
         return self.normal_fn(node)
 

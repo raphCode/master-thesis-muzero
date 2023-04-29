@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional, cast
-from collections.abc import Iterable
+from collections.abc import Iterable, MutableMapping
 
 import torch
 import torch.nn.functional as F
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from fn.selection import SelectionFn
 
 
-class NodeBase(ABC):
+class Node(ABC):
     """
     A Node represents a game state in the monte carlo search tree.
 
@@ -28,15 +28,30 @@ class NodeBase(ABC):
     - see at a glance which children are expanded (node.children is a dict/sparse array)
     """
 
+    latent: Tensor
+    belief: Optional[Tensor]
+
     value_sum: float
     visit_count: int
+    reward: float
+    value_pred: float
+
     probs: tuple[float, ...]
-    children: dict[int, Node]
+    children: MutableMapping[int, Node]
 
     def __init__(
         self,
+        /,
+        latent: Tensor,
+        belief: Optional[Tensor],
+        reward: float,
+        value_pred: float,
         probs: Iterable[float],
     ) -> None:
+        self.latent = latent
+        self.belief = belief
+        self.reward = reward
+        self.value_pred = value_pred
         self.probs = tuple(probs)
         self.children = dict()
         self.visit_count = 0
@@ -65,17 +80,12 @@ class NodeBase(ABC):
         pass
 
 
-class Node(NodeBase):
+class StateNode(Node):
     """
-    Create child Nodes using the dynamics network, based on:
-    - an action
+    Represents a normal game state. Child nodes are created using the dynamics network.
     """
 
-    reward: float
-    value_pred: float
     current_player: int
-    latent: Tensor
-    belief: Optional[Tensor]
 
     def __init__(
         self,
@@ -84,13 +94,15 @@ class Node(NodeBase):
         reward: float,
         nets: Networks,
     ):
-        self.latent = latent
-        self.belief = belief
-        self.reward = reward
         value_pred, probs, current_player = nets.prediction.si(latent, belief)
-        self.value_pred = value_pred.item()
         self.current_player = cast(int, current_player.argmax().item())
-        super().__init__(probs=probs)
+        super().__init__(
+            latent=latent,
+            belief=belief,
+            reward=reward,
+            value_pred=value_pred.item(),
+            probs=probs,
+        )
 
     def _create_child_at(self, action: int, nets: Networks) -> Node:
         latent, belief, reward = nets.dynamics.si(
@@ -98,7 +110,7 @@ class Node(NodeBase):
             self.belief,
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
-        return Node(latent, belief, reward.item(), nets)
+        return StateNode(latent, belief, reward.item(), nets)
 
 
 def ensure_visit_count(
