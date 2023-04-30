@@ -97,6 +97,7 @@ class FcDynamics(FcBase, DynamicsNet):
             math.prod(C.networks.latent_shape),
             belief_size,
             1,
+            1,
         ]
         super().__init__(
             input_width=sum(input_sizes),
@@ -109,7 +110,15 @@ class FcDynamics(FcBase, DynamicsNet):
         latent: Tensor,
         belief: Optional[Tensor],
         action_onehot: Tensor,
-    ) -> tuple[Tensor, Optional[Tensor], Tensor]:
+        logits: bool = False,
+    ) -> tuple[Tensor, Optional[Tensor], Tensor, Tensor]:
         result = self.fc_forward(latent, belief, action_onehot)
-        latent, belief, reward = torch.split(result, self.output_sizes, dim=1)
-        return latent, belief if belief.numel() > 0 else None, reward
+        latent, belief, reward, is_terminal = torch.split(
+            result, self.output_sizes, dim=1
+        )
+        return (
+            latent,
+            belief if belief.numel() > 0 else None,
+            reward,
+            is_terminal if logits else F.sigmoid(is_terminal),
+        )
