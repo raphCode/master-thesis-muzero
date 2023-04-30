@@ -5,9 +5,8 @@ from typing import Callable, Optional, cast
 
 import attrs
 import torch
-import torch.nn.functional as F
 from attrs import Factory, define
-from torch import Tensor
+from torch import Tensor, nn
 from torch.utils.tensorboard import SummaryWriter  # type: ignore [attr-defined]
 
 from config import C
@@ -97,9 +96,9 @@ class Trainer:
             loss = criterion(prediction[mask], target[mask])
             return loss.view(loss.shape[0], -1).mean(dim=1).sum()
 
-        l_pdist = functools.partial(F.pairwise_distance, p=C.training.latent_dist_pnorm)
-        l_cross = functools.partial(F.cross_entropy, reduction="none")
-        l_mse = functools.partial(F.mse_loss, reduction="none")
+        pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
+        cross = nn.CrossEntropyLoss(reduction="none")
+        mse = nn.MSELoss(reduction="none")
 
         losses = Losses()
         counts = LossCounts()
@@ -119,7 +118,7 @@ class Trainer:
                     latent[step.is_observation] = obs_latent[step.is_observation]
                 else:
                     losses.latent += ml(
-                        l_pdist,
+                        pdist,
                         latent.flatten(start_dim=1),
                         obs_latent.flatten(start_dim=1),
                         mask=step.is_observation,
@@ -133,16 +132,16 @@ class Trainer:
                 belief,
                 logits=True,
             )
-            losses.value += ml(l_mse, value, step.value_target)
-            losses.policy += ml(l_cross, policy_logits, step.target_policy)
-            losses.player += ml(l_cross, curr_player_logits, step.current_player)
+            losses.value += ml(mse, value, step.value_target)
+            losses.policy += ml(cross, policy_logits, step.target_policy)
+            losses.player += ml(cross, curr_player_logits, step.current_player)
 
             latent, belief, reward = self.nets.dynamics(
                 latent,
                 belief,
                 step.action_onehot,
             )
-            losses.reward += ml(l_mse, reward, step.reward)
+            losses.reward += ml(mse, reward, step.reward)
 
         losses /= counts
 
