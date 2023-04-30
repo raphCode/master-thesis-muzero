@@ -76,21 +76,21 @@ class Trainer:
         # TODO: move tensors to GPU
 
         def ml(
-            loss_fn: Callable[[Tensor, Tensor], Tensor],
+            criterion: Callable[[Tensor, Tensor], Tensor],
             prediction: Tensor,
             target: Tensor,
             mask: Optional[Tensor] = None,
         ) -> Tensor:
             """
             Masked loss, with the mask defaulting to the current step's is_data.
-            loss_fn is expected to not perform any data reduction:
+            criterion is expected to not perform any data reduction:
             The results are summed over the batch dimension to calculate a final average
             after summing all unroll steps.
             The average is calculated over the remaining dimensions.
             """
             if mask is None:
                 mask = step.is_data
-            loss = loss_fn(prediction[mask], target[mask])
+            loss = criterion(prediction[mask], target[mask])
             return loss.view(loss.shape[0], -1).mean(dim=1).sum()
 
         l_pdist = functools.partial(F.pairwise_distance, p=C.training.latent_dist_pnorm)
