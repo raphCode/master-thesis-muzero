@@ -20,6 +20,10 @@ zero_tensor = Factory(functools.partial(torch.zeros, 1))
 
 @define
 class Losses:
+    """
+    The different loss components, one for each training objective.
+    """
+
     value: Tensor = zero_tensor
     latent: Tensor = zero_tensor
     reward: Tensor = zero_tensor
@@ -86,7 +90,7 @@ class Trainer:
             criterion is expected to not perform any data reduction:
             The results are summed over the batch dimension to calculate a final average
             after summing all unroll steps.
-            The average is calculated over the remaining dimensions.
+            The average is calculated over the remaining loss result dimensions.
             """
             if mask is None:
                 mask = step.is_data
