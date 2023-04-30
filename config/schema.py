@@ -136,6 +136,7 @@ class LossWeights:
     reward: float
     policy: float
     player: float
+    terminal: float
 
 
 @frozen

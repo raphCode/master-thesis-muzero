@@ -105,12 +105,63 @@ class StateNode(Node):
         )
 
     def _create_child_at(self, action: int, nets: Networks) -> Node:
-        latent, belief, reward = nets.dynamics.si(
+        latent, belief, reward, is_terminal = nets.dynamics.si(
             self.latent,
             self.belief,
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
+        if is_terminal.item() > 0.5 and C.training.loss_weights.terminal > 0:
+            return TerminalNode(latent, belief, reward.item())
         return StateNode(latent, belief, reward.item(), nets)
+
+
+class TerminalNode(Node):
+    """
+    Represents states beyond the predicted end of the game, with zero value prediction.
+    Child nodes are always TerminalNodes with zero reward.
+
+    By fixing value predictions and future rewards to zero, the accuracy of node values
+    near the game end is improved, which enables better action selection and faster
+    learning.
+    This is subject to the condition that terminal states are correctly predicted.
+
+    Compared to the alternative of predicting zero values and rewards for any state after
+    the game end, learning the occurence of the game end directly provides these benefits:
+    - more efficient in terms of time and compute
+    - better generalisation for any number of states beyond the game end
+
+    These predictions come from the dynamics rather than the prediction network because:
+    - the 'terminalness' is not really associated with a game state, it is more related to
+      a (state, action) tuple like a reward
+    - a 'terminal score' can easily be learned in the training data of the the last game
+      state without injecting extra training states
+
+    The first TerminalNode in a tree search trajectory is important:
+    - it contains the final reward
+    - it stores a view count which might be relevant for deriving the target policy
+
+    Children of this first TerminalNode are important as well; the tree search cannot
+    simply be truncated: The terminal prediction might be wrong, and the latents / beliefs
+    of some child nodes may still be needed for e.g. training data or some special
+    RLPlayers.
+    """
+
+    def __init__(self, latent: Tensor, belief: Optional[Tensor], reward: float):
+        super().__init__(
+            latent=latent,
+            belief=belief,
+            reward=reward,
+            value_pred=0.0,
+            probs=[1 / C.game.instance.max_num_actions] * C.game.instance.max_num_actions,
+        )
+
+    def _create_child_at(self, action: int, nets: Networks) -> TerminalNode:
+        latent, belief, _, _ = nets.dynamics.si(
+            self.latent,
+            self.belief,
+            F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
+        )
+        return TerminalNode(latent, belief, 0)
 
 
 def ensure_visit_count(

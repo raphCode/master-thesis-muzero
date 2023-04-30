@@ -111,6 +111,7 @@ class TrainingData:
     target_policy: Tensor
     value_target: Tensor
     reward: Tensor
+    terminal: Tensor
 
     @classmethod  # type: ignore [misc]
     @property
@@ -135,6 +136,7 @@ class TrainingData:
             target_policy=cache.zeros(C.game.instance.max_num_actions),
             value_target=cache.tensor(0),
             reward=cache.tensor(0.0),
+            terminal=cache.tensor(0.0),
         )
 
     @classmethod
@@ -143,6 +145,7 @@ class TrainingData:
         ts: TrajectoryState,
         value_target: float,
         is_initial: bool,
+        is_terminal: bool,
         cache: Optional[TensorCache] = None,
     ) -> TrainingData:
         if cache is None:
@@ -169,6 +172,7 @@ class TrainingData:
             target_policy=torch.tensor(ts.target_policy),
             value_target=torch.tensor(float(value_target)),
             reward=cache.tensor(float(ts.reward)),
+            terminal=cache.tensor(float(is_terminal)),
         )
 
     @classmethod

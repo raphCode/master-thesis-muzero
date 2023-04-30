@@ -90,6 +90,7 @@ class ReplayBuffer:
                         ts,
                         value_target,
                         is_initial=(n == 0),
+                        is_terminal=(game_completed and n == len(traj) - 1),
                         cache=self.cache,
                     ),
                 )

@@ -76,7 +76,8 @@ class DynamicsNet(ABC, nn.Module):
         latent: Tensor,
         belief: Optional[Tensor],
         action_onehot: Tensor,
-    ) -> tuple[Tensor, Optional[Tensor], Tensor]:
+        logits: bool = False,
+    ) -> tuple[Tensor, Optional[Tensor], Tensor, Tensor]:
         pass
 
     @copy_type_signature(forward)

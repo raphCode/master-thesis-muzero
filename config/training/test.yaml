@@ -19,3 +19,4 @@ loss_weights:
     reward: 1
     policy: 1
     player: 1
+    terminal: 1
