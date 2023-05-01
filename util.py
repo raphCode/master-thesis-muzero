@@ -1,9 +1,14 @@
 import functools
-from typing import Any, Generic, TypeVar, Callable, Optional, cast
+from typing import Any, Generic, TypeVar, Callable, Optional, TypeAlias, cast
 from collections.abc import Iterator
 
+import numpy as np
 import torch
+import numpy.typing as npt
 import torch.nn.functional as F
+
+ndarr_f32: TypeAlias = npt.NDArray[np.float32]
+ndarr_f64: TypeAlias = npt.NDArray[np.float64]
 
 A = TypeVar("A")
 B = TypeVar("B")
