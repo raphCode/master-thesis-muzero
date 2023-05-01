@@ -1,17 +1,15 @@
 import warnings
 from typing import Any, TypeVar, cast
 from operator import itemgetter
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator
 
 import numpy as np
 
 from mcts import Node
-from util import NaNWarning
+from util import NaNWarning, ndarr_f64
 
 
-def softmax(
-    values: Sequence[float], temp: float = 1.0
-) -> np.ndarray[Any, np.dtype[np.float64]]:
+def softmax(values: Iterable[float], temp: float = 1.0) -> ndarr_f64:
     vals = np.array(values)
     exp = np.exp(vals / temp)
     result = exp / exp.sum()
@@ -29,7 +27,7 @@ def softmax(
             NaNWarning,
             stacklevel=2,
         )
-    return cast(np.ndarray[Any, np.dtype[np.float64]], result)
+    return cast(ndarr_f64, result)
 
 
 T = TypeVar("T")
