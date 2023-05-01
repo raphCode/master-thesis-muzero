@@ -67,10 +67,7 @@ def sample_from_prior(node: Node) -> int:
     """
     Draw a random action from the prior probability distribution.
     """
-    # Explicit dtype necessary since torch uses 32 and numpy 64 bits for floats by
-    # default. The precision difference leads to the message 'probabilities to not
-    # sum to 1' otherwise.
-    return rng.choice(len(node.probs), p=np.array(node.probs, dtype=np.float32))
+    return rng.choice(len(node.probs), p=node.probs)
 
 
 assert_fn_type(sample_from_prior)

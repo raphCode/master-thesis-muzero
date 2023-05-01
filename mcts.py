@@ -4,10 +4,12 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional, cast
 from collections.abc import Iterable, MutableMapping
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import Tensor
 
+from util import ndarr_f32, ndarr_f64
 from config import C
 from networks.bases import Networks
 
@@ -36,7 +38,7 @@ class Node(ABC):
     reward: float
     value_pred: float
 
-    probs: tuple[float, ...]
+    probs: ndarr_f32 | ndarr_f64
     children: MutableMapping[int, Node]
 
     def __init__(
@@ -52,7 +54,8 @@ class Node(ABC):
         self.belief = belief
         self.reward = reward
         self.value_pred = value_pred
-        self.probs = tuple(probs)
+        self.probs = np.asarray(probs)
+        self.probs.flags.writeable = False
         self.children = dict()
         self.visit_count = 0
         self.value_sum = 0
@@ -152,7 +155,9 @@ class TerminalNode(Node):
             belief=belief,
             reward=reward,
             value_pred=0.0,
-            probs=[1 / C.game.instance.max_num_actions] * C.game.instance.max_num_actions,
+            probs=np.full(
+                C.game.instance.max_num_actions, 1 / C.game.instance.max_num_actions
+            ),
         )
 
     def _create_child_at(self, action: int, nets: Networks) -> TerminalNode:
