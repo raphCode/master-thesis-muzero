@@ -3,10 +3,11 @@ from __future__ import annotations
 from typing import Any, Unpack, Optional, cast
 from functools import cached_property
 
+import numpy as np
 import torch
 import pyspiel  # type: ignore
 
-from util import optional_map
+from util import ndarr_f64, optional_map
 
 from .bases import Game, Teams, GameState, MatchData, GameStateInitKwArgs
 
@@ -57,9 +58,11 @@ class OpenSpielGameState(GameState):
         return cast(int, pid)
 
     @property
-    def chance_outcomes(self) -> tuple[float, ...]:
+    def chance_outcomes(self) -> ndarr_f64:
         d = dict(self.state.chance_outcomes())  # type: dict[int, float]
-        return tuple(d.get(a, 0.0) for a in range(self.game.max_num_actions))
+        probs = np.zeros(self.game.max_num_actions)
+        probs[list(d.keys())] = list(d.values())
+        return probs
 
     def apply_action(self, action: int) -> None:
         assert not self.is_terminal
