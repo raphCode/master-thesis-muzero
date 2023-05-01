@@ -3,14 +3,13 @@ from __future__ import annotations
 import operator
 import functools
 from typing import TYPE_CHECKING, Any, Iterable, Optional, TypeAlias, cast
-from collections.abc import Sequence
 
 import attrs
 import torch
 from attrs import frozen
 from torch import Tensor
 
-from util import TensorCache, optional_map
+from util import TensorCache, ndarr_f64, optional_map
 from config import C
 
 if TYPE_CHECKING:
@@ -44,7 +43,7 @@ class TrajectoryState:
     belief: Optional[Tensor]
     current_player: int
     action: int
-    target_policy: Sequence[float]
+    target_policy: ndarr_f64
     mcts_value: float
     reward: float
 
@@ -53,17 +52,19 @@ class TrajectoryState:
         cls,
         info: TrainingInfo,
         *args: Any,
-        target_policy: Optional[Sequence[float]] = None,
+        target_policy: Optional[ndarr_f64] = None,
         current_player: int,
         action: int,
         reward: float,
     ) -> TrajectoryState:
+        if target_policy is None:
+            target_policy = info.target_policy
         return cls(
             representation=info.representation,
             belief=info.belief,
             current_player=current_player,
             action=action,
-            target_policy=target_policy or info.target_policy,
+            target_policy=target_policy,
             mcts_value=info.mcts_value,
             reward=reward,
         )

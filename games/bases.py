@@ -10,6 +10,8 @@ from collections.abc import Sequence, Collection
 import torch
 from attrs import frozen
 
+from util import ndarr_f64
+
 
 class Teams:
     """
@@ -104,10 +106,10 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def chance_outcomes(self) -> tuple[float, ...]:
+    def chance_outcomes(self) -> ndarr_f64:
         """
         On chance events, this can be called to get the action probabilities.
-        Length of returned tuple should be game.max_num_actions
+        Length of returned array should be game.max_num_actions
         """
         pass
 

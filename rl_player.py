@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Unpack, Optional, TypeAlias, TypedDict
-from collections.abc import Sequence
 
 import torch
 from attrs import frozen
 
 from mcts import Node, StateNode, ensure_visit_count
+from util import ndarr_f64
 from config import C
 from trajectory import Latent, Observation
 from config.schema import MctsConfig
@@ -20,7 +20,7 @@ class TrainingInfo:
 
     representation: Observation | Latent
     belief: Optional[torch.Tensor]
-    target_policy: Sequence[float]
+    target_policy: ndarr_f64
     mcts_value: float
 
 
