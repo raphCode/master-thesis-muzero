@@ -156,4 +156,3 @@ class Trainer:
         self.optimizer.zero_grad()
         total_loss.backward()  # type: ignore [no-untyped-call]
         self.optimizer.step()
-        sw.add_scalar("loss/total", total_loss, n)  # type: ignore [no-untyped-call]
