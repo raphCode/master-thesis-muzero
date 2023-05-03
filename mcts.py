@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional, cast
 from collections.abc import Iterable, MutableMapping
@@ -16,6 +17,8 @@ from networks.bases import Networks
 if TYPE_CHECKING:
     # only needed for type annotations, can't import uncondionally due to import cycles
     from fn.selection import SelectionFn
+
+log = logging.getLogger(__name__)
 
 
 class Node(ABC):
@@ -186,6 +189,20 @@ def ensure_visit_count(
             search_path.append(node)
 
         # backpropagate
+        if len(search_path) - 1 > C.training.n_step_horizon:
+            # The backpropagation currently calculates a node return value with all
+            # rewards in the search path (n-step size only bounded by search depth).
+            # Warn the user if the tree search goes deeper than the configured n-step
+            # horizon size.
+            # This is not a problem per se since the state values should converge to the
+            # same values anyways, irrespectively of the n-step horizon size.
+            # But sometimes small horizon sizes perform better empirically.
+            log.warning(
+                "tree search depth ({}) exceeds n-step horizon size ({})".format(
+                    len(search_path) - 1, C.training.n_step_horizon
+                )
+            )
+
         r = node.value_pred
         for node in reversed(search_path):
             node.add_value(r)
