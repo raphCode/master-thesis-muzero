@@ -1,20 +1,20 @@
-batch_size: 4
-min_trajectory_length: 2
-max_trajectory_length: 16
-discount_factor: 0.99
-n_step_horizon: 20
-replay_buffer_size: 1_000
-max_moves_per_game: 10_000
+batch_size: 128
+min_trajectory_length: 3
+max_trajectory_length: ${.min_trajectory_length}
+discount_factor: 0.98
+n_step_horizon: ${.max_moves_per_game}
+replay_buffer_size: 10_000
+max_moves_per_game: 1000
 latent_dist_pnorm: 1
 optimizer:
     _target_: torch.optim.Adam
 learning_rates:
-    base: 1e-5
-    dynamics: 1
+    base: 1e-3
+    dynamics: 2
     prediction: 1
     representation: 1
 loss_weights:
-    latent: 1
+    latent: 0.01
     value: 1
     reward: 1
     policy: 1
