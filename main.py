@@ -17,7 +17,7 @@ cs.store(name="hydra_job_config", group="hydra.job", node={"chdir": True})
 cs.store(name="base_config", node=BaseConfig)
 
 
-@hydra.main(version_base=None, config_path="config", config_name="base_config")
+@hydra.main(version_base=None, config_path="run_config", config_name="base_config")
 def main(cfg: DictConfig) -> None:
     logging.captureWarnings(True)
     populate_config(cfg)
