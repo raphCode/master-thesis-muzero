@@ -24,15 +24,15 @@ class RLPlayers:
     Small helper class to bundle RLPlayers instances, their player ids and trajectories.
     """
 
-    pids: tuple[int]
-    players: tuple[RLBase]
-    trajectories: tuple[list[TrajectoryState]]
+    pids: tuple[int, ...]
+    players: tuple[RLBase, ...]
+    trajectories: tuple[list[TrajectoryState], ...]
 
     def __init__(self, all_players: Iterable[RLBase | Player]):
-        self.pids, self.players = zip(  # type: ignore [assignment]
+        self.pids, self.players = zip(
             *((pid, p) for pid, p in enumerate(all_players) if isinstance(p, RLBase))
         )
-        self.trajectories = tuple([] for _ in self.players)  # type: ignore [assignment]
+        self.trajectories = tuple([] for _ in self.players)
 
 
 def run_episode(player_controller: PCBase) -> SelfplayResult:
