@@ -1,3 +1,4 @@
+import logging
 import operator
 import functools
 import itertools
@@ -15,6 +16,9 @@ from config.schema import LossWeights
 from networks.bases import Networks
 
 zero_tensor = Factory(functools.partial(torch.zeros, 1))
+
+
+log = logging.getLogger(__name__)
 
 
 @define
@@ -156,3 +160,10 @@ class Trainer:
         self.optimizer.zero_grad()
         total_loss.backward()  # type: ignore [no-untyped-call]
         self.optimizer.step()
+
+        log.info(
+            "Finished batch update, traj length {}, loss {:.3f}".format(
+                len(batch),
+                total_loss.item(),
+            )
+        )
