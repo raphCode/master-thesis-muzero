@@ -11,7 +11,7 @@ from collections import defaultdict
 import attrs
 import hydra
 import torch
-import gorilla  # type: ignore
+import gorilla  # type: ignore [import]
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
