@@ -5,7 +5,7 @@ from functools import cached_property
 
 import numpy as np
 import torch
-import pyspiel  # type: ignore
+import pyspiel  # type: ignore [import]
 
 from util import ndarr_f64, optional_map
 
