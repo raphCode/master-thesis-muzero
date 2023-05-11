@@ -50,7 +50,6 @@ class FcRepresentation(FcBase, RepresentationNet):
     def forward(
         self,
         *observations: Tensor,
-        **kwargs: Any,
     ) -> Tensor:
         return self.fc_forward(*observations)
 
