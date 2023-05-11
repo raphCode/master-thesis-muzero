@@ -31,12 +31,11 @@ class FcBase(nn.Module):
         x = torch.cat([i.flatten(1) for i in inputs if i is not None], dim=1)
         for fc in self.fc_layers:
             orig_x = x
-            x = fc(x)
-            tmp = x
-            x = F.relu(x)
+            y = fc(x)  # type: Tensor
+            x = F.relu(y)
             if orig_x.shape == x.shape:
                 x = x + orig_x  # skip connection / ResNet
-        return tmp
+        return y
 
 
 class FcRepresentation(FcBase, RepresentationNet):
