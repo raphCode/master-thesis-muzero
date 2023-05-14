@@ -19,7 +19,7 @@ def single_inference(
     **kwargs: Any,
 ) -> Tensor | tuple[Optional[Tensor], ...]:
     """
-    automatically adds/removes batch dimension on network in/outputs.
+    Adds/removes batch dimension on network in/outputs.
     """
     unsqueeze = optional_map(functools.partial(torch.unsqueeze, dim=0))
     squeeze = functools.partial(torch.squeeze, dim=0)
