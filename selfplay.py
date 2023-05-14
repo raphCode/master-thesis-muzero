@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Iterable, Sequence
 
 import numpy as np
@@ -11,6 +12,8 @@ from player_controller import PCBase, SinglePC
 from tensorboard_wrapper import TBStepLogger
 
 rng = np.random.default_rng()
+
+log = logging.getLogger(__name__)
 
 
 @frozen
@@ -89,6 +92,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     tbs.add_scalar("selfplay/game length", n_move)
     if isinstance(player_controller, SinglePC):
         reward = rlp.trajectories[0][-1].reward
+        log.info(f"Finished selfplay game: length: {n_move}, reward: {reward:.2f}")
         tbs.add_scalar("selfplay/reward", reward)
     else:
         raise NotImplementedError()

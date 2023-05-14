@@ -40,7 +40,6 @@ def main(cfg: DictConfig) -> None:
         while n < 100_000:
             with torch.no_grad():
                 result = run_episode(pc, tb.create_step_logger(n))
-            log.info(f"Finished selfplay game ({result.moves} steps)")
             n += result.moves
             for traj in result.trajectories:
                 rb.add_trajectory(traj, result.game_completed)
