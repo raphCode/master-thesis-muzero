@@ -8,12 +8,12 @@ import attrs
 import torch
 from attrs import Factory, define
 from torch import Tensor, nn
-from torch.utils.tensorboard import SummaryWriter  # type: ignore [attr-defined]
 
 from config import C
 from trajectory import TrainingData
 from config.schema import LossWeights
 from networks.bases import Networks
+from tensorboard_wrapper import TBStepLogger
 
 zero_tensor = Factory(functools.partial(torch.zeros, 1))
 
@@ -80,7 +80,7 @@ class Trainer:
             )
         )
 
-    def process_batch(self, batch: list[TrainingData], sw: SummaryWriter, n: int) -> None:
+    def process_batch(self, batch: list[TrainingData], tbs: TBStepLogger) -> None:
         # TODO: move tensors to GPU
 
         def ml(
@@ -154,7 +154,7 @@ class Trainer:
         losses /= counts
 
         for k, loss in attrs.asdict(losses).items():
-            sw.add_scalar(f"loss/{k}", loss, n)  # type: ignore [no-untyped-call]
+            tbs.add_scalar(f"loss/{k}", loss)
 
         total_loss = losses.weighted_sum(C.training.loss_weights)
         self.optimizer.zero_grad()
