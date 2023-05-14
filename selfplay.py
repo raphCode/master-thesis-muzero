@@ -7,7 +7,8 @@ from config import C
 from rl_player import RLBase
 from trajectory import TrajectoryState
 from games.bases import Player
-from player_controller import PCBase
+from player_controller import PCBase, SinglePC
+from tensorboard_wrapper import TBStepLogger
 
 rng = np.random.default_rng()
 
@@ -35,7 +36,7 @@ class RLPlayers:
         self.trajectories = tuple([] for _ in self.players)
 
 
-def run_episode(player_controller: PCBase) -> SelfplayResult:
+def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     state = C.game.instance.new_initial_state()
     players = player_controller.get_players(state.match_data)
     assert len(players) == state.match_data.num_players
@@ -84,5 +85,12 @@ def run_episode(player_controller: PCBase) -> SelfplayResult:
                 )
             )
             player.advance_game_state(action)
+
+    tbs.add_scalar("selfplay/game length", n_move)
+    if isinstance(player_controller, SinglePC):
+        reward = rlp.trajectories[0][-1].reward
+        tbs.add_scalar("selfplay/reward", reward)
+    else:
+        raise NotImplementedError()
 
     return SelfplayResult(n_move, state.is_terminal, rlp.trajectories)
