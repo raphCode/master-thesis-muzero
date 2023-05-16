@@ -1,8 +1,7 @@
----
 alphago_zero:
   type: article
   parent:
-    - type: periodical
+      type: periodical
       issue: 7676
       volume: 550
       title: Nature
@@ -63,16 +62,14 @@ muzero:
   title: "Mastering Atari, Go, chess and shogi by planning with a learned model"
   page-range: 604
   parent:
-    - type: periodical
+      type: periodical
       title: Nature
       issue: 7839
       volume: 588
   date: 2020
 multiplayer_alphazero:
   type: misc
-  title:
-    value: Multiplayer AlphaZero
-    sentence-case: Multiplayer alphazero
+  title: Multiplayer AlphaZero
   author:
     - "Petosa, Nick"
     - "Balch, Tucker"
@@ -114,13 +111,10 @@ ray:
     - "Paul, William"
     - "Jordan, Michael I."
     - "Stoica, Ion"
-  title:
-    value: "Ray: A Distributed Framework for Emerging AI Applications"
-    sentence-case: "Ray: a distributed framework for emerging ai applications"
+  title: "Ray: A Distributed Framework for Emerging AI Applications"
 hydra:
   type: misc
   date: 2019
-  note: Github
   author: "Yadan, Omry"
   title: Hydra - A framework for elegantly configuring complex applications
   url: "https://github.com/facebookresearch/hydra"
@@ -128,10 +122,8 @@ mcts_survey:
   type: article
   date: 2012
   parent:
-    - type: periodical
-      title:
-        value: IEEE Transactions on Computational Intelligence and AI in Games
-        sentence-case: Ieee transactions on computational intelligence and ai in games
+      type: periodical
+      title: IEEE Transactions on Computational Intelligence and AI in Games
   title: A Survey of Monte Carlo Tree Search Methods
   author:
     - "Browne, Cameron"
@@ -161,16 +153,12 @@ rl_book:
   type: book
   edition: Second
   url: "http://incompleteideas.net/book/the-book-2nd.html"
-  publisher:
-    value: MIT Press
-    sentence-case: Mit press
+  publisher: MIT Press
   author:
     - "Sutton, Richard S."
     - "Barto, Andrew G."
   date: 2018
-  title:
-    value: "Reinforcement Learning: An Introduction"
-    sentence-case: "Reinforcement learning: an introduction"
+  title: "Reinforcement Learning: An Introduction"
 val_pred_net:
   type: misc
   author:
