@@ -1,0 +1,181 @@
+---
+alphago_zero:
+  type: article
+  parent:
+    - type: periodical
+      issue: 7676
+      volume: 550
+      title: Nature
+  page-range: 354-359
+  author:
+    - "Silver, David"
+    - "Schrittwieser, Julian"
+    - "Simonyan, Karen"
+    - "Antonoglou, Ioannis"
+    - "Huang, Aja"
+    - "Guez, Arthur"
+    - "Hubert, Thomas"
+    - "Baker, Lucas"
+    - "Lai, Matthew"
+    - "Bolton, Adrian"
+    - "Chen, Yutian"
+    - "Lillicrap, Timothy"
+    - "Hui, Fan"
+    - "Sifre, Laurent"
+    - "van den Driessche, George"
+    - "Graepel, Thore"
+    - "Hassabis, Demis"
+  date: 2017
+  title: Mastering the game of Go without human knowledge
+alphazero:
+  type: misc
+  date: 2017
+  title: "Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm"
+  author:
+    - "Silver, David"
+    - "Hubert, Thomas"
+    - "Schrittwieser, Julian"
+    - "Antonoglou, Ioannis"
+    - "Lai, Matthew"
+    - "Guez, Arthur"
+    - "Lanctot, Marc"
+    - "Sifre, Laurent"
+    - "Kumaran, Dharshan"
+    - "Graepel, Thore"
+    - "Lillicrap, Timothy"
+    - "Simonyan, Karen"
+    - "Hassabis, Demis"
+muzero:
+  type: article
+  author:
+    - "Schrittwieser, Julian"
+    - "Antonoglou, Ioannis"
+    - "Hubert, Thomas"
+    - "Simonyan, Karen"
+    - "Sifre, Laurent"
+    - "Schmitt, Simon"
+    - "Guez, Arthur"
+    - "Lockhart, Edward"
+    - "Hassabis, Demis"
+    - "Graepel, Thore"
+    - "Lillicrap, Timothy"
+    - "Silver, David"
+  title: "Mastering Atari, Go, chess and shogi by planning with a learned model"
+  page-range: 604
+  parent:
+    - type: periodical
+      title: Nature
+      issue: 7839
+      volume: 588
+  date: 2020
+multiplayer_alphazero:
+  type: misc
+  title:
+    value: Multiplayer AlphaZero
+    sentence-case: Multiplayer alphazero
+  author:
+    - "Petosa, Nick"
+    - "Balch, Tucker"
+  date: 2019
+muzero_intuiton:
+  type: misc
+  author: "Schrittwieser, Julian"
+  title: MuZero Intuition
+  date: 2020
+  url: "https://www.furidamu.org/blog/2020/12/22/muzero-intuition/"
+efficientzero:
+  type: misc
+  author:
+    - "Ye, Weirui"
+    - "Liu, Shaohuai"
+    - "Kurutach, Thanard"
+    - "Abbeel, Pieter"
+    - "Gao, Yang"
+  date: 2021
+  title: Mastering Atari Games with Limited Data
+alphazero_issues:
+  type: misc
+  url: "https://dselsam.github.io/posts/2018-06-06-issues-with-alpha-zero.html"
+  date: 2018
+  author: "Selsam, Daniel"
+  title: Issues with Alphazero
+ray:
+  type: misc
+  date: 2018
+  author:
+    - "Moritz, Philipp"
+    - "Nishihara, Robert"
+    - "Wang, Stephanie"
+    - "Tumanov, Alexey"
+    - "Liaw, Richard"
+    - "Liang, Eric"
+    - "Elibol, Melih"
+    - "Yang, Zongheng"
+    - "Paul, William"
+    - "Jordan, Michael I."
+    - "Stoica, Ion"
+  title:
+    value: "Ray: A Distributed Framework for Emerging AI Applications"
+    sentence-case: "Ray: a distributed framework for emerging ai applications"
+hydra:
+  type: misc
+  date: 2019
+  note: Github
+  author: "Yadan, Omry"
+  title: Hydra - A framework for elegantly configuring complex applications
+  url: "https://github.com/facebookresearch/hydra"
+mcts_survey:
+  type: article
+  date: 2012
+  parent:
+    - type: periodical
+      title:
+        value: IEEE Transactions on Computational Intelligence and AI in Games
+        sentence-case: Ieee transactions on computational intelligence and ai in games
+  title: A Survey of Monte Carlo Tree Search Methods
+  author:
+    - "Browne, Cameron"
+    - "Powley, Edward"
+    - "Whitehouse, Daniel"
+    - "Lucas, Simon"
+    - "Cowling, Peter"
+    - "Rohlfshagen, Philipp"
+    - "Tavener, Stephen"
+    - "Perez Liebana, Diego"
+    - "Samothrakis, Spyridon"
+    - "Colton, Simon"
+  doi: 10.1109/TCIAIG.2012.2186810
+mcts_po:
+  type: misc
+  author:
+    - "Grill, Jean-Bastien"
+    - "Altché, Florent"
+    - "Tang, Yunhao"
+    - "Hubert, Thomas"
+    - "Valko, Michal"
+    - "Antonoglou, Ioannis"
+    - "Munos, Rémi"
+  title: Monte-Carlo Tree Search as Regularized Policy Optimization
+  date: 2020
+rl_book:
+  type: book
+  edition: Second
+  url: "http://incompleteideas.net/book/the-book-2nd.html"
+  publisher:
+    value: MIT Press
+    sentence-case: Mit press
+  author:
+    - "Sutton, Richard S."
+    - "Barto, Andrew G."
+  date: 2018
+  title:
+    value: "Reinforcement Learning: An Introduction"
+    sentence-case: "Reinforcement learning: an introduction"
+val_pred_net:
+  type: misc
+  author:
+    - "Oh, Junhyuk"
+    - "Singh, Satinder"
+    - "Lee, Honglak"
+  title: Value Prediction Network
+  date: 2017
