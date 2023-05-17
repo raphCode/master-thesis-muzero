@@ -21,10 +21,9 @@ alphago_zero:
     - "Graepel, Thore"
     - "Hassabis, Demis"
   parent:
-      type: periodical
-      title: Nature
-      issue: 7676
-      volume: 550
+    title: Nature
+    issue: 7676
+    volume: 550
   page-range: 354-359
 
 alphazero:
@@ -48,7 +47,7 @@ alphazero:
 
 muzero:
   type: article
-  title: "Mastering Atari, Go, chess and shogi by planning with a learned model"
+  title: Mastering Atari, Go, chess and shogi by planning with a learned model
   date: 2020
   author:
     - "Schrittwieser, Julian"
@@ -64,10 +63,9 @@ muzero:
     - "Lillicrap, Timothy"
     - "Silver, David"
   parent:
-      type: periodical
-      title: Nature
-      issue: 7839
-      volume: 588
+    title: Nature
+    issue: 7839
+    volume: 588
   page-range: 604
 
 multiplayer_alphazero:
@@ -125,7 +123,7 @@ hydra:
   title: Hydra - A framework for elegantly configuring complex applications
   date: 2019
   author: "Yadan, Omry"
-  url: "https://github.com/facebookresearch/hydra"
+  url: https://github.com/facebookresearch/hydra
 
 mcts_survey:
   type: article
@@ -143,8 +141,7 @@ mcts_survey:
     - "Samothrakis, Spyridon"
     - "Colton, Simon"
   parent:
-      type: periodical
-      title: IEEE Transactions on Computational Intelligence and AI in Games
+    title: IEEE Transactions on Computational Intelligence and AI in Games
   doi: 10.1109/TCIAIG.2012.2186810
 
 mcts_po:
@@ -169,7 +166,7 @@ rl_book:
     - "Sutton, Richard S."
     - "Barto, Andrew G."
   publisher: MIT Press
-  url: "http://incompleteideas.net/book/the-book-2nd.html"
+  url: http://incompleteideas.net/book/the-book-2nd.html
 
 val_pred_net:
   type: misc
