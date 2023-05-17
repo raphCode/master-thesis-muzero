@@ -1,3 +1,4 @@
+import sys
 from collections.abc import Iterator, Sequence
 
 import yaml
@@ -8,6 +9,7 @@ from yaml import (
     KeyToken,
     ScalarToken,
     Token,
+    YAMLError,
 )
 
 key_order = [
@@ -26,6 +28,10 @@ key_order = [
 ]
 
 
+class UnsortedKeyError(Exception):
+    pass
+
+
 def check_key_order(
     tokens: Iterator[Token],
     ignore_levels: int = 0,
@@ -41,15 +47,30 @@ def check_key_order(
             s = next(tokens)
             assert isinstance(s, ScalarToken)
             key_idx = key_order.index(s.value)
-            assert (
-                key_idx > last_key_idx
-            ), "Line {}: Key out of order: {} (last seen key: {})".format(
-                s.start_mark.line + 1, s.value, key_order[last_key_idx]
-            )
+            if not key_idx > last_key_idx:
+                raise UnsortedKeyError(
+                    "Line {}: Key out of order: {} (last seen key: {})".format(
+                        s.start_mark.line + 1, s.value, key_order[last_key_idx]
+                    )
+                )
             last_key_idx = key_idx
 
 
 if __name__ == "__main__":
-    with open("bibliography.yml", "r") as f:
-        check_key_order(yaml.scan(f), ignore_levels=2)
-    print("all keys are correctly sorted!")
+    filenames = sys.argv[1:]
+    if len(filenames) == 0:
+        print("Needs yaml bibliography filename(s) to check!")
+        sys.exit(2)
+    failed = False
+    for filename in filenames:  # type: str
+        print(f"Checking {filename}... ", end="")
+        try:
+            with open(filename, "r") as f:
+                check_key_order(yaml.scan(f), ignore_levels=2)
+        except (YAMLError, UnsortedKeyError) as e:
+            print("error:")
+            print(e)
+            failed = True
+        else:
+            print("ok")
+        sys.exit(int(failed))
