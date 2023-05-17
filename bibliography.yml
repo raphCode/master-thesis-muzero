@@ -27,9 +27,9 @@ alphago_zero:
   page-range: 354-359
 
 alphazero:
-  type: misc
-  title: "Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm"
-  date: 2017
+  type: article
+  title: "A general reinforcement learning algorithm that masters chess, shogi, and Go through self-play"
+  date: 2018-12-07
   author:
     - "Silver, David"
     - "Hubert, Thomas"
@@ -44,6 +44,12 @@ alphazero:
     - "Lillicrap, Timothy"
     - "Simonyan, Karen"
     - "Hassabis, Demis"
+  parent:
+    title: Science
+    issue: 6419
+    volume: 362
+  page-range: 1140-1144
+  doi: 10.1126/science.aar6404
 
 muzero:
   type: article
