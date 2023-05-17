@@ -2,6 +2,38 @@ arxiv: &arxiv
   type: repository
   title: arXiv
 
+alphago:
+  type: article
+  title: Mastering the game of Go with deep neural networks and tree search
+  date: 2016-01-27
+  author:
+    - "Silver, David"
+    - "Huang, Aja"
+    - "Maddison, Chris J."
+    - "Guez, Arthur"
+    - "Sifre, Laurent"
+    - "van den Driessche, George"
+    - "Schrittwieser, Julian"
+    - "Antonoglou, Ioannis"
+    - "Panneershelvam, Veda"
+    - "Lanctot, Marc"
+    - "Dieleman, Sander"
+    - "Grewe, Dominik"
+    - "Nham, John"
+    - "Kalchbrenner, Nal"
+    - "Sutskever, Ilya"
+    - "Lillicrap, Timothy"
+    - "Leach, Madeleine"
+    - "Kavukcuoglu, Koray"
+    - "Graepel, Thore"
+    - "Hassabis, Demis"
+  parent:
+    title: Nature
+    issue: 7587
+    volume: 529
+  page-range: 484-489
+  doi: 10.1038/nature16961
+
 alphago_zero:
   type: article
   title: Mastering the game of Go without human knowledge
