@@ -1,11 +1,7 @@
 alphago_zero:
   type: article
-  parent:
-      type: periodical
-      issue: 7676
-      volume: 550
-      title: Nature
-  page-range: 354-359
+  title: Mastering the game of Go without human knowledge
+  date: 2017
   author:
     - "Silver, David"
     - "Schrittwieser, Julian"
@@ -24,13 +20,17 @@ alphago_zero:
     - "van den Driessche, George"
     - "Graepel, Thore"
     - "Hassabis, Demis"
-  date: 2017
-  title: Mastering the game of Go without human knowledge
+  parent:
+      type: periodical
+      title: Nature
+      issue: 7676
+      volume: 550
+  page-range: 354-359
 
 alphazero:
   type: misc
-  date: 2017
   title: "Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm"
+  date: 2017
   author:
     - "Silver, David"
     - "Hubert, Thomas"
@@ -48,6 +48,8 @@ alphazero:
 
 muzero:
   type: article
+  title: "Mastering Atari, Go, chess and shogi by planning with a learned model"
+  date: 2020
   author:
     - "Schrittwieser, Julian"
     - "Antonoglou, Ioannis"
@@ -61,50 +63,49 @@ muzero:
     - "Graepel, Thore"
     - "Lillicrap, Timothy"
     - "Silver, David"
-  title: "Mastering Atari, Go, chess and shogi by planning with a learned model"
-  page-range: 604
   parent:
       type: periodical
       title: Nature
       issue: 7839
       volume: 588
-  date: 2020
+  page-range: 604
 
 multiplayer_alphazero:
   type: misc
   title: Multiplayer AlphaZero
+  date: 2019
   author:
     - "Petosa, Nick"
     - "Balch, Tucker"
-  date: 2019
 
 muzero_intuiton:
   type: misc
-  author: "Schrittwieser, Julian"
   title: MuZero Intuition
   date: 2020
+  author: "Schrittwieser, Julian"
   url: "https://www.furidamu.org/blog/2020/12/22/muzero-intuition/"
 
 efficientzero:
   type: misc
+  title: Mastering Atari Games with Limited Data
+  date: 2021
   author:
     - "Ye, Weirui"
     - "Liu, Shaohuai"
     - "Kurutach, Thanard"
     - "Abbeel, Pieter"
     - "Gao, Yang"
-  date: 2021
-  title: Mastering Atari Games with Limited Data
 
 alphazero_issues:
   type: misc
-  url: "https://dselsam.github.io/posts/2018-06-06-issues-with-alpha-zero.html"
+  title: Issues with Alphazero
   date: 2018
   author: "Selsam, Daniel"
-  title: Issues with Alphazero
+  url: "https://dselsam.github.io/posts/2018-06-06-issues-with-alpha-zero.html"
 
 ray:
   type: misc
+  title: "Ray: A Distributed Framework for Emerging AI Applications"
   date: 2018
   author:
     - "Moritz, Philipp"
@@ -118,22 +119,18 @@ ray:
     - "Paul, William"
     - "Jordan, Michael I."
     - "Stoica, Ion"
-  title: "Ray: A Distributed Framework for Emerging AI Applications"
 
 hydra:
   type: misc
+  title: Hydra - A framework for elegantly configuring complex applications
   date: 2019
   author: "Yadan, Omry"
-  title: Hydra - A framework for elegantly configuring complex applications
   url: "https://github.com/facebookresearch/hydra"
 
 mcts_survey:
   type: article
-  date: 2012
-  parent:
-      type: periodical
-      title: IEEE Transactions on Computational Intelligence and AI in Games
   title: A Survey of Monte Carlo Tree Search Methods
+  date: 2012
   author:
     - "Browne, Cameron"
     - "Powley, Edward"
@@ -145,10 +142,15 @@ mcts_survey:
     - "Perez Liebana, Diego"
     - "Samothrakis, Spyridon"
     - "Colton, Simon"
+  parent:
+      type: periodical
+      title: IEEE Transactions on Computational Intelligence and AI in Games
   doi: 10.1109/TCIAIG.2012.2186810
 
 mcts_po:
   type: misc
+  title: Monte-Carlo Tree Search as Regularized Policy Optimization
+  date: 2020
   author:
     - "Grill, Jean-Bastien"
     - "Altché, Florent"
@@ -157,25 +159,23 @@ mcts_po:
     - "Valko, Michal"
     - "Antonoglou, Ioannis"
     - "Munos, Rémi"
-  title: Monte-Carlo Tree Search as Regularized Policy Optimization
-  date: 2020
 
 rl_book:
   type: book
+  title: "Reinforcement Learning: An Introduction"
   edition: Second
-  url: "http://incompleteideas.net/book/the-book-2nd.html"
-  publisher: MIT Press
+  date: 2018
   author:
     - "Sutton, Richard S."
     - "Barto, Andrew G."
-  date: 2018
-  title: "Reinforcement Learning: An Introduction"
+  publisher: MIT Press
+  url: "http://incompleteideas.net/book/the-book-2nd.html"
 
 val_pred_net:
   type: misc
+  title: Value Prediction Network
+  date: 2017
   author:
     - "Oh, Junhyuk"
     - "Singh, Satinder"
     - "Lee, Honglak"
-  title: Value Prediction Network
-  date: 2017
