@@ -1,7 +1,11 @@
+arxiv: &arxiv
+  type: repository
+  title: arXiv
+
 alphago_zero:
   type: article
   title: Mastering the game of Go without human knowledge
-  date: 2017
+  date: 2017-10-19
   author:
     - "Silver, David"
     - "Schrittwieser, Julian"
@@ -25,6 +29,7 @@ alphago_zero:
     issue: 7676
     volume: 550
   page-range: 354-359
+  doi: 10.1038/nature24270
 
 alphazero:
   type: article
@@ -54,7 +59,7 @@ alphazero:
 muzero:
   type: article
   title: Mastering Atari, Go, chess and shogi by planning with a learned model
-  date: 2020
+  date: 2020-12-23
   author:
     - "Schrittwieser, Julian"
     - "Antonoglou, Ioannis"
@@ -72,45 +77,62 @@ muzero:
     title: Nature
     issue: 7839
     volume: 588
-  page-range: 604
+  page-range: 604-609
+  doi: 10.1038/s41586-020-03051-4
 
 multiplayer_alphazero:
-  type: misc
+  type: article
   title: Multiplayer AlphaZero
-  date: 2019
+  date: 2019-12-09
   author:
     - "Petosa, Nick"
     - "Balch, Tucker"
+  parent: *arxiv
+  doi: 10.48550/arXiv.1910.13012
 
 muzero_intuiton:
-  type: misc
+  type: article
   title: MuZero Intuition
-  date: 2020
+  date: 2020-12-22
   author: "Schrittwieser, Julian"
-  url: "https://www.furidamu.org/blog/2020/12/22/muzero-intuition/"
+  parent:
+    type: blog
+    url: https://www.furidamu.org/
+  url:
+    value: https://www.furidamu.org/blog/2020/12/22/muzero-intuition/
+    date: 2021-12-14
+  note: &wayback_archived Saved in the Wayback Machine Internet Archive
 
 efficientzero:
-  type: misc
+  type: article
   title: Mastering Atari Games with Limited Data
-  date: 2021
+  date: 2021-12-12
   author:
     - "Ye, Weirui"
     - "Liu, Shaohuai"
     - "Kurutach, Thanard"
     - "Abbeel, Pieter"
     - "Gao, Yang"
+  parent: *arxiv
+  doi: 10.48550/arXiv.2111.00210
 
 alphazero_issues:
-  type: misc
+  type: article
   title: Issues with Alphazero
-  date: 2018
+  date: 2018-06-06
   author: "Selsam, Daniel"
-  url: "https://dselsam.github.io/posts/2018-06-06-issues-with-alpha-zero.html"
+  parent:
+    type: blog
+    url: https://dselsam.github.io/
+  url:
+    value: https://dselsam.github.io/posts/2018-06-06-issues-with-alpha-zero.html
+    date: 2021-12-12
+  note: *wayback_archived
 
 ray:
-  type: misc
+  type: article
   title: "Ray: A Distributed Framework for Emerging AI Applications"
-  date: 2018
+  date: 2018-09-30
   author:
     - "Moritz, Philipp"
     - "Nishihara, Robert"
@@ -123,9 +145,11 @@ ray:
     - "Paul, William"
     - "Jordan, Michael I."
     - "Stoica, Ion"
+  parent: *arxiv
+  doi: 10.48550/arXiv.1712.05889
 
 hydra:
-  type: misc
+  type: repository
   title: Hydra - A framework for elegantly configuring complex applications
   date: 2019
   author: "Yadan, Omry"
@@ -134,7 +158,7 @@ hydra:
 mcts_survey:
   type: article
   title: A Survey of Monte Carlo Tree Search Methods
-  date: 2012
+  date: 2012-02-03
   author:
     - "Browne, Cameron"
     - "Powley, Edward"
@@ -148,12 +172,15 @@ mcts_survey:
     - "Colton, Simon"
   parent:
     title: IEEE Transactions on Computational Intelligence and AI in Games
+    issue: 1
+    volume: 4
+  page-range: 1-43
   doi: 10.1109/TCIAIG.2012.2186810
 
 mcts_po:
-  type: misc
+  type: article
   title: Monte-Carlo Tree Search as Regularized Policy Optimization
-  date: 2020
+  date: 2020-07-24
   author:
     - "Grill, Jean-Bastien"
     - "Altché, Florent"
@@ -162,23 +189,28 @@ mcts_po:
     - "Valko, Michal"
     - "Antonoglou, Ioannis"
     - "Munos, Rémi"
+  parent: *arxiv
+  doi: 10.48550/arXiv.2007.12509
 
 rl_book:
   type: book
   title: "Reinforcement Learning: An Introduction"
   edition: Second
-  date: 2018
+  date: 2018-11-13
   author:
     - "Sutton, Richard S."
     - "Barto, Andrew G."
   publisher: MIT Press
+  isbn: 978-0262039246
   url: http://incompleteideas.net/book/the-book-2nd.html
 
 val_pred_net:
   type: misc
   title: Value Prediction Network
-  date: 2017
+  date: 2017-11-06
   author:
     - "Oh, Junhyuk"
     - "Singh, Satinder"
     - "Lee, Honglak"
+  parent: *arxiv
+  doi: 10.48550/arXiv.1707.03497

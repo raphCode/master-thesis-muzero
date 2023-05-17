@@ -19,13 +19,16 @@ key_order = [
     "issue",
     "volume",
     "edition",
+    "value",
     "date",
     "author",
     "publisher",
+    "isbn",
     "parent",
     "page-range",
     "url",
     "doi",
+    "note",
 ]
 
 
