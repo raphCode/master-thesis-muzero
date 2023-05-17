@@ -26,6 +26,7 @@ alphago_zero:
     - "Hassabis, Demis"
   date: 2017
   title: Mastering the game of Go without human knowledge
+
 alphazero:
   type: misc
   date: 2017
@@ -44,6 +45,7 @@ alphazero:
     - "Lillicrap, Timothy"
     - "Simonyan, Karen"
     - "Hassabis, Demis"
+
 muzero:
   type: article
   author:
@@ -67,6 +69,7 @@ muzero:
       issue: 7839
       volume: 588
   date: 2020
+
 multiplayer_alphazero:
   type: misc
   title: Multiplayer AlphaZero
@@ -74,12 +77,14 @@ multiplayer_alphazero:
     - "Petosa, Nick"
     - "Balch, Tucker"
   date: 2019
+
 muzero_intuiton:
   type: misc
   author: "Schrittwieser, Julian"
   title: MuZero Intuition
   date: 2020
   url: "https://www.furidamu.org/blog/2020/12/22/muzero-intuition/"
+
 efficientzero:
   type: misc
   author:
@@ -90,12 +95,14 @@ efficientzero:
     - "Gao, Yang"
   date: 2021
   title: Mastering Atari Games with Limited Data
+
 alphazero_issues:
   type: misc
   url: "https://dselsam.github.io/posts/2018-06-06-issues-with-alpha-zero.html"
   date: 2018
   author: "Selsam, Daniel"
   title: Issues with Alphazero
+
 ray:
   type: misc
   date: 2018
@@ -112,12 +119,14 @@ ray:
     - "Jordan, Michael I."
     - "Stoica, Ion"
   title: "Ray: A Distributed Framework for Emerging AI Applications"
+
 hydra:
   type: misc
   date: 2019
   author: "Yadan, Omry"
   title: Hydra - A framework for elegantly configuring complex applications
   url: "https://github.com/facebookresearch/hydra"
+
 mcts_survey:
   type: article
   date: 2012
@@ -137,6 +146,7 @@ mcts_survey:
     - "Samothrakis, Spyridon"
     - "Colton, Simon"
   doi: 10.1109/TCIAIG.2012.2186810
+
 mcts_po:
   type: misc
   author:
@@ -149,6 +159,7 @@ mcts_po:
     - "Munos, Rémi"
   title: Monte-Carlo Tree Search as Regularized Policy Optimization
   date: 2020
+
 rl_book:
   type: book
   edition: Second
@@ -159,6 +170,7 @@ rl_book:
     - "Barto, Andrew G."
   date: 2018
   title: "Reinforcement Learning: An Introduction"
+
 val_pred_net:
   type: misc
   author:
