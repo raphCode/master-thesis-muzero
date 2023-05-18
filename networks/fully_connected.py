@@ -18,8 +18,9 @@ class FcBase(nn.Module):
         output_width: int,
         hidden_depth: int = 2,
         width: Optional[int] = None,
+        **kwargs: Any,
     ):
-        super().__init__()
+        super().__init__(**kwargs)
         if width is None:
             width = input_width
         widths = [input_width] + [width] * hidden_depth + [output_width]
