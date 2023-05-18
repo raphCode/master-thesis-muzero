@@ -16,6 +16,7 @@ class FcBase(nn.Module):
         self,
         input_width: int,
         output_width: int,
+        *,
         hidden_depth: int = 2,
         width: Optional[int] = None,
         **kwargs: Any,
