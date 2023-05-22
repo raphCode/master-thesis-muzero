@@ -3,3 +3,5 @@
 #show: doc => thesis(
   doc,
 )
+
+#include "approach.typ"
