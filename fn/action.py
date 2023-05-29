@@ -1,4 +1,6 @@
-from typing import TypeAlias
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, TypeAlias
 from collections.abc import Callable
 
 import numpy as np
@@ -6,7 +8,8 @@ import numpy as np
 from mcts import Node
 from config.impl import assert_callable
 
-from .policy import PolicyFn
+if TYPE_CHECKING:
+    from .policy import PolicyFn
 
 rng = np.random.default_rng()
 

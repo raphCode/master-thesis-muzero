@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import warnings
-from typing import Any, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 from operator import itemgetter
 from collections.abc import Callable, Iterable, Iterator
 
 import numpy as np
 
-from mcts import Node
 from util import NaNWarning, ndarr_f64
+
+if TYPE_CHECKING:
+    from mcts import Node
 
 
 def softmax(values: Iterable[float], temp: float = 1.0) -> ndarr_f64:

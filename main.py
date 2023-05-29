@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 import hydra
 import torch
-from omegaconf import DictConfig
 from hydra.core.config_store import ConfigStore
 
 from train import Trainer
@@ -18,6 +20,9 @@ from config.schema import BaseConfig
 from replay_buffer import ReplayBuffer
 from player_controller import SinglePC
 from tensorboard_wrapper import TensorboardLogger
+
+if TYPE_CHECKING:
+    from omegaconf import DictConfig
 
 cs = ConfigStore.instance()
 cs.store(name="hydra_job_config", group="hydra.job", node={"chdir": True})

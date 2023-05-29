@@ -16,4 +16,8 @@ pretty = true
 [tool.flake8]
 max-line-length = 90
 show-source = true
-extend-ignore = ["E203", "E741"]
+extend-ignore = ["E203", "E741", "TC003", "TC006"]
+extend-select = ["TC1"]
+per-file-ignores = [
+    "config/schema.py:TC004",
+]

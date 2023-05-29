@@ -8,8 +8,6 @@ import attrs
 from attrs import define, frozen
 from omegaconf import MISSING
 
-from networks.bases import Networks
-
 """
 This file creates the config schema, specifying how config items are nested as well as
 their names and types.
@@ -17,6 +15,9 @@ The dataclasses are also repurposed to function as containers for the global con
 commonly imported as C, so that static typecheckers can reason about C.
 This also means a bit of hackery by switching types based on TYPE_CHECKING.
 """
+
+if TYPE_CHECKING:
+    from networks.bases import Networks
 
 if not TYPE_CHECKING:
     # with the schema merged first, omegaconf needs the structured config to be writeable:
@@ -177,7 +178,7 @@ class BaseConfig:
     ]
 
     @classmethod
-    def placeholder(cls) -> "BaseConfig":
+    def placeholder(cls) -> BaseConfig:
         return cls(
             game=None,  # type:ignore [arg-type]
             mcts=None,  # type:ignore [arg-type]
@@ -187,6 +188,6 @@ class BaseConfig:
             defaults=None,
         )
 
-    def fill_from(self, instance: "BaseConfig") -> None:
+    def fill_from(self, instance: BaseConfig) -> None:
         for field_name in attrs.fields_dict(type(self)):
             object.__setattr__(self, field_name, getattr(instance, field_name))

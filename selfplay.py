@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 from collections.abc import Iterable, Sequence
 
 import numpy as np
@@ -7,9 +10,11 @@ from attrs import frozen
 from config import C
 from rl_player import RLBase
 from trajectory import TrajectoryState
-from games.bases import Player
 from player_controller import PCBase, SinglePC
-from tensorboard_wrapper import TBStepLogger
+
+if TYPE_CHECKING:
+    from games.bases import Player
+    from tensorboard_wrapper import TBStepLogger
 
 rng = np.random.default_rng()
 

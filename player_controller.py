@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import functools
 from abc import ABC, abstractmethod
-from typing import TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 from collections.abc import Sequence
 
 from config import C
 from rl_player import RLBase
 from games.bases import Player, MatchData
-from networks.bases import Networks
+
+if TYPE_CHECKING:
+    from networks.bases import Networks
 
 PlayerPartial: TypeAlias = functools.partial[Player] | functools.partial[RLBase]
 

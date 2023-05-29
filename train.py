@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import logging
 import operator
 import functools
 import itertools
-from typing import Callable, Optional, cast
+from typing import TYPE_CHECKING, Callable, Optional, cast
 
 import attrs
 import torch
@@ -10,10 +12,13 @@ from attrs import Factory, define
 from torch import Tensor, nn
 
 from config import C
-from trajectory import TrainingData
-from config.schema import LossWeights
-from networks.bases import Networks
-from tensorboard_wrapper import TBStepLogger
+
+if TYPE_CHECKING:
+    from trajectory import TrainingData
+    from config.schema import LossWeights
+    from networks.bases import Networks
+    from tensorboard_wrapper import TBStepLogger
+
 
 zero_tensor = Factory(functools.partial(torch.zeros, 1))
 

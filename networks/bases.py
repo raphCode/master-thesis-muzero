@@ -2,14 +2,16 @@ from __future__ import annotations
 
 import functools
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 import torch
 import torch.nn as nn
 from attrs import define
-from torch import Tensor
 
 from util import optional_map, copy_type_signature
+
+if TYPE_CHECKING:
+    from torch import Tensor
 
 
 def single_inference(

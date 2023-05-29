@@ -1,15 +1,20 @@
-from abc import ABC, abstractmethod
-from typing import Unpack, Optional, TypeAlias, TypedDict
+from __future__ import annotations
 
-import torch
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Unpack, Optional, TypeAlias, TypedDict
+
 from attrs import frozen
 
 from mcts import Node, StateNode, ensure_visit_count
-from util import ndarr_f64
 from config import C
 from trajectory import Latent, Observation
-from config.schema import MctsConfig
 from networks.bases import Networks
+
+if TYPE_CHECKING:
+    import torch
+
+    from util import ndarr_f64
+    from config.schema import MctsConfig
 
 
 @frozen(kw_only=True)

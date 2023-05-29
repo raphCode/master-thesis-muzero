@@ -8,15 +8,15 @@ from collections.abc import Iterable, MutableMapping
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch import Tensor
 
-from util import ndarr_f32, ndarr_f64
 from config import C
-from networks.bases import Networks
 
 if TYPE_CHECKING:
-    # only needed for type annotations, can't import uncondionally due to import cycles
+    from torch import Tensor
+
+    from util import ndarr_f32, ndarr_f64
     from fn.selection import SelectionFn
+    from networks.bases import Networks
 
 log = logging.getLogger(__name__)
 
