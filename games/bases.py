@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from abc import ABC, abstractmethod
-from typing import Optional, TypedDict
+from typing import TYPE_CHECKING, Optional, TypedDict
 from functools import lru_cache, cached_property
 from collections import defaultdict
 from collections.abc import Sequence, Collection
@@ -10,7 +10,8 @@ from collections.abc import Sequence, Collection
 import torch
 from attrs import frozen
 
-from util import ndarr_f64
+if TYPE_CHECKING:
+    from util import ndarr_f64
 
 
 class Teams:

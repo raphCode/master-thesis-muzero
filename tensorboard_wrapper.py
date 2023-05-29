@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Type, Literal, Optional
+from typing import TYPE_CHECKING, Type, Literal, Optional
 from contextlib import AbstractContextManager
 
-import torch
 from torch.utils.tensorboard import SummaryWriter  # type: ignore [attr-defined]
+
+if TYPE_CHECKING:
+    import torch
 
 
 class TensorboardLogger(AbstractContextManager["TensorboardLogger"]):
