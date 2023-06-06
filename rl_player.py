@@ -24,7 +24,7 @@ class TrainingInfo:
     """
 
     representation: Observation | Latent
-    belief: Optional[torch.Tensor]
+    belief: torch.Tensor
     target_policy: ndarr_f64
     mcts_value: float
 
@@ -149,4 +149,4 @@ class NoBeliefsRLPlayer(PerfectInformationRLPlayer):
 
     def __init__(self, *args: Unpack[RLBaseInitArgs], **kwargs: Unpack[RLBaseInitKwArgs]):
         super().__init__(*args, **kwargs)
-        assert C.networks.belief_shape is None
+        assert 0 in C.networks.belief_shape

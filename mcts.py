@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, cast
 from collections.abc import Iterable, MutableMapping
 
 import numpy as np
@@ -34,7 +34,7 @@ class Node(ABC):
     """
 
     latent: Tensor
-    belief: Optional[Tensor]
+    belief: Tensor
 
     value_sum: float
     visit_count: int
@@ -48,7 +48,7 @@ class Node(ABC):
         self,
         /,
         latent: Tensor,
-        belief: Optional[Tensor],
+        belief: Tensor,
         reward: float,
         value_pred: float,
         probs: Iterable[float],
@@ -96,7 +96,7 @@ class StateNode(Node):
     def __init__(
         self,
         latent: Tensor,
-        belief: Optional[Tensor],
+        belief: Tensor,
         reward: float,
         nets: Networks,
     ):
@@ -152,7 +152,7 @@ class TerminalNode(Node):
     RLPlayers.
     """
 
-    def __init__(self, latent: Tensor, belief: Optional[Tensor], reward: float):
+    def __init__(self, latent: Tensor, belief: Tensor, reward: float):
         super().__init__(
             latent=latent,
             belief=belief,

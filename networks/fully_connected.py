@@ -6,7 +6,6 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
-from util import optional_map
 from config import C
 from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
 
@@ -29,8 +28,8 @@ class FcBase(nn.Module):
         for n, layer in enumerate(self.fc_layers):
             self.add_module(f"fc{n}", layer)
 
-    def fc_forward(self, *inputs: Optional[Tensor]) -> Tensor:
-        x = torch.cat([i.flatten(1) for i in inputs if i is not None], dim=1)
+    def fc_forward(self, *inputs: Tensor) -> Tensor:
+        x = torch.cat([i.flatten(1) for i in inputs], dim=1)
         for fc in self.fc_layers:
             skip = x
             y = fc(x)  # type: Tensor
@@ -58,7 +57,7 @@ class FcRepresentation(FcBase, RepresentationNet):
 class FcPrediction(FcBase, PredictionNet):
     def __init__(self, **kwargs: Any):
         input_sizes = (
-            optional_map(math.prod)(C.networks.belief_shape) or 0,
+            math.prod(C.networks.belief_shape),
             math.prod(C.networks.latent_shape),
         )
         self.output_sizes = [
@@ -87,15 +86,14 @@ class FcPrediction(FcBase, PredictionNet):
 
 class FcDynamics(FcBase, DynamicsNet):
     def __init__(self, **kwargs: Any):
-        belief_size = optional_map(math.prod)(C.networks.belief_shape) or 0
         input_sizes = (
             math.prod(C.networks.latent_shape),
-            belief_size,
+            math.prod(C.networks.belief_shape),
             C.game.instance.max_num_actions,
         )
         self.output_sizes = [
             math.prod(C.networks.latent_shape),
-            belief_size,
+            math.prod(C.networks.belief_shape),
             1,
             1,
         ]
@@ -108,17 +106,17 @@ class FcDynamics(FcBase, DynamicsNet):
     def forward(
         self,
         latent: Tensor,
-        belief: Optional[Tensor],
+        belief: Tensor,
         action_onehot: Tensor,
         logits: bool = False,
-    ) -> tuple[Tensor, Optional[Tensor], Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         result = self.fc_forward(latent, belief, action_onehot)
         latent, belief, reward, is_terminal = torch.split(
             result, self.output_sizes, dim=1
         )
         return (
             latent,
-            belief if belief.numel() > 0 else None,
+            belief,
             reward,
             is_terminal if logits else F.sigmoid(is_terminal),
         )

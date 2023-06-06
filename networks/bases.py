@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import functools
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import torch
 import torch.nn as nn
 from attrs import define
 
-from util import optional_map, copy_type_signature
+from util import copy_type_signature
 
 if TYPE_CHECKING:
     from torch import Tensor
@@ -19,16 +19,16 @@ def single_inference(
     inputs: tuple[Tensor, ...],
     /,
     **kwargs: Any,
-) -> Tensor | tuple[Optional[Tensor], ...]:
+) -> Tensor | tuple[Tensor, ...]:
     """
     Adds/removes batch dimension on network in/outputs.
     """
-    unsqueeze = optional_map(functools.partial(torch.unsqueeze, dim=0))
+    unsqueeze = functools.partial(torch.unsqueeze, dim=0)
     squeeze = functools.partial(torch.squeeze, dim=0)
 
     result = net(*map(unsqueeze, inputs), **kwargs)  # type: ignore [arg-type]
     if isinstance(result, tuple):
-        return tuple(map(optional_map(squeeze), result))
+        return tuple(map(squeeze, result))
     return squeeze(result)
 
 
@@ -56,7 +56,7 @@ class PredictionNet(ABC, nn.Module):
     def forward(
         self,
         latent: Tensor,
-        belief: Optional[Tensor],
+        belief: Tensor,
         logits: bool = False,
     ) -> tuple[Tensor, Tensor, Tensor]:
         pass
@@ -76,10 +76,10 @@ class DynamicsNet(ABC, nn.Module):
     def forward(
         self,
         latent: Tensor,
-        belief: Optional[Tensor],
+        belief: Tensor,
         action_onehot: Tensor,
         logits: bool = False,
-    ) -> tuple[Tensor, Optional[Tensor], Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         pass
 
     @copy_type_signature(forward)
@@ -97,4 +97,4 @@ class Networks:
     prediction: PredictionNet
     dynamics: DynamicsNet
     initial_latent: Tensor
-    initial_belief: Optional[Tensor]
+    initial_belief: Tensor
