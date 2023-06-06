@@ -9,7 +9,7 @@ import torch
 from attrs import frozen
 from torch import Tensor
 
-from util import TensorCache, ndarr_f64, optional_map
+from util import TensorCache, ndarr_f64
 from config import C
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ class TrajectoryState:
     """
 
     representation: Observation | Latent
-    belief: Optional[Tensor]
+    belief: Tensor
     current_player: int
     action: int
     target_policy: ndarr_f64
@@ -105,7 +105,7 @@ class TrainingData:
     is_data: Tensor
 
     observations: tuple[Tensor, ...]
-    belief: Optional[Tensor]
+    belief: Tensor
     latent: Tensor
     current_player: Tensor
     action_onehot: Tensor
@@ -130,7 +130,7 @@ class TrainingData:
             is_initial=cache.tensor(False),
             is_data=cache.tensor(False),
             observations=tuple(map(torch.zeros, C.game.instance.observation_shapes)),
-            belief=optional_map(cache.zeros)(C.networks.belief_shape),
+            belief=cache.zeros(C.networks.belief_shape),
             latent=cache.zeros(C.networks.latent_shape),
             current_player=cache.tensor(0, dtype=torch.long),  # index tensor needs long
             action_onehot=cache.zeros(C.game.instance.max_num_actions, dtype=torch.long),
@@ -191,8 +191,6 @@ class TrainingData:
         for name, data in zip(field_names, field_data):
             if name == "observations":
                 stacked_data = tuple(map(torch.stack, zip(*data)))
-            elif name == "belief" and C.networks.belief_shape is None:
-                stacked_data = None
             elif name.startswith("is_") or name == "current_player":
                 # only stack these single items in the batch dimension to get a 1D tensor
                 # - is_*: boolean masks, processed specially in the training

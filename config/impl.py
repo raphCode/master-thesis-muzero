@@ -15,7 +15,6 @@ import gorilla  # type: ignore [import]
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
-from util import optional_map
 from games.bases import Game, Player
 from config.schema import BaseConfig, NetworkConfig, NetworkSchema
 from networks.bases import Networks, DynamicsNet, PredictionNet, RepresentationNet
@@ -129,25 +128,23 @@ def populate_config(cfg: DictConfig) -> None:
     assert_callable(cfg.mcts.node_selection_score_fn)
 
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
-        # empty list [] in config creates None values for belief
-        belief_shape = cast(
-            Optional[tuple[int, ...]],
-            optional_map(tuple)(net_cfg.belief_shape or None),  # type: ignore [arg-type]
-        )
         initial_tensor = functools.partial(torch.rand, requires_grad=True)
+
+        latent_shape = tuple(net_cfg.latent_shape)
+        belief_shape = tuple(net_cfg.belief_shape)
 
         def network_factory() -> Networks:
             return Networks(
                 representation=net_cfg.representation(),
                 prediction=net_cfg.prediction(),
                 dynamics=net_cfg.dynamics(),
-                initial_latent=initial_tensor(net_cfg.latent_shape),
-                initial_belief=optional_map(initial_tensor)(belief_shape),
+                initial_latent=initial_tensor(latent_shape),
+                initial_belief=initial_tensor(belief_shape),
             )
 
         return NetworkConfig(
             factory=network_factory,
-            latent_shape=tuple(net_cfg.latent_shape),
+            latent_shape=latent_shape,
             belief_shape=belief_shape,
         )
 
