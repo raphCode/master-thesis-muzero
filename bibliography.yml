@@ -237,7 +237,7 @@ rl_book:
   url: http://incompleteideas.net/book/the-book-2nd.html
 
 val_pred_net:
-  type: misc
+  type: article
   title: Value Prediction Network
   date: 2017-11-06
   author:
