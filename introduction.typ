@@ -71,7 +71,7 @@ hidden.
 While the above discussion refers to games, the muzero algo has also been successfully
 applied to practical problems.
 One example is adjusting codec parameters during video compression, where it outperformed
-previous approaches.
+previous approaches. @vp9_muzero
 Likewise, the aforementioned restrictions of compatible games also translate into
 limitations of real-world applications.
 The original muzero algo is thus unsuitable for environments with multiple agents,

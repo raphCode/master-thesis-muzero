@@ -246,3 +246,30 @@ val_pred_net:
     - "Lee, Honglak"
   parent: *arxiv
   doi: 10.48550/arXiv.1707.03497
+ 
+vp9_muzero:
+  type: article
+  title: MuZero with Self-competition for Rate Control in VP9 Video Compression
+  date: 2022-02-14
+  author:
+    - "Mandhane, Amol"
+    - "Zhernov, Anton"
+    - "Rauh, Maribeth"
+    - "Gu, Chenjie"
+    - "Wang, Miaosen"
+    - "Xue, Flora"
+    - "Shang, Wendy"
+    - "Pang, Derek"
+    - "Claus, Rene"
+    - "Chiang, Ching-Han"
+    - "Chen, Cheng"
+    - "Han, Jingning"
+    - "Chen, Angie"
+    - "Mankowitz, Daniel J."
+    - "Broshear, Jackson"
+    - "Schrittwieser, Julian"
+    - "Hubert, Thomas"
+    - "Vinyals, Oriol"
+    - "Mann, Timothy"
+  parent: *arxiv
+  doi: 10.48550/arXiv.2202.06626
