@@ -15,3 +15,9 @@
   show: abbrev("mp", "multiplayer")
   body
 }
+
+#let game(body) = {
+  show: abbrev("0sum", "zero-sum")
+  body
+}
+
