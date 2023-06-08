@@ -8,3 +8,5 @@
 
 #include "introduction.typ"
 #include "approach.typ"
+
+#bibliography("bibliography.yml")
