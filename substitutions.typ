@@ -8,3 +8,10 @@
   show: abbrev("rl", "reinforcement learning")
   body
 }
+
+#let player(body) = {
+  show: abbrev("sp", "single player")
+  show: abbrev("2p", "two player")
+  show: abbrev("mp", "multiplayer")
+  body
+}
