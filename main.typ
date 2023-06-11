@@ -7,6 +7,7 @@
 #show: substitutions.general
 
 #include "introduction.typ"
+#include "related_work.typ"
 #include "approach.typ"
 
 #bibliography("bibliography.yml")
