@@ -11,6 +11,7 @@
 #include "approach.typ"
 #include "evaluation.typ"
 #include "results.typ"
+#include "discussion.typ"
 #include "conclusion.typ"
 
 #bibliography("bibliography.yml")
