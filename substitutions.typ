@@ -21,7 +21,20 @@
 
 #let general(body) = {
   show "muzero": [MuZero]
+  show "azero": [AlphaZero]
+  show "effzero": [EfficientZero]
+
   show: abbrev("rl", "reinforcement learning")
+  show: abbrev("mcts", "monte carlo tree search")
+  show: abbrev_plural("impl", "implementation")
+  show: abbrev_plural("algo", "algorithm")
+  show: abbrev_plural("pred", "prediction")
+  show: abbrev_plural("latrep", "latent representation")
+
+  show: abbrev_plural("net", "network")
+  show: abbrev("rnet", "representation net")
+  show: abbrev("pnet", "prediction net")
+  show: abbrev("dnet", "dynamics net")
   body
 }
 
