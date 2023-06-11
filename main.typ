@@ -9,6 +9,7 @@
 #include "introduction.typ"
 #include "related_work.typ"
 #include "approach.typ"
+#include "evaluation.typ"
 #include "results.typ"
 #include "conclusion.typ"
 
