@@ -47,6 +47,6 @@
 
 #let game(body) = {
   show: abbrev("0sum", "zero-sum")
+  show: abbrev_plural("traj", "trajectory")
   body
 }
-
