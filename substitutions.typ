@@ -50,3 +50,18 @@
   show: abbrev_plural("traj", "trajectory")
   body
 }
+
+#let rl(body) = {
+  show: abbrev_plural("obs", "observation")
+  show: abbrev_plural("rew", "reward")
+  show: abbrev_plural("val", "value")
+  show: abbrev("vtar", "value target")
+  show: abbrev("df", "discount factor")
+  show: abbrev("ns", "n-step")
+  show: abbrev("nsh", "n-step horizon")
+  show: abbrev("pol", "policy")
+  show: abbrev("offpol", "off-policy")
+  show: abbrev("sampeff", "sample efficiency")
+  body
+}
+
