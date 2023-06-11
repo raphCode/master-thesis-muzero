@@ -10,5 +10,6 @@
 #include "related_work.typ"
 #include "approach.typ"
 #include "results.typ"
+#include "conclusion.typ"
 
 #bibliography("bibliography.yml")
