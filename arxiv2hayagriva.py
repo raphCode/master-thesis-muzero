@@ -7,8 +7,13 @@ from functools import partial
 import arxiv  # type: ignore [import]
 
 """
+Usage:
+./arxiv2hayagriva.py [arxiv ids, urls or pdf filenames] >> bibliography.yml
+
+Hayagriva entries are written to stdout and are appended to the bibliography.
+
 Entries created by this script reference an yaml anchor for the 'parent' field.
-Insert the anchor like this, either on an existing or as a standalone entry:
+Insert the anchor like this, either on an existing entry or as a standalone one:
 
 arxiv: &arxiv
   type: repository
