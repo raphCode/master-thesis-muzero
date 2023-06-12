@@ -3,6 +3,7 @@ import re
 import sys
 import textwrap
 from functools import partial
+from contextlib import suppress
 
 import arxiv  # type: ignore [import]
 
@@ -20,11 +21,28 @@ arxiv: &arxiv
   title: arXiv
 """
 
+eprint = partial(print, file=sys.stderr)
+
 arxiv_id_regex = re.compile(r"(\d{4}\.\d{5})(v\d+)?")
 
 
 def id_from_result(result: arxiv.Result) -> str:
     return arxiv_id_regex.search(result.entry_id)[1]
+
+
+def bibkey_arxiv_id(result: arxiv.Result) -> str:
+    return "arxiv" + id_from_result(result)
+
+
+def ask_bibkey(result: arxiv.Result) -> str:
+    eprint(f"Enter bibliography key for '{result.title}': ", end="")
+    bibkey = ""
+    with suppress(EOFError):
+        bibkey = input()
+    return bibkey or bibkey_arxiv_id(result)
+
+
+get_bibkey = ask_bibkey
 
 
 def hayagriva_from_result(result: arxiv.Result) -> str:
@@ -44,14 +62,13 @@ def hayagriva_from_result(result: arxiv.Result) -> str:
         if result.doi
         else "10.48550/arXiv." + id_from_result(result),
     )
-    lines = [f"arxiv{id_from_result(result)}:"]
+    lines = [get_bibkey(result) + ":"]
     for k, v in data.items():
         lines.append(textwrap.indent(k + ":" + " " * (not v.startswith("n")) + v, "  "))
     return "\n".join(lines)
 
 
 if __name__ == "__main__":
-    eprint = partial(print, file=sys.stderr)
     args = sys.argv[1:]
     if len(args) == 0:
         eprint(
