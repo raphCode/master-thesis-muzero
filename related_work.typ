@@ -54,9 +54,10 @@ This provides a richer training signal since the latrep is usually a very
 wide tensor.~@effzero
 
 Compare this to the default muzero impl:
-Gradients for the dnet come come only from the pnet via backpropagation.
-This means that the training of two whole neural networks is driven by only two scalar
-losses (rew and val).
+The dnet receives training information only from the single scalar loss rew and any
+gradients that flow through the pnet from the val and pol losses.
+In fact, the training of all neural nets is driven only by two scalar losses and the
+low-dimensional pol loss.
 Additionally, it is not even guaranteed that the dnet and the rnet agree on the same
 representation for identical game states.
 
