@@ -51,7 +51,7 @@ Compared to traditional approaches, it might come as a surprise that providing t
 with less information actually leads to better performance.
 
 The performance and generality of muzero is already impressive.
-However, the original implementation is limited in a number of ways.
+However, the original impl is limited in a number of ways.
 First, it was designed for one- or two-player games only.
 In the case of 2p games, an additional requirement is that the game is 0sum, meaning
 that one player's loss is the other's gain.
