@@ -19,7 +19,7 @@
   }
 }
 
-#let general(body) = {
+#let subs(body) = {
   show "muzero": [MuZero]
   show "azero": [AlphaZero]
   show "effzero": [EfficientZero]
@@ -35,23 +35,14 @@
   show: abbrev("rnet", "representation net")
   show: abbrev("pnet", "prediction net")
   show: abbrev("dnet", "dynamics net")
-  body
-}
 
-#let player(body) = {
   show: abbrev("sp", "single player")
   show: abbrev("2p", "two player")
   show: abbrev("mp", "multiplayer")
-  body
-}
 
-#let game(body) = {
   show: abbrev("0sum", "zero-sum")
   show: abbrev_plural("traj", "trajectory")
-  body
-}
 
-#let rl(body) = {
   show: abbrev_plural("obs", "observation")
   show: abbrev_plural("rew", "reward")
   show: abbrev_plural("val", "value")

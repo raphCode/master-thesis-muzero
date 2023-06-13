@@ -4,7 +4,7 @@
 #show: doc => thesis(
   doc,
 )
-#show: substitutions.general
+#show: substitutions.subs
 
 #include "introduction.typ"
 #include "theory.typ"

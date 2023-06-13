@@ -8,11 +8,6 @@ paper selbst lesen muss um die Ideen darin zu verstehen.
 */
 
 #import "commands.typ": citet
-#import "substitutions.typ"
-
-#show: substitutions.player
-#show: substitutions.game
-#show: substitutions.rl
 
 muzero and its precursors already inspired several other works, some of which are
 summarized here.

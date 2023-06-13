@@ -9,11 +9,6 @@ was du gemacht hast und was rausgekommen ist (ohne details natürlich).
 Laut Prof. André eines der wichtigesten Kapitel.
 */
 
-#import "substitutions.typ"
-
-#show: substitutions.player
-#show: substitutions.game
-
 In the last years, muzero has been cited as a remarkable breakthrough in the field of rl,
 being the first algo that beats human experts in the game of Go.
 A computer mastering a particular game may not look like much, after all computers got
