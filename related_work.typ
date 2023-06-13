@@ -77,8 +77,10 @@ representation for identical game states.
 
   However, they employ a stop-gradient operation in the path of #St1, meaning that
   gradients from the similarity loss are not applied to the rnet pred #St1.
-  The authors justify this decision by treating #St1 as the more accurate representation
-  and therefore using it as a target for the dnet.~@effzero
+  This is due to the fact that they closely modeled their architecture after
+  simsiam~@simsiam, a self-supervised framework that learns latreps for images.
+  The authors further justify this decision by treating #St1 as the more accurate
+  representation and therefore using it as a target for the dnet.~@effzero
   In this thesis, I draw inspiration from this idea, but remove the asymmetry in training
   caused by the stop-gradient operation.
   This increases the sampeff even more.

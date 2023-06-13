@@ -23,6 +23,7 @@
   show "muzero": [MuZero]
   show "azero": [AlphaZero]
   show "effzero": [EfficientZero]
+  show "simsiam": [SimSiam]
 
   show: abbrev("rl", "reinforcement learning")
   show: abbrev("mcts", "monte carlo tree search")
