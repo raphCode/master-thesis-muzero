@@ -273,3 +273,39 @@ vp9_muzero:
     - "Mann, Timothy"
   parent: *arxiv
   doi: 10.48550/arXiv.2202.06626
+
+ss_decorr:
+  type: article
+  title: On Feature Decorrelation in Self-Supervised Learning
+  date: 2021-05-02
+  author: 
+    - Tianyu Hua
+    - Wenxiao Wang
+    - Zihui Xue
+    - Sucheng Ren
+    - Yue Wang
+    - Hang Zhao
+  parent: *arxiv
+  doi: 10.48550/arXiv.2105.00470
+
+simsiam:
+  type: article
+  title: Exploring Simple Siamese Representation Learning
+  date: 2020-11-20
+  author: 
+    - Xinlei Chen
+    - Kaiming He
+  parent: *arxiv
+  doi: 10.48550/arXiv.2011.10566
+
+simclr:
+  type: article
+  title: A Simple Framework for Contrastive Learning of Visual Representations
+  date: 2020-02-13
+  author: 
+    - Ting Chen
+    - Simon Kornblith
+    - Mohammad Norouzi
+    - Geoffrey Hinton
+  parent: *arxiv
+  doi: 10.48550/arXiv.2002.05709
