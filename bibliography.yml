@@ -224,7 +224,7 @@ mcts_po:
   parent: *arxiv
   doi: 10.48550/arXiv.2007.12509
 
-rl_book:
+sutton:
   type: book
   title: "Reinforcement Learning: An Introduction"
   edition: Second
