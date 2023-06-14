@@ -7,7 +7,7 @@ Nach Prof. André ist ein related work perfekt, wenn der Leser keines der refere
 paper selbst lesen muss um die Ideen darin zu verstehen.
 */
 
-#import "commands.typ": citet
+#import "thesis.typ": citet
 
 muzero and its precursors already inspired several other works, some of which are
 summarized here.

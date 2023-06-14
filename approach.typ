@@ -5,7 +5,7 @@ Hier beschreibst du, was du in der Arbeit neues gemacht hast, und wie du es impl
 hast.
 */
 
-#import "commands.typ": citet
+#import "thesis.typ": citet, blockquote
 
 - MuZero implementation
   - mcts behavior customizeable
