@@ -63,7 +63,7 @@ low-dimensional pol loss.
 Additionally, it is not even guaranteed that the dnet and the rnet agree on the same
 representation for identical game states.
 
-#let sscl = [_Self-Supervised Consistency Loss_]
+#let sscl = [Self-Supervised Consistency Loss]
 
 #[
   #let St = $S_t$
@@ -76,7 +76,8 @@ representation for identical game states.
   From #St and the corresponding action $a_t$ the dnet predicts the latrep #Sht1.~@muzero
   Since both #St1 and #Sht1 are supposed to represent the same state of the game, it makes
   sense to introduce a loss that aligns these latreps.
-  This is the idea behind effzero's similarity loss, which #citet("effzero") call #sscl.
+  This is the idea behind effzero's similarity loss, which #citet("effzero") call
+  #emph(sscl)
 
   However, they employ a stop-gradient operation in the path of #St1, meaning that
   gradients from the similarity loss are not applied to the rnet pred #St1.
