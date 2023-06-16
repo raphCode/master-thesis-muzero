@@ -75,7 +75,7 @@ of a stop-gradient operation unnecessary.
 In azero, the mcts uses a perfect simulator to determine the next game state for
 hypothetical actions.
 Naturally, this simulator also indicates when the game is over and there are no further
-moves to search for.~@alphazero
+moves to search for.~@azero
 These tss are an important concept in RL, since their value is by definition zero: no
 future rews can occur.~@sutton[p.~6]
 Additionally, in games, the rew is often sparse, meaning that a non-zero rew occurs only

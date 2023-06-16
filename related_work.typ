@@ -15,7 +15,7 @@ summarized here.
 == Mp azero  // {{{
 
 muzero was originally implemented for sp games, as well as for 2p 0sum games.
-While no mp version for muzero itself exists, #citet("multiplayer_alphazero")
+While no mp version for muzero itself exists, #citet("mp_azero")
 extended the predecessor algo azero to mp capabilities.
 
 Importantly, they relax the assumption of the game being 0sum:
@@ -23,14 +23,14 @@ A 0sum game involves two players where one player's gain comes with an equivalen
 the other player.
 The azero (and in turn muzero) algo make use of this fact by directly predicting how good
 the current position is for the current player by a scalar val output of the pnet
-#cite("alphazero", "muzero").
+#cite("azero", "muzero").
 The mp extension predicts a val vector instead, which provides an estimate of the expected
 individual utilities for all players at the same time.
 
 Likewise, they also extend the game to return scores for each player at the end instead of
 a single outcome.
 Naturally, the algo rotates over the list of all players instead of alternating between
-two players.~@alphazero
+two players.~@azero
 They evaluate their work on mp versions of Connect 4 and Tic-Tac-Toe:
 The nets learn to encode knowledge of the game into search, indicating that the proposed
 mp strategy works in principle.

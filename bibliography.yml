@@ -63,7 +63,7 @@ alphago_zero:
   page-range: 354-359
   doi: 10.1038/nature24270
 
-alphazero:
+azero:
   type: article
   title: "A general reinforcement learning algorithm that masters chess, shogi, and Go through self-play"
   date: 2018-12-07
@@ -112,7 +112,7 @@ muzero:
   page-range: 604-609
   doi: 10.1038/s41586-020-03051-4
 
-multiplayer_alphazero:
+mp_azero:
   type: article
   title: Multiplayer AlphaZero
   date: 2019-12-09
@@ -148,7 +148,7 @@ effzero:
   parent: *arxiv
   doi: 10.48550/arXiv.2111.00210
 
-alphazero_issues:
+azero_issues:
   type: article
   title: Issues with Alphazero
   date: 2018-06-06
