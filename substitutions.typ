@@ -1,6 +1,33 @@
-#let abbrev(abb, text) = body => {
-  show regex("\b" + abb + "\b"): text
+#let capitalize(text, first_only: false) = {
+  let args = { if first_only { (count: 1) } else { (:) } }
+  text.replace(regex("\b[[:alpha:]]"), match => { upper(match.text) }, ..args)
+}
+
+#let capitalize_substitution(abb, text) = {
+  if abb == upper(abb) and abb.codepoints().len() > 1 {
+    capitalize(text, first_only: false)
+  } else if abb.match(regex("^[[:upper:]]")) != none {
+    capitalize(text, first_only: true)
+  } else {
+    text
+  }
+}
+
+#let showrule_regex_captures(pattern, callback) = body => {
+  // apply a show rule to the regex,
+  // match it again to get capture groups and call the callback with them
+  let r = regex(pattern)
+  show r: it => { callback(..it.text.match(r).captures) }
   body
+}
+
+#let abbrev(abb, text) = {
+  showrule_regex_captures(
+    "\b((?i)" + abb + ")\b",
+    matched_abb => {
+      capitalize_substitution(matched_abb, text)
+    }
+  )
 }
 
 #let abbrev_plural(abb, text) = {
@@ -11,12 +38,13 @@
       text + "s"
     }
   }
-  body => {
-    show regex("\b" + abb + "s?\b"): match => {
-      if match.text.trim(abb, at: start) == "s" { plural_form } else { text }
+  showrule_regex_captures(
+    "\b((?i)" + abb + ")(s?)\b",
+    (matched_abb, plural_s) => {
+      let sub = if plural_s != "" { plural_form } else { text }
+      capitalize_substitution(matched_abb, sub)
     }
-    body
-  }
+  )
 }
 
 #let subs(body) = {
