@@ -68,12 +68,13 @@
   show: abbrev("dnet", "dynamics net")
 
   show: abbrev("sp", "single player")
-  show: abbrev("2p", "two player")
+  show: abbrev("2p", "two-player")
   show: abbrev("mp", "multiplayer")
 
   show: abbrev("0sum", "zero-sum")
   show: abbrev_plural("traj", "trajectory")
 
+  show: abbrev_plural("env", "environment")
   show: abbrev_plural("obs", "observation")
   show: abbrev_plural("rew", "reward")
   show: abbrev_plural("val", "value")

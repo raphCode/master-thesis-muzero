@@ -9,65 +9,93 @@ was du gemacht hast und was rausgekommen ist (ohne details natürlich).
 Laut Prof. André eines der wichtigesten Kapitel.
 */
 
-In the last years, muzero has been cited as a remarkable breakthrough in the field of rl,
-being the first algo that beats human experts in the game of Go.
-A computer mastering a particular game may not look like much, after all computers got
-very good at playing many other complex games, for example chess.
-In order to understand why Go is different, one first needs to understand how computers
-usually play games:
-Traditional algos try to find a good move by considering different moves and the
-opponent's likely responses.
-After simulating many moves, the one with the best future outcome for the computer's
-player is selected.
-To obtain a useful result from such a search approach, a substantial part of the future
-game tree must be explored.
-This is for two reasons:
-First, because moves are often picked at near-random, a high number of moves should be
-visited to make sure a good move is uncovered.
-Second, the quality of a move is often revealed many moves later, in extreme cases not
-until the end of the game.
-This requires the search to reach very deep in the future to avoid misjudging a certain
-move.
+#import "thesis.typ": citet
 
-Go provides a big challenge to such an approach due to its large 19x19 grid board and the
-fact that games can go on for hundreds of moves.
-The large board allows many possible moves at each point in the search, resulting in a
-very large search space.
-Worse, the large length of the games requires very deep searches before meaningful results
-can be obtained.
+In 2016, alphago was unveiled - the first artificial intelligence program capable of
+playing the complex strategy game of Go at a level surpassing human masters.
+To understand what makes Go particularly challenging for computer programs compared to
+other games, let's summarize how most traditional algos tackle gameplay.
 
-In fact, the Go search space is considered intractable because exploring it in a search
-exceeds the currently available computing budget by orders of magnitudes.
-This suggests that muzero's success in Go must be due to a effective algorithmic approach
-rather than raw computing power.
+These methods try to find a good move by simulating a large number of future moves and
+selecting the one with the best possible outcome.
+The assumption is that by examining enough moves you will eventually find a strong move.
+However, Go presents a major obstacle due to its extensive 19x19 grid, which is
+considerably larger than, say, a chessboard.
+This leads to a very high branching factor in the search, rendering a classical search
+approach computationally impossible, as the number of possible outcomes escalates with
+each additional move evaluated.
 
-Furthermore, muzero is designed to be applicable to more than just Go.
-The original paper also successfully applies muzero to chess, shogi and the Atari suite of
-games, each of which are considered challenging games.
-This is possible since the actual algo does not include any domain-specific knowledge,
-that is, no Go- or chess-specific information is built in.
-This includes even the game's rule, which the algo learns on its own.
-Compared to traditional approaches, it might come as a surprise that providing the algo
-with less information actually leads to better performance.
+Even with an appropriate search approach, there remains the problem of evaluating specific
+board conditions.
+An accurate assessment of positions is necessary to guide the search towards victory.
+Go games can span hundreds of moves, making it difficult to determine which positions are
+good or bad for either player in the long run, especially since a single move can have a
+significant impact on the rest of the game.
+This judgement is crucial in guiding the search towards winning the game.
+Go games can go on for hundreds of moves, making it hard to tell which positions are good
+or bad for either player in the long run, especially since a single move can have a
+significant impact on the rest of the game.
 
-The performance and generality of muzero is already impressive.
-However, the original impl is limited in a number of ways.
-First, it was designed for one- or two-player games only.
-In the case of 2p games, an additional requirement is that the game is 0sum, meaning
-that one player's loss is the other's gain.
+alphago's success suggests that it uses an intelligent algo, as the improvements cannot be
+attributed solely to increased computational power.
+Nevertheless, in 2018, #citet("azero") advanced upon this technology with azero, which was
+able to master three different board games: Go, Chess and Shogi.
+This achievement is remarkable given that most algos rely heavily on specific
+domain-related information, such as the individual game rules.
+The ability of a single algo to excel in several distinct envs highlights its
+versatility~- a key goal of rl approaches.
+
+Like most search approaches, azero uses a simulator that must be explicitly programmed
+with the env rules to determine the subsequent state following an action.
+This is not a limitation per se, in fact it is sometimes helpful or easier in some
+real-world applications.
+For example, #citet("azero_sorting") made use of the azero arch to discover a faster
+sorting algo.
+In this particular case, the env is presented as a game to modify an assembler program,
+and the score is calculated by checking the correctness and speed of the generated
+program.
+
+In other scenarios, it may be more difficult to provide a good impl for the env during the
+search process.
+Muzero addresses this challenge by eliminating the need for a simulator during the search
+phase.
+Instead, it develops its own internal model to predict future env states.
+By doing so, it can learn how to play games without having access to the underlying rules.
+Perhaps surprisingly, this allows Muzero to match Azero's performance in the
+aforementioned board games.
+Moreover, it also masters the Atari suite of 57 video games, demonstrating the ability to
+generalise across many domains.
+
+
+It should come as no surprise that muzero has also been applied successfully in the real
+world.
+For example, #citet("muzero_vp9") used it to achieve bandwidth savings during video
+streaming.
+In this scenario, muzero adjusted the bitrate of a video codec to reduce the file size
+while maintaining visual quality.
+
+While muzero's capabilities are impressive, the original impl is limited in a number of
+ways.
+First, it was designed for one- or 2p games only.
+For 2p games, an additional requirement is that the game must be 0sum, meaning that one
+player's loss is the other's gain.
 
 muzero also only works in perfect information games.
-This means that the game does not conceal any information from the player making a
+The term means that the game does not hide any information from the player making a
 decision, he is perfectly informed about all previous events.
-For example, in chess the current state of the board provides this information.
-On the other hand, in card games like poker, information about other players' hands is
+In chess, for example, the current state of the board provides this information.
+On the other hand, in card games such as poker, information about other players' hands is
 hidden.
 
-While the above discussion refers to games, the muzero algo has also been successfully
-applied to practical problems.
-One example is adjusting codec parameters during video compression, where it outperformed
-previous approaches. @vp9_muzero
-Likewise, the aforementioned restrictions of compatible games also translate into
-limitations of real-world applications.
-The original muzero algo is thus unsuitable for environments with multiple agents,
-arbitrary scoring functions, or imperfect information.
+Finally, the algo has high computational requirements, which results in long training
+times.
+
+This thesis reviews the design of muzero and provides an impl of the muzero algo.
+The impl includes modifications to improve computational requirements and performance.
+The modifications come from previous work on muzero and azero, as well as my own, and are
+evaluated using an ablation study.
+
+I also propose modifications to extend the muzero algo to multiplayer games with arbitrary
+reward functions.
+
+

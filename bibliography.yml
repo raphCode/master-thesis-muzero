@@ -247,7 +247,7 @@ val_pred_net:
   parent: *arxiv
   doi: 10.48550/arXiv.1707.03497
  
-vp9_muzero:
+muzero_vp9:
   type: article
   title: MuZero with Self-competition for Rate Control in VP9 Video Compression
   date: 2022-02-14
