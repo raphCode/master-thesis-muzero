@@ -1,16 +1,16 @@
 import math
 import itertools
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
 from config import C
-from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
+from networks.bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
 
 
-class FcBase(nn.Module):
+class FcBase(NetBase):
     def __init__(
         self,
         input_width: int,
@@ -71,17 +71,12 @@ class FcPrediction(FcBase, PredictionNet):
             **kwargs,
         )
 
-    def forward(
-        self,
-        latent: Tensor,
-        belief: Optional[Tensor],
-        logits: bool = False,
-    ) -> tuple[Tensor, Tensor, Tensor]:
+    def forward(self, latent: Tensor, belief: Tensor) -> tuple[Tensor, Tensor, Tensor]:
         result = self.fc_forward(latent, belief)
-        value, policy, current_player = torch.split(result, self.output_sizes, dim=1)
-        if logits:
-            return value, policy, current_player
-        return value, F.softmax(policy, dim=1), F.softmax(current_player, dim=1)
+        return cast(
+            tuple[Tensor, Tensor, Tensor],
+            torch.split(result, self.output_sizes, dim=1),
+        )
 
 
 class FcDynamics(FcBase, DynamicsNet):
@@ -108,15 +103,9 @@ class FcDynamics(FcBase, DynamicsNet):
         latent: Tensor,
         belief: Tensor,
         action_onehot: Tensor,
-        logits: bool = False,
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
-        result = self.fc_forward(latent, belief, action_onehot)
-        latent, belief, reward, is_terminal = torch.split(
-            result, self.output_sizes, dim=1
-        )
-        return (
-            latent,
-            belief,
-            reward,
-            is_terminal if logits else F.sigmoid(is_terminal),
+        result = self.fc_forward(action_onehot, latent, belief)
+        return cast(
+            tuple[Tensor, Tensor, Tensor, Tensor],
+            torch.split(result, self.output_sizes, dim=1),
         )

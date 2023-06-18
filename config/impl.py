@@ -13,7 +13,12 @@ from omegaconf import OmegaConf, DictConfig, ListConfig
 
 from games.bases import Game, Player
 from config.schema import BaseConfig, NetworkConfig, NetworkSchema
-from networks.bases import Networks, DynamicsNet, PredictionNet, RepresentationNet
+from networks.bases import (
+    Networks,
+    DynamicsNetContainer,
+    PredictionNetContainer,
+    RepresentationNetContainer,
+)
 
 from . import C, schema
 
@@ -139,9 +144,9 @@ def populate_config(cfg: DictConfig) -> None:
 
         def network_factory() -> Networks:
             return Networks(
-                representation=net_cfg.representation(),
-                prediction=net_cfg.prediction(),
-                dynamics=net_cfg.dynamics(),
+                representation=RepresentationNetContainer(net_cfg.representation()),
+                prediction=PredictionNetContainer(net_cfg.prediction()),
+                dynamics=DynamicsNetContainer(net_cfg.dynamics()),
                 initial_latent=initial_tensor(latent_shape),
                 initial_belief=initial_tensor(belief_shape),
             )
@@ -169,14 +174,11 @@ def populate_config(cfg: DictConfig) -> None:
 
     assert isinstance(C.game.instance, Game)
 
-    nets = C.networks.factory()
+    # Network container check the implementation types themselves
+    C.networks.factory()
 
     def net_msg(net_type: str) -> str:
         return f"{net_type} must be subclass of {net_type.upper()}Net!"
-
-    assert isinstance(nets.representation, RepresentationNet), net_msg("representation")
-    assert isinstance(nets.prediction, PredictionNet), net_msg("prediction")
-    assert isinstance(nets.dynamics, DynamicsNet), net_msg("dynamics")
 
     def check_players(cls: type | UnionType) -> Iterable[bool]:
         return (
