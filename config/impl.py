@@ -1,12 +1,7 @@
-import os
-import abc
-import inspect
 import logging
-import builtins
 import functools
 from types import UnionType
 from typing import Any, Iterable, Optional, cast
-from collections import defaultdict
 from collections.abc import Sequence
 
 import attrs
@@ -195,62 +190,3 @@ def populate_config(cfg: DictConfig) -> None:
     assert all(check_players(Player | RLBase))
     msg = "There must be at least one RLBase player involved to collect training data!"
     assert any(check_players(RLBase)), msg
-
-
-def save_source_code() -> None:
-    # to yield reproducable experiments, save the source code of all functions and classes
-    # and its superclasses referenced in the config
-
-    # {"config namespace": {("config key / origin", "source code")}}
-    sources = defaultdict(set)  # type: defaultdict[str, set[tuple[str, str]]]
-
-    def save_recursive(item: Any, path: list[str]) -> None:
-        if item is C.training.optimizer or item is C.defaults:
-            return
-
-        # partials are probably factories, instantiate them
-        # also, C.networks.factory creates the attrs class Networks
-        if isinstance(item, functools.partial) or item is C.networks.factory:
-            item = item()
-
-        if attrs.has(item):
-            for name, child in attrs.asdict(item, recurse=False).items():
-                save_recursive(child, path + [name])
-            return  # attrs classes are not interesting to save
-
-        namespace = "_".join(path[:-1])
-
-        if inspect.isfunction(item):
-            source = inspect.getsource(item)
-        elif inspect.isclass(cls := type(item)) and not (
-            cls is torch.Tensor or hasattr(builtins, cls.__name__)
-        ):
-            source = inspect.getsource(cls)
-            blacklist = {
-                cls,
-                torch.nn.Module,
-                abc.ABC,
-                object,
-                DynamicsNet,
-                PredictionNet,
-                RepresentationNet,
-                Game,
-            }
-            for superclass in filter(lambda c: c not in blacklist, cls.__mro__):
-                sources[namespace].add(("superclass:", inspect.getsource(superclass)))
-        else:
-            return
-
-        sources[namespace].add(("config path: " + ".".join(path), source))
-
-    save_recursive(C, [])
-
-    directory = "sources"
-    os.mkdir(directory)
-    n = 0
-    for namespace, data in sources.items():
-        with open(os.path.join(directory, f"{namespace}.py"), "w") as f:
-            for explanation, sourcecode in sorted(data):
-                f.write(f"# {explanation}\n{sourcecode}\n\n")
-                n += 1
-    log.info(f"Saved source code of {n} objects")

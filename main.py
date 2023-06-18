@@ -12,7 +12,6 @@ from config import C
 from selfplay import run_episode
 from config.impl import (
     populate_config,
-    save_source_code,
     monkeypatch_dictconfig,
     register_omegaconf_resolvers,
 )
@@ -35,7 +34,6 @@ log = logging.getLogger("main")
 def main(cfg: DictConfig) -> None:
     logging.captureWarnings(True)
     populate_config(cfg)
-    save_source_code()
 
     pc = SinglePC(C.players.instances)
     rb = ReplayBuffer()
