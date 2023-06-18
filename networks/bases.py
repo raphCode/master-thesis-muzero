@@ -1,7 +1,8 @@
 import typing
 import functools
 from abc import ABC, abstractmethod
-from typing import Any, Self, TypeVar, ParamSpec, cast
+from typing import Any, Self, TypeVar, ParamSpec, TypeAlias, cast
+from collections.abc import Sequence
 
 import torch
 import torch.nn as nn
@@ -10,9 +11,14 @@ from attrs import define
 from torch import Tensor
 
 from util import copy_type_signature
+from config import C
 
 P = ParamSpec("P")
 R = TypeVar("R", bound=Tensor | tuple[Tensor, ...])
+
+
+Shapes: TypeAlias = list[tuple[int, ...]]
+ShapesInfo: TypeAlias = Sequence[int | Sequence[int]]
 
 
 class NetBase(ABC, nn.Module):
@@ -72,6 +78,17 @@ class DynamicsNet(NetBase):
     @copy_type_signature(forward)  # export a typed __call__() interface
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return super().__call__(*args, **kwargs)
+
+
+def make_shapes(*shapes: int | Sequence[int]) -> Shapes:
+    """
+    Create a list of shape tuples, promoting single integer shapes to a tuple.
+    """
+
+    def int2shape(x: int | Sequence[int]) -> Sequence[int]:
+        return [x] if isinstance(x, int) else x
+
+    return list(map(tuple[int], map(int2shape, shapes)))
 
 
 class AutobatchWrapper(nn.Module):
@@ -141,6 +158,34 @@ class NetContainer(
             )
             self.si = cast(Self, type(self))(AutobatchWrapper(network))
 
+    @classmethod  # type: ignore [misc]
+    @property
+    @cast("functools._lru_cache_wrapper[Shapes]", functools.cache)
+    def in_shapes(cls) -> Shapes:
+        """
+        Input tensor shapes according to the global config (without batch dim).
+        """
+        return make_shapes(*cls._in_shape_info())
+
+    @classmethod  # type: ignore [misc]
+    @property
+    @cast("functools._lru_cache_wrapper[Shapes]", functools.cache)
+    def out_shapes(cls) -> Shapes:
+        """
+        Output tensor shapes according to the global config (without batch dim).
+        """
+        return make_shapes(*cls._out_shape_info())
+
+    @classmethod
+    @abstractmethod
+    def _in_shape_info(cls) -> ShapesInfo:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def _out_shape_info(cls) -> ShapesInfo:
+        pass
+
     @abstractmethod
     def forward(self, *args: Any, **kwargs: Any) -> Any:
         pass
@@ -148,6 +193,14 @@ class NetContainer(
 
 class RepresentationNetContainer(NetContainer):
     net: RepresentationNet
+
+    @classmethod
+    def _in_shape_info(cls) -> ShapesInfo:
+        return list(C.game.instance.observation_shapes)
+
+    @classmethod
+    def _out_shape_info(cls) -> ShapesInfo:
+        return [C.networks.latent_shape]
 
     def forward(
         self,
@@ -162,6 +215,18 @@ class RepresentationNetContainer(NetContainer):
 
 class PredictionNetContainer(NetContainer):
     net: PredictionNet
+
+    @classmethod
+    def _in_shape_info(cls) -> ShapesInfo:
+        return C.networks.latent_shape, C.networks.belief_shape
+
+    @classmethod
+    def _out_shape_info(cls) -> ShapesInfo:
+        return (
+            1,
+            C.game.instance.max_num_actions,
+            C.game.instance.max_num_players + C.game.instance.has_chance_player,
+        )
 
     def forward(
         self,
@@ -182,6 +247,18 @@ class PredictionNetContainer(NetContainer):
 
 class DynamicsNetContainer(NetContainer):
     net: DynamicsNet
+
+    @classmethod
+    def _in_shape_info(cls) -> ShapesInfo:
+        return (
+            C.networks.latent_shape,
+            C.networks.belief_shape,
+            C.game.instance.max_num_actions,
+        )
+
+    @classmethod
+    def _out_shape_info(cls) -> ShapesInfo:
+        return C.networks.latent_shape, C.networks.belief_shape, 1, 1
 
     def forward(
         self,
