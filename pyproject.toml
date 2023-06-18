@@ -13,6 +13,12 @@ python_executable = "venv/bin/python"
 strict = true
 pretty = true
 
+[[tool.mypy.overrides]]
+module = [
+    "torch.jit",
+]
+implicit_reexport = true
+
 [tool.flake8]
 max-line-length = 90
 show-source = true

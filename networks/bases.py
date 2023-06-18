@@ -4,13 +4,14 @@ from abc import ABC, abstractmethod
 from typing import Any, Self, TypeVar, ParamSpec, TypeAlias, cast
 from collections.abc import Sequence
 
+import attrs
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from attrs import define
 from torch import Tensor
 
-from util import copy_type_signature
+from util import copy_type_signature, hide_type_annotations
 from config import C
 
 P = ParamSpec("P")
@@ -190,6 +191,44 @@ class NetContainer(
     def forward(self, *args: Any, **kwargs: Any) -> Any:
         pass
 
+    def jit(
+        self, jit_container: bool = True
+    ) -> Self | torch.jit.TopLevelTracedModule | torch.jit.ScriptModule:
+        def example_tensor(shape: Sequence[int]) -> Tensor:
+            t = torch.zeros(*shape)
+            if isinstance(self.net, AutobatchWrapper):
+                return t
+            return t.expand(C.training.batch_size, *shape)
+
+        example_inputs = list(map(example_tensor, self.in_shapes))
+        traced_net = torch.jit.trace(  # type: ignore [no-untyped-call]
+            self.net, example_inputs
+        )
+        self.net = traced_net
+        if hasattr(self, "si"):
+            self.si.net = AutobatchWrapper(traced_net)
+            self.si = self.si.jit(jit_container)  # type: ignore [assignment]
+        if not jit_container:
+            return self
+        if isinstance(self, RepresentationNetContainer):
+            # forward() has varargs, this can only be traced
+            return cast(
+                torch.jit.TopLevelTracedModule,
+                torch.jit.trace(self, example_inputs),  # type: ignore [no-untyped-call]
+            )
+        else:
+            # forward() has dynamic control flow (logits), use scripting
+            with hide_type_annotations(NetContainer, "si", "net"):
+                # These class type annotations are not really instance attributes but
+                # submodules, covered by nn.Module's __getattr__ lookup
+                # We need them for mypy, but they confuse torch.jit.script,
+                # so temporarily delete them
+                with hide_type_annotations(type(self), "si", "net"):
+                    return cast(
+                        torch.jit.ScriptModule,
+                        torch.jit.script(self),
+                    )
+
 
 class RepresentationNetContainer(NetContainer):
     net: RepresentationNet
@@ -285,3 +324,8 @@ class Networks:
     dynamics: DynamicsNetContainer
     initial_latent: Tensor
     initial_belief: Tensor
+
+    def jit(self, jit_container: bool = True) -> None:
+        for name, item in attrs.asdict(self).items():
+            if isinstance(item, NetContainer):
+                setattr(self, name, item.jit(jit_container))
