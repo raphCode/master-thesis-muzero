@@ -1,16 +1,29 @@
 import math
 import itertools
-from typing import Any, Optional, cast
+from typing import Any, Type, Optional, cast
+from collections.abc import Sequence
 
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
-from config import C
-from networks.bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
+from networks.bases import (
+    NetBase,
+    DynamicsNet,
+    NetContainer,
+    PredictionNet,
+    RepresentationNet,
+    DynamicsNetContainer,
+    PredictionNetContainer,
+    RepresentationNetContainer,
+)
 
 
-class FcBase(NetBase):
+class GenericFc(nn.Module):
+    """
+    Generic fully connected network implementation.
+    """
+
     def __init__(
         self,
         input_width: int,
@@ -39,64 +52,53 @@ class FcBase(NetBase):
         return y
 
 
-class FcRepresentation(FcBase, RepresentationNet):
+class FcBase(GenericFc, NetBase):
+    container_type: Type[NetContainer]
+    out_sizes: list[int]
+
     def __init__(self, **kwargs: Any):
+        self.out_sizes = list(map(math.prod, self.container_type.out_shapes))
         super().__init__(
-            input_width=sum(map(math.prod, C.game.instance.observation_shapes)),
-            output_width=math.prod(C.networks.latent_shape),
+            input_width=sum(map(math.prod, self.container_type.in_shapes)),
+            output_width=sum(self.out_sizes),
             **kwargs,
         )
+
+    def reshape_forward(self, *inputs: Tensor) -> tuple[Tensor, ...]:
+        def reshape_maybe(tensor: Tensor, shape: Sequence[int]) -> Tensor:
+            if len(shape) > 1 and math.prod(shape) > 0:
+                return tensor.reshape(-1, *shape)
+            return tensor
+
+        out_tensors = torch.split(self.fc_forward(*inputs), self.out_sizes, dim=-1)
+        return tuple(
+            reshape_maybe(tensor, shape)
+            for tensor, shape in zip(out_tensors, self.container_type.out_shapes)
+        )
+
+
+class FcRepresentation(FcBase, RepresentationNet):
+    container_type: Type[NetContainer] = RepresentationNetContainer
 
     def forward(
         self,
         *observations: Tensor,
     ) -> Tensor:
-        return self.fc_forward(*observations)
+        return self.reshape_forward(*observations)[0]
 
 
 class FcPrediction(FcBase, PredictionNet):
-    def __init__(self, **kwargs: Any):
-        input_sizes = (
-            math.prod(C.networks.belief_shape),
-            math.prod(C.networks.latent_shape),
-        )
-        self.output_sizes = [
-            1,
-            C.game.instance.max_num_actions,
-            C.game.instance.max_num_players + C.game.instance.has_chance_player,
-        ]
-        super().__init__(
-            input_width=sum(input_sizes),
-            output_width=sum(self.output_sizes),
-            **kwargs,
-        )
+    container_type: Type[NetContainer] = PredictionNetContainer
 
     def forward(self, latent: Tensor, belief: Tensor) -> tuple[Tensor, Tensor, Tensor]:
-        result = self.fc_forward(latent, belief)
         return cast(
             tuple[Tensor, Tensor, Tensor],
-            torch.split(result, self.output_sizes, dim=1),
+            self.reshape_forward(latent, belief),
         )
 
 
 class FcDynamics(FcBase, DynamicsNet):
-    def __init__(self, **kwargs: Any):
-        input_sizes = (
-            math.prod(C.networks.latent_shape),
-            math.prod(C.networks.belief_shape),
-            C.game.instance.max_num_actions,
-        )
-        self.output_sizes = [
-            math.prod(C.networks.latent_shape),
-            math.prod(C.networks.belief_shape),
-            1,
-            1,
-        ]
-        super().__init__(
-            input_width=sum(input_sizes),
-            output_width=sum(self.output_sizes),
-            **kwargs,
-        )
+    container_type: Type[NetContainer] = DynamicsNetContainer
 
     def forward(
         self,
@@ -104,8 +106,7 @@ class FcDynamics(FcBase, DynamicsNet):
         belief: Tensor,
         action_onehot: Tensor,
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
-        result = self.fc_forward(action_onehot, latent, belief)
         return cast(
             tuple[Tensor, Tensor, Tensor, Tensor],
-            torch.split(result, self.output_sizes, dim=1),
+            self.reshape_forward(latent, belief, action_onehot),
         )
