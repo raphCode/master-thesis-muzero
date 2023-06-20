@@ -14,12 +14,12 @@ summarized here.
 
 == Mp azero  // {{{
 
-muzero was originally implemented for sp games, as well as for 2p 0sum games.
+muzero was originally implemented for sp games, as well as for 2p zsum games.
 While no mp version for muzero itself exists, #citet("mp_azero")
 extended the predecessor algo azero to mp capabilities.
 
-Importantly, they relax the assumption of the game being 0sum:
-A 0sum game involves two players where one player's gain comes with an equivalent loss for
+Importantly, they relax the assumption of the game being zsum:
+A zsum game involves two players where one player's gain comes with an equivalent loss for
 the other player.
 The azero (and in turn muzero) algo make use of this fact by directly predicting how good
 the current position is for the current player by a scalar val output of the pnet

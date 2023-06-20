@@ -71,7 +71,7 @@
   show: abbrev("2p", "two-player")
   show: abbrev("mp", "multiplayer")
 
-  show: abbrev("0sum", "zero-sum")
+  show: abbrev("zsum", "zero-sum")
   show: abbrev_plural("traj", "trajectory")
 
   show: abbrev_plural("env", "environment")
@@ -89,4 +89,3 @@
   show: abbrev("sampeff", "sample efficiency")
   body
 }
-

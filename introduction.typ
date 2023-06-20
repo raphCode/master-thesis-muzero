@@ -77,7 +77,7 @@ while maintaining visual quality.
 While muzero's capabilities are impressive, the original impl is limited in a number of
 ways.
 First, it was designed for one- or 2p games only.
-For 2p games, an additional requirement is that the game must be 0sum, meaning that one
+For 2p games, an additional requirement is that the game must be zsum, meaning that one
 player's loss is the other's gain.
 
 muzero also only works in perfect information games.
