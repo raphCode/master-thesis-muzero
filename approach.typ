@@ -26,7 +26,7 @@ hast.
 
 #import "related_work.typ": sscl
 
-=== Symmetric #sscl  // {{{
+=== Symmetric #sscl
 
 As outlined in @rw_effzero, #citet("effzero") already layed the groundwork for
 remarkable improvements in sampeff by introducing the #sscl.
@@ -69,8 +69,7 @@ respectively) for different latreps can be seen as the decorrelation mechanism.
 Consequently, there is no risk of latrep collapse in the muzero arch, making the inclusion
 of a stop-gradient operation unnecessary.
 
-// }}}
-=== Tns in the mcts  // {{{
+=== Tns in the mcts
 
 In azero, the mcts uses a perfect simulator to determine the next game state for
 hypothetical actions.
@@ -170,4 +169,3 @@ terminal state is predicted, all child nodes beyond the first terminal node are 
 zero rew and val.
 This is all achieved without the networks having to learn anything about beyond-tss.
 
-// }}}

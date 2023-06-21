@@ -12,7 +12,7 @@ paper selbst lesen muss um die Ideen darin zu verstehen.
 muzero and its precursors already inspired several other works, some of which are
 summarized here.
 
-== Mp azero  // {{{
+== Mp azero
 
 muzero was originally implemented for sp games, as well as for 2p zsum games.
 While no mp version for muzero itself exists, #citet("mp_azero")
@@ -36,8 +36,7 @@ The nets learn to encode knowledge of the game into search, indicating that the 
 mp strategy works in principle.
 Performance-wise the algo places itself below human experts.
 
-// }}}
-== effzero  // {{{
+== effzero
 <rw_effzero>
 
 effzero by #citet("effzero") is a modification of muzero to achieve similar performance
@@ -132,4 +131,3 @@ therefore considered a more accurate value.~@effzero
 Since the last two modifications were reported to be not as effective, and I also found
 them less relatable than the #sscl, I did not implement them.
 
-// }}}
