@@ -19,16 +19,14 @@ def assert_fn_type(fn: SelectionFn) -> None:
     pass
 
 
-class UCBScore:
-    def __init__(
-        self, prior_log_scale_base: float = 5, prior_log_scale_init: float = 1.25
-    ):
-        self.base = prior_log_scale_base
-        self.init = prior_log_scale_init
+class pUCTscore:
+    def __init__(self, c1: float = 1.25, c2: float = 1000):
+        self.c1 = c1
+        self.c2 = c2
 
     def __call__(self, node: Node) -> int:
         prior_scale_half = (
-            math.log((node.visit_count + self.base + 1) / self.base) + self.init
+            math.log(self.c1 + (node.visit_count + self.c2 + 1) / self.c2)
         ) * math.sqrt(node.visit_count)
 
         def child_score(prior: float, child: Node) -> float:
@@ -43,7 +41,7 @@ class UCBScore:
         )
 
 
-assert_fn_type(UCBScore())
+assert_fn_type(pUCTscore())
 
 
 def from_prior_deterministic(node: Node) -> int:
