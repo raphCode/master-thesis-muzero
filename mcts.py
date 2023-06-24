@@ -107,7 +107,7 @@ class StateNode(Node):
             belief=belief,
             reward=reward,
             value_pred=value_pred.item(),
-            probs=probs,
+            probs=probs.detach(),
         )
 
     def _create_child_at(self, action: int, nets: Networks) -> Node:
