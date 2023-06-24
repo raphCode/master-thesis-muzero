@@ -56,12 +56,12 @@ class RLBase(ABC):
         self.nets = nets
         self.mcts = MCTS(nets, mcts_cfg or C.mcts)
 
-    def reset_new_game(self) -> None:
+    def reset_new_game(self, player_id: int) -> None:
         """
         Called whenever a new game starts.
         """
         self.representation = Latent(self.nets.initial_latent)
-        self.mcts.reset_new_game()
+        self.mcts.reset_new_game(player_id)
 
     @abstractmethod
     def own_move(self, *observations: torch.Tensor) -> int:

@@ -177,6 +177,7 @@ class MCTS:
     Stores and manages a search tree for an agent.
     """
 
+    own_pid: int
     root: Node
     nets: Networks
     cfg: MctsConfig
@@ -189,7 +190,8 @@ class MCTS:
         self.nets = nets
         self.cfg = cfg
 
-    def reset_new_game(self) -> None:
+    def reset_new_game(self, player_id: int) -> None:
+        self.own_pid = player_id
         self.root = StateNode(
             self.nets.initial_latent,
             self.nets.initial_belief,
