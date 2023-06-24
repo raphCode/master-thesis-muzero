@@ -110,9 +110,6 @@ class PerfectInformationRLPlayer(RLBase):
     intermediate moves would be revealed in the next observation anyways.
     """
 
-    def __init__(self, *args: Unpack[RLBaseInitArgs], **kwargs: Unpack[RLBaseInitKwArgs]):
-        super().__init__(*args, **kwargs)
-
     def own_move(self, *observations: torch.Tensor) -> int:
         self.representation = Observation(observations)
         latent = self.nets.representation.si(*observations)
