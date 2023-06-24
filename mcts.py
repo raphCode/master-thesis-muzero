@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from torch import Tensor
 
     from util import ndarr_f32, ndarr_f64
-    from fn.selection import SelectionFn
+    from config.schema import MctsConfig
     from networks.bases import Networks
 
 log = logging.getLogger(__name__)
@@ -172,38 +172,78 @@ class TerminalNode(Node):
         return TerminalNode(latent, belief, 0)
 
 
-def ensure_visit_count(
-    root: Node, visit_count: int, selection_fn: SelectionFn, nets: Networks
-) -> None:
+class MCTS:
     """
-    Run the tree search on a Node until the visit count is reached
+    Stores and manages a search tree for an agent.
     """
-    for _ in range(visit_count - root.visit_count):
-        node = root
-        search_path = [root]
-        was_expanded = True
-        while was_expanded:
-            action = selection_fn(node)
-            was_expanded = action in node.children
-            node = node.get_create_child(action, nets)
-            search_path.append(node)
 
-        # backpropagate
-        if len(search_path) - 1 > C.training.n_step_horizon:
-            # The backpropagation currently calculates a node return value with all
-            # rewards in the search path (n-step size only bounded by search depth).
-            # Warn the user if the tree search goes deeper than the configured n-step
-            # horizon size.
-            # This is not a problem per se since the state values should converge to the
-            # same values anyways, irrespectively of the n-step horizon size.
-            # But sometimes small horizon sizes perform better empirically.
-            log.warning(
-                "tree search depth ({}) exceeds n-step horizon size ({})".format(
-                    len(search_path) - 1, C.training.n_step_horizon
+    root: Node
+    nets: Networks
+    cfg: MctsConfig
+
+    def __init__(
+        self,
+        nets: Networks,
+        cfg: MctsConfig,
+    ):
+        self.nets = nets
+        self.cfg = cfg
+
+    def reset_new_game(self) -> None:
+        self.root = StateNode(
+            self.nets.initial_latent,
+            self.nets.initial_belief,
+            0,
+            self.nets,
+        )
+
+    def new_root(self, latent: Tensor, belief: Tensor) -> None:
+        self.root = StateNode(latent, belief, 0, self.nets)
+
+    def ensure_visit_count(self, count: int) -> None:
+        """
+        Runs the tree search on the root note until the visit count is reached.
+        """
+        for _ in range(count - self.root.visit_count):
+            node = self.root
+            search_path = [self.root]
+            was_expanded = True
+            while was_expanded:
+                action = self.cfg.node_selection_score_fn(node)
+                was_expanded = action in node.children
+                node = node.get_create_child(action, self.nets)
+                search_path.append(node)
+
+            # backpropagate
+            if len(search_path) - 1 > C.training.n_step_horizon:
+                # The backpropagation currently calculates a node return value with all
+                # rewards in the search path (n-step size only bounded by search depth).
+                # Warn the user if the tree search goes deeper than the configured n-step
+                # horizon size.
+                # This is not a problem per se since the state values should converge to
+                # the same values anyways, irrespectively of the n-step horizon size.
+                # But sometimes small horizon sizes perform better empirically.
+                log.warning(
+                    "tree search depth ({}) exceeds n-step horizon size ({})".format(
+                        len(search_path) - 1, C.training.n_step_horizon
+                    )
                 )
-            )
 
-        r = node.value_pred
-        for node in reversed(search_path):
-            node.add_value(r)
-            r = r * C.training.discount_factor + node.reward
+            r = node.value_pred
+            for node in reversed(search_path):
+                node.add_value(r)
+                r = r * C.training.discount_factor + node.reward
+
+    def get_action(self) -> int:
+        return self.cfg.node_action_fn(self.root)
+
+    def get_policy(self) -> ndarr_f64:
+        policy = self.cfg.node_target_policy_fn(self.root)
+        assert len(policy) == C.game.instance.max_num_actions
+        return policy
+
+    def advance_root(self, action: int) -> None:
+        """
+        Replace the root node with its child of the given action.
+        """
+        self.root = self.root.get_create_child(action, self.nets)

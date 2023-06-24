@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Unpack, Optional, TypeAlias, TypedDict
 
 from attrs import frozen
 
-from mcts import Node, StateNode, ensure_visit_count
+from mcts import MCTS
 from config import C
 from trajectory import Latent, Observation
 from networks.bases import Networks
@@ -49,22 +49,19 @@ class RLBase(ABC):
     """
 
     nets: Networks
-    mcts_cfg: MctsConfig
-    root_node: Node
+    mcts: MCTS
     representation: Observation | Latent
 
     def __init__(self, nets: Networks, mcts_cfg: Optional[MctsConfig] = None):
         self.nets = nets
-        self.mcts_cfg = mcts_cfg or C.mcts
+        self.mcts = MCTS(nets, mcts_cfg or C.mcts)
 
     def reset_new_game(self) -> None:
         """
         Called whenever a new game starts.
         """
         self.representation = Latent(self.nets.initial_latent)
-        self.root_node = StateNode(
-            self.nets.initial_latent, self.nets.initial_belief, 0, self.nets
-        )
+        self.mcts.reset_new_game()
 
     @abstractmethod
     def own_move(self, *observations: torch.Tensor) -> int:
@@ -95,19 +92,12 @@ class RLBase(ABC):
         """
         # Expand the part of the tree that represents the actual trajectory.
         # This may be an information leak if the next own move uses results from this tree
-        ensure_visit_count(
-            self.root_node,
-            self.mcts_cfg.iterations_value_estimate,
-            self.mcts_cfg.node_selection_score_fn,
-            self.nets,
-        )
-        policy = self.mcts_cfg.node_target_policy_fn(self.root_node)
-        assert len(policy) == C.game.instance.max_num_actions
+        self.mcts.ensure_visit_count(self.mcts.cfg.iterations_value_estimate)
         return TrainingInfo(
             representation=self.representation,
-            belief=self.root_node.belief,
-            target_policy=policy,
-            mcts_value=self.root_node.value,
+            belief=self.mcts.root.belief,
+            target_policy=self.mcts.get_policy(),
+            mcts_value=self.mcts.root.value,
         )
 
 
@@ -126,18 +116,13 @@ class PerfectInformationRLPlayer(RLBase):
     def own_move(self, *observations: torch.Tensor) -> int:
         self.representation = Observation(observations)
         latent = self.nets.representation.si(*observations)
-        self.root_node = StateNode(latent, self.root_node.belief, 0, self.nets)
-        ensure_visit_count(
-            self.root_node,
-            self.mcts_cfg.iterations_move_selection,
-            self.mcts_cfg.node_selection_score_fn,
-            self.nets,
-        )
-        return self.mcts_cfg.node_action_fn(self.root_node)
+        self.mcts.new_root(latent, self.mcts.root.belief)
+        self.mcts.ensure_visit_count(self.mcts.cfg.iterations_move_selection)
+        return self.mcts.get_action()
 
     def advance_game_state(self, action: int) -> None:
-        self.root_node = self.root_node.get_create_child(action, self.nets)
-        self.representation = Latent(self.root_node.latent)
+        self.mcts.advance_root(action)
+        self.representation = Latent(self.mcts.root.latent)
 
 
 class NoBeliefsRLPlayer(PerfectInformationRLPlayer):
