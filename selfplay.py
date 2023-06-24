@@ -50,8 +50,8 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     assert len(players) == state.match_data.num_players
     rlp = RLPlayers(players)
 
-    for player in rlp.players:
-        player.reset_new_game()
+    for pid, player in zip(rlp.pids, rlp.players):
+        player.reset_new_game(pid)
 
     for n_move in range(C.training.max_moves_per_game):
         if state.is_terminal:
