@@ -29,7 +29,7 @@ class Node(ABC):
     are attached as needed.
     Reasons:
     - avoids that a bunch of attributes could be None
-    - selection score function is only called once instead of for every child node node
+    - selection score function is only called once instead of for every child node
     - see at a glance which children are expanded (node.children is a dict/sparse array)
     """
 
