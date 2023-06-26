@@ -189,6 +189,6 @@ def populate_config(cfg: DictConfig) -> None:
     # avoid circular imports:
     from rl_player import RLBase
 
-    assert all(check_players(Player | RLBase))
+    assert all(check_players(Player))
     msg = "There must be at least one RLBase player involved to collect training data!"
     assert any(check_players(RLBase)), msg

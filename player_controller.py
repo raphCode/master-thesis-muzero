@@ -12,7 +12,7 @@ from games.bases import Player, MatchData
 if TYPE_CHECKING:
     from networks.bases import Networks
 
-PlayerPartial: TypeAlias = functools.partial[Player] | functools.partial[RLBase]
+PlayerPartial: TypeAlias = functools.partial[Player]
 
 
 class PCBase(ABC):
@@ -32,7 +32,7 @@ class PCBase(ABC):
         pass
 
     @abstractmethod
-    def get_players(self, match_data: MatchData) -> Sequence[Player | RLBase]:
+    def get_players(self, match_data: MatchData) -> Sequence[Player]:
         """
         Sequence of players that should take part in a game, called for each match.
         """

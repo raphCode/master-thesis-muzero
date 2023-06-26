@@ -76,10 +76,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
 
         curr_pid = state.current_player_id
         curr_player = players[curr_pid]
-        if isinstance(curr_player, RLBase):
-            action = curr_player.own_move(state)
-        else:
-            action = curr_player.request_action(state, C.game.instance)
+        action = curr_player.request_action(state)
 
         state.apply_action(action)
 
