@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     import torch
 
     from util import ndarr_f64
+    from games.bases import GameState
     from config.schema import MctsConfig
 
 
@@ -64,9 +65,9 @@ class RLBase(ABC):
         self.mcts.reset_new_game(player_id)
 
     @abstractmethod
-    def own_move(self, *observations: torch.Tensor) -> int:
+    def own_move(self, state: GameState) -> int:
         """
-        Called when agent is at turn with current observations, returns action to take.
+        Called when agent is at turn with current game state, returns action to take.
         This must not advance the internal game state with the returned action, only store
         the observation.
         Must set self.representation to an Observation instance.
@@ -110,7 +111,8 @@ class PerfectInformationRLPlayer(RLBase):
     intermediate moves would be revealed in the next observation anyways.
     """
 
-    def own_move(self, *observations: torch.Tensor) -> int:
+    def own_move(self, state: GameState) -> int:
+        observations = state.observation
         self.representation = Observation(observations)
         latent = self.nets.representation.si(*observations)
         self.mcts.new_root(latent, self.mcts.root.belief)
