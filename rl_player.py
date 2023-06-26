@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import TYPE_CHECKING, Unpack, Optional, TypeAlias, TypedDict
 
 from attrs import frozen
@@ -8,6 +8,7 @@ from attrs import frozen
 from mcts import MCTS
 from config import C
 from trajectory import Latent, Observation
+from games.bases import Player
 from networks.bases import Networks
 
 if TYPE_CHECKING:
@@ -37,7 +38,7 @@ class RLBaseInitKwArgs(TypedDict):
     mcts_cfg: Optional[MctsConfig]
 
 
-class RLBase(ABC):
+class RLBase(Player):
     """
     Base class for reinforcement learning agents that use MCTS with neural nets.
     Throughout a game, they collect information that can be used to create training data.
@@ -45,7 +46,8 @@ class RLBase(ABC):
     The class keeps track of the game state by storing either the current Observation or a
     Latent representation. This state is used to return a TrainingInfo instance on
     create_training_info().
-    The state is only ever advanced by calling advance_game_state(), not by own_move().
+    The state is only ever advanced by calling advance_game_state(), not by
+    request_action().
     The latter only stores the current observation.
     """
 
@@ -65,7 +67,7 @@ class RLBase(ABC):
         self.mcts.reset_new_game(player_id)
 
     @abstractmethod
-    def own_move(self, state: GameState) -> int:
+    def request_action(self, state: GameState) -> int:
         """
         Called when agent is at turn with current game state, returns action to take.
         This must not advance the internal game state with the returned action, only store
@@ -111,7 +113,7 @@ class PerfectInformationRLPlayer(RLBase):
     intermediate moves would be revealed in the next observation anyways.
     """
 
-    def own_move(self, state: GameState) -> int:
+    def request_action(self, state: GameState) -> int:
         observations = state.observation
         self.representation = Observation(observations)
         latent = self.nets.representation.si(*observations)
