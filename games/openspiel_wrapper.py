@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import pyspiel  # type: ignore [import]
 
-from util import ndarr_f64, optional_map
+from util import ndarr_f64, ndarr_bool, optional_map
 
 from .bases import Game, Teams, GameState, MatchData, GameStateInitKwArgs
 
@@ -29,6 +29,14 @@ class OpenSpielGameState(GameState):
                 self.game.observation_shapes[0]
             ),
         )
+
+    @property
+    def valid_actions_mask(self) -> ndarr_bool:
+        if self.game.bad_move_reward is not None or self.game.bad_move_action is not None:
+            return np.ones(self.game.max_num_actions, dtype=bool)
+        mask = np.zeros(self.game.max_num_actions, dtype=bool)
+        mask[list(self.state.legal_actions())] = True
+        return mask
 
     @property
     def rewards(self) -> tuple[float, ...]:
@@ -70,6 +78,9 @@ class OpenSpielGameState(GameState):
             if self.game.bad_move_action is not None:
                 self.state.apply_action_with_legality_check(self.game.bad_move_action)
             else:
+                assert (
+                    self.game.bad_move_reward is not None
+                ), "Illegal action and no bad move reward or action specified!"
                 self.invalid = True
         else:
             # TODO: remove legality check, this is just a safety measure now
@@ -92,9 +103,9 @@ class OpenSpielGame(Game):
         self.game = pyspiel.load_game(game_name)
         self.bad_move_reward = optional_map(float)(bad_move_reward)
         self.bad_move_action = optional_map(int)(bad_move_action)
-        assert (bad_move_reward is None) != (
-            bad_move_action is None
-        ), "Exactly one of 'bad_move_reward' or 'bad_move_action' must be given"
+        assert (
+            bad_move_reward is None or bad_move_action is None
+        ), "At most one of 'bad_move_reward' or 'bad_move_action' must be given"
         self.teams = Teams(teams)
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
 
