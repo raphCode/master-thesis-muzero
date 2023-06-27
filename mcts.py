@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, cast
-from collections.abc import Iterable, MutableMapping
+from collections.abc import MutableMapping
 
 import numpy as np
 import torch
@@ -51,13 +51,13 @@ class Node(ABC):
         belief: Tensor,
         reward: float,
         value_pred: float,
-        probs: Iterable[float],
+        probs: ndarr_f32 | ndarr_f64,
     ) -> None:
         self.latent = latent
         self.belief = belief
         self.reward = reward
         self.value_pred = value_pred
-        self.probs = np.asarray(probs)
+        self.probs = probs
         self.probs.flags.writeable = False
         self.children = dict()
         self.visit_count = 0
@@ -107,7 +107,7 @@ class StateNode(Node):
             belief=belief,
             reward=reward,
             value_pred=value_pred.item(),
-            probs=probs.detach(),
+            probs=probs.detach().numpy(),
         )
 
     def _create_child_at(self, action: int, nets: Networks) -> Node:
