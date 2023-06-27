@@ -117,7 +117,7 @@ class PerfectInformationRLPlayer(RLBase):
         observations = state.observation
         self.representation = Observation(observations)
         latent = self.nets.representation.si(*observations)
-        self.mcts.new_root(latent, self.mcts.root.belief)
+        self.mcts.new_root(latent, self.mcts.root.belief, state.valid_actions_mask)
         self.mcts.ensure_visit_count(self.mcts.cfg.iterations_move_selection)
         return self.mcts.get_action()
 

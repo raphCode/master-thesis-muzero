@@ -11,7 +11,7 @@ import torch
 from attrs import frozen
 
 if TYPE_CHECKING:
-    from util import ndarr_f64
+    from util import ndarr_f64, ndarr_bool
 
 
 class Teams:
@@ -84,6 +84,15 @@ class GameState(ABC):
     def observation(self) -> tuple[torch.Tensor, ...]:
         """
         Return observation tensors. Multiple tensors are possible for different shapes.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def valid_actions_mask(self) -> ndarr_bool:
+        """
+        Specifies wich actions are valid to take in the current state.
+        Length of returned array should be game.max_num_actions
         """
         pass
 

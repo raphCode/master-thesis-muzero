@@ -11,6 +11,7 @@ import torch.nn.functional as F
 
 ndarr_f32: TypeAlias = npt.NDArray[np.float32]
 ndarr_f64: TypeAlias = npt.NDArray[np.float64]
+ndarr_bool: TypeAlias = npt.NDArray[np.bool_]
 
 A = TypeVar("A")
 B = TypeVar("B")
