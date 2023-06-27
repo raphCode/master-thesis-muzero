@@ -44,6 +44,8 @@ class Node(ABC):
     probs: ndarr_f32 | ndarr_f64
     children: MutableMapping[int, Node]
 
+    mcts: MCTS
+
     def __init__(
         self,
         /,
@@ -52,6 +54,7 @@ class Node(ABC):
         reward: float,
         value_pred: float,
         probs: ndarr_f32 | ndarr_f64,
+        mcts: MCTS,
     ) -> None:
         self.latent = latent
         self.belief = belief
@@ -62,6 +65,7 @@ class Node(ABC):
         self.children = dict()
         self.visit_count = 0
         self.value_sum = 0
+        self.mcts = mcts
 
     @property
     def value(self) -> float:
@@ -73,16 +77,16 @@ class Node(ABC):
         self.value_sum += value
         self.visit_count += 1
 
-    def get_create_child(self, action: int, nets: Networks) -> Node:
+    def get_create_child(self, action: int) -> Node:
         """
         Returns the child node for the given action, creating it first if necessary.
         """
         if action not in self.children:
-            self.children[action] = self._create_child_at(action, nets)
+            self.children[action] = self._create_child_at(action)
         return self.children[action]
 
     @abstractmethod
-    def _create_child_at(self, action: int, nets: Networks) -> Node:
+    def _create_child_at(self, action: int) -> Node:
         pass
 
 
@@ -99,11 +103,11 @@ class StateNode(Node):
         latent: Tensor,
         belief: Tensor,
         reward: float,
-        nets: Networks,
+        mcts: MCTS,
         valid_actions_mask: Optional[ndarr_bool] = None,
     ):
         self.mask = valid_actions_mask
-        value_pred, policy, current_player = nets.prediction.si(latent, belief)
+        value_pred, policy, current_player = mcts.nets.prediction.si(latent, belief)
         self.current_player = cast(int, current_player.argmax().item())
         probs = policy.detach().numpy()
         if valid_actions_mask is not None:
@@ -118,17 +122,18 @@ class StateNode(Node):
             reward=reward,
             value_pred=value_pred.item(),
             probs=probs,
+            mcts=mcts,
         )
 
-    def _create_child_at(self, action: int, nets: Networks) -> Node:
-        latent, belief, reward, is_terminal = nets.dynamics.si(
+    def _create_child_at(self, action: int) -> Node:
+        latent, belief, reward, is_terminal = self.mcts.nets.dynamics.si(
             self.latent,
             self.belief,
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
         if is_terminal.item() > 0.5 and C.training.loss_weights.terminal > 0:
-            return TerminalNode(latent, belief, reward.item())
-        return StateNode(latent, belief, reward.item(), nets)
+            return TerminalNode(latent, belief, reward.item(), self.mcts)
+        return StateNode(latent, belief, reward.item(), self.mcts)
 
 
 class TerminalNode(Node):
@@ -162,7 +167,7 @@ class TerminalNode(Node):
     RLPlayers.
     """
 
-    def __init__(self, latent: Tensor, belief: Tensor, reward: float):
+    def __init__(self, latent: Tensor, belief: Tensor, reward: float, mcts: MCTS):
         super().__init__(
             latent=latent,
             belief=belief,
@@ -171,15 +176,16 @@ class TerminalNode(Node):
             probs=np.full(
                 C.game.instance.max_num_actions, 1 / C.game.instance.max_num_actions
             ),
+            mcts=mcts,
         )
 
-    def _create_child_at(self, action: int, nets: Networks) -> TerminalNode:
-        latent, belief, _, _ = nets.dynamics.si(
+    def _create_child_at(self, action: int) -> TerminalNode:
+        latent, belief, _, _ = self.mcts.nets.dynamics.si(
             self.latent,
             self.belief,
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
-        return TerminalNode(latent, belief, 0)
+        return TerminalNode(latent, belief, 0, self.mcts)
 
 
 class MCTS:
@@ -213,7 +219,7 @@ class MCTS:
         belief: Tensor,
         valid_actions_mask: Optional[ndarr_bool] = None,
     ) -> None:
-        self.root = StateNode(latent, belief, 0, self.nets, valid_actions_mask)
+        self.root = StateNode(latent, belief, 0, self, valid_actions_mask)
 
     def ensure_visit_count(self, count: int) -> None:
         """
@@ -226,7 +232,7 @@ class MCTS:
             while was_expanded:
                 action = self.cfg.node_selection_score_fn(node)
                 was_expanded = action in node.children
-                node = node.get_create_child(action, self.nets)
+                node = node.get_create_child(action)
                 search_path.append(node)
 
             # backpropagate
@@ -261,4 +267,4 @@ class MCTS:
         """
         Replace the root node with its child of the given action.
         """
-        self.root = self.root.get_create_child(action, self.nets)
+        self.root = self.root.get_create_child(action)
