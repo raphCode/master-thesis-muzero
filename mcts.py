@@ -104,6 +104,7 @@ class StateNode(Node):
         belief: Tensor,
         reward: float,
         mcts: MCTS,
+        /,
         valid_actions_mask: Optional[ndarr_bool] = None,
     ):
         self.mask = valid_actions_mask
@@ -133,7 +134,12 @@ class StateNode(Node):
         )
         if is_terminal.item() > 0.5 and C.training.loss_weights.terminal > 0:
             return TerminalNode(latent, belief, reward.item(), self.mcts)
-        return StateNode(latent, belief, reward.item(), self.mcts)
+        return StateNode(
+            latent,
+            belief,
+            reward.item(),
+            self.mcts,
+        )
 
 
 class TerminalNode(Node):
@@ -219,7 +225,13 @@ class MCTS:
         belief: Tensor,
         valid_actions_mask: Optional[ndarr_bool] = None,
     ) -> None:
-        self.root = StateNode(latent, belief, 0, self, valid_actions_mask)
+        self.root = StateNode(
+            latent,
+            belief,
+            0,
+            self,
+            valid_actions_mask=valid_actions_mask,
+        )
 
     def ensure_visit_count(self, count: int) -> None:
         """
