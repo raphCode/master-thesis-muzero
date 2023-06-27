@@ -83,8 +83,7 @@ class OpenSpielGameState(GameState):
                 ), "Illegal action and no bad move reward or action specified!"
                 self.invalid = True
         else:
-            # TODO: remove legality check, this is just a safety measure now
-            self.state.apply_action_with_legality_check(action)
+            self.state.apply_action(action)
 
 
 class OpenSpielGame(Game):
