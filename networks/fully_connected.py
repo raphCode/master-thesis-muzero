@@ -90,9 +90,9 @@ class FcRepresentation(FcBase, RepresentationNet):
 class FcPrediction(FcBase, PredictionNet):
     container_type: Type[NetContainer] = PredictionNetContainer
 
-    def forward(self, latent: Tensor, belief: Tensor) -> tuple[Tensor, Tensor, Tensor]:
+    def forward(self, latent: Tensor, belief: Tensor) -> tuple[Tensor, Tensor]:
         return cast(
-            tuple[Tensor, Tensor, Tensor],
+            tuple[Tensor, Tensor],
             self.reshape_forward(latent, belief),
         )
 

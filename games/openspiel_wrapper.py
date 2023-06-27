@@ -45,7 +45,7 @@ class OpenSpielGameState(GameState):
         if self.invalid:
             assert self.game.bad_move_reward is not None
             tmp = [0.0] * self.game.max_num_players
-            tmp[self.current_player_id] = self.game.bad_move_reward
+            tmp[cast(int, self.state.current_player())] = self.game.bad_move_reward
             return tuple(tmp)
         return cast(tuple[float, ...], self.state.rewards())
 
@@ -59,11 +59,9 @@ class OpenSpielGameState(GameState):
 
     @property
     def current_player_id(self) -> int:
-        pid = self.state.current_player()
-        if pid == pyspiel.PlayerId.CHANCE:
-            assert self.game.chance_player_id is not None
-            return self.game.chance_player_id
-        return cast(int, pid)
+        assert not self.is_terminal
+        assert not self.is_chance
+        return cast(int, self.state.current_player())
 
     @property
     def chance_outcomes(self) -> ndarr_f64:
@@ -118,10 +116,6 @@ class OpenSpielGame(Game):
     @cached_property
     def max_num_players(self) -> int:
         return cast(int, self.game.num_players())
-
-    @cached_property
-    def has_chance_player(self) -> bool:
-        return True
 
     @cached_property
     def observation_shapes(self) -> tuple[tuple[int, ...]]:

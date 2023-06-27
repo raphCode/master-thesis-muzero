@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import itertools
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional, TypedDict
-from functools import lru_cache, cached_property
+from typing import TYPE_CHECKING, TypedDict
+from functools import lru_cache
 from collections import defaultdict
 from collections.abc import Sequence, Collection
 
@@ -111,7 +111,16 @@ class GameState(ABC):
 
     @property
     @abstractmethod
+    def is_chance(self) -> bool:
+        pass
+
+    @property
+    @abstractmethod
     def current_player_id(self) -> int:
+        """
+        Return the zero-based index of the player currently at turn.
+        This may raise an exception when called on chance or terminal nodes.
+        """
         pass
 
     @property
@@ -168,28 +177,10 @@ class Game(ABC):
     def max_num_players(self) -> int:
         """
         Maximum number of players in a match, excluding the chance player.
-        Used to set the size of reward tuples, the team matrix and prediction network
+        Used to set the size of reward tuples, the team matrix and dynamics network
         outputs.
         """
         pass
-
-    @property
-    @abstractmethod
-    def has_chance_player(self) -> bool:
-        """
-        Returns wheter the game models a chance player.
-        The prediction output CurrentPlayer should then be sized to max_num_players + 1.
-        """
-        pass
-
-    @cached_property
-    def chance_player_id(self) -> Optional[int]:
-        """
-        The chance player id, if it exists.
-        By default the highest id possible to avoid interfering with the zero-based player
-        ids.
-        """
-        return self.max_num_players if self.has_chance_player else None
 
 
 class Player(ABC):
