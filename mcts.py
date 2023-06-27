@@ -202,11 +202,9 @@ class MCTS:
 
     def reset_new_game(self, player_id: int) -> None:
         self.own_pid = player_id
-        self.root = StateNode(
+        self.new_root(
             self.nets.initial_latent,
             self.nets.initial_belief,
-            0,
-            self.nets,
         )
 
     def new_root(
