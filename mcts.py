@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Optional, cast
 from collections.abc import MutableMapping
 
 import numpy as np
@@ -14,7 +14,7 @@ from config import C
 if TYPE_CHECKING:
     from torch import Tensor
 
-    from util import ndarr_f32, ndarr_f64
+    from util import ndarr_f32, ndarr_f64, ndarr_bool
     from config.schema import MctsConfig
     from networks.bases import Networks
 
@@ -92,6 +92,7 @@ class StateNode(Node):
     """
 
     current_player: int
+    mask: Optional[ndarr_bool]  # valid actions
 
     def __init__(
         self,
@@ -99,15 +100,24 @@ class StateNode(Node):
         belief: Tensor,
         reward: float,
         nets: Networks,
+        valid_actions_mask: Optional[ndarr_bool] = None,
     ):
-        value_pred, probs, current_player = nets.prediction.si(latent, belief)
+        self.mask = valid_actions_mask
+        value_pred, policy, current_player = nets.prediction.si(latent, belief)
         self.current_player = cast(int, current_player.argmax().item())
+        probs = policy.detach().numpy()
+        if valid_actions_mask is not None:
+            # Just in case you want to disable the mask:
+            # The correct place to do so is the game implementation. It must then return
+            # an all-True mask and handle 'illegal' moves somehow.
+            probs[~valid_actions_mask] = 0
+            probs /= probs.sum()
         super().__init__(
             latent=latent,
             belief=belief,
             reward=reward,
             value_pred=value_pred.item(),
-            probs=probs.detach().numpy(),
+            probs=probs,
         )
 
     def _create_child_at(self, action: int, nets: Networks) -> Node:
@@ -199,8 +209,13 @@ class MCTS:
             self.nets,
         )
 
-    def new_root(self, latent: Tensor, belief: Tensor) -> None:
-        self.root = StateNode(latent, belief, 0, self.nets)
+    def new_root(
+        self,
+        latent: Tensor,
+        belief: Tensor,
+        valid_actions_mask: Optional[ndarr_bool] = None,
+    ) -> None:
+        self.root = StateNode(latent, belief, 0, self.nets, valid_actions_mask)
 
     def ensure_visit_count(self, count: int) -> None:
         """
