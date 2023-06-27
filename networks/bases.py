@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from attrs import define
 from torch import Tensor
 
+from mcts import TurnStatus
 from util import copy_type_signature, hide_type_annotations
 from config import C
 
@@ -49,14 +50,14 @@ class RepresentationNet(NetBase):
 
 
 class PredictionNet(NetBase):
-    # Latent, Belief -> Value, Policy, CurrentPlayer
+    # Latent, Belief -> Value, Policy
 
     @abstractmethod
     def forward(
         self,
         latent: Tensor,
         belief: Tensor,
-    ) -> tuple[Tensor, Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor]:
         pass
 
     @copy_type_signature(forward)  # export a typed __call__() interface
@@ -65,7 +66,7 @@ class PredictionNet(NetBase):
 
 
 class DynamicsNet(NetBase):
-    # Latent, Belief, Action -> Latent, Belief, Reward, IsTerminal
+    # Latent, Belief, Action -> Latent, Belief, Reward, TurnStatus
 
     @abstractmethod
     def forward(
@@ -264,7 +265,6 @@ class PredictionNetContainer(NetContainer):
         return (
             1,
             C.game.instance.max_num_actions,
-            C.game.instance.max_num_players + C.game.instance.has_chance_player,
         )
 
     def forward(
@@ -272,12 +272,12 @@ class PredictionNetContainer(NetContainer):
         latent: Tensor,
         belief: Tensor,
         logits: bool = False,
-    ) -> tuple[Tensor, Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor]:
         result = self.net(latent, belief)
         if logits:
             return result
-        value, policy_log, player_log = result
-        return value, F.softmax(policy_log, dim=-1), F.softmax(player_log, dim=-1)
+        value, policy_log = result
+        return value, F.softmax(policy_log, dim=-1)
 
     @copy_type_signature(forward)  # export a typed __call__() interface
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
@@ -297,7 +297,12 @@ class DynamicsNetContainer(NetContainer):
 
     @classmethod
     def _out_shape_info(cls) -> ShapesInfo:
-        return C.networks.latent_shape, C.networks.belief_shape, 1, 1
+        return (
+            C.networks.latent_shape,
+            C.networks.belief_shape,
+            1,
+            C.game.instance.max_num_players + len(TurnStatus),
+        )
 
     def forward(
         self,
@@ -309,8 +314,8 @@ class DynamicsNetContainer(NetContainer):
         result = self.net(latent, belief, action_onehot)
         if logits:
             return result
-        latent, belief, reward, terminal_log = result
-        return latent, belief, reward, F.sigmoid(terminal_log)
+        latent, belief, reward, turn_status_log = result
+        return latent, belief, reward, F.softmax(turn_status_log, dim=-1)
 
     @copy_type_signature(forward)  # export a typed __call__() interface
     def __call__(self, *args: Any, **kwargs: Any) -> Any:

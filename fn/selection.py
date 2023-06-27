@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 import numpy as np
 
-from mcts import Node, StateNode
+from mcts import Node, StateNode, TurnStatus
 from config import C
 
 from .util import argmax, map_actions_callback
@@ -87,10 +87,7 @@ class SwitchOnChanceNodes:
         self.chance_fn = chance_selection_fn
 
     def __call__(self, node: Node) -> int:
-        if (
-            isinstance(node, StateNode)
-            and node.current_player == C.game.instance.chance_player_id
-        ):
+        if isinstance(node, StateNode) and node.player is TurnStatus.CHANCE_PLAYER:
             return self.chance_fn(node)
         return self.normal_fn(node)
 

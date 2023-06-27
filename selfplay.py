@@ -7,6 +7,7 @@ from collections.abc import Iterable, Sequence
 import numpy as np
 from attrs import frozen
 
+from mcts import TurnStatus
 from config import C
 from rl_player import RLBase
 from trajectory import TrajectoryState
@@ -57,7 +58,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
         if state.is_terminal:
             break
 
-        if state.current_player_id == C.game.instance.chance_player_id:
+        if state.is_chance:
             chance_outcomes = state.chance_outcomes
             action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
             state.apply_action(action)
@@ -66,7 +67,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
                     TrajectoryState.from_training_info(
                         player.create_training_info(),
                         target_policy=chance_outcomes,
-                        current_player=C.game.instance.chance_player_id,
+                        turn_status=TurnStatus.CHANCE_PLAYER.target_index,
                         action=action,
                         reward=C.game.reward_fn(state, pid),
                     )
@@ -84,7 +85,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
             traj.append(
                 TrajectoryState.from_training_info(
                     player.create_training_info(),
-                    current_player=curr_pid,
+                    turn_status=curr_pid,
                     action=action,
                     reward=C.game.reward_fn(state, pid),
                 )

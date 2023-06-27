@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional, cast
+from enum import Enum
+from typing import TYPE_CHECKING, Self, Literal, Optional, TypeAlias, cast
 from collections.abc import MutableMapping
 
 import numpy as np
@@ -19,6 +20,31 @@ if TYPE_CHECKING:
     from networks.bases import Networks
 
 log = logging.getLogger(__name__)
+
+
+class TurnStatus(Enum):
+    CHANCE_PLAYER = 0  # the chance player is at turn
+    TERMINAL_STATE = 1  # the game ended
+
+    @classmethod
+    def from_index(cls, index: int) -> int | Self:
+        """
+        Return the encoded TurnStatus or player id from the onehot vector.
+        """
+        n = C.game.instance.max_num_players
+        if index < n:
+            return index  # a normal zero-based player id
+        return cls(index - n)  # a TurnStatus enum value
+
+    @property
+    def target_index(self) -> int:
+        """
+        Transform enum values to the corresponding onehot target index.
+        """
+        return C.game.instance.max_num_players + self.value
+
+
+CurrentPlayer: TypeAlias = int | Literal[TurnStatus.CHANCE_PLAYER]
 
 
 class Node(ABC):
@@ -95,7 +121,7 @@ class StateNode(Node):
     Represents a normal game state. Child nodes are created using the dynamics network.
     """
 
-    current_player: int
+    player: CurrentPlayer
     mask: Optional[ndarr_bool]  # valid actions
 
     def __init__(
@@ -105,11 +131,12 @@ class StateNode(Node):
         reward: float,
         mcts: MCTS,
         /,
+        current_player: Optional[CurrentPlayer] = None,
         valid_actions_mask: Optional[ndarr_bool] = None,
     ):
         self.mask = valid_actions_mask
-        value_pred, policy, current_player = mcts.nets.prediction.si(latent, belief)
-        self.current_player = cast(int, current_player.argmax().item())
+        self.player = current_player or mcts.own_pid
+        value_pred, policy = mcts.nets.prediction.si(latent, belief)
         probs = policy.detach().numpy()
         if valid_actions_mask is not None:
             # Just in case you want to disable the mask:
@@ -127,18 +154,20 @@ class StateNode(Node):
         )
 
     def _create_child_at(self, action: int) -> Node:
-        latent, belief, reward, is_terminal = self.mcts.nets.dynamics.si(
+        latent, belief, reward, turn_onehot = self.mcts.nets.dynamics.si(
             self.latent,
             self.belief,
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
-        if is_terminal.item() > 0.5 and C.training.loss_weights.terminal > 0:
+        turn_status = TurnStatus.from_index(cast(int, turn_onehot.argmax().item()))
+        if turn_status is TurnStatus.TERMINAL_STATE:
             return TerminalNode(latent, belief, reward.item(), self.mcts)
         return StateNode(
             latent,
             belief,
             reward.item(),
             self.mcts,
+            current_player=turn_status,
         )
 
 

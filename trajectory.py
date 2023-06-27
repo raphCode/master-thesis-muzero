@@ -9,6 +9,7 @@ import torch
 from attrs import frozen
 from torch import Tensor
 
+from mcts import TurnStatus
 from util import TensorCache, ndarr_f64
 from config import C
 
@@ -41,7 +42,7 @@ class TrajectoryState:
 
     representation: Observation | Latent
     belief: Tensor
-    current_player: int
+    turn_status: int
     action: int
     target_policy: ndarr_f64
     mcts_value: float
@@ -53,7 +54,7 @@ class TrajectoryState:
         info: TrainingInfo,
         *args: Any,
         target_policy: Optional[ndarr_f64] = None,
-        current_player: int,
+        turn_status: int,
         action: int,
         reward: float,
     ) -> TrajectoryState:
@@ -62,7 +63,7 @@ class TrajectoryState:
         return cls(
             representation=info.representation,
             belief=info.belief,
-            current_player=current_player,
+            turn_status=turn_status,
             action=action,
             target_policy=target_policy,
             mcts_value=info.mcts_value,
@@ -107,12 +108,11 @@ class TrainingData:
     observations: tuple[Tensor, ...]
     belief: Tensor
     latent: Tensor
-    current_player: Tensor
+    turn_status: Tensor
     action_onehot: Tensor
     target_policy: Tensor
     value_target: Tensor
     reward: Tensor
-    terminal: Tensor
 
     @classmethod  # type: ignore [misc]
     @property
@@ -132,12 +132,11 @@ class TrainingData:
             observations=tuple(map(torch.zeros, C.game.instance.observation_shapes)),
             belief=cache.zeros(C.networks.belief_shape),
             latent=cache.zeros(C.networks.latent_shape),
-            current_player=cache.tensor(0, dtype=torch.long),  # index tensor needs long
+            turn_status=cache.tensor(0, dtype=torch.long),  # index tensor needs long
             action_onehot=cache.zeros(C.game.instance.max_num_actions, dtype=torch.long),
             target_policy=cache.zeros(C.game.instance.max_num_actions),
             value_target=cache.tensor(0),
             reward=cache.tensor(0.0),
-            terminal=cache.tensor(0.0),
         )
 
     @classmethod
@@ -165,7 +164,10 @@ class TrainingData:
                 ts.representation if not is_obs else cls.dummy,
             ).latent,
             belief=ts.belief,
-            current_player=cache.tensor(ts.current_player, dtype=torch.long),
+            turn_status=cache.tensor(
+                TurnStatus.TERMINAL_STATE.target_index if is_terminal else ts.turn_status,
+                dtype=torch.long,
+            ),
             action_onehot=cache.onehot(
                 ts.action,
                 C.game.instance.max_num_actions,
@@ -173,7 +175,6 @@ class TrainingData:
             target_policy=torch.tensor(ts.target_policy),
             value_target=torch.tensor(float(value_target)),
             reward=cache.tensor(float(ts.reward)),
-            terminal=cache.tensor(float(is_terminal)),
         )
 
     @classmethod
@@ -191,10 +192,10 @@ class TrainingData:
         for name, data in zip(field_names, field_data):
             if name == "observations":
                 stacked_data = tuple(map(torch.stack, zip(*data)))
-            elif name.startswith("is_") or name == "current_player":
+            elif name.startswith("is_") or name == "turn_status":
                 # only stack these single items in the batch dimension to get a 1D tensor
                 # - is_*: boolean masks, processed specially in the training
-                # - current_player: cross entropy loss takes class indices directly
+                # - turn_status: cross entropy loss takes class indices directly
                 stacked_data = torch.stack(data)
             else:
                 # Networks are expected to return data at least 1D (disregarding batch

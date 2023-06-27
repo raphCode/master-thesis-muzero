@@ -36,8 +36,7 @@ class Losses:
     latent: Tensor = zero_tensor
     reward: Tensor = zero_tensor
     policy: Tensor = zero_tensor
-    player: Tensor = zero_tensor
-    terminal: Tensor = zero_tensor
+    turn: Tensor = zero_tensor
 
     def weighted_sum(self, weights: LossWeights) -> Tensor:
         """
@@ -108,7 +107,6 @@ class Trainer:
 
         pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
-        bcel = nn.BCEWithLogitsLoss(reduction="none")
         mse = nn.MSELoss(reduction="none")
 
         losses = Losses()
@@ -138,23 +136,22 @@ class Trainer:
 
             counts.data += cast(int, step.is_data.count_nonzero().item())
 
-            value, policy_logits, curr_player_logits = self.nets.prediction(
+            value, policy_logits = self.nets.prediction(
                 latent,
                 belief,
                 logits=True,
             )
             losses.value += ml(mse, value, step.value_target)
             losses.policy += ml(cross, policy_logits, step.target_policy)
-            losses.player += ml(cross, curr_player_logits, step.current_player)
 
-            latent, belief, reward, terminal_logit = self.nets.dynamics(
+            latent, belief, reward, turn_status_logits = self.nets.dynamics(
                 latent,
                 belief,
                 step.action_onehot,
                 logits=True,
             )
             losses.reward += ml(mse, reward, step.reward)
-            losses.terminal += ml(bcel, terminal_logit, step.terminal)
+            losses.turn += ml(cross, turn_status_logits, step.turn_status)
 
         losses /= counts
 
