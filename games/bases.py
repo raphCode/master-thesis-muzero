@@ -100,7 +100,7 @@ class GameState(ABC):
     @abstractmethod
     def rewards(self) -> tuple[float, ...]:
         """
-        Tuple of rewards, one for each player, starting at 0 for the first player
+        Tuple of rewards, one for each player, index 0 for the first player
         """
         pass
 
