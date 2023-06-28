@@ -97,7 +97,7 @@ class OpenSpielGame(Game):
         bad_move_action: Optional[Any] = None,
         teams: list[list[int]] = [],
     ):
-        self.game = pyspiel.load_game(game_name)
+        self.game = pyspiel.load_game_as_turn_based(game_name)
         self.bad_move_reward = optional_map(float)(bad_move_reward)
         self.bad_move_action = optional_map(int)(bad_move_action)
         assert (
