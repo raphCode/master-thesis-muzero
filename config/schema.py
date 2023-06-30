@@ -128,6 +128,7 @@ class LearningRates:
     dynamics: float
     prediction: float
     representation: float
+    initial_tensors: float
 
 
 @frozen

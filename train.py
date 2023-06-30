@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import operator
 import functools
-import itertools
 from typing import TYPE_CHECKING, Callable, Optional, cast
 
 import attrs
@@ -74,14 +73,26 @@ class LossCounts:
 class Trainer:
     def __init__(self, nets: Networks):
         self.nets = nets
+        lrs = C.training.learning_rates
         self.optimizer = C.training.optimizer(
-            itertools.chain(
-                nets.representation.parameters(),
-                nets.prediction.parameters(),
-                nets.dynamics.parameters(),
-                [nets.initial_latent],
-                [nets.initial_belief] if nets.initial_belief is not None else [],
-            )
+            [
+                dict(
+                    params=nets.representation.parameters(),
+                    lr=lrs.base * lrs.representation,
+                ),
+                dict(
+                    params=nets.prediction.parameters(),
+                    lr=lrs.base * lrs.prediction,
+                ),
+                dict(
+                    params=nets.dynamics.parameters(),
+                    lr=lrs.base * lrs.dynamics,
+                ),
+                dict(
+                    params=[nets.initial_latent, nets.initial_belief],
+                    lr=lrs.base * lrs.initial_tensors,
+                ),
+            ]
         )
 
     def process_batch(self, batch: list[TrainingData], tbs: TBStepLogger) -> None:
