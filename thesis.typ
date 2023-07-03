@@ -15,6 +15,14 @@
   set enum(
     numbering: "1.a)"
   )
+  show ref: it => {
+    if it.element == none {
+      // nonbreaking space before citations
+      h(0pt, weak: true) + [~] + it
+    } else {
+      it
+    }
+  }
   doc
 }
 
