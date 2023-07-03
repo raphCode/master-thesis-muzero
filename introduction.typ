@@ -60,7 +60,7 @@ muzero addresses this challenge by eliminating the need for a simulator in the s
 phase.
 Instead, it develops its own internal model to predict future env states.
 By doing so, it can learn how to play games without having access to the underlying rules.
-Perhaps surprisingly, this allows muzero to match Azero's performance in the
+Perhaps surprisingly, this allows muzero to match azero's performance in the
 aforementioned board games.
 Moreover, it also masters the Atari suite of 57 video games, demonstrating the ability to
 generalise across many domains.
