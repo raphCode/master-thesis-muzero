@@ -1,7 +1,5 @@
 import functools
-from copy import copy
 from typing import Any, Generic, TypeVar, Callable, Optional, TypeAlias, cast
-from contextlib import suppress, contextmanager
 from collections.abc import Iterator
 
 import numpy as np
@@ -35,20 +33,6 @@ class copy_type_signature(Generic[Fn]):
 
     def __call__(self, wrapped: Callable[..., Any]) -> Fn:
         return cast(Fn, wrapped)
-
-
-@contextmanager
-def hide_type_annotations(obj: Any, *annotation_names: str) -> Iterator[None]:
-    """
-    Context manager to temporarily delete some type annotations.
-    Used to hide problematic attributes from torch.jit.script.
-    """
-    original_annotations = copy(obj.__annotations__)
-    for name in annotation_names:
-        with suppress(KeyError):
-            del obj.__annotations__[name]
-    yield
-    obj.__annotations__ = original_annotations
 
 
 class TensorCache:
