@@ -147,19 +147,17 @@ class Trainer:
 
             counts.data += cast(int, step.is_data.count_nonzero().item())
 
-            value, policy_logits = self.nets.prediction(
+            value, policy_logits = self.nets.prediction.raw_forward(
                 latent,
                 belief,
-                logits=True,
             )
             losses.value += ml(mse, value, step.value_target)
             losses.policy += ml(cross, policy_logits, step.target_policy)
 
-            latent, belief, reward, turn_status_logits = self.nets.dynamics(
+            latent, belief, reward, turn_status_logits = self.nets.dynamics.raw_forward(
                 latent,
                 belief,
                 step.action_onehot,
-                logits=True,
             )
             losses.reward += ml(mse, reward, step.reward)
             losses.turn += ml(cross, turn_status_logits, step.turn_status)
