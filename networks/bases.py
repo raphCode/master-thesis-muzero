@@ -44,7 +44,8 @@ class RepresentationNet(NetBase):
     ) -> Tensor:
         pass
 
-    @copy_type_signature(forward)  # export a typed __call__() interface
+    # method overrides are to provide properly typed function signatures:
+    @copy_type_signature(forward)
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return super().__call__(*args, **kwargs)
 
@@ -60,7 +61,8 @@ class PredictionNet(NetBase):
     ) -> tuple[Tensor, Tensor]:
         pass
 
-    @copy_type_signature(forward)  # export a typed __call__() interface
+    # method overrides are to provide properly typed function signatures:
+    @copy_type_signature(forward)
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return super().__call__(*args, **kwargs)
 
@@ -77,7 +79,8 @@ class DynamicsNet(NetBase):
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         pass
 
-    @copy_type_signature(forward)  # export a typed __call__() interface
+    # method overrides are to provide properly typed function signatures:
+    @copy_type_signature(forward)
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return super().__call__(*args, **kwargs)
 
