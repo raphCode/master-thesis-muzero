@@ -46,59 +46,49 @@ class ReplayBuffer:
         traj_id = self.buffer.position + len(traj)
 
         rewards = np.array([ts.reward for ts in traj])
-        for n, ts in enumerate(traj):
+        for t, traj_state in enumerate(traj):
             # The target for the prediction network value head is the bootstrapped n step
             # return. In general, it is calculated by adding future rewards over the n
             # step horizon and a final value estimate.
-            # In MuZero, the summands are a bit different than in classical RL because
-            # reward and value are predicted separately.
-            # Terminology:
-            # - trajectory state at time t: s_t
-            # - mcts root node value of s_t: v_t
-            # - experienced reward after taking action in s_t: r_t
-            # - discount factor d raised to power x: d^x
-            # Value target for s_t with horizon size n:
-            # - sum up n future rewards:
-            #   - r_(t+1), r_(t+2), ..., r_(t+n) with discounts d^0, d^1, ..., d^(n-1)
-            #   - unlike traditional RL, the reward r_t for the current state is NOT
-            #     included: it is already directly learned / predicted by the dynamics
-            #     network
-            # - bootstrap by adding value estimate v_(t+n):
-            #   - includes all 'remaining' future rewards r_(t+n+1), r_(t+n+2), ...
-            #   - discounted with d^n: follows the reward discounting series
-            #   - can be omitted if s_(t+n) is terminal: terminal states have a value
-            #     estimate of zero
-            # In general, the calculations have to be the same like the ones performed
-            # during the tree search.
-            nstep_start = n + 1
-            remaining_nstep_len = len(traj) - nstep_start
-            nstep_len = min(C.training.n_step_horizon, remaining_nstep_len)
+            #
+            # In the MuZero paper, this notation is used:
+            # In state s_t the action a_(t+1) was taken, yielding reward r_(t+1).
+            # The MCTS in s_t produced a value of v_t.
+            # The value target z_t with horizon size n is calculated by:
+            # z_t = d^0 * r_(t+1) + d^1 * r_(t+2), ..., d^(n-1) * r_(t+n) + d^n * v_(t+n)
+            #
+            # In this implementation the trajectory list at index stores at index t:
+            # - state s_t
+            # - action a_(t+1)
+            # - reward r_(t+1)
+            # - mcts root node value v_t
+            #
+            # Therefore, in the implementation, 1 is subtracted from the reward indices
+            # compared to the formula above.
+            # The discount factor d raised to the power x is stored at self.discounts[x]
+            remaining_len = len(traj) - t
+            n = min(C.training.n_step_horizon, remaining_len)
 
-            value_target = np.inner(
-                rewards[nstep_start : nstep_start + nstep_len], self.discounts[:nstep_len]
-            )
+            value_target = np.inner(rewards[t : t + n], self.discounts[:n])
 
-            nstep_end_terminal = game_completed and nstep_start + nstep_len == len(traj)
+            nstep_end_terminal = game_completed and t + n == len(traj)
             if not nstep_end_terminal:
-                value_target += (
-                    traj[nstep_start + nstep_len - 1].mcts_value
-                    * self.discounts[nstep_len]
-                )
+                value_target += traj[t + n].mcts_value * self.discounts[n]
 
             self.buffer.append(
                 (
                     traj_id,
                     TrainingData.from_trajectory_state(
-                        ts,
+                        traj_state,
                         value_target,
-                        is_initial=(n == 0),
-                        is_terminal=(game_completed and n == len(traj) - 1),
+                        is_initial=(t == 0),
+                        is_terminal=(game_completed and t == len(traj) - 1),
                         cache=self.cache,
                     ),
                 )
             )
             self.values.append(value_target)
-            self.rewards.append(ts.reward)
+            self.rewards.append(traj_state.reward)
 
     def sample(self) -> list[TrainingData]:
         """
