@@ -46,6 +46,7 @@ def main(cfg: DictConfig) -> None:
             n += result.moves
             for traj in result.trajectories:
                 rb.add_trajectory(traj, result.game_completed)
+            pc.net.update_rescalers(rb)
             if len(rb) > 0.2 * C.training.replay_buffer_size:
                 t.process_batch(rb.sample(), tb.create_step_logger(n))
 

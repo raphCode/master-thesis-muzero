@@ -37,7 +37,10 @@ class FromExpandedValues(SoftmaxTemp):
 
     def __call__(self, node: Node) -> ndarr_f64:
         assert len(node.children) > 0
-        values = [child.reward + child.value for child in node.children.values()]
+        values = [
+            child.normalized_reward + child.normalized_value
+            for child in node.children.values()
+        ]
         policy = np.full(C.game.instance.max_num_actions, 0.0)
         policy[list(node.children.keys())] = softmax(values, self.temp)
         return policy

@@ -1,7 +1,7 @@
 import typing
 import functools
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar, ParamSpec, TypeAlias, cast
+from typing import Any, TypeVar, Protocol, ParamSpec, TypeAlias, cast
 from collections.abc import Sequence
 
 import attrs
@@ -14,6 +14,8 @@ from torch import Tensor
 from mcts import TurnStatus
 from util import copy_type_signature
 from config import C
+
+from .rescaler import Rescaler
 
 P = ParamSpec("P")
 R = TypeVar("R", bound=Tensor | tuple[Tensor, ...])
@@ -111,7 +113,7 @@ def autobatch(module: nn.Module, *inputs: Tensor) -> Tensor | tuple[Tensor, ...]
 
 class NetContainer(ABC, nn.Module):
     """
-    Wraps actual network implementation, provides single inference.
+    Wraps actual network implementation, provides value rescaling and single inference.
     Single inference means evaluating the network with unbatched data.
     """
 
@@ -179,6 +181,9 @@ class NetContainer(ABC, nn.Module):
 
             return list(map(example_tensor, self.in_shapes))
 
+        for name, mod in self.named_modules():
+            if mod is not self and hasattr(mod, "jit") and callable(mod.jit):
+                setattr(self, name, mod.jit())
         return cast(
             torch.jit.TopLevelTracedModule,
             torch.jit.trace_module(  # type: ignore [no-untyped-call]
@@ -225,6 +230,11 @@ class RepresentationNetContainer(NetContainer):
 
 class PredictionNetContainer(NetContainer):
     net: PredictionNet
+    value_scale: Rescaler
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self.value_scale = Rescaler()
 
     @classmethod
     def _in_shape_info(cls) -> ShapesInfo:
@@ -243,7 +253,7 @@ class PredictionNetContainer(NetContainer):
         belief: Tensor,
     ) -> tuple[Tensor, Tensor]:
         value, policy_log = self.net(latent, belief)
-        return value, F.softmax(policy_log, dim=1)
+        return self.value_scale.rescale(value), F.softmax(policy_log, dim=1)
 
     # method overrides are to provide properly typed function signatures:
     @copy_type_signature(forward)
@@ -261,6 +271,11 @@ class PredictionNetContainer(NetContainer):
 
 class DynamicsNetContainer(NetContainer):
     net: DynamicsNet
+    reward_scale: Rescaler
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self.reward_scale = Rescaler()
 
     @classmethod
     def _in_shape_info(cls) -> ShapesInfo:
@@ -289,7 +304,7 @@ class DynamicsNetContainer(NetContainer):
         return (
             latent,
             belief,
-            reward,
+            self.reward_scale.rescale(reward),
             F.softmax(turn_status_log, dim=1),
         )
 
@@ -307,6 +322,16 @@ class DynamicsNetContainer(NetContainer):
         return super().__call__(*args, **kwargs)
 
 
+class ProvidesBounds(Protocol):
+    @property
+    def value_bounds(self) -> tuple[float, float]:
+        ...
+
+    @property
+    def reward_bounds(self) -> tuple[float, float]:
+        ...
+
+
 @define(kw_only=True)
 class Networks:
     representation: RepresentationNetContainer
@@ -319,3 +344,7 @@ class Networks:
         for name, item in attrs.asdict(self).items():
             if isinstance(item, NetContainer):
                 setattr(self, name, item.jit())
+
+    def update_rescalers(self, b: ProvidesBounds) -> None:
+        self.prediction.value_scale.update_bounds(b.value_bounds)
+        self.dynamics.reward_scale.update_bounds(b.reward_bounds)

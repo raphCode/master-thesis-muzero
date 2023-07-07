@@ -151,7 +151,8 @@ class Trainer:
                 latent,
                 belief,
             )
-            losses.value += ml(mse, value, step.value_target)
+            value_target = self.nets.prediction.value_scale.get_target(step.value_target)
+            losses.value += ml(mse, value, value_target)
             losses.policy += ml(cross, policy_logits, step.target_policy)
 
             latent, belief, reward, turn_status_logits = self.nets.dynamics.raw_forward(
@@ -159,7 +160,8 @@ class Trainer:
                 belief,
                 step.action_onehot,
             )
-            losses.reward += ml(mse, reward, step.reward)
+            reward_target = self.nets.dynamics.reward_scale.get_target(step.reward)
+            losses.reward += ml(mse, reward, reward_target)
             losses.turn += ml(cross, turn_status_logits, step.turn_status)
 
         losses /= counts

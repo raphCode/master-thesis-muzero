@@ -20,6 +20,8 @@ class ReplayBuffer:
     def __init__(self) -> None:
         # the integer is a unique id to differentiate different trajectories
         self.buffer = RingBuffer[tuple[int, TrainingData]](C.training.replay_buffer_size)
+        self.values = RingBuffer[float](C.training.replay_buffer_size)
+        self.rewards = RingBuffer[float](C.training.replay_buffer_size)
         self.cache = TensorCache()
         # These are pre-raised discount factors:
         # discounts[x] = pow(discount_factor, x)
@@ -95,6 +97,8 @@ class ReplayBuffer:
                     ),
                 )
             )
+            self.values.append(value_target)
+            self.rewards.append(ts.reward)
 
     def sample(self) -> list[TrainingData]:
         """
@@ -138,6 +142,14 @@ class ReplayBuffer:
                 break
             batch.append(TrainingData.stack_batch(batch_step))
         return batch
+
+    @property
+    def reward_bounds(self) -> tuple[float, float]:
+        return min(self.rewards), max(self.rewards)
+
+    @property
+    def value_bounds(self) -> tuple[float, float]:
+        return min(self.values), max(self.values)
 
     def __len__(self) -> int:
         return len(self.buffer)
