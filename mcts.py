@@ -99,6 +99,14 @@ class Node(ABC):
             return 0
         return self.value_sum / self.visit_count
 
+    @property
+    def normalized_value(self) -> float:
+        return self.mcts.nets.prediction.value_scale.normalize(self.value)
+
+    @property
+    def normalized_reward(self) -> float:
+        return self.mcts.nets.dynamics.reward_scale.normalize(self.reward)
+
     def add_value(self, value: float) -> None:
         self.value_sum += value
         self.visit_count += 1

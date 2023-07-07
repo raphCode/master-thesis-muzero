@@ -31,7 +31,10 @@ class pUCTscore:
 
         def child_score(prior: float, child: Node) -> float:
             prior_score = prior * prior_scale_half / (child.visit_count + 1)
-            value_score = child.reward + child.value * C.training.discount_factor
+            value_score = (
+                child.normalized_reward
+                + child.normalized_value * C.training.discount_factor
+            )
             return value_score + prior_score
 
         return argmax(
