@@ -83,6 +83,9 @@ class OpenSpielGameState(GameState):
         else:
             self.state.apply_action(action)
 
+    def __repr__(self) -> str:
+        return repr(self.state)
+
 
 class OpenSpielGame(Game):
     game: pyspiel.Game
