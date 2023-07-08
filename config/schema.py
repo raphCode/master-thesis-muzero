@@ -142,6 +142,7 @@ class LossWeights:
 
 @frozen
 class TrainConfig:
+    train_selfplay_ratio: float
     batch_size: int
     min_trajectory_length: int
     max_trajectory_length: int
