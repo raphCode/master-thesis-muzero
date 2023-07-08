@@ -17,12 +17,18 @@ class ReplayBuffer:
     detect when a trajectory ends and a new one starts.
     """
 
+    # Monotonous raising counters representing the number of incoming and outgoing samples
+    data_added: int
+    data_sampled: int
+
     def __init__(self) -> None:
         # the integer is a unique id to differentiate different trajectories
         self.buffer = RingBuffer[tuple[int, TrainingData]](C.training.replay_buffer_size)
         self.values = RingBuffer[float](C.training.replay_buffer_size)
         self.rewards = RingBuffer[float](C.training.replay_buffer_size)
         self.cache = TensorCache()
+        self.data_added = 0
+        self.data_sampled = 0
         # These are pre-raised discount factors:
         # discounts[x] = pow(discount_factor, x)
         self.discounts = np.concatenate(
@@ -89,6 +95,7 @@ class ReplayBuffer:
             )
             self.values.append(value_target)
             self.rewards.append(traj_state.reward)
+        self.data_added += len(traj)
 
     def sample(self) -> list[TrainingData]:
         """
@@ -124,6 +131,7 @@ class ReplayBuffer:
                 traj_id, data = self.buffer[start_index + n]
                 if traj_id == start_traj_id:
                     is_data = True
+                    self.data_sampled += 1
                 else:
                     data = TrainingData.dummy
                 batch_step.append(data)
