@@ -16,8 +16,8 @@ if TYPE_CHECKING:
     from torch import Tensor
 
     from util import ndarr_f32, ndarr_f64, ndarr_bool
+    from networks import Networks
     from config.schema import MctsConfig
-    from networks.bases import Networks
 
 log = logging.getLogger(__name__)
 

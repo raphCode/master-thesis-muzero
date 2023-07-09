@@ -17,7 +17,7 @@ This also means a bit of hackery by switching types based on TYPE_CHECKING.
 """
 
 if TYPE_CHECKING:
-    from networks.bases import Networks
+    from networks import Networks
 
 if not TYPE_CHECKING:
     # with the schema merged first, omegaconf needs the structured config to be writeable:
