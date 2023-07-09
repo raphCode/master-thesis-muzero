@@ -21,8 +21,8 @@ class NetBase(ABC, nn.Module):
     pass
 
 
-# Custom network implementations should subclass the three Net classes below:
-
+# Custom network implementations should subclass the three Net classes below
+#
 # beliefs are always Tensors, even when disabled.
 # In this case, belief tensors are empty, i.e. they have at least one zero data dimension.
 # eg, for 2D images, the tensor shape is often BxHxWxC. An empty tensor may have zero C.
