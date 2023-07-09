@@ -7,9 +7,9 @@ from attrs import frozen
 
 from mcts import MCTS
 from config import C
+from networks import Networks
 from trajectory import Latent, Observation
 from games.bases import Player
-from networks.bases import Networks
 
 if TYPE_CHECKING:
     import torch

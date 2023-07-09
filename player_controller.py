@@ -10,7 +10,7 @@ from rl_player import RLBase
 from games.bases import Player, MatchData
 
 if TYPE_CHECKING:
-    from networks.bases import Networks
+    from networks import Networks
 
 PlayerPartial: TypeAlias = functools.partial[Player]
 

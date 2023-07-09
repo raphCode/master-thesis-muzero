@@ -7,12 +7,9 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
-from networks.bases import (
-    NetBase,
-    DynamicsNet,
+from .bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
+from .containers import (
     NetContainer,
-    PredictionNet,
-    RepresentationNet,
     DynamicsNetContainer,
     PredictionNetContainer,
     RepresentationNetContainer,

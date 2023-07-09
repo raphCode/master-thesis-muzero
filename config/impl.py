@@ -11,10 +11,10 @@ import gorilla  # type: ignore [import]
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
+from networks import Networks
 from games.bases import Game, Player
 from config.schema import BaseConfig, NetworkConfig, NetworkSchema
-from networks.bases import (
-    Networks,
+from networks.containers import (
     DynamicsNetContainer,
     PredictionNetContainer,
     RepresentationNetContainer,

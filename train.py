@@ -13,9 +13,9 @@ from torch import Tensor, nn
 from config import C
 
 if TYPE_CHECKING:
+    from networks import Networks
     from trajectory import TrainingData
     from config.schema import LossWeights
-    from networks.bases import Networks
     from tensorboard_wrapper import TBStepLogger
 
 
