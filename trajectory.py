@@ -192,16 +192,12 @@ class TrainingData:
         for name, data in zip(field_names, field_data):
             if name == "observations":
                 stacked_data = tuple(map(torch.stack, zip(*data)))
-            elif name.startswith("is_") or name == "turn_status":
-                # only stack these single items in the batch dimension to get a 1D tensor
-                # - is_*: boolean masks, processed specially in the training
-                # - turn_status: cross entropy loss takes class indices directly
-                stacked_data = torch.stack(data)
             else:
-                # Networks are expected to return data at least 1D (disregarding batch
-                # dim), so do not make an exception for single data items (reward, value).
-                # To match the shapes returned by the networks, create atleast a 2D
-                # tensor, with the batch dimension first.
-                stacked_data = torch.vstack(data)
+                if not (name.startswith("is_") or name == "turn_status"):
+                    data = torch.atleast_1d(data)  # type: ignore [no-untyped-call]
+                    # only keep this data 0D:
+                    # - is_*: boolean masks, processed specially in the training
+                    # - turn_status: cross entropy loss takes class indices directly
+                stacked_data = torch.stack(data)
             stacked_fields[name] = stacked_data
         return cls(**stacked_fields)  # type: ignore [arg-type]
