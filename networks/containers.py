@@ -3,16 +3,14 @@ from __future__ import annotations
 import typing
 import functools
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, TypeAlias, cast
+from typing import TYPE_CHECKING, Any, cast
 from collections.abc import Sequence
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from mcts import TurnStatus
 from util import copy_type_signature
-from config import C
 
 from .rescaler import Rescaler
 
@@ -20,21 +18,6 @@ if TYPE_CHECKING:
     from torch import Tensor
 
     from .bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
-
-
-Shapes: TypeAlias = list[tuple[int, ...]]
-ShapesInfo: TypeAlias = Sequence[int | Sequence[int]]
-
-
-def make_shapes(*shapes: int | Sequence[int]) -> Shapes:
-    """
-    Create a list of shape tuples, promoting single integer shapes to a tuple.
-    """
-
-    def int2shape(x: int | Sequence[int]) -> Sequence[int]:
-        return [x] if isinstance(x, int) else x
-
-    return list(map(tuple[int], map(int2shape, shapes)))
 
 
 def autobatch(module: nn.Module, *inputs: Tensor) -> Tensor | tuple[Tensor, ...]:
@@ -70,32 +53,12 @@ class NetContainer(ABC, nn.Module):
             f"(found instance of {type(network)})"
         )
 
-    @classmethod  # type: ignore [misc]
-    @property
-    @cast("functools._lru_cache_wrapper[Shapes]", functools.cache)
-    def in_shapes(cls) -> Shapes:
-        """
-        Input tensor shapes according to the global config (without batch dim).
-        """
-        return make_shapes(*cls._in_shape_info())
-
-    @classmethod  # type: ignore [misc]
-    @property
-    @cast("functools._lru_cache_wrapper[Shapes]", functools.cache)
-    def out_shapes(cls) -> Shapes:
-        """
-        Output tensor shapes according to the global config (without batch dim).
-        """
-        return make_shapes(*cls._out_shape_info())
-
     @classmethod
     @abstractmethod
-    def _in_shape_info(cls) -> ShapesInfo:
-        pass
-
-    @classmethod
-    @abstractmethod
-    def _out_shape_info(cls) -> ShapesInfo:
+    def _input_shapes(cls) -> Sequence[Sequence[int]]:
+        """
+        Shapes of the network inputs. Used for jit tracing.
+        """
         pass
 
     @abstractmethod
@@ -113,6 +76,8 @@ class NetContainer(ABC, nn.Module):
         return self.net(*inputs)
 
     def jit(self) -> torch.jit.TopLevelTracedModule:
+        from config import C
+
         @functools.cache
         def example_inputs(unbatched: bool = False) -> list[Tensor]:
             def example_tensor(shape: Sequence[int]) -> Tensor:
@@ -121,7 +86,7 @@ class NetContainer(ABC, nn.Module):
                     return t
                 return t.expand(C.training.batch_size, *shape)
 
-            return list(map(example_tensor, self.in_shapes))
+            return list(map(example_tensor, self._input_shapes()))
 
         for name, mod in self.named_modules():
             if mod is not self and hasattr(mod, "jit") and callable(mod.jit):
@@ -143,12 +108,10 @@ class RepresentationNetContainer(NetContainer):
     net: RepresentationNet
 
     @classmethod
-    def _in_shape_info(cls) -> ShapesInfo:
-        return list(C.game.instance.observation_shapes)
+    def _input_shapes(cls) -> Sequence[Sequence[int]]:
+        from config import C
 
-    @classmethod
-    def _out_shape_info(cls) -> ShapesInfo:
-        return [C.networks.latent_shape]
+        return C.game.instance.observation_shapes
 
     def forward(
         self,
@@ -179,15 +142,10 @@ class PredictionNetContainer(NetContainer):
         self.value_scale = Rescaler()
 
     @classmethod
-    def _in_shape_info(cls) -> ShapesInfo:
-        return C.networks.latent_shape, C.networks.belief_shape
+    def _input_shapes(cls) -> Sequence[Sequence[int]]:
+        from config import C
 
-    @classmethod
-    def _out_shape_info(cls) -> ShapesInfo:
-        return (
-            1,
-            C.game.instance.max_num_actions,
-        )
+        return C.networks.latent_shape, C.networks.belief_shape
 
     def forward(
         self,
@@ -220,20 +178,13 @@ class DynamicsNetContainer(NetContainer):
         self.reward_scale = Rescaler()
 
     @classmethod
-    def _in_shape_info(cls) -> ShapesInfo:
-        return (
-            C.networks.latent_shape,
-            C.networks.belief_shape,
-            C.game.instance.max_num_actions,
-        )
+    def _input_shapes(cls) -> Sequence[Sequence[int]]:
+        from config import C
 
-    @classmethod
-    def _out_shape_info(cls) -> ShapesInfo:
         return (
             C.networks.latent_shape,
             C.networks.belief_shape,
-            1,
-            C.game.instance.max_num_players + len(TurnStatus),
+            [C.game.instance.max_num_actions],
         )
 
     def forward(

@@ -1,6 +1,6 @@
 import math
 import itertools
-from typing import Any, Type, Optional, cast
+from typing import Any, Optional, cast
 from collections.abc import Sequence
 
 import torch
@@ -8,12 +8,6 @@ import torch.nn.functional as F
 from torch import Tensor, nn
 
 from .bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
-from .containers import (
-    NetContainer,
-    DynamicsNetContainer,
-    PredictionNetContainer,
-    RepresentationNetContainer,
-)
 
 
 class GenericFc(nn.Module):
@@ -50,14 +44,18 @@ class GenericFc(nn.Module):
 
 
 class FcBase(GenericFc, NetBase):
-    container_type: Type[NetContainer]
-    out_sizes: list[int]
+    out_shapes: Sequence[Sequence[int]]
 
-    def __init__(self, **kwargs: Any):
-        self.out_sizes = list(map(math.prod, self.container_type.out_shapes))
+    def __init__(
+        self,
+        in_shapes: Sequence[Sequence[int]],
+        out_shapes: Sequence[Sequence[int]],
+        **kwargs: Any,
+    ):
+        self.out_shapes = out_shapes
         super().__init__(
-            input_width=sum(map(math.prod, self.container_type.in_shapes)),
-            output_width=sum(self.out_sizes),
+            input_width=sum(map(math.prod, in_shapes)),
+            output_width=sum(map(math.prod, out_shapes)),
             **kwargs,
         )
 
@@ -67,15 +65,28 @@ class FcBase(GenericFc, NetBase):
                 return tensor.reshape(-1, *shape)
             return tensor
 
-        out_tensors = torch.split(self.fc_forward(*inputs), self.out_sizes, dim=-1)
+        out_tensors = torch.split(
+            self.fc_forward(*inputs),
+            list(map(math.prod, self.out_shapes)),
+            dim=-1,
+        )
         return tuple(
             reshape_maybe(tensor, shape)
-            for tensor, shape in zip(out_tensors, self.container_type.out_shapes)
+            for tensor, shape in zip(out_tensors, self.out_shapes)
         )
 
 
 class FcRepresentation(FcBase, RepresentationNet):
-    container_type: Type[NetContainer] = RepresentationNetContainer
+    def __init__(self, **kwargs: Any):
+        from config import C
+
+        super().__init__(
+            in_shapes=C.game.instance.observation_shapes,
+            out_shapes=[
+                C.networks.latent_shape,
+            ],
+            **kwargs,
+        )
 
     def forward(
         self,
@@ -85,7 +96,20 @@ class FcRepresentation(FcBase, RepresentationNet):
 
 
 class FcPrediction(FcBase, PredictionNet):
-    container_type: Type[NetContainer] = PredictionNetContainer
+    def __init__(self, **kwargs: Any):
+        from config import C
+
+        super().__init__(
+            in_shapes=[
+                C.networks.latent_shape,
+                C.networks.belief_shape,
+            ],
+            out_shapes=[
+                [1],
+                [C.game.instance.max_num_actions],
+            ],
+            **kwargs,
+        )
 
     def forward(self, latent: Tensor, belief: Tensor) -> tuple[Tensor, Tensor]:
         return cast(
@@ -95,7 +119,24 @@ class FcPrediction(FcBase, PredictionNet):
 
 
 class FcDynamics(FcBase, DynamicsNet):
-    container_type: Type[NetContainer] = DynamicsNetContainer
+    def __init__(self, **kwargs: Any):
+        from mcts import TurnStatus
+        from config import C
+
+        super().__init__(
+            in_shapes=[
+                C.networks.latent_shape,
+                C.networks.belief_shape,
+                [C.game.instance.max_num_actions],
+            ],
+            out_shapes=[
+                C.networks.latent_shape,
+                C.networks.belief_shape,
+                [1],
+                [C.game.instance.max_num_players + len(TurnStatus)],
+            ],
+            **kwargs,
+        )
 
     def forward(
         self,
