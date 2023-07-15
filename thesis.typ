@@ -15,14 +15,16 @@
   set enum(
     numbering: "1.a)"
   )
+  let join_nonbreaking = h(0pt, weak: true) + [~]
   show ref: it => {
     if it.element == none {
       // nonbreaking space before citations
-      h(0pt, weak: true) + [~] + it
+      join_nonbreaking + it
     } else {
       it
     }
   }
+  show math.equation: it => { join_nonbreaking + it }
   doc
 }
 
