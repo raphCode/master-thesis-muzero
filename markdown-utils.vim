@@ -10,6 +10,5 @@ set foldmethod=expr
 set foldexpr=MarkdownHeadingFoldLevel()
 
 "macro for text wrapping:
-"wraps from cursor position to next . or :, advances cursor 1 word
-let @w="gq/\\v(\\.|:)nW"
-
+"wraps from beginning of line to next . or :, advances cursor 1 word
+let @w="^gw/\\v(\\.|:)nW"
