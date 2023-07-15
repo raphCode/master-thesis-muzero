@@ -4,15 +4,16 @@
 #show: doc => thesis(
   doc,
 )
-#show: substitutions.subs
 
-#include "introduction.typ"
-#include "theory.typ"
-#include "related_work.typ"
-#include "approach.typ"
-#include "evaluation.typ"
-#include "results.typ"
-#include "discussion.typ"
-#include "conclusion.typ"
+#substitutions.subs[
+  #include "introduction.typ"
+  #include "theory.typ"
+  #include "related_work.typ"
+  #include "approach.typ"
+  #include "evaluation.typ"
+  #include "results.typ"
+  #include "discussion.typ"
+  #include "conclusion.typ"
+]
 
 #bibliography("bibliography.yml")
