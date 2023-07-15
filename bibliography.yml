@@ -309,3 +309,44 @@ simclr:
     - Geoffrey Hinton
   parent: *arxiv
   doi: 10.48550/arXiv.2002.05709
+azero_sorting:
+  type: article
+  title: Faster sorting algorithms discovered using deep reinforcement learning
+  date: 2023-06-07
+  author:
+    - "Mankowitz, Daniel J."
+    - "Michi, Andrea"
+    - "Zhernov, Anton"
+    - "Gelmi, Marco"
+    - "Selvi, Marco"
+    - "Paduraru, Cosmin"
+    - "Leurent, Edouard"
+    - "Iqbal, Shariq"
+    - "Lespiau, Jean-Baptiste"
+    - "Ahern, Alex"
+    - "Köppe, Thomas"
+    - "Millikin, Kevin"
+    - "Gaffney, Stephen"
+    - "Elster, Sophie"
+    - "Broshear, Jackson"
+    - "Gamble, Chris"
+    - "Milan, Kieran"
+    - "Tung, Robert"
+    - "Hwang, Minjae"
+    - "Cemgil, Taylan"
+    - "Barekatain, Mohammadamin"
+    - "Li, Yujia"
+    - "Mandhane, Amol"
+    - "Hubert, Thomas"
+    - "Schrittwieser, Julian"
+    - "Hassabis, Demis"
+    - "Kohli, Pushmeet"
+    - "Riedmiller, Martin"
+    - "Vinyals, Oriol"
+    - "Silver, David"
+  parent:
+    title: Nature
+    issue: 7839
+    volume: 618
+  page-range: 257-263
+  doi: 10.1038/s41586-023-06004-9
