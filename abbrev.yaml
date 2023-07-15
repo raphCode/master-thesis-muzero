@@ -1,0 +1,62 @@
+# implementations and architectures
+ago:
+  singular: AlphaGo
+  plural: null
+az:
+  singular: AlphaZero
+  plural: null
+mz:
+  singular: MuZero
+  plural: null
+effz:
+  singular: EfficientZero
+  plural: null
+simsiam:
+  singular: SimSiam
+  plural: null
+
+# general
+rl:
+  singular: reinforcement learning
+  plural: null
+mcts:
+  singular: Monte Carlo tree search
+  plural: null
+sampeff:
+  singular: sample efficiency
+  plural: null
+fn: function
+env: environment
+algo: algorithm
+pred: prediction
+traj: trajectory
+arch: architecture
+repr: representation
+impl: implementation
+
+# RL terms
+a: action
+r: reward
+p: policy
+v: value
+s: state
+n: node
+ts: terminal state
+tn: terminal node
+ag: agent
+obs: observation
+offp: off-policy
+
+# game related
+sp: single player
+2p: two-player
+mp: multiplayer
+zsum: zero-sum
+pinf: perfect information
+
+# networks
+net: net
+rnet: representation network
+pnet: prediction network
+dnet: dynamics network
+latrep: latent representation

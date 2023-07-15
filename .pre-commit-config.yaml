@@ -5,8 +5,7 @@ repos:
         name: Check hayagriva bibliography key sort order
         entry: ./check_bib_sort.py
         language: python
-        types: [yaml]
-        exclude: ".pre-commit-config.yaml"
+        files: "bibliography.yaml"
         additional_dependencies: ["pyyaml"]
 
 

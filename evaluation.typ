@@ -7,7 +7,7 @@ Experimenten oder Nutzerstudien.
 
 This chapter is divided into two parts.
 The first one examines the effects of the different proposed modifications on top of
-muzero on training performance.
+!mz on training performance.
 For this, an ablation study is chosen so that the effect of individual modifications as
 well as groups of modifications can be analyzed.
-The second part applies the proposed algo to a mp game.
+The second part applies the proposed !algo to a !mp game.
