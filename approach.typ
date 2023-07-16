@@ -44,7 +44,8 @@ and discriminative latent space that encodes useful features in the images.
 However, without careful design, the model can collapse into trivial solutions where all
 learned !reprs end up being very similar or even identical.
 The main idea of !simsiam is that a stop-gradient operation effectively solves this
-problem. @simsiam
+problem.
+@simsiam
 
 !effz, on the other hand, operates in an !rl setting rather than a self-supervised one.
 This means that the !env provides explicit training data in the form of !obs and !rs.
@@ -57,7 +58,8 @@ distinct output values.
 This insight is consistent with the principle of contrastive self-supervised learning,
 where additional negative samples are used to prevent the collapse of !latreps:
 Distinct input images are fed through the two subnetworks, while the training objective is
-to increase the divergence between their corresponding !latreps. @simclr
+to increase the divergence between their corresponding !latreps.
+@simclr
 
 It has been shown that it is possible to learn significant !latreps without the use of
 negative samples or the stop-gradient mechanism:
@@ -75,9 +77,9 @@ of a stop-gradient operation unnecessary.
 In !az, the !mcts uses a perfect simulator to determine the next game !s for hypothetical
 !as.
 Naturally, this simulator also indicates when the game is over and there are no further
-moves to search for.~@azero
+moves to search for @azero.
 These !tss are an important concept in !RL, since their value is by definition zero:
-no future !rs can occur.~@sutton[p.~6]
+no future !rs can occur @sutton.
 Additionally, in games, the !r is often sparse, meaning that a non-zero !r occurs only at
 the end of the game.
 In this case, the !r of !tss is the only driving force behind learning a good !p.
@@ -167,4 +169,3 @@ grandchildren and all reachable child !ns have these values set to zero.
 This approach also generalizes to arbitrary search depths in the sense that once a !ts is
 predicted, all child !ns beyond the first !tn are set to zero !r and !v.
 This is all achieved without the !nets having to learn anything about beyond-!tss.
-

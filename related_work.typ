@@ -30,7 +30,7 @@ individual utilities for all players at the same time.
 Likewise, they also extend the game to return scores for each player at the end instead of
 a single outcome.
 Naturally, the !algo rotates over the list of all players instead of alternating between
-two players. @azero
+two players @azero.
 They evaluate their work on !mp versions of Connect 4 and Tic-Tac-Toe:
 The !nets learn to encode knowledge of the game into search, indicating that the proposed
 !mp strategy works in principle.
@@ -73,7 +73,7 @@ representation for identical game !ss.
   // TODO: add image?
   In !mz, the current and next game !obss $O_t$ and $O_(t+1)$ are fed through the !rnet,
   yielding the !latrep #St respectively #St1.
-  From #St and the corresponding !a $a_t$ the !dnet predicts the !latrep #Sht1. @muzero
+  From #St and the corresponding !a $a_t$ the !dnet predicts the !latrep #Sht1 @muzero.
   Since both #St1 and #Sht1 are supposed to represent the same !s of the game, it makes
   sense to introduce a loss that aligns these !latreps.
   This is the idea behind !effz's similarity loss, which #citet("effzero") call
@@ -84,7 +84,9 @@ representation for identical game !ss.
   This is due to the fact that they closely modeled their !arch after !simsiam @simsiam, a
   self-supervised framework that learns !latreps for images.
   The authors further justify this decision by treating #St1 as the more accurate
-  representation and therefore using it as a target for the !dnet. @effzero
+  representation and therefore using it as a target for the !dnet.
+  @effzero
+
   In this thesis, I draw inspiration from this idea, but remove the asymmetry in training
   caused by the stop-gradient operation.
   This increases the !sampeff even more.
@@ -99,7 +101,8 @@ for each step in the search tree.
 The authors claim that in most cases it is not important at which exact future timestep a
 certain !r occurs, only that it eventually occurs.
 They argue for this assumption from the way humans reason about games, and connect it to
-the !s aliasing problem. @effzero
+the !s aliasing problem.
+@effzero
 // TODO: For a more detailed discussion see ...
 
 // TODO: clarify
@@ -107,7 +110,8 @@ Their suggestion is to introduce a new neural !net to predict the _sum_ of !rs f
 sequence of !ss in an end-to-end manner.
 This effectively sidesteps the question of _when_ a certain !r occurs.
 In the paper, this is called _End-To-End Prediction of the Value Prefix_ and implemented
-with a LSTM !arch. @effzero
+with a LSTM !arch.
+@effzero
 
 Third, the authors propose how to mitigate !offp issues.
 These arise when reusing old game !trajs for training:
@@ -128,7 +132,8 @@ horizon, which is obtained in !mz Reanalyze using a raw !pred from the !pnet @mu
 !effz instead runs a full !mcts at the last horizon !s, and uses the !v estimate from the
 root !n for bootstrapping.
 This estimate is an average of multiple !preds throughout the search tree and is therefore
-considered a more accurate value. @effzero
+considered a more accurate value.
+@effzero
 
 Since the last two modifications were reported to be not as effective, and I also found
 them less relatable than the #sscl, I did not implement them.
