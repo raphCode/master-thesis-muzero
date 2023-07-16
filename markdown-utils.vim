@@ -1,7 +1,7 @@
 function MarkdownHeadingFoldLevel()
   let level = getline(v:lnum)->matchstr('^=\+')->strlen()
   if level > 1
-    return '>'..level
+    return '>'..(level - 1)
   endif
   return '='
 endfunction
