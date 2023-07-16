@@ -10,4 +10,4 @@ The first one examines the effects of the different proposed modifications on to
 !mz on training performance.
 For this, an ablation study is chosen so that the effect of individual modifications as
 well as groups of modifications can be analyzed.
-The second part applies the proposed !algo to a !mp game.
+The second part applies the proposed !algo to a !mp !g.

@@ -57,6 +57,7 @@ exret: expected return
 offp: off-policy
 
 # game related
+g: game
 sp: single player
 2p: two-player
 mp: multiplayer

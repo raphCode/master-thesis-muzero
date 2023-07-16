@@ -22,7 +22,7 @@ hast.
   - multiplayer support: teams, prediction of current player
 - interplay of mcts policy and selection function
   - unstable behavior of original setup: UCT scores and visit count policy
-- application to carchess
+- application to carchess / !mp !g
 
 #import "related_work.typ": sscl
 
@@ -74,14 +74,14 @@ of a stop-gradient operation unnecessary.
 
 === !TNs in the !MCTS
 
-In !az, the !mcts uses a perfect simulator to determine the next game !s for hypothetical
+In !az, the !mcts uses a perfect simulator to determine the next !g !s for hypothetical
 !as.
-Naturally, this simulator also indicates when the game is over and there are no further
+Naturally, this simulator also indicates when the !g is over and there are no further
 moves to search for @azero.
 These !tss are an important concept in !RL, since their value is by definition zero:
 no future !rs can occur @sutton.
-Additionally, in games, the !r is often sparse, meaning that a non-zero !r occurs only at
-the end of the game.
+Additionally, in !gs, the !r is often sparse, meaning that a non-zero !r occurs only at
+the end of the !g.
 In this case, the !r of !tss is the only driving force behind learning a good !p.
 
 Likewise, in the !mcts, !tns are important anchors that provide a known, ground-truth !r
@@ -90,8 +90,8 @@ During search, !rs and !vs of !ns are backpropagated upward along the search pat
 children to parents.
 Backpropagation from !tns provides upstream !ns with valuable information that ultimately
 allows the !ag to make an informed decision about what !a to take.
-In fact, by applying this process iteratively, it is possible to evaluate !as for game !ss
-many steps before the end of the game.
+In fact, by applying this process iteratively, it is possible to evaluate !as for !g !ss
+many steps before the end of the !g.
 
 !mz replaces the perfect simulator with the !dnet, which provides !r !preds for
 transitions between !ns.
@@ -120,8 +120,8 @@ In general, these scenarios are possible regarding !tss:
   + Disallow searching past !tns
   + Only create child !ns with zero !v and !r
 
-Completely ignoring !tns forces the !nets to predict values for !latreps beyond the game
-end they were never trained on, which produces nonsense.
+Completely ignoring !tns forces the !nets to predict values for !latreps beyond the !g end
+they were never trained on, which produces nonsense.
 If values of large magnitude are output, it can even lead to numerical instabilities when
 operations like softmax are applied to the predictions.
 
@@ -132,15 +132,15 @@ more computational power.
 Also, the !nets might fail to generalize beyond the unrolled horizon, simply because they
 were never trained that far.
 This brings us back to the first scenario, if the tree search continues further beyond the
-end of the game than was anticipated during training.
+end of the !g than was anticipated during training.
 
 In this thesis, I chose the third option because it allows !tss to be modeled accurately
 during the search without extra computational cost.
 I implemented it by adding a scalar output to the !dnet, which is trained to predict
-whether the game ends at the next !s.
-Adding the output to the !dnet is favorable over the !pnet, since no additional game !ss
+whether the !g ends at the next !s.
+Adding the output to the !dnet is favorable over the !pnet, since no additional !g !ss
 have to be added during training.
-Moreover, if we consider the idea of using the !pnet to classify whether a certain game !s
+Moreover, if we consider the idea of using the !pnet to classify whether a certain !g !s
 is terminal, we have to use a !latrep to encode the !s.
 However, a !ts has neither an !obs nor a meaningful !v or !p, so it makes little sense to
 associate it with a !latrep#footnote[albeit that would be possible].
@@ -156,8 +156,7 @@ visit counts that do not accurately represent the ideal !p.
 
 Even if the !impl takes into account updating the visit counts, disallowing further
 expansion beyond !tn can still be problematic:
-The terminal !pred may be wrong, and the game may actually continue beyond the assumed
-!tn.
+The terminal !pred may be wrong, and the !g may actually continue beyond the assumed !tn.
 In this case there are no search !ns available for the next move.
 While the original !mz !arch has no issue with this, this paper outlines possible future
 work where this makes a difference.

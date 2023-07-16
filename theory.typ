@@ -64,10 +64,10 @@ It describes the !prob of the !env ending up in !s $s'$ and yielding !r $r$ when
 
 Importantly, !mdps can also capture the aspect of !as affecting not only the immediate !r,
 but also subsequent !ss and thus future !rs.
-In the example of certain game, like tic-tac-toe or chess, !rs are not given after each
+In the example of certain !g, like tic-tac-toe or chess, !rs are not given after each
 move.
-Instead, they come at the end of the entire game in the form of a win or loss.
-Obviously, this final !r depends on most or all moves during the game.
+Instead, they come at the end of the entire !g in the form of a win or loss.
+Obviously, this final !r depends on most or all moves during the !g.
 @sutton
 
 In the general case, when a !r is influenced not only by its immediately preceding !a, but
@@ -81,7 +81,7 @@ to the final !r and how.
 
 In some scenarios the interaction between !ag and !env naturally ends at some point, that
 is, there exists a final time step $t_n$.
-In games this happens when the match is over.
+In !gs this happens when the match is over.
 In !rl such a series of interactions is called an !epi.
 @sutton
 
