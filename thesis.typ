@@ -12,9 +12,6 @@
     justify: true,
   )
   set heading(numbering: "1.")
-  set enum(
-    numbering: "1.a)"
-  )
   let join_nonbreaking = h(0pt, weak: true) + [~]
   show ref: it => {
     if it.element == none {

@@ -114,11 +114,11 @@ Under the assumption that the !nets are able to accurately predict the terminal 
 backpropagation effectively renders the !TNs unreliable.
 
 In general, these scenarios are possible regarding !tss:
-+ Ignore !tss during search and training
-+ Train zero !v and !r for !ss beyond the end
-+ Predict the occurrence of !tss:
-  + Disallow searching past !tns
-  + Only create child !ns with zero !v and !r
+- Ignore !tss during search and training
+- Train zero !v and !r for !ss beyond the end
+- Predict the occurrence of !tss:
+  - Disallow searching past !tns
+  - Only create child !ns with zero !v and !r
 
 Completely ignoring !tns forces the !nets to predict values for !latreps beyond the !g end
 they were never trained on, which produces nonsense.
