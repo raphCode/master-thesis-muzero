@@ -16,6 +16,9 @@ simsiam:
   plural: null
 
 # general
+mc:
+  singular: Monte Carlo
+  plural: null
 rl:
   singular: reinforcement learning
   plural: null
@@ -27,9 +30,11 @@ sampeff:
   plural: null
 fn: function
 env: environment
+mdp: Markov decision process
 algo: algorithm
 pred: prediction
 traj: trajectory
+prob: probability
 arch: architecture
 repr: representation
 impl: implementation
@@ -44,7 +49,11 @@ n: node
 ts: terminal state
 tn: terminal node
 ag: agent
+df: discount factor
 obs: observation
+epi: episode
+ret: return
+exret: expected return
 offp: off-policy
 
 # game related

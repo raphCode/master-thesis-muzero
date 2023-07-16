@@ -16,6 +16,8 @@
 #let get_plural_form(text) = {
   if text.match(regex("[^aeiou]y$")) != none {
     text.replace(regex("y$"), "ies")
+  } else if text.match(regex("(?:ss|ch|sh|x)$")) != none {
+    text + "es"
   } else {
     text + "s"
   }
