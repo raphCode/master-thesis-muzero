@@ -1,5 +1,4 @@
 instance:
     _target_: games.openspiel_wrapper.OpenSpielGame
     game_name: catch
-    bad_move_reward: -1
 reward_fn: ${fn:fn.reward.default}
