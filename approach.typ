@@ -50,7 +50,7 @@ problem.
 !effz, on the other hand, operates in an !rl setting rather than a self-supervised one.
 This means that the !env provides explicit training data in the form of !obs and !rs.
 This data is used to train the !nets in a supervised manner, requiring them to generate
-diverse !ps, !vs, and !rs from a given !obs and sequence of !as.
+diverse !ps, !vs, and !rs from a given !obs and !seq of !as.
 The exchange of information between the different !nets is facilitated by the !latreps.
 If the !latreps were to collapse, it would become impossible to predict meaningful or
 distinct output values.

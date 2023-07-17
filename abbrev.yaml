@@ -31,6 +31,10 @@ sampeff:
 fn: function
 env: environment
 mdp: Markov decision process
+seq: sequence
+seql:
+  singular: sequential
+  plural: null
 algo: algorithm
 pred: prediction
 traj: trajectory

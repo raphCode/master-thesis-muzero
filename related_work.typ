@@ -107,7 +107,7 @@ They argue for this assumption from the way humans reason about !gs, and connect
 
 // TODO: clarify
 Their suggestion is to introduce a new neural !net to predict the _sum_ of !rs for a given
-sequence of !ss in an end-to-end manner.
+!seq of !ss in an end-to-end manner.
 This effectively sidesteps the question of _when_ a certain !r occurs.
 In the paper, this is called _End-To-End Prediction of the Value Prefix_ and implemented
 with a LSTM !arch.

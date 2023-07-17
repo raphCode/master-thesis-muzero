@@ -50,7 +50,7 @@ Further confusion may arise when comparing this to the !impl that accompanies th
 I store tuples $(s_t, a_t, r_(t+1))$ together at the same array index because this is most
 convenient for training.
 
-The concept of sequential decision making can be formalized with finite !mdps.
+The concept of !seql decision making can be formalized with finite !mdps.
 Finite means the sets of possible !ss $S$, !as $A$ and !rs $R$ each have a finite number
 of elements.
 Beside these sets, a !mdp is characterized by the dynamics !fn $p : S times R times S
@@ -85,7 +85,7 @@ In !gs this happens when the match is over.
 In !rl such a series of interactions is called an !epi.
 @sutton
 
-The sequence of visited !ss $s_0, s_1, s_2, ..., s_n$ is referred to as a !traj.
+The !seq of visited !ss $s_0, s_1, s_2, ..., s_n$ is referred to as a !traj.
 Depending on the context, a !traj may also include the !as and !rs associated with the
 transitions between !ss.
 The last !s $s_n$ is also called the !ts. 
@@ -93,7 +93,7 @@ The last !s $s_n$ is also called the !ts.
 
 To translate multiple !rs earned over a period of time into a singular value that guides
 the agent in making optimal decisions, we use the concept of a !ret.
-The !ret is a specific !fn of the !r sequence.
+The !ret is a specific !fn of the !r !seq.
 The !ag's learning objective is then defined as maximizing the !exret.
 In a simple case, the !ret $G_t$ may be defined as the sum of all !rs occurring after time
 step $t$:
@@ -155,7 +155,7 @@ method.
   - MuZero
 
 - original MuZero limitations
-  - perfect information games
-  - sequential games
+  - !pinf !gs
+  - !seql !gs
   - single player / two player zero sum 
   - unique best strategy must exist (counterexample: starcraft)
