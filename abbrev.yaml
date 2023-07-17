@@ -62,6 +62,7 @@ offp: off-policy
 
 # game related
 g: game
+pl: player
 sp: single player
 2p: two-player
 mp: multiplayer

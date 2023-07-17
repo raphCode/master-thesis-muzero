@@ -157,5 +157,5 @@ method.
 - original MuZero limitations
   - !pinf !gs
   - !seql !gs
-  - single player / two player zero sum 
+  - single !pl / two !pl !zsum
   - unique best strategy must exist (counterexample: starcraft)

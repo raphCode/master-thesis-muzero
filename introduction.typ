@@ -29,7 +29,7 @@ Even with an appropriate search approach, there remains the problem of evaluatin
 board conditions.
 An accurate assessment of positions is necessary to guide the search towards victory.
 Go !gs can span hundreds of moves, making it difficult to determine which positions are
-good or bad for either player in the long run, especially since a single move can have a
+good or bad for either !pl in the long run, especially since a single move can have a
 significant impact on the rest of the !g.
 
 !ago's success suggests that it uses an intelligent !algo, as the improvements cannot be
@@ -77,13 +77,13 @@ While !mz's capabilities are impressive, the original !impl is limited in a numb
 ways.
 First, it was designed for one- or !2p !gs only.
 For !2p !gs, an additional requirement is that the !g must be !zsum, meaning that one
-player's loss is the other's gain.
+!pl's loss is the other's gain.
 
 !mz also only works in !pinf !gs.
-The term means that the !g does not hide any information from the player making a
-decision, he is perfectly informed about all previous events.
+The term means that the !g does not hide any information from the !pl making a decision,
+he is perfectly informed about all previous events.
 In chess, for example, the current !s of the board provides this information.
-On the other hand, in card !gs such as poker, information about other players' hands is
+On the other hand, in card !gs such as poker, information about other !pls' hands is
 hidden.
 
 Finally, the !algo has high computational requirements, which results in long training

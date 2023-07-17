@@ -19,18 +19,18 @@ While no !mp version for !mz itself exists, #citet("mp_azero") extended the pred
 !algo !az to !mp capabilities.
 
 Importantly, they relax the assumption of the !g being !zsum:
-A !zsum !g involves two players where one player's gain comes with an equivalent loss for
-the other player.
+A !zsum !g involves two !pls where one !pl's gain comes with an equivalent loss for the
+other !pl.
 The !az (and in turn !mz) !algo make use of this fact by directly predicting how good the
-current position is for the current player by a scalar !v output of the !pnet
+current position is for the current !pl by a scalar !v output of the !pnet
 #cite("azero", "muzero").
 The !mp extension predicts a !v vector instead, which provides an estimate of the expected
-individual utilities for all players at the same time.
+individual utilities for all !pls at the same time.
 
-Likewise, they also extend the !g to return scores for each player at the end instead of a
+Likewise, they also extend the !g to return scores for each !pl at the end instead of a
 single outcome.
-Naturally, the !algo rotates over the list of all players instead of alternating between
-two players @azero.
+Naturally, the !algo rotates over the list of all !pls instead of alternating between two
+!pls @azero.
 They evaluate their work on !mp versions of Connect 4 and Tic-Tac-Toe:
 The !nets learn to encode knowledge of the !g into search, indicating that the proposed
 !mp strategy works in principle.
