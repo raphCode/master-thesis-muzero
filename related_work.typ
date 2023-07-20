@@ -56,8 +56,8 @@ This provides a richer training signal since the !latrep is usually a very wide 
 @effzero
 
 Compare this to the default !mz !impl:
-The !dnet receives training information only from the single scalar loss !r and any
-gradients that flow through the !pnet from the !v and !p losses.
+The !dnet receives training !i only from the single scalar loss !r and any gradients that
+flow through the !pnet from the !v and !p losses.
 In fact, the training of all neural !nets is driven only by two scalar losses and the
 low-dimensional !p loss.
 Additionally, it is not even guaranteed that the !dnet and the !rnet agree on the same
@@ -117,8 +117,8 @@ Third, the authors propose how to mitigate !offp issues.
 These arise when reusing old !g !trajs for training:
 A !traj created using an earlier !p can be considered outdated in comparison with the
 current state of the !nets.
-In other words, the !nets already know how to choose better !as, so the information of the
-old !g !traj is of limited use in training.
+In other words, the !nets already know how to choose better !as, so the !i of the old !g
+!traj is of limited use in training.
 
 The original !mz paper already presented the Reanalyze variant which re-runs the !mcts on
 old !trajs with the newest !net parameters to provide more accurate !preds of the !p

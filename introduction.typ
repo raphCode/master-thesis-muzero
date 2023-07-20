@@ -37,8 +37,8 @@ attributed solely to increased computational power.
 
 Nevertheless, in 2018, #citet("azero") advanced upon this technology with !az, which was
 able to master three different board !gs: Go, Chess and Shogi.
-This is notable given that previous !algos relied heavily on specific domain-related
-information, such as the individual !g rules.
+This is notable given that previous !algos relied heavily on specific domain-related !i,
+such as the individual !g rules.
 The ability of a single !algo to excel in several distinct !envs highlights its
 versatility~- a key goal of !rl.
 
@@ -80,11 +80,10 @@ For !2p !gs, an additional requirement is that the !g must be !zsum, meaning tha
 !pl's loss is the other's gain.
 
 !mz also only works in !pinf !gs.
-The term means that the !g does not hide any information from the !pl making a decision,
-he is perfectly informed about all previous events.
-In chess, for example, the current !s of the board provides this information.
-On the other hand, in card !gs such as poker, information about other !pls' hands is
-hidden.
+The term means that the !g does not hide any !i from the !pl making a decision, he is
+perfectly informed about all previous events.
+In chess, for example, the current !s of the board provides this !i.
+On the other hand, in card !gs such as poker, !i about other !pls' hands is hidden.
 
 Finally, the !algo has high computational requirements, which results in long training
 times.

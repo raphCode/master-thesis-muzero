@@ -51,7 +51,7 @@ problem.
 This means that the !env provides explicit training data in the form of !obs and !rs.
 This data is used to train the !nets in a supervised manner, requiring them to generate
 diverse !ps, !vs, and !rs from a given !obs and !seq of !as.
-The exchange of information between the different !nets is facilitated by the !latreps.
+The exchange of !i between the different !!nets is facilitated by the !latreps.
 If the !latreps were to collapse, it would become impossible to predict meaningful or
 distinct output values.
 
@@ -88,8 +88,8 @@ Likewise, in the !mcts, !tns are important anchors that provide a known, ground-
 and !v:
 During search, !rs and !vs of !ns are backpropagated upward along the search path from
 children to parents.
-Backpropagation from !tns provides upstream !ns with valuable information that ultimately
-allows the !ag to make an informed decision about what !a to take.
+Backpropagation from !tns provides upstream !ns with valuable !i that ultimately allows
+the !ag to make an informed decision about what !a to take.
 In fact, by applying this process iteratively, it is possible to evaluate !as for !g !ss
 many steps before the end of the !g.
 

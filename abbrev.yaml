@@ -16,6 +16,9 @@ simsiam:
   plural: null
 
 # general
+i:
+  singular: information
+  plural: null
 mc:
   singular: Monte Carlo
   plural: null
