@@ -83,7 +83,7 @@ For !2p !gs, an additional requirement is that the !g must be !zsum, meaning tha
 The term means that the !g does not hide any !i from the !pl making a decision, he is
 perfectly informed about all previous events.
 In chess, for example, the current !s of the board provides this !i.
-On the other hand, in card !gs such as poker, !i about other !pls' hands is hidden.
+In contrast, in card !gs such as poker, !i about other !pls' hands is hidden.
 
 Finally, the !algo has high computational requirements, which results in long training
 times.
