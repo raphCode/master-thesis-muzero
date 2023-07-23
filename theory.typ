@@ -50,6 +50,7 @@ Further confusion may arise when comparing this to the !impl that accompanies th
 I store tuples $(s_t, a_t, r_(t+1))$ together at the same array index because this is most
 convenient for training.
 
+
 The concept of !seql decision making can be formalized with finite !mdps.
 Finite means the sets of possible !ss $S$, !as $A$ and !rs $R$ each have a finite number
 of elements.
@@ -147,6 +148,166 @@ is visited approaches infinity.
 Averaging over many random samples of actual data in this way is referred to as a !mc
 method.
 @sutton
+
+== !GT
+
+This section introduces basic !gtic concepts, just enough to provide justification for the
+design and behavior of !mz.
+
+=== Overview
+
+!Gt is a broad interdisciplinary field that uses mathematical models to analyze how
+individuals make decisions in interactive situations.
+It is commonly used in economics, but has other widespread applications.
+@gtheo
+
+In this thesis we are interested in !gtic analysis of the behavior and interaction of
+multiple !pls in a !g.
+!Gtic considerations can be used to find optimal behavior in a given !g under some
+assumptions.
+In this way, !gt can be of assistance in the design of !rl systems.
+@gtheo
+
+=== Basics
+
+I begin with introducing some terminology and basic concepts:
+
+A !g in !gt is a very general concept and applies to more than what the common usage of
+the word "!g" refers to.
+A !g may denote any process consisting of a set of !pls and a number of decision points.
+Additionally, the !i and !as available to each !pl at each decision point must be defined,
+as well as the possible final outcomes of the !g.
+The latter is defined in terms of numerical payoffs for each !pl.
+The tuples of individual payoffs are also called the payoff vector.
+@gtheo
+
+!Gs that involve randomness, such as throwing a dice, are said to have chance events.
+These chance events can be seen as decision points where a special !pl, the chance !pl,
+has his turn.
+A dice throw can therefore be modelled with a decision point of the chance !pl with 6
+possible !as, all with equal !prob.
+@gtheo
+
+A behavior is described by a !sty:
+It can be seen as a complete plan which describes which move (or !a) to take in any given
+!g situation.
+@gtheo
+
+Note the parallels to !rl, just with different terms:
+!Pls in !gt correspond to !rl !ags, payoffs to terminal !rs, and !stys to !ps.
+
+!Gt may differentiate !gs according to their properties:
+
+=== !ZSUM
+
+!Zsum !gs are !gs in which the sum of all !pls' payoffs equals zero for every outcome of
+the !g.
+It is a special case of the more general concept of constant-sum !gs, where all payoffs
+sum to constant value.
+In other words, a !pl may benefit only at the expense of other !pls.
+Examples of !2p !zsum !gs are tic-tac-toe, chess and Go, since only one !pl (payoff of 1)
+may win, while the other looses (payoff of -1).
+Also poker is considered a !zsum !g, because a !pl wins exactly the amount which his
+opponents lose.
+
+Contrastingly, in non-!zsum !gs, no restriction is imposed on the payoff vectors.
+This situation arises when modeling real-world economic situations, as there may be
+gains from trades.
+
+=== !I
+
+An important distinction are !gs of !pinf and !impinf.
+A !pinf !g is one in which every !pl, at every decision point in the !g, has full
+knowledge of the history of the !g and the previous moves of all other !pls.
+A !pl is thus fully and unambiguously informed about the current !s of the !g when he is
+at turn.
+Chess and Go are examples of !gs with !pinf.
+This is because each !pl can see all the pieces on the board at all times.
+@gtheo
+
+!Gs with randomness can also have !pinf if the outcome of all random events is visible to
+the next !pl at his turn.
+An example is backgammon: when a !pl needs to make a decision, he has !pinf about what
+number the dice rolled.
+
+Conversely, a !g with !impinf leaves !pls in the dark about the exact !s of the !g.
+!Pls having to make a decision do not observe enough !i to distinguish between several
+past !g histories.
+They thus have to make decisions under uncertainty.
+The card !g poker is an example of an !impinf !g because the other !pls' cards are
+concealed.
+@gtheo
+
+=== Simultaneous / !Seql Moves
+
+!Gs can be classified according to whether the !pls make their moves at the same time or
+one after the other.
+In the first case, the moves are said to be simultaneous, and the !g is also called a
+static !g.
+@gtheo
+
+An example of a simultaneous !g is !rps:
+Both !pls choose their hand sign at the same time.
+Because of the static nature of the !g, it is not possible to observe the !a chosen by the
+other !pl and react to it.
+@gtheo
+
+In fact, non-observability is the defining aspect of simultaneous !gs:
+Take, for example, an election where all voters make their choices without knowing what
+anyone else has chosen.
+Even though the votes are not literally cast at the same time, the process is still an
+example of a simultaneous !g.
+@gtheo
+
+In contrast, in a !seql !g the !pls take turns in succession.
+These !gs are also called dynamic !gs or extensive form !gs.
+To distinguish them from simultaneous !gs, a !pl making a decision must have !i about the
+previous decisions of other !pls.
+@gtheo
+
+This can be illustrated by a variant of !rps:
+!Pls now have to write down their choices without revealing them to each other.
+Then their (binding) choices are uncovered and the outcome of the !g can be determined.
+While this !g can be played sequentially, with !pls choosing their !as at different times,
+the simultaneous nature of the !g remains.
+At best, it can be seen as a sequential but incomplete information variant of !rps.
+@gtheo
+
+=== Cooperation
+
+!Gt can be divided into two branches, cooperative and non-cooperative.
+The cooperative approach studies !gs where the rules are only broadly defined.
+In fact, the rules are kept implicit in the formal specification of the !g.
+
+Since the rules are not specific enough to analyze individual decision making, cooperative
+!gt looks instead at coalitions of !pls.
+These coalitions assume that !pls can commit to work together through binding agreements
+or through the transfer of decision-making power.
+
+Overall, cooperative !gt provides a framework for understanding how different parties can
+work together toward common goals.
+
+Unlike the other branch, non-cooperative !gt requires an exact specification of the rules
+of the !g.
+For this reason, it is also known as the theory of !gs with complete rules.
+It allows an analysis of the individual decisions of !pls without relying on commitment
+devices.
+!Pls are assumed to act solely out of self-interest, i.e. to choose !as that maximize
+their payoff.
+
+However, this can lead to seemingly cooperative behaviour in some settings:
+!gs may have rules that require !pls to work together to achieve a mutually beneficial
+goal.
+This goal cannot be achieved by one !pl alone, so !pls are motivated to behave
+cooperatively.
+
+The !gs studied in this thesis are strictly non-cooperative in a !gtic sense.
+To avoid any confusion, it is important to point out that this thesis refers to !gs being
+cooperative when:
+- all !pls act out of self-interest and
+- the rules of the !gs are designed to encourage cooperation.
+The latter is achieved by designing a !g outcome with a large payoff for all !pls which
+can only be reached by working together in a way intended by the rules.
 
 - previous versions
   - AlphaGo

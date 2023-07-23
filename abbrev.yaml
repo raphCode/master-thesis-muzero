@@ -65,12 +65,21 @@ offp: off-policy
 
 # game related
 g: game
+gt: game theory
 pl: player
 sp: single player
 2p: two-player
 mp: multiplayer
+sty: strategy
+rps:
+  singular: Rock, Paper, Scissors
+  plural: null
 zsum: zero-sum
+gtic:
+  singular: game theoretic
+  plural: null
 pinf: perfect information
+impinf: imperfect information
 
 # networks
 net: net

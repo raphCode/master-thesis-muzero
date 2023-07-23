@@ -350,3 +350,11 @@ azero_sorting:
     volume: 618
   page-range: 257-263
   doi: 10.1038/s41586-023-06004-9
+
+gtheo:
+  type: book
+  title: Foundations of Non-cooperative Game Theory
+  date: 2002
+  author: "Ritzberger, K."
+  publisher: Oxford University Press
+  isbn: 9780199247851
