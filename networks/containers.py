@@ -153,7 +153,7 @@ class PredictionNetContainer(NetContainer):
         belief: Tensor,
     ) -> tuple[Tensor, Tensor]:
         value, policy_log = self.net(latent, belief)
-        return self.value_scale.rescale(value), F.softmax(policy_log, dim=1)
+        return self.value_scale(value), F.softmax(policy_log, dim=1)
 
     # method overrides are to provide properly typed function signatures:
     @copy_type_signature(forward)
@@ -197,7 +197,7 @@ class DynamicsNetContainer(NetContainer):
         return (
             latent,
             belief,
-            self.reward_scale.rescale(reward),
+            self.reward_scale(reward),
             F.softmax(turn_status_log, dim=1),
         )
 
