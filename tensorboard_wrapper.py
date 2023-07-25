@@ -1,23 +1,54 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import TYPE_CHECKING, Type, Literal, Optional
+from typing import TYPE_CHECKING, Type, Literal, Optional, cast
 from contextlib import AbstractContextManager
 
+import torch
 from torch.utils.tensorboard import SummaryWriter  # type: ignore [attr-defined]
+from tensorboard.compat.proto.graph_pb2 import GraphDef  # type: ignore [import]
+from tensorboard.compat.proto.node_def_pb2 import NodeDef  # type: ignore [import]
+from tensorboard.compat.proto.versions_pb2 import VersionDef  # type: ignore [import]
 
 if TYPE_CHECKING:
-    import torch
+    from networks import Networks
+    from networks.containers import NetContainer
 
 
 class TensorboardLogger(AbstractContextManager["TensorboardLogger"]):
     """
     Wrapper around the tensorboard SummaryWriter, provides:
+    - a custom add_graph implementation suited for the three networks
     - TBStepLogger instances to log data at specified global steps
     """
 
     def __init__(self, log_dir: str) -> None:
         self.sw = SummaryWriter(log_dir=log_dir)  # type: ignore [no-untyped-call]
+
+    def add_graphs(self, nets: Networks) -> None:
+        # The pytorch graph parsing is a bit messy / buggy at the moment and becomes
+        # easily confused, producing bogus or unwieldy graphs:
+        # https://github.com/pytorch/pytorch/issues/101110
+        # This happens especially when tracing the three MuZero networks together (e.g. as
+        # submodules in a new Module)
+        # To ensure clean graphs, combine the nodes of three individual network traces.
+        # The behavior is replicated from SummaryWriter.add_graph().
+        def tb_graph_nodes(cont: NetContainer) -> list[NodeDef]:
+            traced_model = cont.jit()
+            nodes = torch.utils.tensorboard._pytorch_graph.parse(
+                traced_model.inlined_graph,
+                traced_model,
+                (),  # args are currently unused in the graph parsing function
+            )  # type: ignore [no-untyped-call]
+            return cast(list[NodeDef], nodes)
+
+        nodes = []
+        nodes += tb_graph_nodes(nets.representation)
+        nodes += tb_graph_nodes(nets.prediction)
+        nodes += tb_graph_nodes(nets.dynamics)
+
+        graph = GraphDef(node=nodes, versions=VersionDef(producer=22))
+        self.sw._get_file_writer().add_onnx_graph(graph)  # type: ignore [no-untyped-call]
 
     def create_step_logger(self, step: int) -> TBStepLogger:
         return TBStepLogger(self.sw, step)
