@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 from torch.jit import TopLevelTracedModule
 
+from util import copy_type_signature
+
 if TYPE_CHECKING:
     from torch import Tensor
 T = TypeVar("T")
@@ -68,7 +70,7 @@ class Rescaler(RescalerPy, nn.Module):
         self.register_buffer("min", torch.tensor(0))
         self.register_buffer("max", torch.tensor(1))
 
-    def rescale(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         """
         [-1, 1] range to [min, max]
         """
@@ -84,9 +86,13 @@ class Rescaler(RescalerPy, nn.Module):
         traced_mod = torch.jit.trace_module(  # type: ignore [no-untyped-call]
             self,
             dict(
-                rescale=torch.tensor(0),
+                forward=torch.tensor(0),
                 get_target=torch.tensor(0),
             ),
         )
         object.__setattr__(traced_mod, "__class__", RescalerJit)
         return cast(RescalerJit, traced_mod)
+
+    @copy_type_signature(forward)  # provide typed __call__ interface
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return super().__call__(*args, **kwargs)
