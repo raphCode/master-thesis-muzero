@@ -1,9 +1,10 @@
 import functools
-from typing import Any, Generic, TypeVar, Callable, Optional, TypeAlias, cast
+from typing import Any, Generic, TypeVar, Callable, Optional, ParamSpec, TypeAlias, cast
 from collections.abc import Iterator
 
 import numpy as np
 import torch
+import gorilla  # type: ignore [import]
 import numpy.typing as npt
 import torch.nn.functional as F
 
@@ -33,6 +34,21 @@ class copy_type_signature(Generic[Fn]):
 
     def __call__(self, wrapped: Callable[..., Any]) -> Fn:
         return cast(Fn, wrapped)
+
+
+P = ParamSpec("P")
+
+
+def monkeypatch_wrap_args(obj: Any, attr: str, wrap_fn: Callable[P, Any]) -> None:
+    """
+    Monkeypatch a function to preprocess its arguments with a wrapper.
+    """
+
+    def wrapper(*args: P.args) -> Any:
+        return original_fn(wrap_fn(*args))
+
+    gorilla.apply(gorilla.Patch(obj, attr, wrapper, gorilla.Settings(allow_hit=True)))
+    original_fn = gorilla.get_original_attribute(obj, attr)
 
 
 class TensorCache:

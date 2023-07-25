@@ -3,12 +3,15 @@ from __future__ import annotations
 from types import TracebackType
 from typing import TYPE_CHECKING, Type, Literal, Optional, cast
 from contextlib import AbstractContextManager
+from collections.abc import Sequence
 
 import torch
 from torch.utils.tensorboard import SummaryWriter  # type: ignore [attr-defined]
 from tensorboard.compat.proto.graph_pb2 import GraphDef  # type: ignore [import]
 from tensorboard.compat.proto.node_def_pb2 import NodeDef  # type: ignore [import]
 from tensorboard.compat.proto.versions_pb2 import VersionDef  # type: ignore [import]
+
+from util import monkeypatch_wrap_args
 
 if TYPE_CHECKING:
     from networks import Networks
@@ -26,6 +29,18 @@ class TensorboardLogger(AbstractContextManager["TensorboardLogger"]):
         self.sw = SummaryWriter(log_dir=log_dir)  # type: ignore [no-untyped-call]
 
     def add_graphs(self, nets: Networks) -> None:
+        def tensor_shape_fix(shape: Sequence[int]) -> list[int]:
+            # zero dimensions are problematic in tensorboard model graphs:
+            # https://github.com/tensorflow/tensorboard/issues/6418
+            # Replace them with -1 so that a ? shows for the zero dimension instead
+            return [-1 if dim == 0 else dim for dim in shape]
+
+        monkeypatch_wrap_args(
+            torch.utils.tensorboard._proto_graph,
+            "tensor_shape_proto",
+            tensor_shape_fix,
+        )
+
         # The pytorch graph parsing is a bit messy / buggy at the moment and becomes
         # easily confused, producing bogus or unwieldy graphs:
         # https://github.com/pytorch/pytorch/issues/101110
