@@ -149,5 +149,12 @@ class ReplayBuffer:
     def value_bounds(self) -> tuple[float, float]:
         return min(self.values), max(self.values)
 
+    @property
+    def fullness(self) -> float:
+        """
+        Number from zero to one describing how full the buffer is.
+        """
+        return len(self.buffer) / self.buffer.size
+
     def __len__(self) -> int:
         return len(self.buffer)
