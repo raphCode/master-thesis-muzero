@@ -55,7 +55,7 @@ class RescalerJit(RescalerPy, TopLevelTracedModule):
     pass
 
 
-class Rescaler(nn.Module, RescalerPy):
+class Rescaler(RescalerPy, nn.Module):
     """
     Translates scalar network predictions in the range [-1, 1] to another range and back.
     """
