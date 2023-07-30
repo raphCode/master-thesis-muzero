@@ -41,7 +41,6 @@ class TrajectoryState:
     """
 
     representation: Observation | Latent
-    belief: Tensor
     turn_status: int
     action: int
     target_policy: ndarr_f64
@@ -62,7 +61,6 @@ class TrajectoryState:
             target_policy = info.target_policy
         return cls(
             representation=info.representation,
-            belief=info.belief,
             turn_status=turn_status,
             action=action,
             target_policy=target_policy,
@@ -106,7 +104,6 @@ class TrainingData:
     is_data: Tensor
 
     observations: tuple[Tensor, ...]
-    belief: Tensor
     latent: Tensor
     turn_status: Tensor
     action_onehot: Tensor
@@ -130,7 +127,6 @@ class TrainingData:
             is_initial=cache.tensor(False),
             is_data=cache.tensor(False),
             observations=tuple(map(torch.zeros, C.game.instance.observation_shapes)),
-            belief=cache.zeros(C.networks.belief_shape),
             latent=cache.zeros(C.networks.latent_shape),
             turn_status=cache.tensor(0, dtype=torch.long),  # index tensor needs long
             action_onehot=cache.zeros(C.game.instance.max_num_actions, dtype=torch.long),
@@ -163,7 +159,6 @@ class TrainingData:
                 TrainingData | Latent,
                 ts.representation if not is_obs else cls.dummy,
             ).latent,
-            belief=ts.belief,
             turn_status=cache.tensor(
                 TurnStatus.TERMINAL_STATE.target_index if is_terminal else ts.turn_status,
                 dtype=torch.long,
