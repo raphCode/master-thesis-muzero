@@ -133,6 +133,10 @@ def populate_config(cfg: DictConfig) -> None:
     # - the representation network will likely access C.game.observation_shapes in init
     assert isinstance(cfg.game.instance, Game)
     C.fill_from(attrs.evolve(C, game=cfg.game))
+    log.info(
+        f"Game instance: {C.game.instance}, "
+        f"observation shapes: {C.game.instance.observation_shapes}"
+    )
 
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
         latent_shape = get_output_shape(
