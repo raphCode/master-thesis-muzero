@@ -34,7 +34,7 @@
 #let get_substitution(key, plural_form: false) = {
   let data = yaml("abbrev.yaml").at(key)
   if type(data) == "dictionary" {
-    if plural_form { data.at("plural") } else { data.at("singular") }
+    if plural_form { data.plural } else { data.singular }
   } else {
     if plural_form { get_plural_form(data) } else { data }
   }
@@ -69,4 +69,3 @@
 
   body
 }
-
