@@ -110,7 +110,6 @@ class NetworkSchema:  # omegaconf schema
     dynamics: DynamicsNetPartial
     prediction: PredictionNetPartial
     representation: RepresentationNetPartial
-    latent_shape: list[int]
 
 
 if TYPE_CHECKING:  # RUNTIME TYPES
