@@ -1,0 +1,23 @@
+batch_size: 512
+train_selfplay_ratio: 50
+min_trajectory_length: 3
+max_trajectory_length: ${.min_trajectory_length}
+discount_factor: 0.98
+n_step_horizon: ${game.max_steps_per_game}
+latent_dist_pnorm: 1
+optimizer:
+    _target_: torch.optim.Adam
+    #_target_: lion_pytorch.Lion
+learning_rates:
+    base: 5e-3
+    dynamics: 1
+    prediction: 1
+    representation: 1
+    initial_tensors: 1
+loss_weights:
+    latent: 0
+    value: 0
+    reward: 1
+    policy: 0
+    turn: 1
+    # try this new optimizer thing

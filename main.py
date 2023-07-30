@@ -6,6 +6,7 @@ import logging
 from typing import TYPE_CHECKING
 
 import hydra
+import numpy as np
 import torch
 from hydra.core.config_store import ConfigStore
 
@@ -19,7 +20,7 @@ from config.impl import (
 )
 from config.schema import BaseConfig
 from replay_buffer import ReplayBuffer
-from player_controller import SinglePC
+from player_controller import SelfplayPC
 from tensorboard_wrapper import TensorboardLogger
 
 if TYPE_CHECKING:
@@ -28,8 +29,6 @@ if TYPE_CHECKING:
 cs = ConfigStore.instance()
 cs.store(name="hydra_job_config", group="hydra.job", node={"chdir": True})
 cs.store(name="base_config", node=BaseConfig)
-
-log = logging.getLogger("main")
 
 
 @hydra.main(version_base=None, config_path="run_config", config_name="base_config")
@@ -52,32 +51,51 @@ def main(cfg: DictConfig) -> None:
     logging.captureWarnings(True)
     populate_config(cfg)
 
-    pc = SinglePC(C.players.instances)
+    torch.autograd.set_detect_anomaly(True)  # type: ignore [attr-defined]
+    torch.set_default_dtype(torch.float64)  # type: ignore [no-untyped-call]
+    np.set_printoptions(precision=3, suppress=True)
+
+    log_dir = "tb"
+    if "tb_name" in cfg:
+        log_dir = cfg["tb_name"]
+    if cfg.no_tb:
+        log_dir = "/tmp"
+
+    pc = SelfplayPC(C.players.instances)
     rb = ReplayBuffer()
     t = Trainer(pc.net)
+
     n = 0
     try:
         with TensorboardLogger(log_dir="tb") as tb:
+            # tb.add_graphs(pc.net)
+
+            pc.net.jit()
             tb.add_graphs(C.networks.factory())
-            while n < 100_000:
+            while n < 1_000_000:
                 with torch.no_grad():
                     result = run_episode(pc, tb.create_step_logger(n))
                 n += result.moves
                 for traj in result.trajectories:
                     rb.add_trajectory(traj, result.game_completed)
                 pc.net.update_rescalers(rb)
+
                 batch_samples = C.training.batch_size * C.training.max_trajectory_length
                 target_samples = (
-                    rb.data_added * C.training.train_selfplay_ratio * rb.fullness**2
+                    rb.data_added * C.training.train_selfplay_ratio * rb.fullness
                 )
                 while rb.data_sampled < target_samples - batch_samples:
                     t.process_batch(rb.sample(), tb.create_step_logger(n))
     except KeyboardInterrupt:
         if n < 30_000:
             ask_delete_logs()
+    # print("selfplay:", timer_selfplay.summary())
+    # print("train:", t.timer.summary())
 
 
 if __name__ == "__main__":
     monkeypatch_dictconfig()
     register_omegaconf_resolvers()
     main()
+    print(os.getcwd())
+    pass

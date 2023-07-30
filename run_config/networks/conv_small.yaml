@@ -1,0 +1,21 @@
+representation:
+    _target_: networks.convolutional.ConvRepresentation
+    channels: 16
+    layers: 12
+    pool_after: [4, 8]
+    #encode_position: false
+prediction:
+    _target_: networks.fully_connected.FcPrediction
+    num_blocks: 5
+dynamics:
+    _target_: networks.fully_connected.FcDynamics
+    num_shared_blocks: 5
+    num_main_blocks: 5
+    num_pred_blocks: 5
+    #shared_residual_blocks: 5
+    #main_residual_blocks: 5
+    #pred_residual_blocks: 5
+    #side_widths: 50
+latent_shape: [16, 10]
+belief_shape: [0, 10]
+scalar_support_size: 11

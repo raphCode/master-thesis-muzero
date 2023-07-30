@@ -63,6 +63,7 @@ class RLBase(Player):
         """
         Called whenever a new game starts.
         """
+        self.nets.eval()
         self.representation = Latent(self.nets.initial_latent)
         self.mcts.reset_new_game(player_id)
 

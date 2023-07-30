@@ -1,5 +1,20 @@
+import time
 import functools
-from typing import Any, Generic, TypeVar, Callable, Optional, ParamSpec, TypeAlias, cast
+from copy import copy
+from types import TracebackType
+from typing import (
+    Any,
+    Type,
+    Generic,
+    Literal,
+    TypeVar,
+    Callable,
+    Optional,
+    ParamSpec,
+    TypeAlias,
+    cast,
+)
+from contextlib import AbstractContextManager, suppress, contextmanager
 from collections.abc import Iterator
 
 import numpy as np
@@ -24,6 +39,29 @@ class NaNWarning(RuntimeWarning):
     pass
 
 
+class Sentinel:
+    pass
+
+
+def broadcast_cat(
+    *tensors: torch.Tensor, dim: int, unsqueeze_dim: int = -1
+) -> torch.Tensor:
+    """
+    Concatenate the tensors at the given dimension, expanding tensors as necessary.
+    With this function, you can concatenate a BxCxHxW image and a BxC onehot tensor in the
+    C dimension.
+    """
+    target_shape = list(max((len(t.shape), t.shape) for t in tensors)[1])
+    target_shape[dim] = -1
+
+    def expand(t: torch.Tensor) -> torch.Tensor:
+        for _ in range(len(target_shape) - t.dim()):
+            t = t.unsqueeze(unsqueeze_dim)
+        return t.expand(target_shape)
+
+    return torch.cat(list(map(expand, tensors)), dim=dim)
+
+
 Fn = TypeVar("Fn", bound=Callable[..., Any])
 
 
@@ -34,6 +72,44 @@ class copy_type_signature(Generic[Fn]):
 
     def __call__(self, wrapped: Callable[..., Any]) -> Fn:
         return cast(Fn, wrapped)
+
+
+class FunctionRegistry(dict[str, Callable[..., Any]]):
+    """
+    Acts as a decorator, collecting the wrapped functions.
+    """
+
+    def __call__(self, fn: Fn) -> Fn:
+        self[fn.__name__] = fn
+        return fn
+
+
+@contextmanager
+def hide_type_annotations(obj: Any, *annotation_names: str) -> Iterator[None]:
+    """
+    Context manager to temporarily delete some type annotations.
+    Used to hide problematic attributes from torch.jit.script.
+    """
+    original_annotations = copy(obj.__annotations__)
+    for name in annotation_names:
+        with suppress(KeyError):
+            del obj.__annotations__[name]
+    yield
+    obj.__annotations__ = original_annotations
+
+
+def wrap_attr(obj: Any, name: str, wrapper: Callable[..., Any]) -> None:
+    """
+    Applies a function to an object's attribute in-place.
+    """
+    setattr(obj, name, wrapper(getattr(obj, name)))
+
+
+def script_if_tracing(fn: Fn) -> Fn:
+    """
+    Typed decorator because torch.jit decorators are untyped.
+    """
+    return cast(Fn, torch.jit.script_if_tracing(fn))  # type: ignore [no-untyped-call]
 
 
 P = ParamSpec("P")
@@ -97,5 +173,45 @@ class RingBuffer(Generic[T]):
         wrapped_pos = self.position % len(self.data)
         yield from self.data[wrapped_pos:] + self.data[:wrapped_pos]
 
+    @property
+    def fullness(self) -> float:
+        return len(self) / self.size
+
     def __len__(self) -> int:
         return len(self.data)
+
+
+class TimeProfiler(AbstractContextManager[None]):
+    """
+    Measures time to execute the context manager block as well as how many times it was called.
+    """
+
+    timings: RingBuffer[int]
+    start_time: int
+
+    def __init__(self, maxlen: int = 1000) -> None:
+        self.timings = RingBuffer(maxlen)
+
+    def __enter__(self) -> None:
+        self.start_time = time.perf_counter_ns()
+
+    def __exit__(
+        self,
+        exctype: Optional[Type[BaseException]],
+        excinst: Optional[BaseException],
+        exctb: Optional[TracebackType],
+    ) -> Literal[False]:
+        self.timings.append(time.perf_counter_ns() - self.start_time)
+        return False
+
+    def summary(self) -> str:
+        timings = np.array(self.timings)
+        units = ["ns", "us", "ms", "s"]
+        for unit in units:
+            if np.mean(timings) < 10_000:
+                break
+            timings = timings / 1000
+        return (
+            f"{np.mean(timings):.1f} ±{np.std(timings):.1f} {unit} "
+            f"{len(timings)} samples"
+        )

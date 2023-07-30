@@ -190,14 +190,16 @@ class TrainingData:
         get_fields = operator.attrgetter(*field_names)
         field_data = zip(*map(get_fields, instances))
         for name, data in zip(field_names, field_data):
+            # TODO: save memory by setting latent,beliefs = None for all steps expect first?
             if name == "observations":
                 stacked_data = tuple(map(torch.stack, zip(*data)))
             else:
-                if not (name.startswith("is_") or name == "turn_status"):
+                if not (name.startswith("is_") or name in ("turn_status", "belief")):
                     data = torch.atleast_1d(data)  # type: ignore [no-untyped-call]
                     # only keep this data 0D:
                     # - is_*: boolean masks, processed specially in the training
                     # - turn_status: cross entropy loss takes class indices directly
+                    # - belief: may be empty
                 stacked_data = torch.stack(data)
             stacked_fields[name] = stacked_data
         return cls(**stacked_fields)  # type: ignore [arg-type]

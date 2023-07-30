@@ -23,9 +23,9 @@ class ReplayBuffer:
 
     def __init__(self) -> None:
         # the integer is a unique id to differentiate different trajectories
-        self.buffer = RingBuffer[tuple[int, TrainingData]](C.training.replay_buffer_size)
-        self.values = RingBuffer[float](C.training.replay_buffer_size)
-        self.rewards = RingBuffer[float](C.training.replay_buffer_size)
+        self.buffer = RingBuffer[tuple[int, TrainingData]](C.game.replay_buffer_steps)
+        self.values = RingBuffer[float](C.game.replay_buffer_steps)
+        self.rewards = RingBuffer[float](C.game.replay_buffer_steps)
         self.cache = TensorCache()
         self.data_added = 0
         self.data_sampled = 0
@@ -143,10 +143,16 @@ class ReplayBuffer:
 
     @property
     def reward_bounds(self) -> tuple[float, float]:
+        """
+        Minimum and maximum rewards found in the stored data.
+        """
         return min(self.rewards), max(self.rewards)
 
     @property
     def value_bounds(self) -> tuple[float, float]:
+        """
+        Minimum and maximum value targets found in the stored data.
+        """
         return min(self.values), max(self.values)
 
     @property

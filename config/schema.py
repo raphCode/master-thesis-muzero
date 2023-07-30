@@ -88,6 +88,8 @@ else:  # OMEGACONF SCHEMA TYPES
 class GameConfig:
     instance: Game
     reward_fn: RewardFn
+    max_steps_per_game: int
+    replay_buffer_steps: int
 
 
 @frozen
@@ -104,6 +106,7 @@ class NetworkConfig:  # runtime config container
     factory: Callable[[], Networks]
     latent_shape: tuple[int, ...]
     belief_shape: tuple[int, ...]
+    scalar_support_size: int
 
 
 @frozen
@@ -114,6 +117,7 @@ class NetworkSchema:  # omegaconf schema
     latent_shape: list[int]
     # to disable beliefs, use a zero dimension in the list somewhere
     belief_shape: list[int]
+    scalar_support_size: int
 
 
 if TYPE_CHECKING:  # RUNTIME TYPES
@@ -148,8 +152,6 @@ class TrainConfig:
     max_trajectory_length: int
     discount_factor: float
     n_step_horizon: int
-    replay_buffer_size: int
-    max_moves_per_game: int
     latent_dist_pnorm: float
     optimizer: OptimizerPartial
     learning_rates: LearningRates
@@ -168,13 +170,14 @@ class BaseConfig:
     networks: NetworkContainer
     training: TrainConfig
     players: PlayerConfig
+    no_tb: bool = False
     defaults: Optional[list[Any]] = [
         "_self_",
         {"game": MISSING},
-        {"mcts": MISSING},
-        {"networks": MISSING},
-        {"training": MISSING},
-        {"players": MISSING},
+        {"mcts": "default"},
+        {"networks": "fc_small"},
+        {"training": "default"},
+        {"players": "single"},
         {"hydra.job": "hydra_job_config"},
     ]
 

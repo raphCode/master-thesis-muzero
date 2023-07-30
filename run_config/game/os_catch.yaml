@@ -1,4 +1,8 @@
 instance:
     _target_: games.openspiel_wrapper.OpenSpielGame
     game_name: catch
+    rows: 20
+    columns: 20
 reward_fn: ${fn:fn.reward.default}
+replay_buffer_steps: 20_000
+max_steps_per_game: 100

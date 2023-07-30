@@ -1,5 +1,5 @@
+import math
 import logging
-import functools
 from types import UnionType
 from typing import Any, Iterable, Optional, cast
 from collections.abc import Sequence
@@ -77,7 +77,7 @@ def monkeypatch_dictconfig() -> None:
 
 def register_omegaconf_resolvers() -> None:
     # This resolver allows accessing python functions by their fully qualified name:
-    OmegaConf.register_new_resolver("fn", hydra.utils.get_method)
+    OmegaConf.register_new_resolver("fn", hydra.utils.get_method, replace=True)
 
 
 def merge_structured_config_defaults(cfg: Any) -> None:
@@ -129,10 +129,18 @@ def populate_config(cfg: DictConfig) -> None:
     assert_callable(cfg.mcts.node_selection_score_fn)
 
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
-        initial_tensor = functools.partial(torch.rand, requires_grad=True)
+        def initial_tensor(shape: Sequence[int]) -> torch.Tensor:
+            if math.prod(shape) == 0:
+                s = list(latent_shape)
+                s[0] = -1
+                t = torch.tensor(()).view([-1] + [1] * (len(latent_shape) - 1)).expand(s)
+                t.requires_grad = True
+                return t
+            return torch.rand(shape, requires_grad=True)
 
         def shape_check(shape: Sequence[int], name: str) -> None:
-            assert len(shape) > 0, f"{name} shape does not contain dimensions!"
+            if name != "belief":
+                assert len(shape) > 0, f"{name} shape does not contain dimensions!"
             assert all(
                 dim >= 0 for dim in shape
             ), f"{name} shape contains negative dimensions!"
@@ -155,6 +163,7 @@ def populate_config(cfg: DictConfig) -> None:
             factory=network_factory,
             latent_shape=latent_shape,
             belief_shape=belief_shape,
+            scalar_support_size=net_cfg.scalar_support_size,
         )
 
     # casts are necessary because here the omegaconf schema types co-exist with the

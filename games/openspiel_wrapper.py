@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Any, Unpack, Optional, cast
 from functools import cached_property
 
@@ -23,11 +24,17 @@ class OpenSpielGameState(GameState):
         super().__init__(**kwargs)
 
     @property
-    def observation(self) -> tuple[torch.Tensor]:
+    def observation(self) -> tuple[torch.Tensor, ...]:
+        flat_obs = torch.tensor(self.state.observation_tensor())
+        shapes = self.game.observation_shapes
+        obs_shape = shapes[0]
+        if len(shapes) == 1:
+            return (flat_obs.reshape(obs_shape),)
+        # Untangle the concatenated player onehot done by loading the game as turn-based
+        onehot_size = shapes[1][0]
         return (
-            torch.tensor(self.state.observation_tensor()).reshape(
-                self.game.observation_shapes[0]
-            ),
+            flat_obs[onehot_size:].reshape(obs_shape),
+            flat_obs[:onehot_size],
         )
 
     @property
@@ -89,6 +96,7 @@ class OpenSpielGameState(GameState):
 
 class OpenSpielGame(Game):
     game: pyspiel.Game
+    original_obs_shape: tuple[int, ...]
     teams: Teams
     bad_move_reward: Optional[float]
     bad_move_action: Optional[int]
@@ -110,6 +118,13 @@ class OpenSpielGame(Game):
         self.teams = Teams(teams)
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
 
+        # Loading a game as turn-based flattens the observation and
+        # concatenates player onehots
+        # https://github.com/deepmind/open_spiel/issues/1096
+        self.original_obs_shape = tuple(
+            pyspiel.load_game(game_name, kwargs).observation_tensor_shape()
+        )
+
     def new_initial_state(self) -> OpenSpielGameState:
         return OpenSpielGameState(
             self.game.new_initial_state(),
@@ -122,8 +137,18 @@ class OpenSpielGame(Game):
         return cast(int, self.game.num_players())
 
     @cached_property
-    def observation_shapes(self) -> tuple[tuple[int, ...]]:
-        return (tuple(self.game.observation_tensor_shape()),)
+    def observation_shapes(self) -> tuple[tuple[int, ...], ...]:
+        def make_3d(shape: tuple[int, ...]) -> tuple[int, ...]:
+            if len(shape) == 2:
+                # add singleton channel dimension to enable use of convolution networks
+                return (1, *shape)
+            return shape
+
+        obs_shape = tuple(self.game.observation_tensor_shape())
+        if self.original_obs_shape == obs_shape:
+            return (make_3d(obs_shape),)
+        onehot_size = math.prod(obs_shape) - math.prod(self.original_obs_shape)
+        return (make_3d(self.original_obs_shape), (onehot_size,))
 
     @cached_property
     def max_num_actions(self) -> int:

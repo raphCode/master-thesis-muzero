@@ -45,6 +45,7 @@ class RepresentationNet(NetBase):
 
 
 class PredictionNet(NetBase):
+    # Latent, Belief, CoopLevel -> Value, Policy
     # Latent, Belief -> Value, Policy
 
     @abstractmethod

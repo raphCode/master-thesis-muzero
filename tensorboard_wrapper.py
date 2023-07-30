@@ -5,13 +5,17 @@ from typing import TYPE_CHECKING, Type, Literal, Optional, cast
 from contextlib import AbstractContextManager
 from collections.abc import Sequence
 
+import attrs
 import torch
+from toolz import dicttoolz  # type: ignore [import]
 from torch.utils.tensorboard import SummaryWriter  # type: ignore [attr-defined]
 from tensorboard.compat.proto.graph_pb2 import GraphDef  # type: ignore [import]
 from tensorboard.compat.proto.node_def_pb2 import NodeDef  # type: ignore [import]
 from tensorboard.compat.proto.versions_pb2 import VersionDef  # type: ignore [import]
 
 from util import monkeypatch_wrap_args
+from config import C
+from config.schema import MctsConfig
 
 if TYPE_CHECKING:
     from networks import Networks
@@ -21,6 +25,7 @@ if TYPE_CHECKING:
 class TensorboardLogger(AbstractContextManager["TensorboardLogger"]):
     """
     Wrapper around the tensorboard SummaryWriter, provides:
+    - a typed function for adding hyperparameters to the tensorboard run
     - a custom add_graph implementation suited for the three networks
     - TBStepLogger instances to log data at specified global steps
     """
@@ -34,6 +39,8 @@ class TensorboardLogger(AbstractContextManager["TensorboardLogger"]):
             # https://github.com/tensorflow/tensorboard/issues/6418
             # Replace them with -1 so that a ? shows for the zero dimension instead
             return [-1 if dim == 0 else dim for dim in shape]
+
+        # venv/lib/python3.11/site-packages/torch/utils/tensorboard/_proto_graph.py
 
         monkeypatch_wrap_args(
             torch.utils.tensorboard._proto_graph,
@@ -64,6 +71,26 @@ class TensorboardLogger(AbstractContextManager["TensorboardLogger"]):
 
         graph = GraphDef(node=nodes, versions=VersionDef(producer=22))
         self.sw._get_file_writer().add_onnx_graph(graph)  # type: ignore [no-untyped-call]
+
+    def add_hparams(self, mcts_cfg: MctsConfig, metrics: dict[str, float]) -> None:
+        lrs = {
+            f"lr_{k}": lr * C.training.learning_rates.base
+            for k, lr in attrs.asdict(C.training.learning_rates).items()
+            if k != "base"
+        }
+        lw = dicttoolz.keymap(lambda k: f"lw_{k}", attrs.asdict(C.training.loss_weights))
+        self.sw.add_hparams(
+            hparam_dict=lrs
+            | lw
+            | attrs.asdict(C.training, recurse=False)
+            | dict(
+                latent_shape=str(C.networks.latent_shape),
+                belief_shape=str(C.networks.belief_shape),
+                mcts_iter_moves=mcts_cfg.iterations_move_selection,
+                mcts_iter_value=mcts_cfg.iterations_value_estimate,
+            ),
+            metric_dict=metrics,
+        )  # type: ignore [no-untyped-call]
 
     def create_step_logger(self, step: int) -> TBStepLogger:
         return TBStepLogger(self.sw, step)
@@ -98,4 +125,11 @@ class TBStepLogger:
             value,
             global_step=self.step,
             new_style=True,
+        )  # type: ignore [no-untyped-call]
+
+    def add_histogram(self, tag: str, values: torch.Tensor) -> None:
+        self.sw.add_histogram(
+            tag,
+            values,
+            global_step=self.step,
         )  # type: ignore [no-untyped-call]

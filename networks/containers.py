@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing
+import logging
 import functools
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, cast
@@ -18,6 +19,8 @@ if TYPE_CHECKING:
     from torch import Tensor
 
     from .bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
+
+log = logging.getLogger(__name__)
 
 
 def autobatch(module: nn.Module, *inputs: Tensor) -> Tensor | tuple[Tensor, ...]:
@@ -88,10 +91,12 @@ class NetContainer(ABC, nn.Module):
 
             return list(map(example_tensor, self._input_shapes()))
 
+        # TODO: move into network attrs thingy
         for name, mod in self.named_modules():
             if mod is not self and hasattr(mod, "jit") and callable(mod.jit):
                 setattr(self, name, mod.jit())
-        return cast(
+        self.eval()
+        jit_mod = cast(
             torch.jit.TopLevelTracedModule,
             torch.jit.trace_module(  # type: ignore [no-untyped-call]
                 self,
@@ -102,6 +107,10 @@ class NetContainer(ABC, nn.Module):
                 ),
             ),
         )
+
+        node_count = sum(1 for _ in jit_mod.inlined_graph.nodes())
+        log.info(f"Jit traced {type(self).__name__} ({node_count} Nodes)")
+        return jit_mod
 
 
 class RepresentationNetContainer(NetContainer):
@@ -139,7 +148,9 @@ class PredictionNetContainer(NetContainer):
 
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
-        self.value_scale = Rescaler()
+        from config import C
+
+        self.value_scale = Rescaler(C.networks.scalar_support_size)
 
     @classmethod
     def _input_shapes(cls) -> Sequence[Sequence[int]]:
@@ -175,7 +186,9 @@ class DynamicsNetContainer(NetContainer):
 
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
-        self.reward_scale = Rescaler()
+        from config import C
+
+        self.reward_scale = Rescaler(C.networks.scalar_support_size)
 
     @classmethod
     def _input_shapes(cls) -> Sequence[Sequence[int]]:
