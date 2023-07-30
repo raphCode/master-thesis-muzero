@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Unpack, Optional, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Optional, TypeAlias, TypedDict
 
 from attrs import frozen
 
@@ -12,8 +12,6 @@ from trajectory import Latent, Observation
 from games.bases import Player
 
 if TYPE_CHECKING:
-    import torch
-
     from util import ndarr_f64
     from games.bases import GameState
     from config.schema import MctsConfig
@@ -26,7 +24,6 @@ class TrainingInfo:
     """
 
     representation: Observation | Latent
-    belief: torch.Tensor
     target_policy: ndarr_f64
     mcts_value: float
 
@@ -98,7 +95,6 @@ class RLBase(Player):
         self.mcts.ensure_visit_count(self.mcts.cfg.iterations_value_estimate)
         return TrainingInfo(
             representation=self.representation,
-            belief=self.mcts.root.belief,
             target_policy=self.mcts.get_policy(),
             mcts_value=self.mcts.root.value,
         )
@@ -106,9 +102,8 @@ class RLBase(Player):
 
 class PerfectInformationRLPlayer(RLBase):
     """
-    Uses beliefs to propagate information to new observations.
-    To find the correct belief at the next own move, the tree search / dynamics network
-    follows along the actual game trajectory with all actions of other players.
+    The tree search follows along the actual game trajectory with all actions of other
+    players.
     This behaviour is only sound if the game is of perfect information, as any
     intermediate moves would be revealed in the next observation anyways.
     """
@@ -117,22 +112,10 @@ class PerfectInformationRLPlayer(RLBase):
         observations = state.observation
         self.representation = Observation(observations)
         latent = self.nets.representation.si(*observations)
-        self.mcts.new_root(latent, self.mcts.root.belief, state.valid_actions_mask)
+        self.mcts.new_root(latent, state.valid_actions_mask)
         self.mcts.ensure_visit_count(self.mcts.cfg.iterations_move_selection)
         return self.mcts.get_action()
 
     def advance_game_state(self, action: int) -> None:
         self.mcts.advance_root(action)
         self.representation = Latent(self.mcts.root.latent)
-
-
-class NoBeliefsRLPlayer(PerfectInformationRLPlayer):
-    """
-    Like the original MuZero, uses no beliefs, runs new tree search on each observation.
-    Disabling beliefs means the agent does not make use of intermediate actions in the
-    next own move. This means the implementation is safe for imperfect-information games.
-    """
-
-    def __init__(self, *args: Unpack[RLBaseInitArgs], **kwargs: Unpack[RLBaseInitKwArgs]):
-        super().__init__(*args, **kwargs)
-        assert 0 in C.networks.belief_shape

@@ -89,7 +89,7 @@ class Trainer:
                     lr=lrs.base * lrs.dynamics,
                 ),
                 dict(
-                    params=[nets.initial_latent, nets.initial_belief],
+                    params=[nets.initial_latent],
                     lr=lrs.base * lrs.initial_tensors,
                 ),
             ]
@@ -126,10 +126,6 @@ class Trainer:
         first = batch[0]
         latent = first.latent
         latent[first.is_initial] = self.nets.initial_latent
-        belief = first.belief
-        if belief is not None:
-            assert self.nets.initial_belief is not None
-            belief[first.is_initial] = self.nets.initial_belief
 
         for step in batch:
             if step.is_observation.any():
@@ -149,15 +145,13 @@ class Trainer:
 
             value, policy_logits = self.nets.prediction.raw_forward(
                 latent,
-                belief,
             )
             value_target = self.nets.prediction.value_scale.get_target(step.value_target)
             losses.value += ml(mse, value, value_target)
             losses.policy += ml(cross, policy_logits, step.target_policy)
 
-            latent, belief, reward, turn_status_logits = self.nets.dynamics.raw_forward(
+            latent, reward, turn_status_logits = self.nets.dynamics.raw_forward(
                 latent,
-                belief,
                 step.action_onehot,
             )
             reward_target = self.nets.dynamics.reward_scale.get_target(step.reward)

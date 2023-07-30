@@ -2,7 +2,6 @@ import logging
 import functools
 from types import UnionType
 from typing import Any, Iterable, Optional, cast
-from collections.abc import Sequence
 
 import attrs
 import hydra
@@ -131,16 +130,11 @@ def populate_config(cfg: DictConfig) -> None:
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
         initial_tensor = functools.partial(torch.rand, requires_grad=True)
 
-        def shape_check(shape: Sequence[int], name: str) -> None:
-            assert len(shape) > 0, f"{name} shape does not contain dimensions!"
-            assert all(
-                dim >= 0 for dim in shape
-            ), f"{name} shape contains negative dimensions!"
-
         latent_shape = tuple(net_cfg.latent_shape)
-        belief_shape = tuple(net_cfg.belief_shape)
-        shape_check(latent_shape, "latent")
-        shape_check(belief_shape, "belief")
+        assert len(latent_shape) > 0, "latent shape does not contain dimensions!"
+        assert all(
+            dim >= 0 for dim in latent_shape
+        ), "latent shape contains negative dimensions!"
 
         def network_factory() -> Networks:
             return Networks(
@@ -148,13 +142,11 @@ def populate_config(cfg: DictConfig) -> None:
                 prediction=PredictionNetContainer(net_cfg.prediction()),
                 dynamics=DynamicsNetContainer(net_cfg.dynamics()),
                 initial_latent=initial_tensor(latent_shape),
-                initial_belief=initial_tensor(belief_shape),
             )
 
         return NetworkConfig(
             factory=network_factory,
             latent_shape=latent_shape,
-            belief_shape=belief_shape,
         )
 
     # casts are necessary because here the omegaconf schema types co-exist with the

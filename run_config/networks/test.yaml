@@ -8,4 +8,3 @@ dynamics:
     _target_: networks.fully_connected.FcDynamics
     hidden_depth: 2
 latent_shape: [50]
-belief_shape: [0]

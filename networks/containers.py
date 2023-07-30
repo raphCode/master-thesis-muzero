@@ -145,14 +145,13 @@ class PredictionNetContainer(NetContainer):
     def _input_shapes(cls) -> Sequence[Sequence[int]]:
         from config import C
 
-        return C.networks.latent_shape, C.networks.belief_shape
+        return [C.networks.latent_shape]
 
     def forward(
         self,
         latent: Tensor,
-        belief: Tensor,
     ) -> tuple[Tensor, Tensor]:
-        value, policy_log = self.net(latent, belief)
+        value, policy_log = self.net(latent)
         return self.value_scale(value), F.softmax(policy_log, dim=1)
 
     # method overrides are to provide properly typed function signatures:
@@ -183,20 +182,17 @@ class DynamicsNetContainer(NetContainer):
 
         return (
             C.networks.latent_shape,
-            C.networks.belief_shape,
             [C.game.instance.max_num_actions],
         )
 
     def forward(
         self,
         latent: Tensor,
-        belief: Tensor,
         action_onehot: Tensor,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
-        latent, belief, reward, turn_status_log = self.net(latent, belief, action_onehot)
+    ) -> tuple[Tensor, Tensor, Tensor]:
+        latent, reward, turn_status_log = self.net(latent, action_onehot)
         return (
             latent,
-            belief,
             self.reward_scale(reward),
             F.softmax(turn_status_log, dim=1),
         )

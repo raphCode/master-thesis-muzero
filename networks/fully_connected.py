@@ -102,7 +102,6 @@ class FcPrediction(FcBase, PredictionNet):
         super().__init__(
             in_shapes=[
                 C.networks.latent_shape,
-                C.networks.belief_shape,
             ],
             out_shapes=[
                 [1],
@@ -111,10 +110,10 @@ class FcPrediction(FcBase, PredictionNet):
             **kwargs,
         )
 
-    def forward(self, latent: Tensor, belief: Tensor) -> tuple[Tensor, Tensor]:
+    def forward(self, latent: Tensor) -> tuple[Tensor, Tensor]:
         return cast(
             tuple[Tensor, Tensor],
-            self.reshape_forward(latent, belief),
+            self.reshape_forward(latent),
         )
 
 
@@ -126,12 +125,10 @@ class FcDynamics(FcBase, DynamicsNet):
         super().__init__(
             in_shapes=[
                 C.networks.latent_shape,
-                C.networks.belief_shape,
                 [C.game.instance.max_num_actions],
             ],
             out_shapes=[
                 C.networks.latent_shape,
-                C.networks.belief_shape,
                 [1],
                 [C.game.instance.max_num_players + len(TurnStatus)],
             ],
@@ -141,10 +138,9 @@ class FcDynamics(FcBase, DynamicsNet):
     def forward(
         self,
         latent: Tensor,
-        belief: Tensor,
         action_onehot: Tensor,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor, Tensor]:
         return cast(
-            tuple[Tensor, Tensor, Tensor, Tensor],
-            self.reshape_forward(latent, belief, action_onehot),
+            tuple[Tensor, Tensor, Tensor],
+            self.reshape_forward(latent, action_onehot),
         )

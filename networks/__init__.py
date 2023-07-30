@@ -32,7 +32,6 @@ class Networks:
     prediction: PredictionNetContainer
     dynamics: DynamicsNetContainer
     initial_latent: Tensor
-    initial_belief: Tensor
 
     def jit(self) -> None:
         for name, item in attrs.asdict(self).items():

@@ -103,7 +103,6 @@ class MctsConfig:
 class NetworkConfig:  # runtime config container
     factory: Callable[[], Networks]
     latent_shape: tuple[int, ...]
-    belief_shape: tuple[int, ...]
 
 
 @frozen
@@ -112,8 +111,6 @@ class NetworkSchema:  # omegaconf schema
     prediction: PredictionNetPartial
     representation: RepresentationNetPartial
     latent_shape: list[int]
-    # to disable beliefs, use a zero dimension in the list somewhere
-    belief_shape: list[int]
 
 
 if TYPE_CHECKING:  # RUNTIME TYPES
