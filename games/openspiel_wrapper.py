@@ -101,7 +101,7 @@ class OpenSpielGame(Game):
         teams: list[list[int]] = [],
         **kwargs: dict[str, Any],
     ):
-        self.game = pyspiel.load_game_as_turn_based(game_name, kwargs)
+        self.game = pyspiel.load_game(game_name, kwargs)
         self.bad_move_reward = optional_map(float)(bad_move_reward)
         self.bad_move_action = optional_map(int)(bad_move_action)
         assert (
@@ -109,6 +109,16 @@ class OpenSpielGame(Game):
         ), "At most one of 'bad_move_reward' or 'bad_move_action' must be given"
         self.teams = Teams(teams)
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
+        t = self.game.get_type()
+        assert (
+            t.chance_mode != t.ChanceMode.SAMPLED_STOCHASTIC
+        ), "Unsupported game: Sampled / implicit stochasticity!"
+        assert (
+            t.dynamics == t.Dynamics.SEQUENTIAL
+        ), "Only sequential move games are supported!"
+        assert (
+            t.information == t.Information.PERFECT_INFORMATION
+        ), "Only games with perfect information are supported!"
 
     def new_initial_state(self) -> OpenSpielGameState:
         return OpenSpielGameState(
