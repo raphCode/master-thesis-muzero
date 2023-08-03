@@ -143,10 +143,16 @@ class ReplayBuffer:
 
     @property
     def reward_bounds(self) -> tuple[float, float]:
+        """
+        Minimum and maximum rewards found in the stored data.
+        """
         return min(self.rewards), max(self.rewards)
 
     @property
     def value_bounds(self) -> tuple[float, float]:
+        """
+        Minimum and maximum value targets found in the stored data.
+        """
         return min(self.values), max(self.values)
 
     @property
