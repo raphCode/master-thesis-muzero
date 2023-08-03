@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Protocol
 
 import attrs
 from attrs import define
+from torch import nn
 
 from .containers import (
     NetContainer,
@@ -26,12 +27,15 @@ class ProvidesBounds(Protocol):
         ...
 
 
-@define(kw_only=True)
-class Networks:
+@define(kw_only=True, slots=False, eq=False)
+class Networks(nn.Module):
     representation: RepresentationNetContainer
     prediction: PredictionNetContainer
     dynamics: DynamicsNetContainer
     initial_latent: Tensor
+
+    def __attrs_pre_init__(self) -> None:
+        super().__init__()
 
     def jit(self) -> None:
         for name, item in attrs.asdict(self).items():
