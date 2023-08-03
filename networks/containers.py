@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing
+import logging
 import functools
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, cast
@@ -18,6 +19,8 @@ if TYPE_CHECKING:
     from torch import Tensor
 
     from .bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
+
+log = logging.getLogger(__name__)
 
 
 def autobatch(module: nn.Module, *inputs: Tensor) -> Tensor | tuple[Tensor, ...]:
@@ -88,7 +91,7 @@ class NetContainer(ABC, nn.Module):
 
             return list(map(example_tensor, self._input_shapes()))
 
-        return cast(
+        jit_mod = cast(
             torch.jit.TopLevelTracedModule,
             torch.jit.trace_module(  # type: ignore [no-untyped-call]
                 self,
@@ -99,6 +102,10 @@ class NetContainer(ABC, nn.Module):
                 ),
             ),
         )
+
+        node_count = sum(1 for _ in jit_mod.inlined_graph.nodes())
+        log.info(f"Jit traced {type(self).__name__} ({node_count} Nodes)")
+        return jit_mod
 
 
 class RepresentationNetContainer(NetContainer):
