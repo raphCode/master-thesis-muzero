@@ -159,6 +159,7 @@ def populate_config(cfg: DictConfig) -> None:
         return NetworkConfig(
             factory=network_factory,
             latent_shape=latent_shape,
+            scalar_support_size=net_cfg.scalar_support_size,
         )
 
     # casts are necessary because here the omegaconf schema types co-exist with the

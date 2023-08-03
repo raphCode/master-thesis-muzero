@@ -118,7 +118,6 @@ class Trainer:
 
         pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
-        mse = nn.MSELoss(reduction="none")
 
         losses = Losses()
         counts = LossCounts()
@@ -143,19 +142,19 @@ class Trainer:
 
             counts.data += cast(int, step.is_data.count_nonzero().item())
 
-            value, policy_logits = self.nets.prediction.raw_forward(
+            value_logits, policy_logits = self.nets.prediction.raw_forward(
                 latent,
             )
             value_target = self.nets.prediction.value_scale.get_target(step.value_target)
-            losses.value += ml(mse, value, value_target)
+            losses.value += ml(cross, value_logits, value_target)
             losses.policy += ml(cross, policy_logits, step.target_policy)
 
-            latent, reward, turn_status_logits = self.nets.dynamics.raw_forward(
+            latent, reward_logits, turn_status_logits = self.nets.dynamics.raw_forward(
                 latent,
                 step.action_onehot,
             )
             reward_target = self.nets.dynamics.reward_scale.get_target(step.reward)
-            losses.reward += ml(mse, reward, reward_target)
+            losses.reward += ml(cross, reward_logits, reward_target)
             losses.turn += ml(cross, turn_status_logits, step.turn_status)
 
         losses /= counts

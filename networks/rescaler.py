@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, TypeVar, Protocol, cast
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.jit import TopLevelTracedModule
 
 from util import copy_type_signature
@@ -29,23 +30,28 @@ class RescalerPy:
     Methods that need to be accessible from python, even after jit tracing.
     """
 
+    support: Tensor
+
     def update_bounds(self, bounds: tuple[float, float]) -> None:
-        minimum, maximum = bounds
-        self.min = torch.tensor(minimum)
-        self.max = torch.tensor(maximum)
+        n = len(self.support)
+        self.support = torch.linspace(*bounds, n)
 
     def normalize(self, value: R) -> R:
         """
         [min, max] range to [0, 1]
         """
-        minf = cast(float, self.min.item())
-        maxf = cast(float, self.max.item())
-        return (value - minf) / (maxf - minf)
+        return (value - self.min) / (self.max - self.min)
+
+    @property
+    def min(self) -> float:
+        return cast(float, self.support[0].item())
+
+    @property
+    def max(self) -> float:
+        return cast(float, self.support[-1].item())
 
     def __repr__(self) -> str:
-        return (
-            type(self).__name__ + f": min {self.min.item():.2f} max {self.max.item():.2f}"
-        )
+        return type(self).__name__ + f": min {self.min:.2f} max {self.max:.2f}"
 
 
 class RescalerJit(RescalerPy, TopLevelTracedModule):
@@ -59,35 +65,51 @@ class RescalerJit(RescalerPy, TopLevelTracedModule):
 
 class Rescaler(RescalerPy, nn.Module):
     """
-    Translates scalar network predictions in the range [-1, 1] to another range and back.
+    Translates between scalar values and categorical distributions from the network.
+
+    To make scalar prediction (like reward and value) over differing and wide ranges
+    easier for the network, they are implemented with a discrete probability distribution
+    over a support vector.
+    This support vector has n values evenly spaced in the range [min, max].
+    The range is updated by the minimum and maximum values encoutered in the replay
+    buffer.
     """
 
-    min: Tensor
-    max: Tensor
+    support: Tensor
 
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __init__(self, support_size: int, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
-        self.register_buffer("min", torch.tensor(0))
-        self.register_buffer("max", torch.tensor(1))
+        self.register_buffer("support", torch.linspace(0, 1, support_size))
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, logits: Tensor) -> Tensor:
         """
-        [-1, 1] range to [min, max]
+        support logits -> actual value in [min, max] range
         """
-        return (x + 1) / 2 * (self.max - self.min) + self.min
+        return F.softmax(logits, dim=-1) @ self.support
 
     def get_target(self, x: Tensor) -> Tensor:
         """
-        [min, max] range to [-1, 1]
+        value in [min, max] range -> target support probability distribution
         """
-        return (x - self.min) / (self.max - self.min) * 2 - 1
+        n = len(self.support)
+        x = x.view(-1)
+        mini, maxi = self.support[[0, -1]]
+        i = ((x - mini) / (maxi - mini) * (n - 1)).to(dtype=torch.int64)
+        i = i.clamp(0, n - 2)
+        low = self.support[i]
+        high = self.support[i + 1]
+        lerp = ((x - low) / (high - low)).unsqueeze(1)
+        return cast(
+            torch.Tensor,
+            F.one_hot(i, n) * (1 - lerp) + F.one_hot(i + 1, n) * lerp,
+        )
 
     def jit(self) -> RescalerJit:
         traced_mod = torch.jit.trace_module(  # type: ignore [no-untyped-call]
             self,
             dict(
-                forward=torch.tensor(0),
-                get_target=torch.tensor(0),
+                forward=torch.zeros(len(self.support)),
+                get_target=torch.tensor([0]),
             ),
         )
         object.__setattr__(traced_mod, "__class__", RescalerJit)

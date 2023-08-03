@@ -139,7 +139,9 @@ class PredictionNetContainer(NetContainer):
 
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
-        self.value_scale = Rescaler()
+        from config import C
+
+        self.value_scale = Rescaler(C.networks.scalar_support_size)
 
     @classmethod
     def _input_shapes(cls) -> Sequence[Sequence[int]]:
@@ -151,8 +153,8 @@ class PredictionNetContainer(NetContainer):
         self,
         latent: Tensor,
     ) -> tuple[Tensor, Tensor]:
-        value, policy_log = self.net(latent)
-        return self.value_scale(value), F.softmax(policy_log, dim=1)
+        value_log, policy_log = self.net(latent)
+        return self.value_scale(value_log), F.softmax(policy_log, dim=1)
 
     # method overrides are to provide properly typed function signatures:
     @copy_type_signature(forward)
@@ -174,7 +176,9 @@ class DynamicsNetContainer(NetContainer):
 
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
-        self.reward_scale = Rescaler()
+        from config import C
+
+        self.reward_scale = Rescaler(C.networks.scalar_support_size)
 
     @classmethod
     def _input_shapes(cls) -> Sequence[Sequence[int]]:
@@ -190,10 +194,10 @@ class DynamicsNetContainer(NetContainer):
         latent: Tensor,
         action_onehot: Tensor,
     ) -> tuple[Tensor, Tensor, Tensor]:
-        latent, reward, turn_status_log = self.net(latent, action_onehot)
+        latent, reward_log, turn_status_log = self.net(latent, action_onehot)
         return (
             latent,
-            self.reward_scale(reward),
+            self.reward_scale(reward_log),
             F.softmax(turn_status_log, dim=1),
         )
 

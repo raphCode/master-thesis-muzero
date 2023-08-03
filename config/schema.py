@@ -103,6 +103,7 @@ class MctsConfig:
 class NetworkConfig:  # runtime config container
     factory: Callable[[], Networks]
     latent_shape: tuple[int, ...]
+    scalar_support_size: int
 
 
 @frozen
@@ -110,6 +111,7 @@ class NetworkSchema:  # omegaconf schema
     dynamics: DynamicsNetPartial
     prediction: PredictionNetPartial
     representation: RepresentationNetPartial
+    scalar_support_size: int
 
 
 if TYPE_CHECKING:  # RUNTIME TYPES
