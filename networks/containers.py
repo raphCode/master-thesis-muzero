@@ -88,9 +88,6 @@ class NetContainer(ABC, nn.Module):
 
             return list(map(example_tensor, self._input_shapes()))
 
-        for name, mod in self.named_modules():
-            if mod is not self and hasattr(mod, "jit") and callable(mod.jit):
-                setattr(self, name, mod.jit())
         return cast(
             torch.jit.TopLevelTracedModule,
             torch.jit.trace_module(  # type: ignore [no-untyped-call]

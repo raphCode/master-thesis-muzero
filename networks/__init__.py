@@ -2,19 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-import attrs
 from attrs import define
 from torch import nn
 
-from .containers import (
-    NetContainer,
-    DynamicsNetContainer,
-    PredictionNetContainer,
-    RepresentationNetContainer,
-)
-
 if TYPE_CHECKING:
     from torch import Tensor
+
+    from .containers import (
+        DynamicsNetContainer,
+        PredictionNetContainer,
+        RepresentationNetContainer,
+    )
 
 
 class ProvidesBounds(Protocol):
@@ -38,9 +36,9 @@ class Networks(nn.Module):
         super().__init__()
 
     def jit(self) -> None:
-        for name, item in attrs.asdict(self).items():
-            if isinstance(item, NetContainer):
-                setattr(self, name, item.jit())
+        for name, mod in self.named_modules():
+            if mod is not self and hasattr(mod, "jit") and callable(mod.jit):
+                setattr(self, name, mod.jit())
 
     def update_rescalers(self, b: ProvidesBounds) -> None:
         self.prediction.value_scale.update_bounds(b.value_bounds)
