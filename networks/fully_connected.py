@@ -102,7 +102,7 @@ class FcPrediction(FcBase, PredictionNet):
                 C.networks.latent_shape,
             ],
             out_shapes=[
-                [1],
+                [C.networks.scalar_support_size],
                 [C.game.instance.max_num_actions],
             ],
             **kwargs,
@@ -127,7 +127,7 @@ class FcDynamics(FcBase, DynamicsNet):
             ],
             out_shapes=[
                 C.networks.latent_shape,
-                [1],
+                [C.networks.scalar_support_size],
                 [C.game.instance.max_num_players + len(TurnStatus)],
             ],
             **kwargs,
