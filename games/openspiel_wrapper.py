@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import math
 from typing import Any, Unpack, Optional, cast
 from functools import cached_property
 
@@ -24,17 +23,11 @@ class OpenSpielGameState(GameState):
         super().__init__(**kwargs)
 
     @property
-    def observation(self) -> tuple[torch.Tensor, ...]:
-        flat_obs = torch.tensor(self.state.observation_tensor())
-        shapes = self.game.observation_shapes
-        obs_shape = shapes[0]
-        if len(shapes) == 1:
-            return (flat_obs.reshape(obs_shape),)
-        # Untangle the concatenated player onehot done by loading the game as turn-based
-        onehot_size = shapes[1][0]
+    def observation(self) -> tuple[torch.Tensor]:
         return (
-            flat_obs[onehot_size:].reshape(obs_shape),
-            flat_obs[:onehot_size],
+            torch.tensor(self.state.observation_tensor()).reshape(
+                self.game.observation_shapes[0]
+            ),
         )
 
     @property
@@ -96,7 +89,6 @@ class OpenSpielGameState(GameState):
 
 class OpenSpielGame(Game):
     game: pyspiel.Game
-    original_obs_shape: tuple[int, ...]
     teams: Teams
     bad_move_reward: Optional[float]
     bad_move_action: Optional[int]
@@ -109,7 +101,7 @@ class OpenSpielGame(Game):
         teams: list[list[int]] = [],
         **kwargs: dict[str, Any],
     ):
-        self.game = pyspiel.load_game_as_turn_based(game_name, kwargs)
+        self.game = pyspiel.load_game(game_name, kwargs)
         self.bad_move_reward = optional_map(float)(bad_move_reward)
         self.bad_move_action = optional_map(int)(bad_move_action)
         assert (
@@ -117,13 +109,16 @@ class OpenSpielGame(Game):
         ), "At most one of 'bad_move_reward' or 'bad_move_action' must be given"
         self.teams = Teams(teams)
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
-
-        # Loading a game as turn-based flattens the observation and
-        # concatenates player onehots
-        # https://github.com/deepmind/open_spiel/issues/1096
-        self.original_obs_shape = tuple(
-            pyspiel.load_game(game_name, kwargs).observation_tensor_shape()
-        )
+        t = self.game.get_type()
+        assert (
+            t.chance_mode != t.ChanceMode.SAMPLED_STOCHASTIC
+        ), "Unsupported game: Sampled / implicit stochasticity!"
+        assert (
+            t.dynamics == t.Dynamics.SEQUENTIAL
+        ), "Only sequential move games are supported!"
+        assert (
+            t.information == t.Information.PERFECT_INFORMATION
+        ), "Only games with perfect information are supported!"
 
     def new_initial_state(self) -> OpenSpielGameState:
         return OpenSpielGameState(
@@ -137,18 +132,12 @@ class OpenSpielGame(Game):
         return cast(int, self.game.num_players())
 
     @cached_property
-    def observation_shapes(self) -> tuple[tuple[int, ...], ...]:
-        def make_3d(shape: tuple[int, ...]) -> tuple[int, ...]:
-            if len(shape) == 2:
-                # add singleton channel dimension to enable use of convolution networks
-                return (1, *shape)
-            return shape
-
-        obs_shape = tuple(self.game.observation_tensor_shape())
-        if self.original_obs_shape == obs_shape:
-            return (make_3d(obs_shape),)
-        onehot_size = math.prod(obs_shape) - math.prod(self.original_obs_shape)
-        return (make_3d(self.original_obs_shape), (onehot_size,))
+    def observation_shapes(self) -> tuple[tuple[int, ...]]:
+        shape = tuple(self.game.observation_tensor_shape())
+        if len(shape) == 2:
+            # add singleton channel dimension to enable use of convolution networks
+            return ((1, *shape),)
+        return (shape,)
 
     @cached_property
     def max_num_actions(self) -> int:
