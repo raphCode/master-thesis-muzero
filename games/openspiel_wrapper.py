@@ -133,7 +133,11 @@ class OpenSpielGame(Game):
 
     @cached_property
     def observation_shapes(self) -> tuple[tuple[int, ...]]:
-        return (tuple(self.game.observation_tensor_shape()),)
+        shape = tuple(self.game.observation_tensor_shape())
+        if len(shape) == 2:
+            # add singleton channel dimension to enable use of convolution networks
+            return ((1, *shape),)
+        return (shape,)
 
     @cached_property
     def max_num_actions(self) -> int:
