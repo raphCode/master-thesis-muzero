@@ -91,12 +91,7 @@ class NetContainer(ABC, nn.Module):
 
             return list(map(example_tensor, self._input_shapes()))
 
-        # TODO: move into network attrs thingy
-        for name, mod in self.named_modules():
-            if mod is not self and hasattr(mod, "jit") and callable(mod.jit):
-                setattr(self, name, mod.jit())
-        self.eval()
-        jit_mod = cast(
+        return cast(
             torch.jit.TopLevelTracedModule,
             torch.jit.trace_module(  # type: ignore [no-untyped-call]
                 self,
@@ -156,15 +151,14 @@ class PredictionNetContainer(NetContainer):
     def _input_shapes(cls) -> Sequence[Sequence[int]]:
         from config import C
 
-        return C.networks.latent_shape, C.networks.belief_shape
+        return [C.networks.latent_shape]
 
     def forward(
         self,
         latent: Tensor,
-        belief: Tensor,
     ) -> tuple[Tensor, Tensor]:
-        value, policy_log = self.net(latent, belief)
-        return self.value_scale(value), F.softmax(policy_log, dim=1)
+        value_log, policy_log = self.net(latent)
+        return self.value_scale(value_log), F.softmax(policy_log, dim=1)
 
     # method overrides are to provide properly typed function signatures:
     @copy_type_signature(forward)
@@ -196,21 +190,18 @@ class DynamicsNetContainer(NetContainer):
 
         return (
             C.networks.latent_shape,
-            C.networks.belief_shape,
             [C.game.instance.max_num_actions],
         )
 
     def forward(
         self,
         latent: Tensor,
-        belief: Tensor,
         action_onehot: Tensor,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
-        latent, belief, reward, turn_status_log = self.net(latent, belief, action_onehot)
+    ) -> tuple[Tensor, Tensor, Tensor]:
+        latent, reward_log, turn_status_log = self.net(latent, action_onehot)
         return (
             latent,
-            belief,
-            self.reward_scale(reward),
+            self.reward_scale(reward_log),
             F.softmax(turn_status_log, dim=1),
         )
 

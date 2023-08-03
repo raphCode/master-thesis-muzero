@@ -64,7 +64,6 @@ class Node(ABC):
     """
 
     latent: Tensor
-    belief: Tensor
 
     value_sum: float
     visit_count: int
@@ -80,14 +79,12 @@ class Node(ABC):
         self,
         /,
         latent: Tensor,
-        belief: Tensor,
         reward: float,
         value_pred: float,
         probs: ndarr_f32 | ndarr_f64,
         mcts: MCTS,
     ) -> None:
         self.latent = latent
-        self.belief = belief
         self.reward = reward
         self.value_pred = value_pred
         self.probs = probs
@@ -161,7 +158,6 @@ class StateNode(Node):
     def __init__(
         self,
         latent: Tensor,
-        belief: Tensor,
         reward: float,
         mcts: MCTS,
         /,
@@ -170,7 +166,7 @@ class StateNode(Node):
     ):
         self.mask = valid_actions_mask
         self.player = current_player or mcts.own_pid
-        value_pred, policy = mcts.nets.prediction.si(latent, belief)
+        value_pred, policy = mcts.nets.prediction.si(latent)
         probs = policy.detach().numpy()
         if valid_actions_mask is not None:
             # Just in case you want to disable the mask:
@@ -180,7 +176,6 @@ class StateNode(Node):
             probs /= probs.sum()
         super().__init__(
             latent=latent,
-            belief=belief,
             reward=reward,
             value_pred=value_pred.item(),
             probs=probs,
@@ -188,18 +183,16 @@ class StateNode(Node):
         )
 
     def _create_child_at(self, action: int) -> Node:
-        latent, belief, reward, turn_onehot = self.mcts.nets.dynamics.si(
+        latent, reward, turn_onehot = self.mcts.nets.dynamics.si(
             self.latent,
-            self.belief,
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
         turn_status = TurnStatus.from_index(cast(int, turn_onehot.argmax().item()))
         # if turn_status is TurnStatus.TERMINAL_STATE and self.mcts.settings.enable_terminal_nodes:
         if turn_status is TurnStatus.TERMINAL_STATE:
-            return TerminalNode(latent, belief, reward.item(), self.mcts)
+            return TerminalNode(latent, reward.item(), self.mcts)
         return StateNode(
             latent,
-            belief,
             reward.item(),
             self.mcts,
             current_player=turn_status,
@@ -240,15 +233,13 @@ class TerminalNode(Node):
     - it stores a view count which might be relevant for deriving the target policy
 
     Children of this first TerminalNode are important as well; the tree search cannot
-    simply be truncated: The terminal prediction might be wrong, and the latents / beliefs
-    of some child nodes may still be needed for e.g. training data or some special
-    RLPlayers.
+    simply be truncated: The terminal prediction might be wrong, and the latents of some
+    child nodes may still be needed for e.g. training data or some special RLPlayers.
     """
 
-    def __init__(self, latent: Tensor, belief: Tensor, reward: float, mcts: MCTS):
+    def __init__(self, latent: Tensor, reward: float, mcts: MCTS):
         super().__init__(
             latent=latent,
-            belief=belief,
             reward=reward,
             value_pred=0.0,
             probs=np.full(
@@ -258,12 +249,11 @@ class TerminalNode(Node):
         )
 
     def _create_child_at(self, action: int) -> TerminalNode:
-        latent, belief, _, _ = self.mcts.nets.dynamics.si(
+        latent, _, _ = self.mcts.nets.dynamics.si(
             self.latent,
-            self.belief,
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
-        return TerminalNode(latent, belief, 0, self.mcts)
+        return TerminalNode(latent, 0, self.mcts)
 
     def debug_info(self) -> Iterable[str]:
         return [
@@ -301,18 +291,15 @@ class MCTS:
         self.own_pid = player_id
         self.new_root(
             self.nets.initial_latent,
-            self.nets.initial_belief,
         )
 
     def new_root(
         self,
         latent: Tensor,
-        belief: Tensor,
         valid_actions_mask: Optional[ndarr_bool] = None,
     ) -> None:
         self.root = StateNode(
             latent,
-            belief,
             0,
             self,
             valid_actions_mask=valid_actions_mask,

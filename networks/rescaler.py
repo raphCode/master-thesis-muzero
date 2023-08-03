@@ -65,7 +65,14 @@ class RescalerJit(RescalerPy, TopLevelTracedModule):
 
 class Rescaler(RescalerPy, nn.Module):
     """
-    Translates scalar network predictions in the range [-1, 1] to another range and back.
+    Translates between scalar values and categorical distributions from the network.
+
+    To make scalar prediction (like reward and value) over differing and wide ranges
+    easier for the network, they are implemented with a discrete probability distribution
+    over a support vector.
+    This support vector has n values evenly spaced in the range [min, max].
+    The range is updated by the minimum and maximum values encoutered in the replay
+    buffer.
     """
 
     support: Tensor
@@ -76,13 +83,13 @@ class Rescaler(RescalerPy, nn.Module):
 
     def forward(self, logits: Tensor) -> Tensor:
         """
-        logits to actual value
+        support logits -> actual value in [min, max] range
         """
         return F.softmax(logits, dim=-1) @ self.support
 
     def get_target(self, x: Tensor) -> Tensor:
         """
-        [min, max] range to target probability distribution
+        value in [min, max] range -> target support probability distribution
         """
         n = len(self.support)
         x = x.view(-1)

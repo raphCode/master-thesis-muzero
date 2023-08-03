@@ -2,7 +2,6 @@ import math
 import logging
 from types import UnionType
 from typing import Any, Iterable, Optional, cast
-from collections.abc import Sequence
 
 import attrs
 import hydra
@@ -11,6 +10,7 @@ import gorilla  # type: ignore [import]
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
+from util import get_output_shape
 from networks import Networks
 from games.bases import Game, Player
 from config.schema import BaseConfig, NetworkConfig, NetworkSchema
@@ -128,41 +128,37 @@ def populate_config(cfg: DictConfig) -> None:
     assert_callable(cfg.mcts.node_target_policy_fn)
     assert_callable(cfg.mcts.node_selection_score_fn)
 
+    # Populate game.instance because:
+    # - we need to get the latent shape from the representation network
+    # - the representation network will likely access C.game.observation_shapes in init
+    assert isinstance(cfg.game.instance, Game)
+    C.fill_from(attrs.evolve(C, game=cfg.game))
+    log.info(
+        f"Game instance: {C.game.instance}, "
+        f"observation shapes: {C.game.instance.observation_shapes}"
+    )
+
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
-        def initial_tensor(shape: Sequence[int]) -> torch.Tensor:
-            if math.prod(shape) == 0:
-                s = list(latent_shape)
-                s[0] = -1
-                t = torch.tensor(()).view([-1] + [1] * (len(latent_shape) - 1)).expand(s)
-                t.requires_grad = True
-                return t
-            return torch.rand(shape, requires_grad=True)
-
-        def shape_check(shape: Sequence[int], name: str) -> None:
-            if name != "belief":
-                assert len(shape) > 0, f"{name} shape does not contain dimensions!"
-            assert all(
-                dim >= 0 for dim in shape
-            ), f"{name} shape contains negative dimensions!"
-
-        latent_shape = tuple(net_cfg.latent_shape)
-        belief_shape = tuple(net_cfg.belief_shape)
-        shape_check(latent_shape, "latent")
-        shape_check(belief_shape, "belief")
+        latent_shape = get_output_shape(
+            net_cfg.representation(),
+            *C.game.instance.observation_shapes,
+        )
+        log.info(
+            "Determined latent shape from representation network output: "
+            f"{latent_shape} ({math.prod(latent_shape)} elements)"
+        )
 
         def network_factory() -> Networks:
             return Networks(
                 representation=RepresentationNetContainer(net_cfg.representation()),
                 prediction=PredictionNetContainer(net_cfg.prediction()),
                 dynamics=DynamicsNetContainer(net_cfg.dynamics()),
-                initial_latent=initial_tensor(latent_shape),
-                initial_belief=initial_tensor(belief_shape),
+                initial_latent=torch.rand(latent_shape, requires_grad=True),
             )
 
         return NetworkConfig(
             factory=network_factory,
             latent_shape=latent_shape,
-            belief_shape=belief_shape,
             scalar_support_size=net_cfg.scalar_support_size,
         )
 
@@ -180,8 +176,6 @@ def populate_config(cfg: DictConfig) -> None:
     # finally, check for correct class instances:
     # this can only be done after the game instance is in place since network creation may
     # access game-specific data like observation sizes
-
-    assert isinstance(C.game.instance, Game)
 
     # Network container check the implementation types themselves
     C.networks.factory()

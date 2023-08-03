@@ -151,7 +151,7 @@ class Trainer:
                     lr=lrs.base * lrs.dynamics,
                 ),
                 dict(
-                    params=[nets.initial_latent, nets.initial_belief],
+                    params=[nets.initial_latent],
                     lr=lrs.base * lrs.initial_tensors,
                 ),
             ]
@@ -197,10 +197,6 @@ class Trainer:
         first = batch[0]
         latent = first.latent
         latent[first.is_initial] = self.nets.initial_latent
-        belief = first.belief
-        if belief is not None:
-            assert self.nets.initial_belief is not None
-            belief[first.is_initial] = self.nets.initial_belief
 
         for n,step in enumerate(batch):
             if step.is_observation.any():
@@ -219,22 +215,20 @@ class Trainer:
             tbs.add_histogram(f"latent/unroll {n}", latent.clamp(-10, 10))
             counts.data += cast(int, step.is_data.count_nonzero().item())
 
-            value_log, policy_log = self.nets.prediction.raw_forward(
+            value_logits, policy_logits = self.nets.prediction.raw_forward(
                 latent,
-                belief,
             )
-            value_support = self.nets.prediction.value_scale.get_target(step.value_target)
-            losses.value += ml(cross, value_log, value_support)
-            losses.policy += ml(cross, policy_log, step.target_policy)
+            value_target = self.nets.prediction.value_scale.get_target(step.value_target)
+            losses.value += ml(cross, value_logits, value_target)
+            losses.policy += ml(cross, policy_logits, step.target_policy)
 
-            latent, belief, reward_log, turn_status_log = self.nets.dynamics.raw_forward(
+            latent, reward_logits, turn_status_logits = self.nets.dynamics.raw_forward(
                 latent,
-                belief,
                 step.action_onehot,
             )
-            reward_support = self.nets.dynamics.reward_scale.get_target(step.reward)
-            losses.reward += ml(cross, reward_log, reward_support)
-            losses.turn += ml(cross, turn_status_log, step.turn_status)
+            reward_target = self.nets.dynamics.reward_scale.get_target(step.reward)
+            losses.reward += ml(cross, reward_logits, reward_target)
+            losses.turn += ml(cross, turn_status_logits, step.turn_status)
 
         losses /= counts
 

@@ -105,7 +105,6 @@ class MctsConfig:
 class NetworkConfig:  # runtime config container
     factory: Callable[[], Networks]
     latent_shape: tuple[int, ...]
-    belief_shape: tuple[int, ...]
     scalar_support_size: int
 
 
@@ -114,9 +113,6 @@ class NetworkSchema:  # omegaconf schema
     dynamics: DynamicsNetPartial
     prediction: PredictionNetPartial
     representation: RepresentationNetPartial
-    latent_shape: list[int]
-    # to disable beliefs, use a zero dimension in the list somewhere
-    belief_shape: list[int]
     scalar_support_size: int
 
 

@@ -16,6 +16,10 @@ from typing import (
 )
 from contextlib import AbstractContextManager, suppress, contextmanager
 from collections.abc import Iterator
+from typing import Any, Generic, TypeVar, Callable, Optional, ParamSpec, TypeAlias, cast
+from collections.abc import Iterator
+from typing import Any, Generic, TypeVar, Callable, Optional, ParamSpec, TypeAlias, cast
+from collections.abc import Iterator, Sequence
 
 import numpy as np
 import torch
@@ -125,6 +129,16 @@ def monkeypatch_wrap_args(obj: Any, attr: str, wrap_fn: Callable[P, Any]) -> Non
 
     gorilla.apply(gorilla.Patch(obj, attr, wrapper, gorilla.Settings(allow_hit=True)))
     original_fn = gorilla.get_original_attribute(obj, attr)
+
+
+def get_output_shape(
+    module: torch.nn.Module,
+    *input_shapes: Sequence[int],
+    **kwargs: Any,
+) -> tuple[int]:
+    module.eval()
+    example_inputs = [torch.zeros(1, *shape) for shape in input_shapes]
+    return cast(tuple[int], tuple(module(*example_inputs, **kwargs).shape[1:]))
 
 
 class TensorCache:

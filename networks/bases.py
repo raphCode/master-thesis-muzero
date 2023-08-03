@@ -22,10 +22,6 @@ class NetBase(ABC, nn.Module):
 
 
 # Custom network implementations should subclass the three Net classes below
-#
-# beliefs are always Tensors, even when disabled.
-# In this case, belief tensors are empty, i.e. they have at least one zero data dimension.
-# eg, for 2D images, the tensor shape is often BxHxWxC. An empty tensor may have zero C.
 
 
 class RepresentationNet(NetBase):
@@ -45,14 +41,12 @@ class RepresentationNet(NetBase):
 
 
 class PredictionNet(NetBase):
-    # Latent, Belief, CoopLevel -> Value, Policy
-    # Latent, Belief -> Value, Policy
+    # Latent -> Value, Policy
 
     @abstractmethod
     def forward(
         self,
         latent: Tensor,
-        belief: Tensor,
     ) -> tuple[Tensor, Tensor]:
         pass
 
@@ -63,15 +57,14 @@ class PredictionNet(NetBase):
 
 
 class DynamicsNet(NetBase):
-    # Latent, Belief, Action -> Latent, Belief, Reward, TurnStatus
+    # Latent, Action -> Latent, Reward, TurnStatus
 
     @abstractmethod
     def forward(
         self,
         latent: Tensor,
-        belief: Tensor,
         action_onehot: Tensor,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor, Tensor]:
         pass
 
     # method overrides are to provide properly typed function signatures:
