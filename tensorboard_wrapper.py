@@ -85,7 +85,6 @@ class TensorboardLogger(AbstractContextManager["TensorboardLogger"]):
             | attrs.asdict(C.training, recurse=False)
             | dict(
                 latent_shape=str(C.networks.latent_shape),
-                belief_shape=str(C.networks.belief_shape),
                 mcts_iter_moves=mcts_cfg.iterations_move_selection,
                 mcts_iter_value=mcts_cfg.iterations_value_estimate,
             ),
