@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import math
 import logging
 import operator
 import functools
-from typing import TYPE_CHECKING, Callable, Optional, cast
+from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 
 import attrs
 import numpy as np
 import scipy  # type: ignore
 import torch
 from attrs import Factory, define
+from toolz import dicttoolz  # type: ignore
 from torch import Tensor, nn
 
 from util import RingBuffer, ndarr_f64
@@ -17,6 +19,7 @@ from config import C
 from config.schema import LossWeights
 
 if TYPE_CHECKING:
+    from util import ndarr_f64
     from networks import Networks
     from trajectory import TrainingData
     from config.schema import LossWeights
@@ -41,14 +44,15 @@ class Losses:
     policy: Tensor = zero_tensor
     turn: Tensor = zero_tensor
 
-    def weighted_sum(self, weights: LossWeights) -> Tensor:
+    def weighted_sum(self, weights: dict[str, float]) -> Tensor:
         """
         Multiplies each loss component with the same-named weight and returns the sum.
         """
-        field_names = [f.name for f in attrs.fields(type(self))]
-        get_fields = operator.attrgetter(*field_names)  # access fields in same order
+        losses = attrs.asdict(self)
+        assert losses.keys() == weights.keys()
         return cast(
-            Tensor, sum(l * w for l, w in zip(get_fields(self), get_fields(weights)))
+            Tensor,
+            sum(dicttoolz.merge_with(math.prod, losses, weights).values()),
         )
 
 
@@ -82,60 +86,65 @@ class SLAW:
     """
 
     beta: float
-    names: tuple[str, ...]  # names of loss components and weights, in order
+    auto_weight_names: list[str]  # names of loss components / weights, in order
+    fixed_weights: dict[str, float]
     a: ndarr_f64
     b: ndarr_f64
     w: ndarr_f64
 
-    def __init__(self, mavg_beta: float) -> None:
-        self.beta = mavg_beta
-        self.names = tuple(
-            f.name for f in attrs.fields(LossWeights) #    if f.name != "latent"
-        )
-        n = len(self.names)
+    def __init__(self, loss_weight_config: LossWeights, mavg_beta: float) -> None:
+        def can_parse_float(x: Any) -> bool:
+            try:
+                float(x)
+                return True
+            except ValueError:
+                return False
+
+        self.auto_weight_names = []
+        self.fixed_weights = {}
+        for k, v in attrs.asdict(loss_weight_config).items():
+            if v == "auto":
+                self.auto_weight_names.append(k)
+                continue
+            assert can_parse_float(v), (
+                "Loss weights must either be a float or the string 'auto'!\n"
+                f"Could not parse value for weight '{k}': {v}"
+            )
+            self.fixed_weights[k] = float(v)
+
+        n = len(self.auto_weight_names)
         self.a = np.zeros(n)
         self.b = np.zeros(n)
+        self.w = np.ones(n)
+        self.beta = mavg_beta
 
-    def step(self, losses: Losses, tbs: TBStepLogger) -> None:
+    def step(self, losses: Losses) -> None:
         """
         Update internal loss weights based on the current training step's losses.
         """
-        get_fields = operator.attrgetter(*self.names)
+        n = len(self.auto_weight_names)
+        if n == 0:
+            return
+        get_fields = operator.attrgetter(*self.auto_weight_names)
         l = np.array([t.item() for t in get_fields(losses)])
-        n = len(self.names)
         self.a = self.beta * self.a + (1 - self.beta) * l**2
         self.b = self.beta * self.b + (1 - self.beta) * l
         s = np.maximum(1e-5, np.sqrt(self.a - self.b**2))
         self.w = (n / s) / np.sum(1 / s)
 
-        tbs.add_scalar("slaw: w/std", np.std(self.w))  # type: ignore [arg-type]
-        tbs.add_scalar("slaw: s/mean", np.mean(s))
-        tbs.add_scalar("slaw: s/geomean", scipy.stats.gmean(s))
-        tbs.add_scalar("slaw: s/std", np.std(s))
-        tbs.add_scalar("slaw: s/std/mean", np.std(s) / np.mean(s))
-        for name, ss in zip(self.names, s):
-            tbs.add_scalar("slaw: s/" + name, ss)
-
     @property
-    def weights(self) -> LossWeights:
+    def weights(self) -> dict[str, float]:
         """
         Return the calculated loss weights.
         """
-        return LossWeights(**dict(zip(self.names, self.w)))#   ,latent=0)
-
-
-class MyReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
-    def step(self, metrics: float, epoch: Optional[int] = None) -> None:
-        if self.in_cooldown:
-            self.best = self.mode_worse
-        return super().step(metrics)
+        return dict(zip(self.auto_weight_names, self.w)) | self.fixed_weights
 
 
 class Trainer:
     def __init__(self, nets: Networks):
         self.nets = nets
         lrs = C.training.learning_rates
-        self.slaw = SLAW(0.999)
+        self.slaw = SLAW(C.training.loss_weights, 0.999)
         self.optimizer = C.training.optimizer(
             [
                 dict(
@@ -232,17 +241,16 @@ class Trainer:
 
         losses /= counts
 
-        self.slaw.step(losses, tbs)
+        self.slaw.step(losses)
         weights = self.slaw.weights
-        #weights=C.training.loss_weights
 
+        total_loss = losses.weighted_sum(weights)
 
         for k, loss in attrs.asdict(losses).items():
             tbs.add_scalar(f"loss/{k}", loss)
-        for k, weight in attrs.asdict(weights).items():
+        for k, weight in weights.items():
             tbs.add_scalar(f"loss weight/{k}", weight)
 
-        total_loss = losses.weighted_sum(weights)
         self.loss_history.append(total_loss.item())
         self.lr_scheduler.step(np.mean(self.loss_history))  # type: ignore [call-overload]
         for n, param_group in enumerate(self.optimizer.param_groups):

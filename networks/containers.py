@@ -91,7 +91,7 @@ class NetContainer(ABC, nn.Module):
 
             return list(map(example_tensor, self._input_shapes()))
 
-        return cast(
+        jit_mod = cast(
             torch.jit.TopLevelTracedModule,
             torch.jit.trace_module(  # type: ignore [no-untyped-call]
                 self,
