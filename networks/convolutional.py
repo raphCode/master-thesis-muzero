@@ -9,7 +9,13 @@ from torch import Tensor, nn
 from util import broadcast_cat, copy_type_signature
 from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
 
-from .fully_connected import FcSplitOutputs, skip_connections
+from .fully_connected import (
+    BasicBlock,
+    ResidualBlock,
+    FcSplitOutputs,
+    raph_relu,
+    skip_connections,
+)
 
 
 def get_output_shape(module: nn.Module, input_shape: Sequence[int]) -> Sequence[int]:
@@ -90,17 +96,17 @@ class ConvRepresentation(RepresentationNet):
         pool_after: list[int] = [],
         kernel_size: int = 3,
         padding: str = "same",
-        encode_position:bool=True,
+        encode_position: bool = True,
         **kwargs: Any,
     ):
         super().__init__()
         from config import C
 
-        self.encode_position=bool(encode_position)
+        self.encode_position = bool(encode_position)
         observation_shapes = C.game.instance.observation_shapes
         assert len(observation_shapes) == 1
         assert len(observation_shapes[0]) == 3, "Game does not provide a 3D observation"
-        obs_channels = observation_shapes[0][0]+2*self.encode_position
+        obs_channels = observation_shapes[0][0] + 2 * self.encode_position
         self.upconv = nn.Conv2d(obs_channels, channels, 1)
         self.conv_layers = nn.ModuleList(
             [
@@ -115,13 +121,15 @@ class ConvRepresentation(RepresentationNet):
                 for n in range(layers)
             ]
         )
-        self.input_bn=nn.BatchNorm2d(observation_shapes[0][0])
+        self.input_bn = nn.BatchNorm2d(observation_shapes[0][0])
         self.batchnorms = nn.ModuleList([nn.BatchNorm2d(channels) for _ in range(layers)])
         self.downconv = nn.Conv2d(channels, C.networks.latent_shape[0], 1)
         self.pool_after = set(pool_after)
-        self.bn_out=nn.BatchNorm1d(C.networks.latent_shape[0])      
-        width=C.networks.latent_shape[0]*10
-        self.fc = nn.Sequential(*[ResidualBlock([BasicBlock(width) for _ in range(2)]) for _ in range(5)])
+        self.bn_out = nn.BatchNorm1d(C.networks.latent_shape[0])
+        width = C.networks.latent_shape[0] * 10
+        self.fc = nn.Sequential(
+            *[ResidualBlock([BasicBlock(width) for _ in range(2)]) for _ in range(5)]
+        )
         # self.pool = nn.MaxPool2d(2, ceil_mode=True)
         # TODO conv out shape may not be the latent directly
         # TODO: better error messages
@@ -137,16 +145,16 @@ class ConvRepresentation(RepresentationNet):
         x = observations[0]
         x = self.input_bn(x)
         if self.encode_position:
-            n=x.shape[0]
+            n = x.shape[0]
             w, h = x.shape[-2:]
-            pos_w = torch.linspace(-1, 1, w).view(1, 1, -1, 1).expand(n, 1, w,h)
-            pos_h = torch.linspace(-1, 1, h).view(1, 1, 1, -1).expand(n, 1, w,h)
-            x = torch.cat([x, pos_w, pos_h] ,dim =1)
+            pos_w = torch.linspace(-1, 1, w).view(1, 1, -1, 1).expand(n, 1, w, h)
+            pos_h = torch.linspace(-1, 1, h).view(1, 1, 1, -1).expand(n, 1, w, h)
+            x = torch.cat([x, pos_w, pos_h], dim=1)
         x = self.upconv(x)
         for n, (conv, bn) in enumerate(zip(self.conv_layers, self.batchnorms)):
             skip = x
-            #x = F.celu(x, alpha=0.1)  # pre-activation
-            x=raph_relu(x)
+            # x = F.celu(x, alpha=0.1)  # pre-activation
+            x = raph_relu(x)
             x = bn(x)
             x = conv(x)
             if skip.shape == x.shape:
@@ -161,9 +169,8 @@ class ConvRepresentation(RepresentationNet):
         a = x.max(dim=-1).values
         b = x.max(dim=-2).values
         x = self.bn_out(torch.cat([a, b], dim=-1))
-        return self.fc(x.flatten(1)).reshape([-1,16,10])
+        return self.fc(x.flatten(1)).reshape([-1, 16, 10])
 
-from .fully_connected import raph_relu, ResidualBlock, BasicBlock
 
 class ConvPrediction(PredictionNet):
     conv: GenericConv

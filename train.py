@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 
 import attrs
 import numpy as np
-import scipy  # type: ignore
 import torch
 from attrs import Factory, define
 from toolz import dicttoolz  # type: ignore
@@ -167,7 +166,11 @@ class Trainer:
         )
         self.loss_history = RingBuffer[float](20)
         self.lr_scheduler = MyReduceLROnPlateau(
-            self.optimizer, factor=0.5, cooldown=1000, verbose=True, patience=100,
+            self.optimizer,
+            factor=0.5,
+            cooldown=1000,
+            verbose=True,
+            patience=100,
         )
 
     def process_batch(self, batch: list[TrainingData], tbs: TBStepLogger) -> None:
@@ -207,7 +210,7 @@ class Trainer:
         latent = first.latent
         latent[first.is_initial] = self.nets.initial_latent
 
-        for n,step in enumerate(batch):
+        for n, step in enumerate(batch):
             if step.is_observation.any():
                 obs_latent = self.nets.representation(*step.observations)
                 if step is first:

@@ -15,10 +15,6 @@ from typing import (
     cast,
 )
 from contextlib import AbstractContextManager, suppress, contextmanager
-from collections.abc import Iterator
-from typing import Any, Generic, TypeVar, Callable, Optional, ParamSpec, TypeAlias, cast
-from collections.abc import Iterator
-from typing import Any, Generic, TypeVar, Callable, Optional, ParamSpec, TypeAlias, cast
 from collections.abc import Iterator, Sequence
 
 import numpy as np

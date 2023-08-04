@@ -12,14 +12,6 @@ from .containers import (
     RepresentationNetContainer,
 )
 
-from .containers import (
-    NetContainer,
-    DynamicsNetContainer,
-    PredictionNetContainer,
-    RepresentationNetContainer,
-)
-from torch import nn
-
 if TYPE_CHECKING:
     from torch import Tensor
 

@@ -5,24 +5,23 @@ from collections.abc import Sequence
 
 import torch
 import torch.nn.functional as F
-from toolz import itertoolz  # type: ignore
 from torch import Tensor, nn
-from functools import partial
 
 from util import copy_type_signature
 
 from .bases import DynamicsNet, PredictionNet, RepresentationNet
 
-def raph_relu(x:Tensor)->Tensor:
+
+def raph_relu(x: Tensor) -> Tensor:
     forward = F.relu(x)
     backward = F.leaky_relu(x)
-    return backward+(forward - backward).detach()
-    
+    return backward + (forward - backward).detach()
+
 
 class RaphRELU(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         return raph_relu(x)
-    
+
 
 class BasicBlock(nn.Module):
     def __init__(
@@ -30,7 +29,7 @@ class BasicBlock(nn.Module):
         input_width: int,
         output_width: Optional[int] = None,
         norm: Type[nn.Module] = nn.BatchNorm1d,
-        #activation: Type[nn.Module] = partial(nn.CELU, alpha=0.1),
+        # activation: Type[nn.Module] = partial(nn.CELU, alpha=0.1),
         activation: Type[nn.Module] = RaphRELU,
         **kwargs: Any,
     ):
@@ -65,6 +64,8 @@ class ResidualBlock(nn.Module):
     @copy_type_signature(forward)  # provide typed __call__ interface
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return super().__call__(*args, **kwargs)
+
+
 """
 
 class FcResidualXBlock(nn.Module):
@@ -325,8 +326,8 @@ class FcPrediction(PredictionNet):
                 ],
             )
         )
-        width=1*input_width
-        self.up=nn.Linear(input_width, width)
+        width = 1 * input_width
+        self.up = nn.Linear(input_width, width)
         output_shapes = [
             [C.networks.scalar_support_size],
             [C.game.instance.max_num_actions],
@@ -341,29 +342,32 @@ class FcPrediction(PredictionNet):
 
     def forward(self, latent: Tensor, belief: Tensor) -> tuple[Tensor, Tensor]:
         x = torch.cat([latent.flatten(1), belief.flatten(1)], dim=1)
-        x=self.up(x)
+        x = self.up(x)
         x = self.resnet(x)
         return cast(tuple[Tensor, Tensor], self.head(x))
 
 
 class FcDynamics(DynamicsNet):
-    def __init__(self, 
-    num_shared_blocks: int,
-    num_pred_blocks: int,
-    num_main_blocks: int,
-    block_depth: int = 2, **kwargs: Any):
+    def __init__(
+        self,
+        num_shared_blocks: int,
+        num_pred_blocks: int,
+        num_main_blocks: int,
+        block_depth: int = 2,
+        **kwargs: Any,
+    ):
         super().__init__()
         from mcts import TurnStatus
         from config import C
 
-        def make_resnet(num_blocks:int)->nn.Sequential:
+        def make_resnet(num_blocks: int) -> nn.Sequential:
             return nn.Sequential(
-            *[
-                ResidualBlock([BasicBlock(width) for _ in range(block_depth)])
-                for _ in range(num_blocks)
-            ]
-        )
-            
+                *[
+                    ResidualBlock([BasicBlock(width) for _ in range(block_depth)])
+                    for _ in range(num_blocks)
+                ]
+            )
+
         input_width = sum(
             map(
                 math.prod,
@@ -374,8 +378,8 @@ class FcDynamics(DynamicsNet):
                 ],
             )
         )
-        width=1*input_width
-        self.up=nn.Linear(input_width, width)
+        width = 1 * input_width
+        self.up = nn.Linear(input_width, width)
         self.resnet_shared = make_resnet(num_shared_blocks)
         self.resnet_main = make_resnet(num_main_blocks)
         self.resnet_pred = make_resnet(num_pred_blocks)
@@ -399,10 +403,10 @@ class FcDynamics(DynamicsNet):
         self, latent: Tensor, belief: Tensor, action_onehot: Tensor
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         x = torch.cat([latent.flatten(1), belief.flatten(1), action_onehot], dim=1)
-        x=self.up(x)
+        x = self.up(x)
         x = self.resnet_shared(x)
         a = self.resnet_main(x)
-        b=self.resnet_pred(x)
+        b = self.resnet_pred(x)
         return cast(
             tuple[Tensor, Tensor, Tensor, Tensor],
             tuple(self.latent_head(a) + self.pred_head(b)),
