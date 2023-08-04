@@ -16,8 +16,8 @@ learning_rates:
     representation: 1
     initial_tensors: 1
 loss_weights:
-    latent: 0.01
-    value: 1
-    reward: 1
-    policy: 1
-    turn: 1
+    latent: auto
+    value: auto
+    reward: auto
+    policy: auto
+    turn: auto
