@@ -42,9 +42,6 @@ class Networks(nn.Module):
     def __attrs_pre_init__(self) -> None:
         super().__init__()
 
-    def __attrs_pre_init__(self) -> None:
-        super().__init__()
-
     def jit(self) -> None:
         for name, mod in self.named_modules():
             if mod is not self and hasattr(mod, "jit") and callable(mod.jit):
