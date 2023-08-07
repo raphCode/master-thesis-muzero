@@ -358,3 +358,13 @@ gtheo:
   author: "Ritzberger, K."
   publisher: Oxford University Press
   isbn: 9780199247851
+
+gtheo2:
+  type: book
+  title: Game Theory
+  date: 1991
+  author:
+    - "Fudenberg, D."
+    - "Tirole, J."
+  publisher: MIT Press
+  isbn: 9780262061414

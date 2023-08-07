@@ -285,26 +285,26 @@ concealed.
 one after the other.
 In the first case, the moves are said to be simultaneous, and the !g is also called a
 static !g.
-@gtheo
+@gtheo2
 
 An example of a simultaneous !g is !rps:
 Both !pls choose their hand sign at the same time.
 Because of the static nature of the !g, it is not possible to observe the !a chosen by the
 other !pl and react to it.
-@gtheo
+@gtheo2
 
 In fact, non-observability is the defining aspect of simultaneous !gs:
 Take, for example, an election where all voters make their choices without knowing what
 anyone else has chosen.
 Even though the votes are not literally cast at the same time, the process is still an
 example of a simultaneous !g.
-@gtheo
+@gtheo2
 
 In contrast, in a !seql !g the !pls take turns in succession.
 These !gs are also called dynamic !gs or extensive form !gs.
 To distinguish them from simultaneous !gs, a !pl making a decision must have !i about the
 previous decisions of other !pls.
-@gtheo
+@gtheo2
 
 This can be illustrated by a variant of !rps:
 !Pls now have to write down their choices without revealing them to each other.
@@ -312,7 +312,7 @@ Then their (binding) choices are uncovered and the outcome of the !g can be dete
 While this !g can be played sequentially, with !pls choosing their !as at different times,
 the simultaneous nature of the !g remains.
 At best, it can be seen as a sequential but incomplete information variant of !rps.
-@gtheo
+@gtheo2
 
 === Cooperation
 
