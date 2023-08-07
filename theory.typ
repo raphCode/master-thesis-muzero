@@ -213,6 +213,10 @@ It can be seen as a complete plan which describes which move to take at any give
 the !g.
 @gtheo
 
+Given a !sty for each !pl, one can calculate the !probs of future moves and !g outcomes.
+For any !pl and any !s of the !g, it is thus possible to derive the expected payoff, also called !exut.
+@gtheo
+
 Note that the concepts are comparable to !rl, but have slightly different terminology.
 @concept_comparison shows a comparison of the analogous terms between the two fields.
 
@@ -226,6 +230,7 @@ Note that the concepts are comparable to !rl, but have slightly different termin
     [!sty], [!p],
     [outcome], [!ts],
     [payoff], [terminal !r],
+    [!exut], [!exret],
     [!h], [!traj],
   ),
   caption: [Comparison of similar concepts in !gt and !rl],

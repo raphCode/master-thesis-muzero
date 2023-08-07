@@ -76,6 +76,7 @@ sty: strategy
 rps:
   singular: Rock, Paper, Scissors
   plural: null
+exut: expected utility
 zsum: zero-sum
 gtic:
   singular: game theoretic
