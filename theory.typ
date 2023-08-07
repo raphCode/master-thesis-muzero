@@ -336,7 +336,7 @@ devices.
 !Pls are assumed to act solely out of self-interest, i.e. to choose !as that maximize
 their payoff.
 
-However, this can lead to seemingly cooperative behaviour in some settings:
+However, this can lead to seemingly cooperative behavior in some settings:
 !gs may have rules that require !pls to work together to achieve a mutually beneficial
 goal.
 This goal cannot be achieved by one !pl alone, so !pls are motivated to behave
