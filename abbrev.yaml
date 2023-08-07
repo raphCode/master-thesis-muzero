@@ -65,11 +65,13 @@ offp: off-policy
 
 # game related
 g: game
+h: history
 gt: game theory
 pl: player
 sp: single player
 2p: two-player
 mp: multiplayer
+dp: decision point
 sty: strategy
 rps:
   singular: Rock, Paper, Scissors

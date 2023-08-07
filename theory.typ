@@ -174,18 +174,17 @@ I begin with introducing some terminology and basic concepts:
 
 A !g in !gt is a very general concept and applies to more than what the common usage of
 the word "!g" refers to.
-A !g may denote any process consisting of a set of !pls and a number of decision points.
-Additionally, the !i and !as available to each !pl at each decision point must be defined,
-as well as the possible final outcomes of the !g.
+A !g may denote any process consisting of a set of !pls and a number of !dps.
+Additionally, the !i and !as available to each !pl at each !dp must be defined, as well as
+the possible final outcomes of the !g.
 The latter is defined in terms of numerical payoffs for each !pl.
 The tuples of individual payoffs are also called the payoff vector.
 @gtheo
 
 !Gs that involve randomness, such as throwing a dice, are said to have chance events.
-These chance events can be seen as decision points where a special !pl, the chance !pl,
-has his turn.
-A dice throw can therefore be modelled with a decision point of the chance !pl with 6
-possible !as, all with equal !prob.
+These chance events can be seen as !dps where a special !pl, the chance !pl, has his turn.
+A dice throw can therefore be modelled with a !dp of the chance !pl with 6 possible !as,
+all with equal !probs.
 @gtheo
 
 A behavior is described by a !sty:
@@ -217,8 +216,8 @@ gains from trades.
 === !I
 
 An important distinction are !gs of !pinf and !impinf.
-A !pinf !g is one in which every !pl, at every decision point in the !g, has full
-knowledge of the history of the !g and the previous moves of all other !pls.
+A !pinf !g is one in which every !pl, at every !dp in the !g, has full knowledge of the !h
+of the !g and the previous moves of all other !pls.
 A !pl is thus fully and unambiguously informed about the current !s of the !g when he is
 at turn.
 Chess and Go are examples of !gs with !pinf.
@@ -232,7 +231,7 @@ number the dice rolled.
 
 Conversely, a !g with !impinf leaves !pls in the dark about the exact !s of the !g.
 !Pls having to make a decision do not observe enough !i to distinguish between several
-past !g histories.
+past !g !hs.
 They thus have to make decisions under uncertainty.
 The card !g poker is an example of an !impinf !g because the other !pls' cards are
 concealed.
