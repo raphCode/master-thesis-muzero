@@ -184,6 +184,15 @@ These are defined in terms of a numerical payoff, one for each !pl.
 Payoffs for multiple !pls are noted as a tuple, also called a payoff vector in this case.
 @gtheo
 
+The !gs considered in thesis are finite, meaning that the number of possible choices is
+limited.
+Finiteness also applies to the length of the !g, it should end at some point.
+This may sound trivial since most !gs encountered in the real world are finite.
+However, !gt is not limited to finite !gs.
+It is therefore important to note that some of the !gt statements in this chapter only
+apply to finite !gs.
+@gtheo
+
 !Gs that involve randomness, such as throwing a dice, are said to have chance events.
 These chance events can be seen as !dps where a special !pl, the chance !pl, has his turn.
 A dice throw can therefore be modelled with a !dp of the chance !pl with 6 possible !as,
