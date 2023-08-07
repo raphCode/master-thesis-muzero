@@ -204,8 +204,22 @@ It can be seen as a complete plan which describes which move to take at any give
 the !g.
 @gtheo
 
-Note the parallels to !rl, just with different terms:
-!Pls in !gt correspond to !rl !ags, payoffs to terminal !rs, and !stys to !ps.
+Note that the concepts are comparable to !rl, but have slightly different terminology.
+@concept_comparison shows a comparison of the analogous terms between the two fields.
+
+#figure(
+  table(
+    columns: (auto, auto),
+    [*!Gt*], [*RL*],
+    [!g], [!env],
+    [!pl], [!ag],
+    [decision / move / !a], [!a],
+    [!sty], [!p],
+    [outcome], [!ts],
+    [payoff], [terminal !r],
+  ),
+  caption: [Comparison of similar concepts in !gt and !rl],
+) <concept_comparison>
 
 !Gt may differentiate !gs according to different properties which are explained in the
 next chapters.
