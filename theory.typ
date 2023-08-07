@@ -165,7 +165,8 @@ In this thesis we are interested in !gtic analysis of the behavior and interacti
 multiple !pls in a !g.
 !Gtic considerations can be used to find optimal behavior in a given !g under some
 assumptions.
-In this way, !gt can be of assistance in the design of !rl systems.
+In this way, !gt can provide a foundation for what should or even can be learned by a !rl
+system.
 @gtheo
 
 === Basics
@@ -175,10 +176,12 @@ I begin with introducing some terminology and basic concepts:
 A !g in !gt is a very general concept and applies to more than what the common usage of
 the word "!g" refers to.
 A !g may denote any process consisting of a set of !pls and a number of !dps.
-Additionally, the !i and !as available to each !pl at each !dp must be defined, as well as
-the possible final outcomes of the !g.
-The latter is defined in terms of numerical payoffs for each !pl.
-The tuples of individual payoffs are also called the payoff vector.
+Additionally, the !i and !as available to each !pl at each !dp must be defined.
+@gtheo
+
+A !g also needs to have a definition of its possible final outcomes.
+These are defined in terms of a numerical payoff, one for each !pl.
+Payoffs for multiple !pls are noted as a tuple, also called a payoff vector in this case.
 @gtheo
 
 !Gs that involve randomness, such as throwing a dice, are said to have chance events.
@@ -188,14 +191,15 @@ all with equal !probs.
 @gtheo
 
 A behavior is described by a !sty:
-It can be seen as a complete plan which describes which move (or !a) to take in any given
-!g situation.
+It can be seen as a complete plan which describes which move to take at any given !dp of
+the !g.
 @gtheo
 
 Note the parallels to !rl, just with different terms:
 !Pls in !gt correspond to !rl !ags, payoffs to terminal !rs, and !stys to !ps.
 
-!Gt may differentiate !gs according to their properties:
+!Gt may differentiate !gs according to different properties which are explained in the
+next chapters.
 
 === !ZSUM
 
