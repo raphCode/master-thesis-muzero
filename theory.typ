@@ -304,6 +304,7 @@ In contrast, in a !seql !g the !pls take turns in succession.
 These !gs are also called dynamic !gs or extensive form !gs.
 To distinguish them from simultaneous !gs, a !pl making a decision must have !i about the
 previous decisions of other !pls.
+It is important to note that only some !i is required, not necessarily !pinf.
 @gtheo2
 
 This can be illustrated by a variant of !rps:
