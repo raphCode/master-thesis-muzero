@@ -179,6 +179,15 @@ A !g may denote any process consisting of a set of !pls and a number of !dps.
 Additionally, the !i and !as available to each !pl at each !dp must be defined.
 @gtheo
 
+When the !g is played, each !pl has to make a choice at their !dps.
+This choice is often referred to as a move or !a.
+A play of a !g consists of the moves made by each !pl, so the !dps are replaced by
+concrete choices.
+Such a !seq of moves is also called a !h.
+The !h is also defined for any situation in the middle of the !g.
+Since it contains all the moves made so far, it identifies the current !s of the !g.
+@gtheo
+
 A !g also needs to have a definition of its possible final outcomes.
 These are defined in terms of a numerical payoff, one for each !pl.
 Payoffs for multiple !pls are noted as a tuple, also called a payoff vector in this case.
@@ -217,6 +226,7 @@ Note that the concepts are comparable to !rl, but have slightly different termin
     [!sty], [!p],
     [outcome], [!ts],
     [payoff], [terminal !r],
+    [!h], [!traj],
   ),
   caption: [Comparison of similar concepts in !gt and !rl],
 ) <concept_comparison>
