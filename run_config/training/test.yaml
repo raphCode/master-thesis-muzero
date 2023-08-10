@@ -14,7 +14,6 @@ learning_rates:
     dynamics: 2
     prediction: 1
     representation: 1
-    initial_tensors: 1
 loss_weights:
     latent: 0.01
     value: 1

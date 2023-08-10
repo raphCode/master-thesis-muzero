@@ -241,9 +241,6 @@ class MCTS:
 
     def reset_new_game(self, player_id: int) -> None:
         self.own_pid = player_id
-        self.new_root(
-            self.nets.initial_latent,
-        )
 
     def new_root(
         self,
@@ -254,6 +251,7 @@ class MCTS:
             latent,
             0,
             self,
+            current_player=self.own_pid,
             valid_actions_mask=valid_actions_mask,
         )
 

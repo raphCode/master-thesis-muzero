@@ -8,10 +8,11 @@ from attrs import frozen
 from mcts import MCTS
 from config import C
 from networks import Networks
-from trajectory import Latent, Observation
 from games.bases import Player
 
 if TYPE_CHECKING:
+    from torch import Tensor
+
     from util import ndarr_f64
     from games.bases import GameState
     from config.schema import MctsConfig
@@ -23,7 +24,7 @@ class TrainingInfo:
     Information recorded by the RLPlayers to enable training.
     """
 
-    representation: Observation | Latent
+    observations: Optional[tuple[Tensor, ...]]
     target_policy: ndarr_f64
     mcts_value: float
 
@@ -50,7 +51,7 @@ class RLBase(Player):
 
     nets: Networks
     mcts: MCTS
-    representation: Observation | Latent
+    observations: Optional[tuple[Tensor, ...]]
 
     def __init__(self, nets: Networks, mcts_cfg: Optional[MctsConfig] = None):
         self.nets = nets
@@ -60,7 +61,6 @@ class RLBase(Player):
         """
         Called whenever a new game starts.
         """
-        self.representation = Latent(self.nets.initial_latent)
         self.mcts.reset_new_game(player_id)
 
     @abstractmethod
@@ -69,7 +69,7 @@ class RLBase(Player):
         Called when agent is at turn with current game state, returns action to take.
         This must not advance the internal game state with the returned action, only store
         the observation.
-        Must set self.representation to an Observation instance.
+        Must set self.observations.
         """
         pass
 
@@ -80,21 +80,20 @@ class RLBase(Player):
         The information which action the other players took is intended be used only to
         create an accurate training trajectory, it must not be used for advantage in
         future own moves.
-        Must set self.representation to a Latent instance.
         """
         pass
 
     def create_training_info(self) -> TrainingInfo:
         """
         Called after each move, to record information for training.
-        Uses self.representation so it is important this attribute is correcty set on own
+        Uses self.observations so it is important this attribute is correcty set on own
         and other players' moves.
         """
         # Expand the part of the tree that represents the actual trajectory.
         # This may be an information leak if the next own move uses results from this tree
         self.mcts.ensure_visit_count(self.mcts.cfg.iterations_value_estimate)
         return TrainingInfo(
-            representation=self.representation,
+            observations=self.observations,
             target_policy=self.mcts.get_policy(),
             mcts_value=self.mcts.root.value,
         )
@@ -110,7 +109,7 @@ class PerfectInformationRLPlayer(RLBase):
 
     def request_action(self, state: GameState) -> int:
         observations = state.observation
-        self.representation = Observation(observations)
+        self.observations = observations
         latent = self.nets.representation.si(*observations)
         self.mcts.new_root(latent, state.valid_actions_mask)
         self.mcts.ensure_visit_count(self.mcts.cfg.iterations_move_selection)
@@ -118,4 +117,4 @@ class PerfectInformationRLPlayer(RLBase):
 
     def advance_game_state(self, action: int) -> None:
         self.mcts.advance_root(action)
-        self.representation = Latent(self.mcts.root.latent)
+        self.observations = None
