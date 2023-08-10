@@ -156,10 +156,6 @@ class Trainer:
                     params=nets.dynamics.parameters(),
                     lr=lrs.base * lrs.dynamics,
                 ),
-                dict(
-                    params=[nets.initial_latent],
-                    lr=lrs.base * lrs.initial_tensors,
-                ),
             ]
         )
 
@@ -191,14 +187,14 @@ class Trainer:
         counts = LossCounts()
 
         first = batch[0]
-        latent = first.latent
-        latent[first.is_initial] = self.nets.initial_latent
+        latent: Tensor
 
         for step in batch:
             if step.is_observation.any():
                 obs_latent = self.nets.representation(*step.observations)
                 if step is first:
-                    latent[step.is_observation] = obs_latent[step.is_observation]
+                    assert step.is_observation.all()
+                    latent = obs_latent
                 else:
                     losses.latent += ml(
                         pdist,

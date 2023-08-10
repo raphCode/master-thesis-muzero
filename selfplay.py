@@ -54,6 +54,8 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     for pid, player in zip(rlp.pids, rlp.players):
         player.reset_new_game(pid)
 
+    started_pids = set[int]()
+
     for n_move in range(C.training.max_moves_per_game):
         if state.is_terminal:
             break
@@ -63,6 +65,8 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
             action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
             state.apply_action(action)
             for player, pid, traj in zip(rlp.players, rlp.pids, rlp.trajectories):
+                if pid not in started_pids:
+                    continue
                 traj.append(
                     TrajectoryState.from_training_info(
                         player.create_training_info(),
@@ -78,10 +82,13 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
         curr_pid = state.current_player_id
         curr_player = players[curr_pid]
         action = curr_player.request_action(state)
+        started_pids.add(curr_pid)
 
         state.apply_action(action)
 
         for player, pid, traj in zip(rlp.players, rlp.pids, rlp.trajectories):
+            if pid not in started_pids:
+                continue
             traj.append(
                 TrajectoryState.from_training_info(
                     player.create_training_info(),

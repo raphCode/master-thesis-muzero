@@ -18,16 +18,6 @@ if TYPE_CHECKING:
     from rl_player import TrainingInfo
 
 
-@frozen
-class Observation:
-    observations: tuple[Tensor, ...]
-
-
-@frozen
-class Latent:
-    latent: Tensor
-
-
 @frozen(kw_only=True)
 class TrajectoryState:
     """
@@ -40,7 +30,7 @@ class TrajectoryState:
     should use inital tensors during network training.
     """
 
-    representation: Observation | Latent
+    observations: Optional[tuple[Tensor, ...]]
     turn_status: int
     action: int
     target_policy: ndarr_f64
@@ -60,7 +50,7 @@ class TrajectoryState:
         if target_policy is None:
             target_policy = info.target_policy
         return cls(
-            representation=info.representation,
+            observations=info.observations,
             turn_status=turn_status,
             action=action,
             target_policy=target_policy,
@@ -100,11 +90,9 @@ class TrainingData:
 
     # masks:
     is_observation: Tensor
-    is_initial: Tensor
     is_data: Tensor
 
     observations: tuple[Tensor, ...]
-    latent: Tensor
     turn_status: Tensor
     action_onehot: Tensor
     target_policy: Tensor
@@ -124,10 +112,8 @@ class TrainingData:
         cache = TensorCache()
         return cls(
             is_observation=cache.tensor(False),
-            is_initial=cache.tensor(False),
             is_data=cache.tensor(False),
             observations=tuple(map(torch.zeros, C.game.instance.observation_shapes)),
-            latent=cache.zeros(C.networks.latent_shape),
             turn_status=cache.tensor(0, dtype=torch.long),  # index tensor needs long
             action_onehot=cache.zeros(C.game.instance.max_num_actions, dtype=torch.long),
             target_policy=cache.zeros(C.game.instance.max_num_actions),
@@ -140,25 +126,17 @@ class TrainingData:
         cls,
         ts: TrajectoryState,
         value_target: float,
-        is_initial: bool,
         is_terminal: bool,
         cache: Optional[TensorCache] = None,
     ) -> TrainingData:
         if cache is None:
             cache = TensorCache()
-        is_obs = isinstance(ts.representation, Observation)
         return cls(
-            is_observation=cache.tensor(is_obs),
-            is_initial=cache.tensor(bool(is_initial)),
+            is_observation=cache.tensor(ts.observations is not None),
             is_data=cache.tensor(True),
-            observations=cast(
-                TrainingData | Observation,
-                ts.representation if is_obs else cls.dummy,
-            ).observations,
-            latent=cast(
-                TrainingData | Latent,
-                ts.representation if not is_obs else cls.dummy,
-            ).latent,
+            observations=ts.observations
+            if ts.observations is not None
+            else cls.dummy.observations,
             turn_status=cache.tensor(
                 TurnStatus.TERMINAL_STATE.target_index if is_terminal else ts.turn_status,
                 dtype=torch.long,

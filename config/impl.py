@@ -5,7 +5,6 @@ from typing import Any, Iterable, Optional, cast
 
 import attrs
 import hydra
-import torch
 import gorilla  # type: ignore [import]
 import omegaconf
 from omegaconf import OmegaConf, DictConfig, ListConfig
@@ -153,7 +152,6 @@ def populate_config(cfg: DictConfig) -> None:
                 representation=RepresentationNetContainer(net_cfg.representation()),
                 prediction=PredictionNetContainer(net_cfg.prediction()),
                 dynamics=DynamicsNetContainer(net_cfg.dynamics()),
-                initial_latent=torch.rand(latent_shape, requires_grad=True),
             )
 
         return NetworkConfig(

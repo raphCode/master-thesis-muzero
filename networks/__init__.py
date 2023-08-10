@@ -6,8 +6,6 @@ from attrs import define
 from torch import nn
 
 if TYPE_CHECKING:
-    from torch import Tensor
-
     from .containers import (
         DynamicsNetContainer,
         PredictionNetContainer,
@@ -30,7 +28,6 @@ class Networks(nn.Module):
     representation: RepresentationNetContainer
     prediction: PredictionNetContainer
     dynamics: DynamicsNetContainer
-    initial_latent: Tensor
 
     def __attrs_pre_init__(self) -> None:
         super().__init__()

@@ -87,7 +87,6 @@ class ReplayBuffer:
                     TrainingData.from_trajectory_state(
                         traj_state,
                         value_target,
-                        is_initial=(t == 0),
                         is_terminal=(game_completed and t == len(traj) - 1),
                         cache=self.cache,
                     ),
@@ -110,9 +109,9 @@ class ReplayBuffer:
         sampled_starts = set()
         for _ in range(retry_limit * C.training.batch_size):
             start_index = random.randrange(len(self.buffer))
-            traj_id, _ = self.buffer[start_index]
+            traj_id, traj = self.buffer[start_index]
             minlen_id, _ = self.buffer[start_index + C.training.min_trajectory_length - 1]
-            if traj_id == minlen_id:
+            if traj.is_observation and traj_id == minlen_id:
                 sampled_starts.add((start_index, traj_id))
             if len(sampled_starts) == C.training.batch_size:
                 break
