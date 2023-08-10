@@ -8,6 +8,7 @@ import numpy as np
 import imageio.v3 as iio
 import numpy.typing as npt
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 map_path = "maps/map1"
 
@@ -51,22 +52,27 @@ class TrafficLights:
 
     def __init__(self, mask: ndarr_bool, percent_closed: float = 0.5):
         self.lights = mask
-        self.closed = mask & (rng.random(mask.shape) < percent_closed)
+        self.reset()
+
+    def reset(self):
+        percent_closed = 0.6
+        self.closed = self.lights & (rng.random(self.lights.shape) < percent_closed)
 
     def is_closed(self, pos) -> bool:
         return self.closed[pos]
 
-    def plot(self, plt) -> None:
+    def plot(self, plt) -> Any:
         y, x = np.nonzero(self.closed)
-        plt.scatter(x, -y, marker="x", s=200, color="red")
+        return plt.scatter(x, -y, marker="x", s=200, color="red")
 
 
 class Layer:
     size: tuple[int, int]
     pos: list[Pos]
     cars: set[int]  # indices of cars along the path
+    moveable_cars: set[int]
 
-    def __init__(self, mask: ndarr_bool, prepopulate: float = 0.2):
+    def __init__(self, mask: ndarr_bool, prepopulate: float = 0.5):
         def is_at_border(x, y) -> bool:
             mx, my = mask.shape
             return x in (0, mx - 1) or y in (0, my - 1)
@@ -110,35 +116,44 @@ class Layer:
                     False
                 ), f"Did not find next field! pos: ({pos[0]}, {pos[1]}), dir: {dir.name}"
 
-        n = len(self.pos)
-        self.cars = list((np.arange(n)[rng.random(n) < prepopulate]))
+        n = len(self.pos) - 1
+        self.cars = set((np.arange(n)[rng.random(n) < prepopulate]))
+        self.moveable_cars = set()
 
     @cache
     def offset_pos(self, pos, offset: int = 1) -> Pos:
         return self.pos[self.index_at(pos) + offset]
 
     @cache
-    def index_at(self, pos) -> int:
-        return self.pos.index(pos)
+    def index_at(self, pos) -> Optional[int]:
+        try:
+            return self.pos.index(pos)
+        except ValueError:
+            return None
 
     @cache
     def dir_at(self, pos) -> Dir:
-        return Dir(pos - self.offset_pos(pos, 1))
+        for d in Dir:
+            if d.offset(pos) == self.offset_pos(pos, 1):
+                return d
 
     def is_car(self, pos) -> bool:
         return self.index_at(pos) in self.cars
 
-    def advance_cars(self, car_indices: Iterable[int]) -> None:
-        n = len(self.pos)
-        assert list(sorted(self.cars)) == self.cars
-        for i in car_indices:
-            self.cars[i] += 1
-        if self.cars[-1] > n:
-            del self.cars[-1]
+    def mark_car(self, pos) -> None:
+        self.moveable_cars.add(self.index_at(pos))
 
-    def remove_cars(self, car_indices: Iterable[int]) -> None:
-        for i in sorted(car_indices, reverse=True):
-            del self.cars[i]
+    def advance_cars(self) -> None:
+        self.cars -= self.moveable_cars
+        self.cars.update(x + 1 for x in self.moveable_cars)
+        self.cars.discard(len(self.pos) - 1)
+        self.moveable_cars = set()
+
+    def remove_cars(self, pos: Iterable[Pos]) -> None:
+        self.cars.difference_update(map(self.index_at, pos))
+
+    def car_pos_iter(self) -> Iterator[Pos]:
+        yield from (self.pos[i] for i in self.cars)
 
     @property
     def lane_map(self) -> ndarr_bool:
@@ -154,20 +169,23 @@ class Layer:
             ret[self.pos[index]] = True
         return ret
 
-    def plot(self, plt, offset: float, **kwargs: Any) -> None:
+    def plot(self, plt, offset: float, **kwargs: Any) -> List[Any]:
         def plot(data):
             y, x = np.asarray(data).T
             return x, -y
 
         pos = np.array(self.pos) + offset
-        cars = np.array([self.pos[c] for c in self.cars]) + offset
-        plt.plot(*plot(pos), **kwargs)
-        plt.scatter(*plot(cars), **kwargs)
+        line_plots = plt.plot(*plot(pos), **kwargs)
+        if self.cars:
+            cars = np.array([self.pos[c] for c in self.cars]) + offset
+            car_plot = plt.scatter(*plot(cars), **kwargs)
+            return line_plots + [car_plot]
+        return line_plots
 
 
 def collision_check(layers: Iterable[Layer]) -> list[Pos]:
     car_map = sum(l.car_map.astype(int) for l in layers)
-    return list(zip(*np.nonzero(car_map > 1))), car_map > 1
+    return list(zip(*np.nonzero(car_map > 1)))
 
 
 layers: list[Layer] = []
@@ -176,9 +194,9 @@ layers: list[Layer] = []
 # ax = iter(axes.flatten())
 # grid = next(ax)
 
-f, grid = plt.subplots()
-grid.set_xticks(np.arange(100) + 0.5, labels="")
-grid.set_yticks(-np.arange(100) + 0.5, labels="")
+fig, grid = plt.subplots()
+grid.set_xticks(np.arange(100) + 0.5)  # , labels="")
+grid.set_yticks(-np.arange(100) + 0.5)  # , labels="")
 grid.grid(color="grey")
 grid.set_aspect("equal")
 
@@ -186,7 +204,6 @@ im = iio.imread(path.join(map_path, "tl.png"))
 alpha_mask = im[:, :, -1] > 0
 tl = TrafficLights(alpha_mask)
 
-tl.plot(grid)
 
 n_maps = 4
 
@@ -198,16 +215,59 @@ for n in range(n_maps):
     red_channel = im[:, :, 0]
     layer = Layer(red_channel * alpha_mask)
     layers.append(layer)
-    layer.plot(grid, offset=(n / n_maps - 0.5) / 2, color=colors[n])
 
     continue
     m = layer.lane_map * 0.2 + layer.car_map
     next(ax).imshow(m)
 
 
-coll, m = collision_check(layers)
-# next(ax).imshow(m)
-print(coll)
+def can_move(pos: Pos, layer_id: int, layers: list[Layer], tl: TrafficLights):
+    if tl.is_closed(pos):
+        return False
+    next_pos = layers[layer_id].offset_pos(pos)
+    for n, l in enumerate(layers):
+        if l.is_car(next_pos):
+            same_dir = l.dir_at(next_pos) == layers[layer_id].dir_at(pos)
+            same_layer = layer_id == n
+            if same_dir or same_layer:
+                return can_move(next_pos, n, layers, tl)
+            return True  # risk a car crash
+    # empty field
+    return True
 
+
+def resolve_collisions(layers):
+    coll = collision_check(layers)
+    print(coll)
+    for l in layers:
+        l.remove_cars(coll)
+
+
+def plot_layers(layers) -> List[Any]:
+    ret = [tl.plot(grid)]
+    for n, l in enumerate(layers):
+        ret.extend(l.plot(grid, offset=(n / n_maps - 0.5) / 2, color=colors[n]))
+    return ret
+
+
+artists = []
+artists.append(plot_layers(layers))
+while coll := collision_check(layers):
+    random_layer = layers[rng.integers(len(layers))]
+    random_layer.remove_cars(coll)
+
+for step in range(20):
+    artists.append(plot_layers(layers))
+    for n, l in enumerate(layers):
+        for pos in l.car_pos_iter():
+            if can_move(pos, n, layers, tl):
+                l.mark_car(pos)
+    for l in layers:
+        l.advance_cars()
+    resolve_collisions(layers)
+    if step % 5 == 0:
+        tl.reset()
+
+ani = animation.ArtistAnimation(fig=fig, artists=artists, interval=1000)
 
 plt.show()
