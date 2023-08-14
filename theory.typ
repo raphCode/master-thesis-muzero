@@ -14,7 +14,7 @@ damit gut zeigen, dass man das Material verstanden hat.
   - planning
   - !mcts
 
-== !RL Background
+== !RL
 
 !Rl refers to a subset of machine learning where a decision maker learns by trial and
 error while interacting with its !env.  
