@@ -368,3 +368,11 @@ gtheo2:
     - "Tirole, J."
   publisher: MIT Press
   isbn: 9780262061414
+
+phd_games:
+  type: thesis
+  title: Searching for solutions in games and artificial intelligence
+  date: 1994-01-01
+  author: Allis, L.V.
+  organization: Maastricht University
+  doi: 10.26481/dis.19940923la

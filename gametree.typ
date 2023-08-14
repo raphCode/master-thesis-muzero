@@ -1,5 +1,37 @@
 #import "@preview/cetz:0.0.2": canvas, draw, tree, coordinate, vector
 
+#let backprop(node, parent_player: none) = {
+  node.parent_player = parent_player
+  if "utility" in node {
+    node
+  } else {
+    node.children = node.children.map(backprop.with(parent_player: node.player))
+    let max_utility
+    let max_child_index
+    for (n, child) in node.children.enumerate() {
+      let u = child.utility.at(node.player - 1)
+      if max_utility == none or u > max_utility {
+        max_utility = u
+        max_child_index = n
+      }
+    }
+    let max_child = node.children.at(max_child_index)
+    max_child.backprop = true
+    node.children.at(max_child_index) = max_child
+    node.utility = max_child.utility
+    node.utility.at(node.player - 1) = max_utility
+    node.backprop_info = (utility: max_utility, action: max_child.label, child: max_child)
+    node
+  }
+}
+
+#let get_optimal_strategy(node) = {
+  if "backprop_info" in node {
+    return (node.backprop_info.action, ) + get_optimal_strategy(node.backprop_info.child)
+  }
+  ()
+}
+
 #let n(label, data, ..children) = {
   if children.pos().len() == 0 {
     assert(
@@ -21,6 +53,9 @@
     (label: label, content: data, player: 1, children: children.pos())
   }
 }
+
+#let l = n.with($a$)
+#let r = n.with($b$)
 
 #let nodetree(root_content, ..nodes, backpropagate: false) = {
   let root = n([], root_content, ..nodes)

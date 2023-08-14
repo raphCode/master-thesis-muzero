@@ -368,7 +368,7 @@ can only be reached by working together in a way intended by the rules.
 
 === !Exf
 
-#import "gametree.typ": draw_gametree, n, nodetree
+#import "gametree.typ": draw_gametree, n, l, r, nodetree, get_optimal_strategy
 
 In !gt, !gs can be modeled in different forms.
 These forms provide a formal !repr of the arbitrary rules of a !g.
@@ -444,6 +444,140 @@ For example, @fig_exf_subgame shows two particular subgames from the !g in
   ),
   caption: [Some subgames of the !g in @fig_exf_example]
 ) <fig_exf_subgame>
+
+=== Solutions, Equilibria and Optimal !Stys
+
+A goal of !gt is to assign solutions to, or "solve" !gs.
+A solution is a set of !stys, one for each !pl, that leads to optimal play.
+The optimality is defined according to some condition or assumption.
+A !g can be said to be solved when a solution can be obtained with reasonable resources,
+such as computing time and memory.
+#cite("gtheo", "phd_games")
+
+In non-cooperative !gt, the goal of an optimal solution is always to maximizing the !pl's
+payoff.
+@gtheo
+
+=== !BI
+
+In the case of !pinf !gs with !seql moves, an optimal solution can be computed with a
+simple !algo.
+The !algo is best introduced with a !sp !g, as it makes the !g analysis straightforward.
+Consider for example this !g in !exf, as shown in @fig_bi_sp:
+
+#let root = nodetree(
+  backpropagate: true, 
+  [A],
+  l([B], l(3), r(1)),
+  r([C], l(0), r(4)),
+)
+
+#let (node1, node2) = root.children
+
+#figure(
+  draw_gametree(root),
+  caption: [!Bi in a simple !sp !g]
+) <fig_bi_sp>
+
+The optimal !sty can now be computed bottom-up, starting at the leaf !ns:
+If the !pl were already at !dp #node1.content, he would certainly choose !a
+#node1.backprop_info.action since this results in the bigger payoff of
+#node1.backprop_info.utility over all alternatives.
+Therefore, !n #node1.content can be assigned an utility of #node1.backprop_info.utility.
+Likewise, the utility of !dp #node2.content can be determined to be
+#node2.backprop_info.utility, as the !pl would always choose #node2.backprop_info.action.
+Now that the utilities of #node1.content and #node2.content are found, the optimal
+decision at #root.content can be identified to be #root.backprop_info.action with the same
+reasoning.
+Since #root.content is already the root !n, the optimal !sty is thus
+${ #get_optimal_strategy(root).join(" ") }$.
+This recursive process is known as !bi.
+@gtheo
+
+In a !mp setting, the !stys of other !pls influence the course of the !g and thus the
+utility of !ss.
+Since it is not immediately apparent what other !pls will do, it raises the question of
+whether an optimal !sty can even be determined.
+However, !gt can answer this question in the affirmative.
+By introducing the concept of rationality, one can make robust assumptions about the
+behavior of the !pls and the !stys they will select.
+@gtheo
+
+The concept of rationality is built on the premise that !pls aim to maximize their
+individual payoffs.
+Importantly, rationality also includes the understanding that each !pl is aware that
+others will act on this premise.
+Consequently, a !pl can adjust his !sty accordingly.
+However, all other !pls can also infer this change in !sty and adjust their own !stys
+accordingly... ad infinitum.
+@gtheo
+
+It can be shown that this reasoning converges to a solution.
+The constraint that all !pls try to maximize their payoff has an important implication:
+No !pl can improve by choosing a different !sty, as long as he expects all other !pls to
+adhere to the solution.
+The solution is therefore self-enforcing and no !pl has incentive to deviate.
+Such self-enforcing !sty combinations are known as Nash equilibria.
+@gtheo
+
+#let root = nodetree(
+  backpropagate: true, 
+  1,
+  l(2,
+    l(3, l((1, 2, 2)), r((3, 5, -1))),
+    r(3, l((8, 3, 4)), r((2, 6, -4))),
+  ),
+  r(2,
+    l(3, l((3, 7, -3)), r((-3, 6, 7))),
+    r(3, l((-8, 5, 2)), r((3, -4, 1))),
+  ),
+)
+
+#let (node1, node2) = root.children
+#assert(node1.content == node2.content)
+#let node_leftmost = node1.children.at(0)
+
+Such a solution for !mp !gs can be computed as well with !bi.
+@fig_bi_mp visualizes the process for an example !g with three !pls, each having one !dp.
+The !ns are now labeled with the number of the !pl at turn, so there are multiple !ns with
+the same number.
+
+#figure(
+  draw_gametree(root),
+  caption: [!Bi in a !mp !g with three moves]
+) <fig_bi_mp>
+
+The tree looks a bit more complicated since a !mp !g involves payoff vectors instead of
+single scalar payoffs.
+However, the reasoning is exactly the same as in the !sp scenario:
+Starting at the last !dps in the tree, !pl #node_leftmost.content can decide which !a to
+take.
+He is only interested in maximizing his payoff, so he only looks a the third entry of the
+payoff vectors.
+In @fig_bi_mp, this is illustrated by underlining the respective entry in the tuple of
+payoffs.
+In the specific case of the leftmost !dp in the tree, !pl #node_leftmost.content has the
+possible outcomes
+#node_leftmost.children.map(c => str(c.utility.at(c.parent_player - 1))).join(" and ") .
+As the higher payoff is #node_leftmost.backprop_info.utility, he will always choose !a
+#node_leftmost.backprop_info.action .
+Thus, the leftmost !n can be assigned the payoff vector #repr(node_leftmost.utility) since
+that is how the !g will end from this !dp onwards.
+
+Similarly, the other !ns of !pl #node_leftmost.content can be processed and utilities
+assigned that maximize !pl #node_leftmost.content's payoff.
+Next, we can move one step upwards in the tree, looking at !pl #node1.content's decision.
+He is only interested in the payoffs relevant to him, which are in the second entry of the
+payoff vectors.
+Again, this is illustrated in @fig_bi_mp with underlining the corresponding entries.
+Consider for instance the left !n labeled with #node1.content:
+The !pl will choose !a #node1.backprop_info.action, since that gives him the higher payoff
+of #node1.backprop_info.utility.
+In the !exf, this means the utility #repr(node1.utility) of the respective child !n can be
+propagated upwards and assigned to !pl #node1.content's decision node.
+Analogously, !pl #root.content reasons that #root.backprop_info.action is his best choice.
+Overall, three rational !pls will choose the respective !as
+#get_optimal_strategy(root).join(", ").
 
 - previous versions
   - AlphaGo

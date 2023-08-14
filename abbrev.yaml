@@ -67,6 +67,7 @@ offp: off-policy
 g: game
 h: history
 gt: game theory
+bi: backwards induction
 pl: player
 sp: single player
 2p: two-player
