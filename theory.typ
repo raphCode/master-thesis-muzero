@@ -304,7 +304,7 @@ example of a simultaneous !g.
 @gtheo2
 
 In contrast, in a !seql !g the !pls take turns in succession.
-These !gs are also called dynamic !gs or extensive form !gs.
+These !gs are also called dynamic !gs or !exf !gs.
 To distinguish them from simultaneous !gs, a !pl making a decision must have !i about
 the previous decisions of other !pls.
 It is important to note that only some !i is required, not necessarily !pinf.
@@ -365,6 +365,85 @@ cooperative when:
 - the rules of the !gs are designed to encourage cooperation.
 The latter is achieved by designing a !g outcome with a large payoff for all !pls which
 can only be reached by working together in a way intended by the rules.
+
+=== !Exf
+
+#import "gametree.typ": draw_gametree, n, nodetree
+
+In !gt, !gs can be modeled in different forms.
+These forms provide a formal !repr of the arbitrary rules of a !g.
+The !gs studied in this thesis are !seql, of !pinf and may involve multiple !pls.
+This makes the !exf an appropriate choice.
+It can be seen as a kind of flowchart that shows what can happen during the course of
+playing the !g.
+@gtheo
+
+#let root = nodetree(
+  [C],
+  n([$[1/2]$ heads], [1],
+    n([go], [2],
+      n([left], (2, 3)),
+      n([right], (4, 1)),
+    ),
+    n([stop], (-1, 0)),
+  ),
+  n([tails $[1/2]$], [2],
+    n([stop], (0, -1)),
+    n([go], [1],
+      n([left], (1, 2)),
+      n([right], (5, 3)),
+    ),
+  ),
+)
+
+#figure(
+  draw_gametree(root),
+  caption: [!Exf example of a !g with two !pls and a chance event]
+) <fig_exf_example>
+
+The !exf looks similar to a regular tree in computer science.
+It is accordinly also known as a gametree.
+Each !n represents a !dp for a !pl, with the !g starting at the root !n.
+Outgoing edges from a !n are labeled with !as the !pl can choose.
+The leaf !ns are the outcomes of the !g and specify the payoff vectors.
+In summary, it can be stated that the !exf enumerates all possible !hs of the !g in a
+tree-like form.
+@gtheo
+
+An example of the !exf of a fictive !g is given in @fig_exf_example.
+The root !n denotes the start of the !g, in the example it is labeled with~C.
+In this case the !n is meant to represent a chance event, specifically a coin flip.
+Therefore, it has two possible outcomes with equal !probs of $1/2$ each, and the edges are
+labeled with _heads_ and _tails_ respectively.
+
+The !g continues with either !pl~1 or~2, depending on the chance event.
+The coin flip therefore determines the starting !pl.
+The first !pl to move has two available !as, _stop_ and _go_.
+The former ends the !g immediatly with a reward of~-1 for the !pl which chose _stop_, and
+zero for the other one.
+If the !g continues, the other !pl is given a choice to go left or right, after which the
+!g ends with the payoffs in the !tns.
+
+The !exf also allows an visual explanation of subgames.
+The !exf of a subgame is a subset of the original !g's gametree.
+In the example of @fig_exf_example, if a !g were to start at any of the !ns labeled with~1
+or~2 and shares all !ns below, this is a subgame of the original !g.
+@gtheo
+
+For example, @fig_exf_subgame shows two particular subgames from the !g in
+@fig_exf_example:
+
+#let cetz_align(alignment, body) = align(alignment, block(align(top, body)))
+
+#figure(
+  stack(
+    dir: ltr,
+    spacing: 10mm,
+    draw_gametree(root.children.at(0)),
+    cetz_align(horizon, draw_gametree(root.children.at(1).children.at(1)))
+  ),
+  caption: [Some subgames of the !g in @fig_exf_example]
+) <fig_exf_subgame>
 
 - previous versions
   - AlphaGo

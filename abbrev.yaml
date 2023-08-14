@@ -73,6 +73,7 @@ sp: single player
 mp: multiplayer
 dp: decision point
 sty: strategy
+exf: extensive form
 rps:
   singular: Rock, Paper, Scissors
   plural: null
