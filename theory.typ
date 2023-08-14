@@ -575,9 +575,32 @@ The !pl will choose !a #node1.backprop_info.action, since that gives him the hig
 of #node1.backprop_info.utility.
 In the !exf, this means the utility #repr(node1.utility) of the respective child !n can be
 propagated upwards and assigned to !pl #node1.content's decision node.
+
 Analogously, !pl #root.content reasons that #root.backprop_info.action is his best choice.
 Overall, three rational !pls will choose the respective !as
 #get_optimal_strategy(root).join(", ").
+
+=== Subgame Perfection
+
+An interesting property of the solutions visualized in @fig_bi_sp and @fig_bi_mp is that
+they also contain optimal !as for !g !s which are not part of the overall optimal !sty.
+For example, in @fig_bi_mp, the right !n of !pl #node2.content is not part of the optimal
+play.
+However, if !pl #node2.content would ever find himself in this !g !s (maybe through a
+mishap of !pl #root.content), he knows that his best option is
+#node2.backprop_info.action.
+
+If an optimal solution to a !g also contains optimal solutions for all its subgames, the
+solution is said to be subgame perfect. 
+In the case of !bi, the computed solution is always subgame perfect.
+@gtheo
+
+Subgame perfection is an desireable property of a solution, since it allows !pls to react
+to other !pl's deviations from the optimal !sty.
+Compared to all !pls adhering to their optimal !stys, this means:
+- in a non-cooperative !g: exploiting opponent's mistakes, to potentially achieve a higher payoff
+- in a cooperative !g: compensating for mistakes of teammates
+
 
 - previous versions
   - AlphaGo
