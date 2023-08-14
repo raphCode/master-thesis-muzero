@@ -318,6 +318,13 @@ the simultaneous nature of the !g remains.
 At best, it can be seen as a sequential but incomplete information variant of !rps.
 @gtheo2
 
+==== Determinism
+
+A !g that involves no chance events is said to be deterministic.
+For instance, chess and Go are deterministic !gs since the !g !s only depends on the moves
+of the !pls.
+@gtheo
+
 ==== Cooperation
 
 !Gt can be divided into two branches, cooperative and non-cooperative.
