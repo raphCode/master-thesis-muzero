@@ -625,11 +625,26 @@ Compared to all !pls adhering to their optimal !stys, this means:
 - with enough simulations, we can then shift the exploring focus to better actions (UCT formula?)
 - this can be improved with a !p !fn
 
-- previous versions
-  - AlphaGo
-  - AlphaGo Zero
-  - AlphaZero
-  - MuZero
+== !mz and Precursors
+
+!mz is a state-of-the-art deep !rl !algo that builds on previous generations of closely
+related !rl !algos.
+By understanding its precursors, we can gain valuable insight into !mz's design and how it
+evolved from traditional game playing programs.
+
+This section explores and explains the predecessors, they are listed in ascending order of
+publication date.
+They build on each other and eventually lead to !mz, which is explained in detail in the
+last section.
+// TODO: reference
+
+=== !ago
+
+=== !agoz
+
+=== !az
+
+=== !mz
 
 - original MuZero limitations
   - !pinf !gs
