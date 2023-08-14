@@ -217,8 +217,9 @@ Given a !sty for each !pl, one can calculate the !probs of future moves and !g o
 For any !pl and any !s of the !g, it is thus possible to derive the expected payoff, also called !exut.
 @gtheo
 
-Note that the concepts are comparable to !rl, but have slightly different terminology.
-@concept_comparison shows a comparison of the analogous terms between the two fields.
+Both !gt and !rl are about decision making, so naturally they employ similar concepts.
+However, comparable concepts have slightly different terminology in the two fields.
+@tbl_gt_rl_terms shows a tabular overview of related terms between !gt and !rl.
 
 #figure(
   table(
@@ -234,7 +235,7 @@ Note that the concepts are comparable to !rl, but have slightly different termin
     [!h], [!traj],
   ),
   caption: [Comparison of similar concepts in !gt and !rl],
-) <concept_comparison>
+) <tbl_gt_rl_terms>
 
 !Gt may differentiate !gs according to different properties which are explained in the
 next chapters.
