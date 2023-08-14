@@ -601,6 +601,29 @@ Compared to all !pls adhering to their optimal !stys, this means:
 - in a non-cooperative !g: exploiting opponent's mistakes, to potentially achieve a higher payoff
 - in a cooperative !g: compensating for mistakes of teammates
 
+== !Gs and Tree Searches
+
+- minimax
+- max n
+- a b pruning
+- move ordering
+- negamax
+- expectimax
+
+// https://stackoverflow.com/questions/14826451/extending-minimax-algorithm-for-multiple-opponents
+
+=== Complexity
+
+- state space
+
+=== !MCTS
+
+- since !bi converges to the optimal solution with pure !stys:
+  - a unique !v can be associated with each !g !s
+  - a uniqe best action can be associated with any !g !s
+- at least the value function should be approximated somehow
+- with enough simulations, we can then shift the exploring focus to better actions (UCT formula?)
+- this can be improved with a !p !fn
 
 - previous versions
   - AlphaGo
