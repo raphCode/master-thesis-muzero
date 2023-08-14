@@ -153,8 +153,8 @@ method.
 
 This section introduces basic !gtic concepts, just enough to provide justification for the
 design and behavior of !mz.
-
-=== Overview
+It also provides foundations to discuss the limitations of the original !mz !impl in
+TODO: label.
 
 !Gt is a broad interdisciplinary field that uses mathematical models to analyze how
 individuals make decisions in interactive situations.
@@ -237,10 +237,12 @@ However, comparable concepts have slightly different terminology in the two fiel
   caption: [Comparison of similar concepts in !gt and !rl],
 ) <tbl_gt_rl_terms>
 
+=== Types of !Gs
+
 !Gt may differentiate !gs according to different properties which are explained in the
 next chapters.
 
-=== !ZSUM
+==== !ZSUM
 
 !Zsum !gs are !gs in which the sum of all !pls' payoffs equals zero for every outcome of
 the !g.
@@ -256,7 +258,7 @@ Contrastingly, in non-!zsum !gs, no restriction is imposed on the payoff vectors
 This situation arises when modeling real-world economic situations, as there may be
 gains from trades.
 
-=== !I
+==== !I
 
 An important distinction are !gs of !pinf and !impinf.
 A !pinf !g is one in which every !pl, at every !dp in the !g, has full knowledge of the !h
@@ -280,7 +282,7 @@ The card !g poker is an example of an !impinf !g because the other !pls' cards a
 concealed.
 @gtheo
 
-=== Simultaneous / !Seql Moves
+==== Simultaneous / !Seql Moves
 
 !Gs can be classified according to whether the !pls make their moves at the same time or
 one after the other.
@@ -316,7 +318,7 @@ the simultaneous nature of the !g remains.
 At best, it can be seen as a sequential but incomplete information variant of !rps.
 @gtheo2
 
-=== Cooperation
+==== Cooperation
 
 !Gt can be divided into two branches, cooperative and non-cooperative.
 The cooperative approach studies !gs where the rules are only broadly defined.
