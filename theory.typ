@@ -640,6 +640,42 @@ last section.
 
 === !ago
 
+!ago by #citet("alphago") is a novel and successful approach to the !g of Go using !nns.
+Go has long been known as a very difficult !g for computers to play.
+The reason is the high complexity in the !g tree:
+A complete !g tree would be very large in both height (Go !gs can span hundreds of moves)
+and breadth (many possible actions at each board position).
+This makes an exhaustive search computationally intractable.
+#cite("computer_go", "phd_games")
+
+TODO: cite
+!ago is a refinement of previous approaches to computer Go.
+Go programs preceeding !ago use !mcts to estimate !vs in the search tree.
+To reduce the effective breadth of the search tree, some use a !p !fn.
+Thus, tree search requires two !fns, one for the search !p and one for the !v of a !g !s.
+These !fns are composed of a linear combination of features extraced from the !g board.
+These features are hand-crafted and use domain-specific knowledge of the !g.
+
+!ago also uses !mcts, but replaces the !p and !v !fns with !nns.
+Specifically, !ago employs deep convolutional !nns that operate direcly on a 19x19 image
+of the Go board.
+The !pnet outputs a !prob distribution of !as that are most likely to lead to a win of the
+!g.
+The !vnet predicts a scalar !v, approximating the outcome of the !g if both !pls were to
+select !as according to the !pnet.
+@alphago
+
+The main contribution of #citet("alphago") is to provide a pipeline for effective training
+of these !nns.
+- supervised training of !pnet on human expert !gs
+  - SL !pnet
+  - fast rollout !p
+- fine-tune the SL !pnet via RL selfplay to optimize for the goal of winning the !g
+  - opponents: random previous iteration
+- train the !vnet: use the !pnet to generate !hs of selfplay
+
+After training, the !pnet and !vnet are used in the !mcts.
+
 === !agoz
 
 === !az

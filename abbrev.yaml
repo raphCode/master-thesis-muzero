@@ -90,8 +90,10 @@ pinf: perfect information
 impinf: imperfect information
 
 # networks
-net: net
+nn: neural network
+net: network
 rnet: representation network
 pnet: prediction network
 dnet: dynamics network
+vnet: value network
 latrep: latent representation

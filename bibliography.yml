@@ -376,3 +376,15 @@ phd_games:
   author: Allis, L.V.
   organization: Maastricht University
   doi: 10.26481/dis.19940923la
+
+computer_go:
+  type: article
+  title: Computer Go
+  date: 2002
+  author: "Müller, Martin"
+  parent:
+    title: Artificial Intelligence
+    issue: 1
+    volume: 134
+  page-range: 145-179
+  doi: 10.1016/S0004-3702(01)00121-7
