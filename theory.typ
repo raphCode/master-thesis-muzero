@@ -330,14 +330,17 @@ of the !pls.
 !Gt can be divided into two branches, cooperative and non-cooperative.
 The cooperative approach studies !gs where the rules are only broadly defined.
 In fact, the rules are kept implicit in the formal specification of the !g.
+@gtheo
 
 Since the rules are not specific enough to analyze individual decision making, cooperative
 !gt looks instead at coalitions of !pls.
 These coalitions assume that !pls can commit to work together through binding agreements
 or through the transfer of decision-making power.
+@gtheo
 
 Overall, cooperative !gt provides a framework for understanding how different parties can
 work together toward common goals.
+@gtheo
 
 Unlike the other branch, non-cooperative !gt requires an exact specification of the rules
 of the !g.
@@ -346,12 +349,14 @@ It allows an analysis of the individual decisions of !pls without relying on com
 devices.
 !Pls are assumed to act solely out of self-interest, i.e. to choose !as that maximize
 their payoff.
+@gtheo
 
 However, this can lead to seemingly cooperative behavior in some settings:
 !gs may have rules that require !pls to work together to achieve a mutually beneficial
 goal.
 This goal cannot be achieved by one !pl alone, so !pls are motivated to behave
 cooperatively.
+@gtheo
 
 The !gs studied in this thesis are strictly non-cooperative in a !gtic sense.
 To avoid any confusion, it is important to point out that this thesis refers to !gs being
