@@ -11,7 +11,7 @@ import torch
 from attrs import frozen
 
 if TYPE_CHECKING:
-    from util import ndarr_f64, ndarr_bool
+    from util import ndarr_f32, ndarr_bool
 
 
 class Teams:
@@ -125,7 +125,7 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def chance_outcomes(self) -> ndarr_f64:
+    def chance_outcomes(self) -> ndarr_f32:
         """
         On chance events, this can be called to get the action probabilities.
         Length of returned array should be game.max_num_actions

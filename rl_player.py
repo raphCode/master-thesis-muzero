@@ -13,7 +13,7 @@ from games.bases import Player
 if TYPE_CHECKING:
     from torch import Tensor
 
-    from util import ndarr_f64
+    from util import ndarr_f32
     from games.bases import GameState
     from config.schema import MctsConfig
 
@@ -25,7 +25,7 @@ class TrainingInfo:
     """
 
     observations: Optional[tuple[Tensor, ...]]
-    target_policy: ndarr_f64
+    target_policy: ndarr_f32
     mcts_value: float
 
 
