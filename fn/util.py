@@ -7,14 +7,14 @@ from collections.abc import Callable, Iterable, Iterator
 
 import numpy as np
 
-from util import NaNWarning, ndarr_f64
+from util import NaNWarning, ndarr_f32
 
 if TYPE_CHECKING:
     from mcts import Node
 
 
-def softmax(values: Iterable[float], temp: float = 1.0) -> ndarr_f64:
-    vals = np.array(values)
+def softmax(values: Iterable[float], temp: float = 1.0) -> ndarr_f32:
+    vals = np.array(values, dtype=np.float32)
     exp = np.exp(vals / temp)
     result = exp / exp.sum()
     if np.isnan(result).any():
@@ -31,7 +31,7 @@ def softmax(values: Iterable[float], temp: float = 1.0) -> ndarr_f64:
             NaNWarning,
             stacklevel=2,
         )
-    return cast(ndarr_f64, result)
+    return cast(ndarr_f32, result)
 
 
 T = TypeVar("T")

@@ -10,7 +10,7 @@ from attrs import frozen
 from torch import Tensor
 
 from mcts import TurnStatus
-from util import TensorCache, ndarr_f64
+from util import TensorCache, ndarr_f32
 from config import C
 
 if TYPE_CHECKING:
@@ -33,7 +33,7 @@ class TrajectoryState:
     observations: Optional[tuple[Tensor, ...]]
     turn_status: int
     action: int
-    target_policy: ndarr_f64
+    target_policy: ndarr_f32
     mcts_value: float
     reward: float
 
@@ -42,7 +42,7 @@ class TrajectoryState:
         cls,
         info: TrainingInfo,
         *args: Any,
-        target_policy: Optional[ndarr_f64] = None,
+        target_policy: Optional[ndarr_f32] = None,
         turn_status: int,
         action: int,
         reward: float,

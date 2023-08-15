@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import pyspiel  # type: ignore [import]
 
-from util import ndarr_f64, ndarr_bool, optional_map
+from util import ndarr_f32, ndarr_bool, optional_map
 
 from .bases import Game, Teams, GameState, MatchData, GameStateInitKwArgs
 
@@ -64,9 +64,9 @@ class OpenSpielGameState(GameState):
         return cast(int, self.state.current_player())
 
     @property
-    def chance_outcomes(self) -> ndarr_f64:
+    def chance_outcomes(self) -> ndarr_f32:
         d = dict(self.state.chance_outcomes())  # type: dict[int, float]
-        probs = np.zeros(self.game.max_num_actions)
+        probs = np.zeros(self.game.max_num_actions, dtype=np.float32)
         probs[list(d.keys())] = list(d.values())
         return probs
 

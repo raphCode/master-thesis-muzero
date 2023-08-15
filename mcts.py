@@ -15,7 +15,7 @@ from config import C
 if TYPE_CHECKING:
     from torch import Tensor
 
-    from util import ndarr_f32, ndarr_f64, ndarr_bool
+    from util import ndarr_f32, ndarr_bool
     from networks import Networks
     from config.schema import MctsConfig
 
@@ -66,7 +66,7 @@ class Node(ABC):
     reward: float
     value_pred: float
 
-    probs: ndarr_f32 | ndarr_f64
+    probs: ndarr_f32
     children: MutableMapping[int, Node]
 
     mcts: MCTS
@@ -77,7 +77,7 @@ class Node(ABC):
         latent: Tensor,
         reward: float,
         value_pred: float,
-        probs: ndarr_f32 | ndarr_f64,
+        probs: ndarr_f32,
         mcts: MCTS,
     ) -> None:
         self.latent = latent
@@ -292,7 +292,7 @@ class MCTS:
     def get_action(self) -> int:
         return self.cfg.node_action_fn(self.root)
 
-    def get_policy(self) -> ndarr_f64:
+    def get_policy(self) -> ndarr_f32:
         policy = self.cfg.node_target_policy_fn(self.root)
         assert len(policy) == C.game.instance.max_num_actions
         return policy
