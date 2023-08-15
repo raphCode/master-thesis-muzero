@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypeVar, Protocol, cast
+from typing import Any, TypeVar, Protocol, cast
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import Tensor
 from torch.jit import TopLevelTracedModule
 
 from util import copy_type_signature
 
-if TYPE_CHECKING:
-    from torch import Tensor
 T = TypeVar("T")
 
 
@@ -100,7 +99,7 @@ class Rescaler(RescalerPy, nn.Module):
         high = self.support[i + 1]
         lerp = ((x - low) / (high - low)).unsqueeze(1)
         return cast(
-            torch.Tensor,
+            Tensor,
             F.one_hot(i, n) * (1 - lerp) + F.one_hot(i + 1, n) * lerp,
         )
 
