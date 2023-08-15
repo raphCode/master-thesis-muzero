@@ -54,6 +54,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     for pid, player in zip(rlp.pids, rlp.players):
         player.reset_new_game(pid)
 
+    # RL players that already had their first move
     started_pids = set[int]()
 
     def commit_step(action: int) -> None:
