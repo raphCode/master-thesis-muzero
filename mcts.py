@@ -133,13 +133,12 @@ class StateNode(Node):
         self,
         latent: Tensor,
         reward: float,
+        current_player: CurrentPlayer,
         mcts: MCTS,
-        /,
-        current_player: Optional[CurrentPlayer] = None,
         valid_actions_mask: Optional[ndarr_bool] = None,
     ):
         self.mask = valid_actions_mask
-        self.player = current_player or mcts.own_pid
+        self.player = current_player
         value_pred, policy = mcts.nets.prediction.si(latent)
         probs = policy.detach().numpy()
         if valid_actions_mask is not None:
@@ -167,8 +166,8 @@ class StateNode(Node):
         return StateNode(
             latent,
             reward.item(),
+            turn_status,
             self.mcts,
-            current_player=turn_status,
         )
 
 
@@ -250,8 +249,8 @@ class MCTS:
         self.root = StateNode(
             latent,
             0,
+            self.own_pid,
             self,
-            current_player=self.own_pid,
             valid_actions_mask=valid_actions_mask,
         )
 
