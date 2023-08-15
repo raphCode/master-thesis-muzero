@@ -58,6 +58,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
 
     for n_step in range(C.training.max_steps_per_game):
         if state.is_terminal:
+            n_step -= 1
             break
 
         if state.is_chance:
