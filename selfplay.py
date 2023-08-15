@@ -56,7 +56,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
 
     started_pids = set[int]()
 
-    for n_move in range(C.training.max_moves_per_game):
+    for n_step in range(C.training.max_steps_per_game):
         if state.is_terminal:
             break
 
@@ -99,12 +99,12 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
             )
             player.advance_game_state(action)
 
-    tbs.add_scalar("selfplay/game length", n_move)
+    tbs.add_scalar("selfplay/game length", n_step)
     if isinstance(player_controller, SinglePC):
         reward = rlp.trajectories[0][-1].reward
-        log.info(f"Finished selfplay game: length: {n_move}, reward: {reward:.2f}")
+        log.info(f"Finished selfplay game: length: {n_step}, reward: {reward:.2f}")
         tbs.add_scalar("selfplay/reward", reward)
     else:
         raise NotImplementedError()
 
-    return SelfplayResult(n_move, state.is_terminal, rlp.trajectories)
+    return SelfplayResult(n_step, state.is_terminal, rlp.trajectories)
