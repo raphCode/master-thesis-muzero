@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING, TypeAlias, cast
 from collections.abc import Sequence
 
 from config import C
@@ -46,24 +46,28 @@ class PCBase(ABC):
         pass
 
 
-class SinglePC(PCBase):
+class SelfplayPC(PCBase):
     """
-    Simple Player Controller for one RLPlayer in single-player games.
+    Uses the same RLPlayer configuration for all players.
+    Requires all matches to have the same (maximum) number of players.
+    This arrangement works for single- and multi-player games.
     """
 
     net: Networks
-    player: RLBase
+    players: list[RLBase]
 
     def __init__(self, player_partials: Sequence[PlayerPartial]):
         assert len(player_partials) == 1
-        assert C.game.instance.max_num_players == 1
         self.net = C.networks.factory()
-        player = player_partials[0](self.net)
-        assert isinstance(player, RLBase)
-        self.player = player
+        self.players = [
+            cast(RLBase, player_partials[0](self.net))
+            for _ in range(C.game.instance.max_num_players)
+        ]
+        assert isinstance(self.players[0], RLBase)
 
-    def get_players(self, _: MatchData) -> list[RLBase]:
-        return [self.player]
+    def get_players(self, match_data: MatchData) -> list[RLBase]:
+        assert match_data.num_players == len(self.players)
+        return self.players
 
     def update_networks(self, new_networks: Networks) -> None:
         pass

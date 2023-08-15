@@ -19,7 +19,7 @@ from config.impl import (
 )
 from config.schema import BaseConfig
 from replay_buffer import ReplayBuffer
-from player_controller import SinglePC
+from player_controller import SelfplayPC
 from tensorboard_wrapper import TensorboardLogger
 
 if TYPE_CHECKING:
@@ -52,7 +52,7 @@ def main(cfg: DictConfig) -> None:
     logging.captureWarnings(True)
     populate_config(cfg)
 
-    pc = SinglePC(C.players.instances)
+    pc = SelfplayPC(C.players.instances)
     rb = ReplayBuffer()
     t = Trainer(pc.net)
     n = 0
