@@ -146,7 +146,7 @@ class TrainConfig:
     discount_factor: float
     n_step_horizon: int
     replay_buffer_size: int
-    max_moves_per_game: int
+    max_steps_per_game: int
     latent_dist_pnorm: float
     optimizer: OptimizerPartial
     learning_rates: LearningRates
