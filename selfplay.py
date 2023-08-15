@@ -56,34 +56,13 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
 
     started_pids = set[int]()
 
-    for n_step in range(C.training.max_steps_per_game):
-        if state.is_terminal:
-            n_step -= 1
-            break
-
+    def commit_step(action: int) -> None:
         if state.is_chance:
-            chance_outcomes = state.chance_outcomes
-            action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
-            state.apply_action(action)
-            for player, pid, traj in zip(rlp.players, rlp.pids, rlp.trajectories):
-                if pid not in started_pids:
-                    continue
-                traj.append(
-                    TrajectoryState.from_training_info(
-                        player.create_training_info(),
-                        target_policy=chance_outcomes,
-                        turn_status=TurnStatus.CHANCE_PLAYER.target_index,
-                        action=action,
-                        reward=C.game.reward_fn(state, pid),
-                    )
-                )
-                player.advance_game_state(action)
-            continue
-
-        curr_pid = state.current_player_id
-        curr_player = players[curr_pid]
-        action = curr_player.request_action(state)
-        started_pids.add(curr_pid)
+            target_policy = state.chance_outcomes
+            turn_status = TurnStatus.CHANCE_PLAYER.target_index
+        else:
+            target_policy = None
+            turn_status = state.current_player_id
 
         state.apply_action(action)
 
@@ -93,12 +72,30 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
             traj.append(
                 TrajectoryState.from_training_info(
                     player.create_training_info(),
-                    turn_status=curr_pid,
+                    target_policy=target_policy,
+                    turn_status=turn_status,
                     action=action,
                     reward=C.game.reward_fn(state, pid),
                 )
             )
             player.advance_game_state(action)
+
+    for n_step in range(C.training.max_steps_per_game):
+        if state.is_terminal:
+            n_step -= 1
+            break
+
+        if state.is_chance:
+            chance_outcomes = state.chance_outcomes
+            action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
+            commit_step(action)
+            continue
+
+        curr_pid = state.current_player_id
+        action = players[curr_pid].request_action(state)
+        started_pids.add(curr_pid)
+
+        commit_step(action)
 
     tbs.add_scalar("selfplay/game length", n_step)
     if isinstance(player_controller, SinglePC):
