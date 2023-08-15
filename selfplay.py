@@ -11,10 +11,10 @@ from mcts import TurnStatus
 from config import C
 from rl_player import RLBase
 from trajectory import TrajectoryState
-from player_controller import PCBase, SinglePC
 
 if TYPE_CHECKING:
     from games.bases import Player
+    from player_controller import PCBase
     from tensorboard_wrapper import TBStepLogger
 
 rng = np.random.default_rng()
@@ -57,6 +57,8 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     # RL players that already had their first move
     started_pids = set[int]()
 
+    score = 0.0
+
     def commit_step(action: int) -> None:
         if state.is_chance:
             target_policy = state.chance_outcomes
@@ -66,6 +68,9 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
             turn_status = state.current_player_id
 
         state.apply_action(action)
+
+        nonlocal score
+        score += C.game.reward_fn(state, 0)
 
         for player, pid, traj in zip(rlp.players, rlp.pids, rlp.trajectories):
             if pid not in started_pids:
@@ -99,11 +104,8 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
         commit_step(action)
 
     tbs.add_scalar("selfplay/game length", n_step)
-    if isinstance(player_controller, SinglePC):
-        reward = rlp.trajectories[0][-1].reward
-        log.info(f"Finished selfplay game: length: {n_step}, reward: {reward:.2f}")
-        tbs.add_scalar("selfplay/reward", reward)
-    else:
-        raise NotImplementedError()
+    trunc_msg = " (truncated)" * (not state.is_terminal)
+    log.info(f"Finished selfplay game: {n_step + 1} steps{trunc_msg}, score: {score}")
+    tbs.add_scalar("selfplay/score", score)
 
     return SelfplayResult(n_step, state.is_terminal, rlp.trajectories)
