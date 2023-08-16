@@ -6,6 +6,7 @@ from functools import cached_property
 import numpy as np
 import torch
 import pyspiel  # type: ignore [import]
+import torch.nn.functional as F
 
 from util import ndarr_f32, ndarr_bool, optional_map
 
@@ -23,12 +24,13 @@ class OpenSpielGameState(GameState):
         super().__init__(**kwargs)
 
     @property
-    def observation(self) -> tuple[torch.Tensor]:
-        return (
-            torch.tensor(self.state.observation_tensor()).reshape(
-                self.game.observation_shapes[0]
-            ),
+    def observation(self) -> tuple[torch.Tensor, torch.Tensor]:
+        shapes = self.game.observation_shapes
+        obs = torch.tensor(self.state.observation_tensor()).reshape(shapes[0])
+        player_onehot = F.one_hot(
+            torch.tensor(self.current_player_id), self.game.max_num_players
         )
+        return obs, player_onehot
 
     @property
     def valid_actions_mask(self) -> ndarr_bool:
@@ -132,12 +134,12 @@ class OpenSpielGame(Game):
         return cast(int, self.game.num_players())
 
     @cached_property
-    def observation_shapes(self) -> tuple[tuple[int, ...]]:
+    def observation_shapes(self) -> tuple[tuple[int, ...], tuple[int]]:
         shape = tuple(self.game.observation_tensor_shape())
         if len(shape) == 2:
             # add singleton channel dimension to enable use of convolution networks
-            return ((1, *shape),)
-        return (shape,)
+            shape = (1, *shape)
+        return (shape, (self.max_num_players,))
 
     @cached_property
     def max_num_actions(self) -> int:
