@@ -68,6 +68,10 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
             turn_status = state.current_player_id
 
         state.apply_action(action)
+
+        print("=" * 3 + f"step {n_step + 1}")
+        print(repr(state))
+
         nonlocal scores
         rewards = state.rewards
         scores += rewards
