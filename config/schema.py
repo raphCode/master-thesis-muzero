@@ -62,7 +62,6 @@ if TYPE_CHECKING:  # RUNTIME TYPES
 
     from fn.action import ActionFn
     from fn.policy import PolicyFn
-    from fn.reward import RewardFn
     from fn.selection import SelectionFn
 else:  # OMEGACONF SCHEMA TYPES
     # For omegaconf, just use a dataclass that requires the _target_ config key
@@ -80,14 +79,12 @@ else:  # OMEGACONF SCHEMA TYPES
     fn = Any
     ActionFn = fn
     PolicyFn = fn
-    RewardFn = fn
     SelectionFn = fn
 
 
 @frozen
 class GameConfig:
     instance: Game
-    reward_fn: RewardFn
 
 
 @frozen

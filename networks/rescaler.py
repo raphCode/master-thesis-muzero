@@ -84,31 +84,31 @@ class Rescaler(RescalerPy, nn.Module):
         """
         support logits -> actual value in [min, max] range
         """
-        return F.softmax(logits, dim=-1) @ self.support
+        return cast(
+            Tensor,
+            torch.tensordot(F.softmax(logits, dim=1), self.support, dims=([1], [0])),
+        )
 
     def get_target(self, x: Tensor) -> Tensor:
         """
         value in [min, max] range -> target support probability distribution
         """
         n = len(self.support)
-        x = x.view(-1)
         mini, maxi = self.support[[0, -1]]
         i = ((x - mini) / (maxi - mini) * (n - 1)).to(dtype=torch.int64)
         i = i.clamp(0, n - 2)
         low = self.support[i]
         high = self.support[i + 1]
-        lerp = ((x - low) / (high - low)).unsqueeze(1)
-        return cast(
-            Tensor,
-            F.one_hot(i, n) * (1 - lerp) + F.one_hot(i + 1, n) * lerp,
-        )
+        lerp = ((x - low) / (high - low)).unsqueeze(-1)
+        result = F.one_hot(i, n) * (1 - lerp) + F.one_hot(i + 1, n) * lerp
+        return cast(Tensor, result.transpose(1, -1))
 
     def jit(self) -> RescalerJit:
         traced_mod = torch.jit.trace_module(  # type: ignore [no-untyped-call]
             self,
             dict(
-                forward=torch.zeros(len(self.support)),
-                get_target=torch.tensor([0]),
+                forward=torch.zeros(len(self.support), 1),
+                get_target=torch.zeros(1, 1),
             ),
         )
         object.__setattr__(traced_mod, "__class__", RescalerJit)

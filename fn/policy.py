@@ -3,7 +3,7 @@ from collections.abc import Callable
 
 import numpy as np
 
-from mcts import Node
+from mcts import Node, StateNode, TurnStatus
 from util import ndarr_f32
 from config import C
 
@@ -36,9 +36,11 @@ class FromExpandedValues(SoftmaxTemp):
     """
 
     def __call__(self, node: Node) -> ndarr_f32:
+        assert isinstance(node, StateNode)
+        assert node.player is not TurnStatus.CHANCE_PLAYER
         assert len(node.children) > 0
         values = [
-            child.normalized_reward + child.normalized_value
+            child.normalized_reward[node.player] + child.normalized_value[node.player]
             for child in node.children.values()
         ]
         policy = np.zeros(C.game.instance.max_num_actions, dtype=np.float32)

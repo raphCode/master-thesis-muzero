@@ -98,9 +98,9 @@ class GameState(ABC):
 
     @property
     @abstractmethod
-    def rewards(self) -> tuple[float, ...]:
+    def rewards(self) -> ndarr_f32:
         """
-        Tuple of rewards, one for each player, index 0 for the first player
+        Array of rewards, one for each player, index 0 for the first player
         """
         pass
 

@@ -1,5 +1,5 @@
 import math
-from typing import TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 from collections.abc import Callable
 
 import numpy as np
@@ -25,17 +25,22 @@ class pUCTscore:
         self.c2 = c2
 
     def __call__(self, node: Node) -> int:
+        assert isinstance(node, StateNode)
+        assert node.player is not TurnStatus.CHANCE_PLAYER
         prior_scale_half = (
             math.log(self.c1 + (node.visit_count + self.c2 + 1) / self.c2)
         ) * math.sqrt(node.visit_count)
 
         def child_score(prior: float, child: Node) -> float:
+            if TYPE_CHECKING:
+                assert isinstance(node, StateNode)
+                assert node.player is not TurnStatus.CHANCE_PLAYER
             prior_score = prior * prior_scale_half / (child.visit_count + 1)
             value_score = (
-                child.normalized_reward
-                + child.normalized_value * C.training.discount_factor
+                child.normalized_reward[node.player]
+                + child.normalized_value[node.player] * C.training.discount_factor
             )
-            return value_score + prior_score
+            return float(value_score) + prior_score
 
         return argmax(
             map_actions_callback(

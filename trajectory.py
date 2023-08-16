@@ -10,11 +10,12 @@ from attrs import frozen
 from torch import Tensor
 
 from mcts import TurnStatus
-from util import TensorCache, ndarr_f32
+from util import TensorCache
 from config import C
 
 if TYPE_CHECKING:
     # only needed for type annotations, can't import uncondionally due to import cycles
+    from util import ndarr_f32
     from rl_player import TrainingInfo
 
 
@@ -34,8 +35,8 @@ class TrajectoryState:
     turn_status: int
     action: int
     target_policy: ndarr_f32
-    mcts_value: float
-    reward: float
+    mcts_value: ndarr_f32
+    reward: ndarr_f32
 
     @classmethod
     def from_training_info(
@@ -45,7 +46,7 @@ class TrajectoryState:
         target_policy: Optional[ndarr_f32] = None,
         turn_status: int,
         action: int,
-        reward: float,
+        reward: ndarr_f32,
     ) -> TrajectoryState:
         if target_policy is None:
             target_policy = info.target_policy
@@ -117,15 +118,15 @@ class TrainingData:
             turn_status=cache.tensor(0, dtype=torch.long),  # index tensor needs long
             action_onehot=cache.zeros(C.game.instance.max_num_actions, dtype=torch.long),
             target_policy=cache.zeros(C.game.instance.max_num_actions),
-            value_target=cache.tensor(0),
-            reward=cache.tensor(0.0),
+            value_target=cache.zeros(C.game.instance.max_num_players),
+            reward=cache.zeros(C.game.instance.max_num_players),
         )
 
     @classmethod
     def from_trajectory_state(
         cls,
         ts: TrajectoryState,
-        value_target: float,
+        value_target: ndarr_f32,
         is_terminal: bool,
         cache: Optional[TensorCache] = None,
     ) -> TrainingData:
@@ -146,8 +147,8 @@ class TrainingData:
                 C.game.instance.max_num_actions,
             ),
             target_policy=torch.tensor(ts.target_policy),
-            value_target=torch.tensor(float(value_target)),
-            reward=cache.tensor(float(ts.reward)),
+            value_target=torch.tensor(value_target),
+            reward=torch.tensor(ts.reward),
         )
 
     @classmethod
