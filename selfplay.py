@@ -8,6 +8,7 @@ import numpy as np
 from attrs import frozen
 
 from mcts import TurnStatus
+from util import RingBuffer
 from config import C
 from rl_player import RLBase
 from trajectory import TrajectoryState
@@ -46,6 +47,8 @@ class RLPlayers:
 
 
 def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
+    debug_text_buffer = RingBuffer[str](5)
+
     state = C.game.instance.new_initial_state()
     players = player_controller.get_players(state.match_data)
     assert len(players) == state.match_data.num_players
@@ -105,7 +108,23 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
         action = players[curr_pid].request_action(state)
         started_pids.add(curr_pid)
 
+        def debug_text() -> str:
+            curr_player = players[curr_pid]
+            assert isinstance(curr_player, RLBase)
+            return "\n".join(
+                [
+                    repr(state),
+                    curr_player.mcts.debug_dump_tree(maxdepth=5),
+                ]
+            )
+
+        debug_text_buffer.append(debug_text())
+
         commit_step(action)
+
+    print("=" * 50)
+    for txt in debug_text_buffer:
+        print(txt)
 
     tbs.add_scalar("selfplay/game length", n_step)
     trunc_msg = " (truncated)" * (not state.is_terminal)
