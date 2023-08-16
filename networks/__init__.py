@@ -33,9 +33,13 @@ class Networks(nn.Module):
         super().__init__()
 
     def jit(self) -> None:
-        for name, mod in self.named_modules():
-            if mod is not self and hasattr(mod, "jit") and callable(mod.jit):
-                setattr(self, name, mod.jit())
+        def reassign_jittable_submodules(mod: nn.Module) -> None:
+            for name, submod in mod.named_children():
+                reassign_jittable_submodules(submod)
+                if hasattr(submod, "jit") and callable(submod.jit):
+                    setattr(mod, name, submod.jit())
+
+        reassign_jittable_submodules(self)
 
     def update_rescalers(self, b: ProvidesBounds) -> None:
         self.prediction.value_scale.update_bounds(b.value_bounds)
