@@ -72,6 +72,11 @@ class Rescaler(RescalerPy, nn.Module):
     This support vector has n values evenly spaced in the range [min, max].
     The range is updated by the minimum and maximum values encoutered in the replay
     buffer.
+
+    The shape specifications in the docstrings are as follows:
+    B = batch size
+    S = support size
+    V = number of values
     """
 
     support: Tensor
@@ -83,6 +88,7 @@ class Rescaler(RescalerPy, nn.Module):
     def forward(self, logits: Tensor) -> Tensor:
         """
         support logits -> actual value in [min, max] range
+        Shapes: (B, S, V) -> (B, V)
         """
         return cast(
             Tensor,
@@ -92,6 +98,7 @@ class Rescaler(RescalerPy, nn.Module):
     def get_target(self, x: Tensor) -> Tensor:
         """
         value in [min, max] range -> target support probability distribution
+        Shapes: (B, V) -> (B, S, V)
         """
         n = len(self.support)
         mini, maxi = self.support[[0, -1]]
