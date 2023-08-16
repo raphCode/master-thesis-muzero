@@ -227,6 +227,8 @@ class TerminalNode(Node):
 class MCTS:
     """
     Stores and manages a search tree for an agent.
+    The MCTS instance lives as long as the agent because it stores networks and a mcts
+    config specific for the agent.
     """
 
     own_pid: int
