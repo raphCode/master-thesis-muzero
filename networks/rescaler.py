@@ -33,7 +33,10 @@ class RescalerPy:
 
     def update_bounds(self, bounds: tuple[float, float]) -> None:
         n = len(self.support)
-        self.support = torch.linspace(*bounds, n)
+        low, high = bounds
+        assert low <= high
+        eps = 1e-4
+        self.support = torch.linspace(low - eps, high + eps, n)
 
     def normalize(self, value: R) -> R:
         """
