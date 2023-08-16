@@ -26,7 +26,7 @@ class TrainingInfo:
 
     observations: Optional[tuple[Tensor, ...]]
     target_policy: ndarr_f32
-    mcts_value: float
+    mcts_value: ndarr_f32
 
 
 RLBaseInitArgs: TypeAlias = tuple[Networks]

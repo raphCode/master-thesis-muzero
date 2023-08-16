@@ -122,7 +122,6 @@ def populate_config(cfg: DictConfig) -> None:
     # transform all configs with _target_ keys into their class instances (or partials)
     cfg = hydra.utils.instantiate(cfg)  # type: DictConfig # type: ignore [no-redef]
 
-    assert_callable(cfg.game.reward_fn)
     assert_callable(cfg.mcts.node_action_fn)
     assert_callable(cfg.mcts.node_target_policy_fn)
     assert_callable(cfg.mcts.node_selection_score_fn)

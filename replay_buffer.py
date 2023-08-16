@@ -24,8 +24,11 @@ class ReplayBuffer:
     def __init__(self) -> None:
         # the integer is a unique id to differentiate different trajectories
         self.buffer = RingBuffer[tuple[int, TrainingData]](C.training.replay_buffer_size)
-        self.values = RingBuffer[float](C.training.replay_buffer_size)
-        self.rewards = RingBuffer[float](C.training.replay_buffer_size)
+        scalar_buffer_size = (
+            C.training.replay_buffer_size * C.game.instance.max_num_players
+        )
+        self.values = RingBuffer[float](scalar_buffer_size)
+        self.rewards = RingBuffer[float](scalar_buffer_size)
         self.cache = TensorCache()
         self.data_added = 0
         self.data_sampled = 0
@@ -51,7 +54,7 @@ class ReplayBuffer:
         # ensuring the id is indeed unique.
         traj_id = self.buffer.position + len(traj)
 
-        rewards = np.array([ts.reward for ts in traj])
+        rewards = np.stack([ts.reward for ts in traj])
         for t, traj_state in enumerate(traj):
             # The target for the prediction network value head is the bootstrapped n step
             # return. In general, it is calculated by adding future rewards over the n
@@ -75,7 +78,9 @@ class ReplayBuffer:
             remaining_len = len(traj) - t
             n = min(C.training.n_step_horizon, remaining_len)
 
-            value_target = np.inner(rewards[t : t + n], self.discounts[:n])
+            value_target = np.tensordot(
+                rewards[t : t + n], self.discounts[:n], axes=(0, 0)
+            )
 
             nstep_end_terminal = game_completed and t + n == len(traj)
             if not nstep_end_terminal:
@@ -92,8 +97,8 @@ class ReplayBuffer:
                     ),
                 )
             )
-            self.values.append(value_target)
-            self.rewards.append(traj_state.reward)
+            self.values.extend(value_target)
+            self.rewards.extend(traj_state.reward)
         self.data_added += len(traj)
 
     def sample(self) -> list[TrainingData]:

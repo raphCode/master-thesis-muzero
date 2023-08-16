@@ -1,6 +1,6 @@
 import functools
 from typing import Any, Generic, TypeVar, Callable, Optional, ParamSpec, TypeAlias, cast
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 
 import numpy as np
 import torch
@@ -96,6 +96,10 @@ class RingBuffer(Generic[T]):
         else:
             self.data[self.position] = value
         self.position = (self.position + 1) % self.size
+
+    def extend(self, values: Iterable[T]) -> None:
+        for v in values:
+            self.append(v)
 
     def __getitem__(self, index: int) -> T:
         """

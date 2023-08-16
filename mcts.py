@@ -61,10 +61,10 @@ class Node(ABC):
 
     latent: Tensor
 
-    value_sum: float
+    value_sum: ndarr_f32
     visit_count: int
-    reward: float
-    value_pred: float
+    reward: ndarr_f32
+    value_pred: ndarr_f32
 
     probs: ndarr_f32
     children: MutableMapping[int, Node]
@@ -75,8 +75,8 @@ class Node(ABC):
         self,
         /,
         latent: Tensor,
-        reward: float,
-        value_pred: float,
+        reward: ndarr_f32,
+        value_pred: ndarr_f32,
         probs: ndarr_f32,
         mcts: MCTS,
     ) -> None:
@@ -87,24 +87,28 @@ class Node(ABC):
         self.probs.flags.writeable = False
         self.children = dict()
         self.visit_count = 0
-        self.value_sum = 0
+        self.value_sum = np.zeros_like(reward)
         self.mcts = mcts
 
     @property
-    def value(self) -> float:
+    def value(self) -> ndarr_f32:
         if self.visit_count == 0:
-            return 0
+            return self.value_sum
         return self.value_sum / self.visit_count
 
     @property
-    def normalized_value(self) -> float:
-        return self.mcts.nets.prediction.value_scale.normalize(self.value)
+    def normalized_value(self) -> ndarr_f32:
+        return np.atleast_1d(
+            self.mcts.nets.prediction.value_scale.normalize(self.value)
+        ).astype(np.float32)
 
     @property
-    def normalized_reward(self) -> float:
-        return self.mcts.nets.dynamics.reward_scale.normalize(self.reward)
+    def normalized_reward(self) -> ndarr_f32:
+        return np.atleast_1d(
+            self.mcts.nets.dynamics.reward_scale.normalize(self.reward)
+        ).astype(np.float32)
 
-    def add_value(self, value: float) -> None:
+    def add_value(self, value: ndarr_f32) -> None:
         self.value_sum += value
         self.visit_count += 1
 
@@ -132,7 +136,7 @@ class StateNode(Node):
     def __init__(
         self,
         latent: Tensor,
-        reward: float,
+        reward: ndarr_f32,
         current_player: CurrentPlayer,
         mcts: MCTS,
         valid_actions_mask: Optional[ndarr_bool] = None,
@@ -150,7 +154,7 @@ class StateNode(Node):
         super().__init__(
             latent=latent,
             reward=reward,
-            value_pred=value_pred.item(),
+            value_pred=value_pred.detach().numpy(),
             probs=probs,
             mcts=mcts,
         )
@@ -162,10 +166,10 @@ class StateNode(Node):
         )
         turn_status = TurnStatus.from_index(cast(int, turn_onehot.argmax().item()))
         if turn_status is TurnStatus.TERMINAL_STATE:
-            return TerminalNode(latent, reward.item(), self.mcts)
+            return TerminalNode(latent, reward.detach().numpy(), self.mcts)
         return StateNode(
             latent,
-            reward.item(),
+            reward.detach().numpy(),
             turn_status,
             self.mcts,
         )
@@ -201,11 +205,11 @@ class TerminalNode(Node):
     child nodes may still be needed for e.g. training data or some special RLPlayers.
     """
 
-    def __init__(self, latent: Tensor, reward: float, mcts: MCTS):
+    def __init__(self, latent: Tensor, reward: ndarr_f32, mcts: MCTS):
         super().__init__(
             latent=latent,
             reward=reward,
-            value_pred=0.0,
+            value_pred=np.zeros_like(reward),
             probs=np.full(
                 C.game.instance.max_num_actions, 1 / C.game.instance.max_num_actions
             ),
@@ -217,7 +221,7 @@ class TerminalNode(Node):
             self.latent,
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
-        return TerminalNode(latent, 0, self.mcts)
+        return TerminalNode(latent, np.zeros_like(self.reward), self.mcts)
 
 
 class MCTS:
@@ -248,7 +252,7 @@ class MCTS:
     ) -> None:
         self.root = StateNode(
             latent,
-            0,
+            np.zeros(C.game.instance.max_num_players, dtype=np.float32),
             self.own_pid,
             self,
             valid_actions_mask=valid_actions_mask,

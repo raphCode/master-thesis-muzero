@@ -57,7 +57,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     # RL players that already had their first move
     started_pids = set[int]()
 
-    score = 0.0
+    scores = np.zeros(len(rlp.players))
 
     def commit_step(action: int) -> None:
         if state.is_chance:
@@ -68,9 +68,9 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
             turn_status = state.current_player_id
 
         state.apply_action(action)
-
-        nonlocal score
-        score += C.game.reward_fn(state, 0)
+        nonlocal scores
+        rewards = state.rewards
+        scores += rewards
 
         for player, pid, traj in zip(rlp.players, rlp.pids, rlp.trajectories):
             if pid not in started_pids:
@@ -81,7 +81,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
                     target_policy=target_policy,
                     turn_status=turn_status,
                     action=action,
-                    reward=C.game.reward_fn(state, pid),
+                    reward=rewards,
                 )
             )
             player.advance_game_state(action)
@@ -105,7 +105,11 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
 
     tbs.add_scalar("selfplay/game length", n_step)
     trunc_msg = " (truncated)" * (not state.is_terminal)
-    log.info(f"Finished selfplay game: {n_step + 1} steps{trunc_msg}, score: {score}")
-    tbs.add_scalar("selfplay/score", score)
+    log.info(
+        f"Finished selfplay game: {n_step + 1} steps{trunc_msg}, scores: "
+        + " ".join(f"{s:.2f}" for s in scores)
+    )
+    for n, score in enumerate(scores):
+        tbs.add_scalar(f"selfplay/score{n:02d}", score)
 
     return SelfplayResult(n_step, state.is_terminal, rlp.trajectories)

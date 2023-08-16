@@ -39,15 +39,15 @@ class OpenSpielGameState(GameState):
         return mask
 
     @property
-    def rewards(self) -> tuple[float, ...]:
+    def rewards(self) -> ndarr_f32:
         if self.is_chance:
-            return (0.0,) * self.game.max_num_players
+            return np.zeros(self.game.max_num_players, dtype=np.float32)
         if self.invalid:
             assert self.game.bad_move_reward is not None
-            tmp = [0.0] * self.game.max_num_players
-            tmp[cast(int, self.state.current_player())] = self.game.bad_move_reward
-            return tuple(tmp)
-        return cast(tuple[float, ...], self.state.rewards())
+            ret = np.zeros(self.game.max_num_players, dtype=np.float32)
+            ret[cast(int, self.state.current_player())] = self.game.bad_move_reward
+            return ret
+        return np.array(self.state.rewards())
 
     @property
     def is_terminal(self) -> bool:
