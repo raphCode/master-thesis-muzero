@@ -2,8 +2,10 @@ node_action_fn:
     _target_: fn.action.DrawFromPolicyFn
     policy_fn: ${..node_target_policy_fn}
 node_target_policy_fn:
-    _target_: fn.policy.FromExpandedValues
-    softmax_temp: 0.3
+    _target_: fn.policy.HandlePlayerNodes
+    policy_fn:
+        _target_: fn.policy.FromExpandedValues
+        softmax_temp: 0.3
 node_selection_score_fn: ${fn:fn.selection.from_prior_deterministic}
 iterations_move_selection: 5
 iterations_value_estimate: 5

@@ -49,3 +49,25 @@ class FromExpandedValues(SoftmaxTemp):
 
 
 assert_fn_type(FromExpandedValues())
+
+
+class HandlePlayerNodes:
+    """
+    Handles player nodes in the search tree with the given policy fn, resorts to returning
+    node probabilies on chance or terminal nodes.
+    Effectively makes other policy fns compatible with chance / terminal nodes.
+    """
+
+    def __init__(
+        self,
+        policy_fn: PolicyFn,
+    ):
+        self.policy_fn = policy_fn
+
+    def __call__(self, node: Node) -> ndarr_f32:
+        if isinstance(node, StateNode) and node.player is not TurnStatus.CHANCE_PLAYER:
+            return self.policy_fn(node)
+        return node.probs
+
+
+assert_fn_type(HandlePlayerNodes(from_visit_counts))
