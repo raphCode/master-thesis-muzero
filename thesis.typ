@@ -45,6 +45,6 @@
     fill: luma(230),
     inset: 8pt,
     radius: 4pt,
-    body + ref(label(citekey)),  // TODO: nonbreaking space before the citation
+    body + ref(label(citekey)),
   )
 }
