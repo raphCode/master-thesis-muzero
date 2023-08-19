@@ -45,6 +45,13 @@
     fill: luma(230),
     inset: 8pt,
     radius: 4pt,
-    body + ref(label(citekey)),
+    {
+      ["]
+      h(0pt, weak: true)
+      body
+      h(0pt, weak: true)
+      ["]
+      align(right, ref(label(citekey)))
+    },
   )
 }
