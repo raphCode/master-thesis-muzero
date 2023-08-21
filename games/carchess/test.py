@@ -10,7 +10,6 @@ import numpy.typing as npt
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-map_path = "maps/map1"
 
 Pos: TypeAlias = tuple[int, int]
 ndarr_bool: TypeAlias = npt.NDArray[np.bool_]
@@ -82,10 +81,6 @@ class Layer:
     spawn_counter:int
 
     def __init__(self, mask: ndarr_bool):
-        def is_at_border(x, y) -> bool:
-            mx, my = mask.shape
-            return x in (0, mx - 1) or y in (0, my - 1)
-
         def highspot_to_start_info(x, y) -> tuple[Pos, Dir]:
             mx, my = mask.shape
             if x == 0:
@@ -170,37 +165,36 @@ class Layer:
         self.cars.difference_update(map(self.index_at, pos))
 
     def car_pos_iter(self) -> Iterator[Pos]:
+        # TODO: make faster
+        getter=operator.itemgetter(*self.cars)
+        ret=getter(self.pos)
         yield from (self.pos[i] for i in self.cars)
 
     @property
     def lane_mask(self) -> ndarr_bool:
         ret = np.zeros(self.size, dtype=bool)
-        for pos in self.pos:
-            ret[pos] = True
+        x,y=zip(*self.pos)
+        ret[x,y] = True
         return ret
 
     @property
     def car_mask(self) -> ndarr_bool:
         ret = np.zeros(self.size, dtype=bool)
+        x,y =zip(*self.car_pos_iter)
+        ret[x,y] = True
         for index in self.cars:
             ret[self.pos[index]] = True
         return ret
 
     @property
-    def observation_map(self) -> ndarr_int:
+    def observation_maps(self) -> tuple[ndarr_f64, ndarr_int, ndarr_int]:
         x,y=zip(*self.pos)
         lane_map = np.full(self.size, -1)
         lane_map[x,y] = np.linspace(1, 0, len(self.pos))
-        spawn_map = np.zeros(self.size)
+        spawn_map = np.zeros(self.size, dtype=int)
         spawn_map[self.pos[0]] =self.spawn_counter
         car_map = self.car_mask.astype(int) * 2 - 1
-        return np.stack(lane_map,car_map, spawn_map)
-
-    def plot_grid(self, ax)->Any:
-        ax.set_xticks(np.arange(100) + 0.5)  # , labels="")
-        ax.set_yticks(-np.arange(100) + 0.5)  # , labels="")
-        ax.grid(color="grey")
-        ax.set_aspect("equal")
+        return lane_map,car_map, spawn_map
 
     def plot(self, plt, offset: float, **kwargs: Any) -> List[Any]:
         def coords(pos:ndarr_f64):
@@ -217,33 +211,15 @@ class Layer:
 
 
 
-layers: list[Layer] = []
+from contextlib import suppress
 
-# f, axes = plt.subplots(3,3)
-# ax = iter(axes.flatten())
-# grid = next(ax)
-
-fig, ax = plt.subplots()
-
-im = iio.imread(path.join(map_path, "tl.png"))
-alpha_mask = im[:, :, -1] > 0
-tl = TrafficLights(alpha_mask)
-
-
-n_maps = 4
-
-
-for n in range(n_maps):
-    im = iio.imread(path.join(map_path, f"{n + 1}.png"))
-    red_channel = im[:, :, 0]
-    layer = Layer(red_channel * alpha_mask)
-    layers.append(layer)
-
-    continue
-
+import itertools
 
 
 class Map:
+    """
+    Map with layers, traffic lights and cars. Provides simulation interface and access to observation tensors.
+    """
     layers:list[Layer]
     tl:TrafficLights
 
@@ -254,23 +230,56 @@ class Map:
         def alpha_mask(img:ndarr_f64)->ndarr_bool:
             return img[:, :, -1] > 0
         self.tl=TrafficLights(alpha_mask(read_map_img( "tl.png") ))
-        
-            
+        shape = self.tl.lights.shape
+        self.layers=[]
+        with suppress(FileNotFoundError):
+            for layer_id in itertools.count(1):
+                img=read_map_img(f"{layer_id}.png")
+                assert img.shape[:2] == shape, f"Shape of layer {layer_id} map {img.shape[:2]} does not match the shape of the traffic light map {shape}"
+                red_channel = img[:, :, 0]
+                l = Layer(red_channel * alpha_mask(img))
+                self.layers.append(l)
 
     def reset(self, prepopulate: float=0.3,  init_red_rate:float=0.5)->None:
+        del self.car_observations # evict cache
+        self.tl.reset(init_red_rate)
         for layer in self.layers:
             layer.reset(prepopulate)
-        self.tl.reset(init_red_rate)
+        while (coll_pos, _) := self.get_collisions:
+            random_layer = layers[rng.integers(len(layers))]
+            random_layer.remove_cars(coll_pos)
 
     def update_spawn_counts(min_spawn:int, max_spawn:int, max_density:float)->None:
         # car_density:float=0.5, spawn_rate:tuple[int,int] 
         for l in self.layers:
             l.update_spawn_count(min_spawn, max_spawn, max_density)
 
+    @cached_property
+    def car_observations(self)->list[ndarr_f64]:
+        channels = []
+        for l in self.layers:
+            channels.extend(l.observation_maps)
+        return channels
+
+    @property
+    def observation(self)->ndarr_f64:
+        return np.stack([self.tl.observation_map] + self.car_observations)
+
+    @cached_property
+    def observation_shape(self)->tuple[int, int,int]:
+        return (3*len(self.layers),* self.tl.lights.shape)
+
     def toggle_tl(self,pos)->None:
         self.tl.toggle_at(pos)
 
+    def _get_collisions() -> tuple[list[Pos], int]:
+        car_map = sum(l.car_mask.astype(int) for l in self.layers)
+        crash_map = np.max(0, car_map-1)
+        return list(zip(*np.nonzero(crash_map))), crash_map.sum()
+
     def simulation_step()->tuple[int,int]:
+        del self.car_observations # evict cache
+
         # local function with local cache:
         # cache is correctly evicted after each simulation step
         @cache
@@ -295,11 +304,6 @@ class Map:
             # empty field
             return True
 
-        def collision_check() -> tuple[list[Pos], int]:
-            car_map = sum(l.car_mask.astype(int) for l in self.layers)
-            crash_map = np.max(0, car_map-1)
-            return list(zip(*np.nonzero(crash_map))), crash_map.sum()
-
         # check moveability
         for n, l in enumerate(layers):
             for pos in l.car_pos_iter():
@@ -310,10 +314,16 @@ class Map:
         for l in self.layers:
             goal_cars += l.advance_cars()
         # check collisions
-        coll_pos, crashed_cars = collision_check(layers)
+        coll_pos, crashed_cars = self._get_collisions()
         for l in self.layers:
             l.remove_cars(coll_pos)
         return goal_cars, crashed_cars
+
+    def plot_grid(self, ax)->Any:
+        ax.set_xticks(np.arange(100) + 0.5)  # , labels="")
+        ax.set_yticks(-np.arange(100) + 0.5)  # , labels="")
+        ax.grid(color="grey")
+        ax.set_aspect("equal")
 
     def plot(self, plt) -> List[Any]:
         colors = ["tab:red", "tab:blue", "tab:cyan", "tab:orange"]
@@ -322,12 +332,15 @@ class Map:
             ret.extend(l.plot(plt, offset=(n / len(self.layers) - 0.5) / 2, color=colors[n]))
         return ret
             
+m = Map("maps/map1")
+m.reset()
+
+fig, ax = plt.subplots()
+
+grid = m.plot_grid(ax)
 
 artists = []
-artists.append(plot_layers(layers))
-while coll := collision_check(layers):
-    random_layer = layers[rng.integers(len(layers))]
-    random_layer.remove_cars(coll)
+artists.append(plot_layers())
 
 for step in range(20):
     artists.append(plot_layers(layers))
