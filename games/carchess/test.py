@@ -4,21 +4,24 @@ import operator
 import itertools
 from os import path
 from enum import IntEnum
-from typing import *
+from typing import Any, Optional, TypeAlias, cast
 from functools import cache, cached_property
 from contextlib import suppress
 from collections.abc import Iterable, Iterator
 
 import numpy as np
 import imageio.v3 as iio
+import matplotlib
 import numpy.typing as npt
 import matplotlib.pyplot as plt  # type: ignore [import]
 import matplotlib.animation as animation  # type: ignore [import]
+from matplotlib.axes import Axes  # type: ignore [import]
 
 Pos: TypeAlias = tuple[int, int]
 ndarr_bool: TypeAlias = npt.NDArray[np.bool_]
 ndarr_int: TypeAlias = npt.NDArray[np.int64]
 ndarr_f64: TypeAlias = npt.NDArray[np.float64]
+PlotData: TypeAlias = matplotlib.collections.PathCollection | matplotlib.lines.Line2D
 
 rng = np.random.default_rng()
 
@@ -58,17 +61,17 @@ class TrafficLights:
         self.lights = mask
         self.reset()
 
-    def reset(self, percent_closed: float = 0.5):
+    def reset(self, percent_closed: float = 0.5) -> None:
         self.closed = self.lights & (rng.random(self.lights.shape) < percent_closed)
 
-    def toggle_at(self, pos) -> None:
+    def toggle_at(self, pos: Pos) -> None:
         assert self.lights[pos]
         self.closed[pos] ^= True
 
-    def is_closed(self, pos) -> bool:
-        return self.closed[pos]
+    def is_closed(self, pos: Pos) -> bool:
+        return self.closed[pos]  # type: ignore [no-any-return]
 
-    def plot(self, plt) -> Any:
+    def plot(self, plt: Axes) -> PlotData:
         y, x = np.nonzero(self.closed)
         return plt.scatter(x, -y, marker="x", s=200, color="red")
 
@@ -85,7 +88,7 @@ class Layer:
     spawn_counter: int
 
     def __init__(self, mask: ndarr_int):
-        def highspot_to_start_info(x, y) -> tuple[Pos, Dir]:
+        def highspot_to_start_info(x: int, y: int) -> tuple[Pos, Dir]:
             mx, my = mask.shape
             if x == 0:
                 # top border
@@ -102,7 +105,9 @@ class Layer:
             assert False, f"Invalid highest spot: ({x}, {y})"
 
         self.size = tuple(mask.shape)  # type: ignore [assignment]
-        highspot_pos = np.unravel_index(np.argmax(mask), mask.shape)
+        highspot_pos = cast(
+            tuple[int, int], np.unravel_index(np.argmax(mask), mask.shape)
+        )
         pos, dir = highspot_to_start_info(*highspot_pos)
 
         self.pos = []
@@ -211,18 +216,18 @@ class Layer:
         car_map = self.car_mask.astype(int) * 2 - 1
         return lane_map, car_map, spawn_map
 
-    def plot(self, plt, offset: float, **kwargs: Any) -> List[Any]:
-        def coords(pos: ndarr_f64):
+    def plot(self, ax: Axes, offset: float, **kwargs: Any) -> list[PlotData]:
+        def coords(pos: ndarr_f64) -> tuple[ndarr_f64, ndarr_f64]:
             y, x = pos.T
             return x, -y
 
         pos = np.array(self.pos) + offset
-        line_plots = plt.plot(*coords(pos), **kwargs)
+        line_plots = ax.plot(*coords(pos), **kwargs)
         if self.cars:
             cars = np.array([self.pos[c] for c in self.cars]) + offset
-            car_plot = plt.scatter(*coords(cars), **kwargs)
-            return line_plots + [car_plot]
-        return line_plots
+            car_plot = ax.scatter(*coords(cars), **kwargs)
+            return line_plots + [car_plot]  # type: ignore [no-any-return]
+        return line_plots  # type: ignore [no-any-return]
 
 
 class Map:
@@ -288,7 +293,7 @@ class Map:
     def observation_shape(self) -> tuple[int, int, int]:
         return (1 + 3 * len(self.layers), *self.tl.lights.shape)  # type: ignore [return-value]
 
-    def toggle_tl(self, pos) -> None:
+    def toggle_tl(self, pos: Pos) -> None:
         self.tl.toggle_at(pos)
 
     def _get_collisions(self) -> tuple[list[Pos], int]:
@@ -336,18 +341,18 @@ class Map:
             l.remove_cars(coll_pos)
         return goal_cars, crashed_cars
 
-    def plot_grid(self, ax) -> Any:
+    def plot_grid(self, ax: Axes) -> None:
         ax.set_xticks(np.arange(100) + 0.5)  # , labels="")
         ax.set_yticks(-np.arange(100) + 0.5)  # , labels="")
         ax.grid(color="grey")
         ax.set_aspect("equal")
 
-    def plot(self, plt) -> List[Any]:
+    def plot(self, ax: Axes) -> list[PlotData]:
         colors = ["tab:red", "tab:blue", "tab:cyan", "tab:orange"]
-        ret = [self.tl.plot(plt)]
+        ret = [self.tl.plot(ax)]
         for n, l in enumerate(self.layers):
             ret.extend(
-                l.plot(plt, offset=(n / len(self.layers) - 0.5) / 2, color=colors[n])
+                l.plot(ax, offset=(n / len(self.layers) - 0.5) / 2, color=colors[n])
             )
         return ret
 
@@ -357,7 +362,7 @@ m.reset()
 
 fig, ax = plt.subplots()
 
-grid = m.plot_grid(ax)
+m.plot_grid(ax)
 
 artists = []
 
