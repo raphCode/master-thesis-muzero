@@ -7,11 +7,11 @@ from enum import IntEnum
 from typing import Any, Optional, TypeAlias, cast
 from functools import cache, cached_property
 from contextlib import suppress
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 
 import numpy as np
 import imageio.v3 as iio
-import matplotlib
+import matplotlib  # type: ignore [import]
 import numpy.typing as npt
 import matplotlib.pyplot as plt  # type: ignore [import]
 import matplotlib.animation as animation  # type: ignore [import]
@@ -184,11 +184,10 @@ class Layer:
         self.cars.difference_update(map(self.index_at, pos))
 
     @property
-    def car_pos_iter(self) -> Iterator[Pos]:
-        # TODO: make faster
-        getter = operator.itemgetter(*self.cars)
-        ret = getter(self.pos)
-        yield from (self.pos[i] for i in self.cars)
+    def car_pos(self) -> tuple[Pos]:
+        # add two dummy items to force returning a tuple
+        getter = operator.itemgetter(0, 0, *self.cars)
+        return getter(self.pos)[2:]  # type: ignore [no-any-return]
 
     @property
     def lane_mask(self) -> ndarr_bool:
@@ -200,10 +199,8 @@ class Layer:
     @property
     def car_mask(self) -> ndarr_bool:
         ret = np.zeros(self.size, dtype=bool)
-        x, y = zip(*self.car_pos_iter)
+        x, y = zip(*self.car_pos)
         ret[x, y] = True
-        for index in self.cars:
-            ret[self.pos[index]] = True
         return ret
 
     @property
@@ -224,7 +221,7 @@ class Layer:
         pos = np.array(self.pos) + offset
         line_plots = ax.plot(*coords(pos), **kwargs)
         if self.cars:
-            cars = np.array([self.pos[c] for c in self.cars]) + offset
+            cars = np.array(self.car_pos) + offset
             car_plot = ax.scatter(*coords(cars), **kwargs)
             return line_plots + [car_plot]  # type: ignore [no-any-return]
         return line_plots  # type: ignore [no-any-return]
@@ -328,7 +325,7 @@ class Map:
 
         # check moveability
         for n, l in enumerate(self.layers):
-            for pos in l.car_pos_iter:
+            for pos in l.car_pos:
                 if can_move(pos, n):
                     l.mark_car(pos)
         # move cars
