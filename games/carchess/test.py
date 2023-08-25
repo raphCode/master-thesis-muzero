@@ -145,7 +145,7 @@ class Layer:
         )
 
     @cache
-    def offset_pos(self, pos: Pos, offset: int = 1) -> Pos:
+    def next_pos(self, pos: Pos, offset: int = 1) -> Pos:
         index = self.index_at(pos)
         assert index is not None
         return self.pos[index + offset]
@@ -159,7 +159,7 @@ class Layer:
     @cache
     def dir_at(self, pos: Pos) -> Dir:
         for d in Dir:
-            if d.offset(pos) == self.offset_pos(pos, 1):
+            if d.offset(pos) == self.next_pos(pos):
                 return d
         raise ValueError
 
@@ -313,7 +313,7 @@ class Map:
             if self.tl.is_closed(pos):
                 return False
             layer = self.layers[layer_id]
-            next_pos = layer.offset_pos(pos)
+            next_pos = layer.next_pos(pos)
             for n, l in enumerate(self.layers):
                 if l.is_car(next_pos):
                     same_dir = l.dir_at(next_pos) == layer.dir_at(pos)
