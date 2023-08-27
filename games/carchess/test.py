@@ -4,7 +4,7 @@ import operator
 import itertools
 from os import path
 from enum import IntEnum
-from typing import Any, Optional, TypeAlias, cast
+from typing import TYPE_CHECKING, Any, Optional, TypeAlias, cast
 from functools import cache, cached_property
 from contextlib import suppress
 from collections.abc import Iterable
@@ -15,7 +15,10 @@ import matplotlib  # type: ignore [import]
 import numpy.typing as npt
 import matplotlib.pyplot as plt  # type: ignore [import]
 import matplotlib.animation as animation  # type: ignore [import]
-from matplotlib.axes import Axes  # type: ignore [import]
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes  # type: ignore [import]
+
 
 Pos: TypeAlias = tuple[int, int]
 ndarr_bool: TypeAlias = npt.NDArray[np.bool_]
@@ -273,14 +276,14 @@ class Map:
         for l in self.layers:
             l.update_spawn_count(min_spawn, max_spawn, max_density)
 
-    def get_car_observations(self) -> list[ndarr_int | ndarr_f64]:
-        channels: list[ndarr_int | ndarr_f64] = []
+    def get_car_observations(self) -> list[npt.NDArray[Any]]:
+        channels: list[npt.NDArray[Any]] = []
         for l in self.layers:
             channels.extend(l.observation_maps)
         return channels
 
     def get_observation(
-        self, car_observations: Optional[list[ndarr_int | ndarr_f64]] = None
+        self, car_observations: Optional[list[npt.NDArray[Any]]] = None
     ) -> ndarr_f64:
         if car_observations is None:
             car_observations = self.get_car_observations()
@@ -296,7 +299,8 @@ class Map:
     def _get_collisions(self) -> tuple[list[Pos], int]:
         car_map = sum(l.car_mask.astype(int) for l in self.layers)
         crash_map = np.maximum(0, car_map - 1)
-        return list(zip(*np.nonzero(crash_map))), crash_map.sum()  # type: ignore [arg-type]
+        x, y = np.nonzero(crash_map)
+        return (list(zip(x, y)), crash_map.sum())
 
     def simulation_step(self) -> tuple[int, int]:
         # local function with local cache:
