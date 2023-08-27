@@ -232,14 +232,14 @@ class Layer:
 
 class Map:
     """
-    Map with layers, traffic lights and cars. Provides simulation interface and access to observation tensors.
+    Map with layers, traffic lights and cars.
+    Provides a simulation interface and access to observation tensors.
     """
 
     layers: list[Layer]
     tl: TrafficLights
 
     def __init__(self, map_path: str):
-        # rounds:int = 20,actions_per_round:int=2, reward_car:float=2, reward_crash :float=-1
         def read_map_img(name: str) -> ndarr_int:
             return iio.imread(path.join(map_path, name))
 
@@ -252,9 +252,10 @@ class Map:
         with suppress(FileNotFoundError):
             for layer_id in itertools.count(1):
                 img = read_map_img(f"{layer_id}.png")
-                assert (
-                    img.shape[:2] == shape
-                ), f"Shape of layer {layer_id} map {img.shape[:2]} does not match the shape of the traffic light map {shape}"
+                assert img.shape[:2] == shape, (
+                    f"Shape of layer {layer_id} map {img.shape[:2]} "
+                    f"does not match the shape of the traffic light map {shape}"
+                )
                 red_channel = img[:, :, 0]
                 l = Layer(red_channel * alpha_mask(img))
                 self.layers.append(l)
@@ -287,11 +288,13 @@ class Map:
     ) -> ndarr_f64:
         if car_observations is None:
             car_observations = self.get_car_observations()
-        return np.stack([self.tl.observation_map] + car_observations)  # type: ignore [arg-type, operator]
+        return np.stack(
+            [self.tl.observation_map] + car_observations,
+        )
 
     @cached_property
     def observation_shape(self) -> tuple[int, int, int]:
-        return (1 + 3 * len(self.layers), *self.tl.lights.shape)  # type: ignore [return-value]
+        return (1 + 3 * len(self.layers), *self.tl.lights.shape)  # type: ignore [return-value] # noqa: E501
 
     def toggle_tl(self, pos: Pos) -> None:
         self.tl.toggle_at(pos)
