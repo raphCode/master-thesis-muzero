@@ -139,17 +139,6 @@ In !tss, the !v is always zero per definition:
 There are no future !rs possible.
 @sutton
 
-To estimate the !v !fn, we can use data collected through interactions with the !env.
-For example, suppose an !ag pursues a !p #sym.pi and experiences several !epis where the
-same !ss occur repeatedly.
-The !ag then collects all the !rets that have ever occurred for all !ss and averages them
-for each !s.
-These averages would converge to the optimal !v !fn $v_pi$ as the number of times each !s
-is visited approaches infinity.
-Averaging over many random samples of actual data in this way is referred to as a !mc
-method.
-@sutton
-
 == !GT
 
 This section introduces basic !gtic concepts, just enough to provide justification for the
@@ -309,14 +298,6 @@ These !gs are also called dynamic !gs or !exf !gs.
 To distinguish them from simultaneous !gs, a !pl making a decision must have !i about
 the previous decisions of other !pls.
 It is important to note that only some !i is required, not necessarily !pinf.
-@gtheo2
-
-This can be illustrated by a variant of !rps:
-!Pls now have to write down their choices without revealing them to each other.
-Then their (binding) choices are uncovered and the outcome of the !g can be determined.
-While this !g can be played sequentially, with !pls choosing their !as at different times,
-the simultaneous nature of the !g remains.
-At best, it can be seen as a sequential but incomplete information variant of !rps.
 @gtheo2
 
 ==== Determinism
