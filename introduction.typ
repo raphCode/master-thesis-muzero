@@ -11,8 +11,8 @@ Laut Prof. André eines der wichtigesten Kapitel.
 
 #import "thesis.typ": citet
 
-In 2016, !ago was unveiled - the first artificial intelligence program capable of playing
-the complex strategy !g of Go at a level surpassing human masters.
+In 2016, !ago was unveiled - the first computer program capable of playing the complex
+strategy !g of Go at a level surpassing human masters.
 To understand why this is a remarkable achievement, let's summarize how most traditional
 !algos approach gameplay.
 
@@ -100,4 +100,4 @@ This thesis is accompanied by an !impl of !mz that includes modifications as pro
 me and in prior work.
 With this !impl, the modifications are experimentally evaluated on two aspects:
 First, an ablation study compares the influence of the different performance enhancements.
-Second, I confirm my !mp extension is able to learn the cooperative !mp !g.
+Second, I confirm my !mp extension is able to learn a cooperative !mp !g.

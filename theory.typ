@@ -40,6 +40,7 @@ At each time $t$, the !ag receives an !obs of the current !s $s_t in S$ and then
 an !a $a_(t+1) in A(s)$ to take.
 The !a transitions the !env to a new !s $s_(t+1)$ and generates a numerical !r $r_(t+1) in
 R subset RR$ for the !ag.
+$S$, $A$ and $R$ denote the set of all !ss, !as and !rs respectively.
 @sutton
 
 Note that the subscript used to represent an !a that occurred between $s_t$ and $s_(t+1)$
@@ -134,7 +135,7 @@ The !v is thus an estimate of how good it is for the !ag to be in a particular !
 measured by the objective !fn, the !ret.
 @sutton
 
-In !ts, the !v is always zero per definition:
+In !tss, the !v is always zero per definition:
 There are no future !rs possible.
 @sutton
 
@@ -398,7 +399,7 @@ playing the !g.
 
 #figure(
   draw_gametree(root),
-  caption: [!Exf example of a !g with two !pls and a chance event]
+  caption: [!Exf example of an artificial !g with two !pls and a chance event]
 ) <fig_exf_example>
 
 The !exf looks similar to a regular tree in computer science.
@@ -410,7 +411,7 @@ In summary, it can be stated that the !exf enumerates all possible !hs of the !g
 tree-like form.
 @gtheo
 
-An example of the !exf of a fictive !g is given in @fig_exf_example.
+An example of the !exf of an artificial !g is given in @fig_exf_example.
 The root !n denotes the start of the !g, in the example it is labeled with~C.
 In this case the !n is meant to represent a chance event, specifically a coin flip.
 Therefore, it has two possible outcomes with equal !probs of $1/2$ each, and the edges are
