@@ -67,11 +67,19 @@ class Map:
             random_layer = self.layers[rng.integers(len(self.layers))]
             random_layer.remove_cars(coll_pos)
 
-    def update_spawn_counts(
+    def update_spawn_count_explicit(
+        self, layer_id: int, random_number: int, max_density: float
+    ) -> None:
+        self.layers[layer_id].update_spawn_count(random_number, max_density)
+
+    def update_spawn_counts_random(
         self, min_spawn: int, max_spawn: int, max_density: float
     ) -> None:
-        for l in self.layers:
-            l.update_spawn_count(min_spawn, max_spawn, max_density)
+        random_numbers = rng.integers(
+            min_spawn, max_spawn, endpoint=True, size=len(self.layers)
+        )
+        for l, n in zip(self.layers, random_numbers):
+            l.update_spawn_count(n, max_density)
 
     def get_car_observations(self) -> list[npt.NDArray[Any]]:
         channels: list[npt.NDArray[Any]] = []

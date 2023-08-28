@@ -109,13 +109,13 @@ class Layer:
         self.cars = set((np.arange(n)[rng.random(n) < prepopulate]))
         self.moveable_cars = set()
 
-    def update_spawn_count(
-        self, min_spawn: int, max_spawn: int, max_density: float
-    ) -> None:
+    def update_spawn_count(self, random_number: int, max_density: float) -> None:
+        # This double-counts / overestimates the capacity of fields sharing multiple lanes
+        # But I talked to the author of the carchess gymenv, it seems to be intentional
         max_capacity = len(self.pos) - 2  # minus first and last field
         self.spawn_counter = min(
             int(max_capacity * max_density),
-            self.spawn_counter + rng.integers(min_spawn, max_spawn, endpoint=True),
+            self.spawn_counter + random_number,
         )
 
     @cache
