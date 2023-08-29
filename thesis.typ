@@ -12,16 +12,9 @@
     justify: true,
   )
   set heading(numbering: "1.")
-  set cite(brackets: false, style: "chicago-author-date")
   let join_nonbreaking = h(0pt, weak: true) + [~]
-  show ref: it => {
-    if it.element == none {
-      // nonbreaking space before citations
-      join_nonbreaking + "[" + it + "]"
-    } else {
-      it
-    }
-  }
+  set cite(brackets: true, style: "chicago-author-date")
+  show cite.where(brackets: true): it => "[" + cite(..it.keys, brackets: false)  + "]"
   show math.equation: it => join_nonbreaking + it
 
   show regex("(?i:on the other hand)"): m => {
@@ -37,7 +30,7 @@
 
 #let citet(key) = {  // cite in text
   show regex("\d{4}$"): match => "[" + match.text + "]"
-  cite(key)
+  cite(key, brackets: false)
 }
 
 #let blockquote(citekey, body) = {
@@ -51,7 +44,7 @@
       body
       h(0pt, weak: true)
       ["]
-      align(right, ref(label(citekey)))
+      align(right, cite(citekey))
     },
   )
 }
