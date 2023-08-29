@@ -22,7 +22,7 @@
       it
     }
   }
-  show math.equation: it => { join_nonbreaking + it }
+  show math.equation: it => join_nonbreaking + it
 
   show regex("(?i:on the other hand)"): m => {
     panic("Prof. Andre only allows to use this phrase with 'on one hand' beforehand!")
