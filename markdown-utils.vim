@@ -12,3 +12,5 @@ set foldexpr=MarkdownHeadingFoldLevel()
 "macro for text wrapping:
 "wraps from beginning of line to next . or :, advances cursor 1 word
 let @w="^gw/\\v(\\.|:)nW"
+
+set formatprg=./unsubstitute.py
