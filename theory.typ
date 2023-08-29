@@ -540,9 +540,9 @@ In @fig_bi_mp, this is illustrated by underlining the respective entry in the tu
 payoffs.
 In the specific case of the leftmost !dp in the tree, !pl #node_leftmost.content has the
 possible outcomes
-#node_leftmost.children.map(c => str(c.utility.at(c.parent_player - 1))).join(" and ") .
+#node_leftmost.children.map(c => str(c.utility.at(c.parent_player - 1))).join(" and ").
 As the higher payoff is #node_leftmost.backprop_info.utility, he will always choose !a
-#node_leftmost.backprop_info.action .
+#node_leftmost.backprop_info.action.
 Thus, the leftmost !n can be assigned the payoff vector #repr(node_leftmost.utility) since
 that is how the !g will end from this !dp onwards.
 
