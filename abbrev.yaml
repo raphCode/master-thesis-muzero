@@ -93,7 +93,7 @@ impinf: imperfect information
 nn: neural network
 net: network
 rnet: representation network
-pnet: prediction network
+pnet: policy network
 dnet: dynamics network
 vnet: value network
 latrep: latent representation
