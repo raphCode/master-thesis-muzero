@@ -7,14 +7,15 @@ from contextlib import suppress
 from collections.abc import Iterable
 
 import numpy as np
-import matplotlib  # type: ignore [import]
 
 from .util import Dir, Pos, ndarr_f64, ndarr_int, ndarr_bool
 
 if TYPE_CHECKING:
+    import matplotlib  # type: ignore [import]
     from matplotlib.axes import Axes  # type: ignore [import]
 
-PlotData: TypeAlias = matplotlib.collections.PathCollection | matplotlib.lines.Line2D
+    PlotData: TypeAlias = matplotlib.collections.PathCollection | matplotlib.lines.Line2D
+
 
 rng = np.random.default_rng()
 
