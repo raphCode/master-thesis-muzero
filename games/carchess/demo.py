@@ -1,7 +1,13 @@
+import sys
+
 import matplotlib.pyplot as plt  # type: ignore [import]
 import matplotlib.animation as animation  # type: ignore [import]
 
-from .map import Map
+try:
+    from .map import Map
+except ImportError:
+    print("Run the demo from the parent folder with: python -m carchess.demo")
+    sys.exit(1)
 
 m = Map("map1")
 m.reset()
