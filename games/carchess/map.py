@@ -3,6 +3,7 @@ from __future__ import annotations
 import itertools
 from os import path
 from typing import TYPE_CHECKING, Any, Optional, TypeAlias
+from pathlib import Path
 from functools import cache, cached_property
 from contextlib import suppress
 
@@ -32,9 +33,10 @@ class Map:
     layers: list[Layer]
     tl: TrafficLights
 
-    def __init__(self, map_path: str):
+    def __init__(self, map_name_or_path: str):
         def read_map_img(name: str) -> ndarr_int:
-            return iio.imread(path.join(map_path, name))
+            default_map_path = Path(__file__).parent / "maps"
+            return iio.imread(path.join(default_map_path, map_name_or_path, name))
 
         def alpha_mask(img: ndarr_int) -> ndarr_bool:
             return img[:, :, -1] > 0
