@@ -174,8 +174,9 @@ class Layer:
     @property
     def car_mask(self) -> ndarr_bool:
         ret = np.zeros(self.size, dtype=bool)
-        x, y = zip(*self.car_pos)
-        ret[x, y] = True
+        if self.car_pos:
+            x, y = zip(*self.car_pos)
+            ret[x, y] = True
         return ret
 
     @property
