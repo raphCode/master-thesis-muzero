@@ -3,7 +3,7 @@ import matplotlib.animation as animation  # type: ignore [import]
 
 from .map import Map
 
-m = Map("maps/map1")
+m = Map("map1")
 m.reset()
 
 fig, ax = plt.subplots()
