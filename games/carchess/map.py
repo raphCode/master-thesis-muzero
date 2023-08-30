@@ -8,20 +8,17 @@ from contextlib import suppress
 
 import numpy as np
 import imageio.v3 as iio
-import matplotlib  # type: ignore [import]
 import numpy.typing as npt
 
 from .layers import Layer, TrafficLights
 
 if TYPE_CHECKING:
+    import matplotlib  # type: ignore [import]
     from matplotlib.axes import Axes  # type: ignore [import]
 
+    PlotData: TypeAlias = matplotlib.collections.PathCollection | matplotlib.lines.Line2D
 
-Pos: TypeAlias = tuple[int, int]
-ndarr_bool: TypeAlias = npt.NDArray[np.bool_]
-ndarr_int: TypeAlias = npt.NDArray[np.int64]
-ndarr_f64: TypeAlias = npt.NDArray[np.float64]
-PlotData: TypeAlias = matplotlib.collections.PathCollection | matplotlib.lines.Line2D
+    from .util import Pos, ndarr_f64, ndarr_int, ndarr_bool
 
 rng = np.random.default_rng()
 
