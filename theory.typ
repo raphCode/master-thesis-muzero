@@ -415,14 +415,12 @@ or~2 and shares all !ns below, this is a subgame of the original !g.
 For example, @fig_exf_subgame shows two particular subgames from the !g in
 @fig_exf_example:
 
-#let cetz_align(alignment, body) = align(alignment, block(align(top, body)))
-
 #figure(
   stack(
     dir: ltr,
     spacing: 10mm,
     draw_gametree(root.children.at(0)),
-    cetz_align(horizon, draw_gametree(root.children.at(1).children.at(1)))
+    align(horizon, draw_gametree(root.children.at(1).children.at(1)))
   ),
   caption: [Some subgames of the !g in @fig_exf_example]
 ) <fig_exf_subgame>
