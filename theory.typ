@@ -64,21 +64,6 @@ It describes the !prob of the !env ending up in !s $s'$ and yielding !r $r$ when
 !a $a$ in !s $s$.
 @sutton
 
-Importantly, !mdps can also capture the aspect of !as affecting not only the immediate !r,
-but also subsequent !ss and thus future !rs.
-In the example of certain !g, like tic-tac-toe or chess, !rs are not given after each
-move.
-Instead, they come at the end of the entire !g in the form of a win or loss.
-Obviously, this final !r depends on most or all moves during the !g.
-@sutton
-
-In the general case, when a !r is influenced not only by its immediately preceding !a, but
-also by older ones, the situation is called a delayed !r.
-Delayed rewards pose a challenge in !rl:
-Since !as have long-term consequences, the !ag must decompose which of his !as contributed
-to the final !r and how.
-@sutton
-
 === !Epis and !Rets
 
 In some scenarios the interaction between !ag and !env naturally ends at some point, that
