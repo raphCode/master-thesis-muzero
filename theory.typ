@@ -582,29 +582,94 @@ Compared to all !pls adhering to their optimal !stys, this means:
 - in a non-cooperative !g: exploiting opponent's mistakes, to potentially achieve a higher payoff
 - in a cooperative !g: compensating for mistakes of teammates
 
-== !Gs and Tree Searches
+== !MCTS
 
-- minimax
-- max n
-- a b pruning
-- move ordering
-- negamax
-- expectimax
+!Mcts is a stochastic !algo that can be applied to !seql decision problems to discover
+good !as.
+It takes random samples in the decision space and collects the outcomes in a search tree
+that grows iteratively.
+The tree thus contains statistical evidence of available !a choices.
+#cite("mcts_survey", "mcts_review")
 
-// https://stackoverflow.com/questions/14826451/extending-minimax-algorithm-for-multiple-opponents
+!Mcts is attractive because of its properties:
+First, it can handle large !s spaces due to the random subsampling.
+This is essential for !gs or problems where the decision space cannot be fully searched.
+Second, MCTS is an anytime !algo:
+It can be interrupted at any point and returns the best solution found so far.
+This is important for e.g. !gs where only a limited time budget is available for move decisions.
+Likewise, allowing more computing time generally leads to better solutions.
+Lastly, MCTS can be utilized with little or no domain knowledge.
+#cite("mcts_survey", "mcts_review")
 
-=== Complexity
+!Mcts grows a tree #footnote[typically a !g tree] in an asymmetric fashion, expanding it
+by one !n in each iteration.
+Each !n in the tree contains a visit count, that indicated in how many iterations the !n
+was visited.
+A !n also keeps track of its mean !v as approximated by the !mc simulations.
+In the case of !mp !gs, this !v many be a vector with multiple entries, one for each !pl.
+In the basic variant, each iteration of the !algo consists of four phases, as illustrated
+in @fig_mcts_phases.
 
-- state space
+#[
 
-=== !MCTS
+#import "mcts.typ": draw_mcts
 
-- since !bi converges to the optimal solution with pure !stys:
-  - a unique !v can be associated with each !g !s
-  - a uniqe best action can be associated with any !g !s
-- at least the value function should be approximated somehow
-- with enough simulations, we can then shift the exploring focus to better actions (UCT formula?)
-- this can be improved with a !p !fn
+#let labels = (
+  [Selection],
+  [Expansion],
+  [Simulation / Rollout],
+  [Backpropagation],
+)
+
+#figure(
+  grid(
+    columns: labels.len(),
+    column-gutter: 10mm,
+    row-gutter: 5mm,
+    ..labels.map(strong).map(align.with(center + bottom)).map(par.with(justify: false)),
+    ..for i in range(labels.len()) {
+      (draw_mcts(i + 1), )
+    }.map(align.with(center))
+  ),
+  caption: [The four phases of one iteration of !mcts],
+) <fig_mcts_phases>
+
+#let phase(n) = labels.at(n - 1)
+
+#let phase_heading(n) = [
+  #strong(phase(n)):\
+]
+
+#phase_heading(1)
+The !algo descends the current tree and finds the most urgent location.
+Selection always begins at the root !n and, at each level, selects the next !n based on an
+!a determined by a tree !p.
+The tree !p aims to strike a balance between exploration (focus areas that are not sampled
+well yet) and exploitation (focus promising areas).
+The phase steps down the tree until the !n corresponding to the next selected !a is not
+contained in the tree yet.
+#cite("mcts_survey", "mcts_review")
+
+#phase_heading(2)
+Adds a new child !n to the tree at the position determined by the #phase(1) phase.
+If the new !n represents a !ts of the !g / problem, the !algo directly skips to the
+#phase(4) phase.
+#cite("mcts_survey", "mcts_review")
+
+#phase_heading(3)
+Takes !as at uniform random until a !ts is reached and retrieves the outcome.
+The !algo's "!mc" property stems from the random selection of !as during this phase.
+The choice of !as can be refined with another !p, that is referred to as the rollout !p.
+Intermediate !ss visited during this phase are not stored or evaluated in any way.
+#cite("mcts_survey", "mcts_review", "alphago")
+
+#phase_heading(4)
+Propagates the information obtained from the #phase(3) upwards in the tree, updating all
+ancestor !ns.
+For each !n, the visit count is incremented and the mean !v is updated to include the
+result of the #phase(3).
+
+]
 
 == !mz and Precursors
 

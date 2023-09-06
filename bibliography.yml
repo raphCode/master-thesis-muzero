@@ -209,6 +209,22 @@ mcts_survey:
   page-range: 1-43
   doi: 10.1109/TCIAIG.2012.2186810
 
+mcts_review:
+  type: article
+  title: "Monte Carlo Tree Search: A Review of Recent Modifications and Applications"
+  date: 2022-07-19
+  author:
+    - "Świechowski, Maciej"
+    - "Godlewski, Konrad"
+    - "Sawicki, Bartosz"
+    - "Mańdziuk, Jacek"
+  parent:
+    title: Artificial Intelligence Review
+    issue: 3
+    volume: 56
+  page-range: 2497-2562
+  doi: 10.1007/s10462-022-10228-y
+
 mcts_po:
   type: article
   title: Monte-Carlo Tree Search as Regularized Policy Optimization
