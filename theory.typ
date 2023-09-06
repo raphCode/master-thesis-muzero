@@ -335,7 +335,9 @@ can only be reached by working together in a way intended by the rules.
 
 === !Exf
 
-#import "gametree.typ": draw_gametree, n, l, r, nodetree, get_optimal_strategy
+#[
+
+#import "gametree.typ": draw_gametree, n, nodetree
 
 In !gt, !gs can be modeled in different forms.
 These forms provide a formal !repr of the arbitrary rules of a !g.
@@ -410,6 +412,8 @@ For example, @fig_exf_subgame shows two particular subgames from the !g in
   caption: [Some subgames of the !g in @fig_exf_example]
 ) <fig_exf_subgame>
 
+]
+
 === Solutions, Equilibria and Optimal !Stys
 
 A goal of !gt is to assign solutions to, or "solve" !gs.
@@ -429,6 +433,10 @@ In the case of !pinf !gs with !seql moves, an optimal solution can be computed w
 simple !algo.
 The !algo is best introduced with a !sp !g, as it makes the !g analysis straightforward.
 Consider for example this !g in !exf, as shown in @fig_bi_sp:
+
+#[
+
+#import "gametree.typ": draw_gametree, n, l, r, nodetree, get_optimal_strategy
 
 #let root = nodetree(
   backpropagate: true, 
@@ -459,6 +467,8 @@ ${ #get_optimal_strategy(root).join(" ") }$.
 This recursive process is known as !bi.
 @gtheo
 
+]
+
 In a !mp setting, the !stys of other !pls influence the course of the !g and thus the
 utility of !ss.
 Since it is not immediately apparent what other !pls will do, it raises the question of
@@ -484,6 +494,10 @@ adhere to the solution.
 The solution is therefore self-enforcing and no !pl has incentive to deviate.
 Such self-enforcing !sty combinations are known as Nash equilibria.
 @gtheo
+
+#[
+
+#import "gametree.typ": draw_gametree, l, r, nodetree, get_optimal_strategy
 
 #let root = nodetree(
   backpropagate: true, 
@@ -554,6 +568,8 @@ play.
 However, if !pl #node2.content would ever find himself in this !g !s (maybe through a
 mishap of !pl #root.content), he knows that his best option is
 #node2.backprop_info.action.
+
+]
 
 If an optimal solution to a !g also contains optimal solutions for all its subgames, the
 solution is said to be subgame perfect. 
