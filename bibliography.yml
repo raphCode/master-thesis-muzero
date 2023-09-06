@@ -393,6 +393,158 @@ phd_games:
   organization: Maastricht University
   doi: 10.26481/dis.19940923la
 
+fuego:
+  type: article
+  title: Fuego - An Open-Source Framework for Board Games and Go Engine Based on Monte Carlo Tree Search
+  date: 2010-10-14
+  author:
+    - "Enzenberger, Markus"
+    - "Müller, Martin"
+    - "Arneson, Broderick"
+    - "Segal, Richard B."
+  parent:
+    title: IEEE Transactions on Computational Intelligence and AI in Games
+    issue: 4
+    volume: 2
+  page-range: 259-270
+  doi: 10.1109/TCIAIG.2010.2083662
+
+pachi:
+  type: article
+  title: "PACHI: State of the Art Open Source Go Program"
+  date: 2012
+  author:
+    - "Baudiš, Petr"
+    - "Gailly, Jean-loup"
+  parent:
+    type: proceedings
+    title: Advances in Computer Games
+    publisher: Springer Berlin Heidelberg
+    isbn: 978-3-642-31866-5
+  page-range: 24-38
+  doi: 10.1007/978-3-642-31866-5_3
+
+on_offline_uct:
+  type: article
+  title: Combining Online and Offline Knowledge in UCT
+  date: 2007-06-20
+  author:
+    - "Gelly, Sylvain"
+    - "Silver, David"
+  parent:
+    type: proceedings
+    title: Proceedings of the 24th International Conference on Machine Learning
+    publisher: Association for Computing Machinery
+    isbn: 9781595937933
+  page-range: 273-280
+  doi: 10.1145/1273496.1273531
+
+go_hand_patterns:
+  type: report
+  title: Modiﬁcation of UCT with Patterns in Monte-Carlo Go
+  date: 2006-12-20
+  author:
+    - "Gelly, Sylvain"
+    - "Wang, Yizao"
+    - "Munos, Rémi"
+    - "Teytaud, Olivier"
+  organization: INRIA
+
+go_learn_patterns:
+  type: article
+  title: Computing Elo ratings of move patterns in the game of Go
+  date: 2007-12-01
+  author: "Coulom, Rémi"
+  parent:
+    title: ICGA Journal
+    issue: 4
+    volume: 30
+    publisher: IOS Press
+  page-range: 198-208
+  doi: 10.3233/ICG-2007-30403
+
+mcts_balancing_practice:
+  type: article
+  title: Monte-Carlo Simulation Balancing in Practice
+  date: 2011
+  author:
+    - "Huang, Shih-Chieh"
+    - "Coulom, Rémi"
+    - "Lin, Shun-Shii"
+  parent:
+    type: proceedings
+    title: Computers and Games
+    publisher: Springer Berlin Heidelberg
+    isbn: 978-3-642-17928-0
+  page-range: 81-92
+  doi: 10.1007/978-3-642-17928-0_8
+
+mcts_balancing:
+  type: article
+  title: Monte-Carlo Simulation Balancing
+  date: 2009-06-14
+  author:
+    - "Silver, David"
+    - "Tesauro, Gerald"
+  parent:
+    type: proceedings
+    title: Proceedings of the 26th Annual International Conference on Machine Learning
+    publisher: Association for Computing Machinery
+    isbn: 9781605585161
+  page-range: 945-952
+  doi: 10.1145/1553374.1553495
+
+go_mcts_limits:
+  type: article
+  title: Investigating the Limits of Monte-Carlo Tree Search Methods in Computer Go
+  date: 2014-07-12
+  author:
+    - "Huang, Shih-Chieh"
+    - "Müller, Martin"
+  parent:
+    type: proceedings
+    title: Computers and Games
+    publisher: Springer International Publishing
+    isbn: 978-3-319-09165-5
+  page-range: 39-48
+  doi: 10.1007/978-3-319-09165-5_4
+
+go_cnn_2008:
+  type: article
+  title: Mimicking Go Experts with Convolutional Neural Networks
+  date: 2008
+  author:
+    - "Sutskever, Ilya"
+    - "Nair, Vinod"
+  parent:
+    type: proceedings
+    title: Artificial Neural Networks - ICANN 2008
+    publisher: Springer Berlin Heidelberg
+    isbn: 978-3-540-87559-8
+  page-range: 101-110
+
+go_cnn_2014a:
+  type: article
+  title: Move Evaluation in Go Using Deep Convolutional Neural Networks
+  date: 2014-12-20
+  author: 
+    - Chris J. Maddison
+    - Aja Huang
+    - Ilya Sutskever
+    - David Silver
+  parent: *arxiv
+  doi: 10.48550/arXiv.1412.6564
+
+go_cnn_2014b:
+  type: article
+  title: Teaching Deep Convolutional Neural Networks to Play Go
+  date: 2014-12-10
+  author: 
+    - Christopher Clark
+    - Amos Storkey
+  parent: *arxiv
+  doi: 10.48550/arXiv.1412.3409
+
 computer_go:
   type: article
   title: Computer Go

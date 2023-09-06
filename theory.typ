@@ -682,11 +682,14 @@ This section explores and explains the predecessors, they are listed in ascendin
 publication date.
 They build on each other and eventually lead to !mz, which is explained in detail in the
 last section.
-// TODO: reference
 
-=== !ago
+Since the first two !algos, !ago and !agoz, focused on the !g of Go, I start with a
+overview of previous attempts at Computer Go.
 
-!ago by #citet("alphago") is a novel and successful approach to the !g of Go using !nns.
+=== Computer Go
+
+Go is a !2p, !zsum board !g where !pls place their (black and white respectively) stones
+on a 19x19 grid.
 Go has long been known as a very difficult !g for computers to play.
 The reason is the high complexity in the !g tree:
 A complete !g tree would be very large in both height (Go !gs can span hundreds of moves)
@@ -694,33 +697,148 @@ and breadth (many possible actions at each board position).
 This makes an exhaustive search computationally intractable.
 #cite("computer_go", "phd_games")
 
-TODO: cite
-!ago is a refinement of previous approaches to computer Go.
-Go programs preceeding !ago use !mcts to estimate !vs in the search tree.
-To reduce the effective breadth of the search tree, some use a !p !fn.
-Thus, tree search requires two !fns, one for the search !p and one for the !v of a !g !s.
-These !fns are composed of a linear combination of features extraced from the !g board.
-These features are hand-crafted and use domain-specific knowledge of the !g.
+Go programs preceeding !ago therefore use !mcts to subsample !ss in the !g tree.
+A search !p is used to prioritize promising moves, reducing the effective breadth of the
+search tree.
+To estimate !vs of !ns the tree, complete rollouts are simulated until the end of the !g.
+To obtain robust !v estimations, many rollouts are needed.
+Obviously, the !p for selecting !as during rollouts is crucial for the determined !vs and
+resulting performance.
+#cite("mcts_balancing", "mcts_balancing_practice", "pachi", "fuego")
 
-!ago also uses !mcts, but replaces the !p and !v !fns with !nns.
-Specifically, !ago employs deep convolutional !nns that operate direcly on a 19x19 image
+Since a high number of rollouts with many simulation steps each are needed, the !p !fns
+are required to be fast.
+Prior work to !ago therefore uses very simple !ps in the search tree and during rollout !a
+selection.
+These !p !fns can be hand-crafted heuristics based on features extracted from the Go board
+@go_hand_patterns. 
+Another possibility is to learn a shallow !fn based on a linear combination of board
+features
+#cite("go_learn_patterns", "mcts_balancing", "mcts_balancing_practice").
+All features are hand-crafted and use domain-specific knowledge of the !g.
+#cite("go_hand_patterns", "go_learn_patterns", "pachi", "fuego").
+
+However, evaluating board positions via rollouts has been shown to be often inaccurate
+@go_mcts_limits.
+There have been efforts to include a !v !fn that directly estimates the !v of a position
+without any rollouts @on_offline_uct.
+But again, the !v !fn used by #citet("on_offline_uct") is simple and based on a linear
+combination of hand-crafted features.
+Hence, its accuracy is limited and complete rollouts are still required to achieve good
+performance @on_offline_uct.
+
+The performance of these approaches is limited, reaching only strong amateur level play
+#cite("fuego", "pachi", "go_learn_patterns").
+
+=== !ago
+
+!ago by #citet("alphago") is a novel and successful approach to the !g of Go with the full
+19x19 board size.
+Like prior work, it is based on !mcts, enhanced with a !p and !v !fn.
+Unlike previous approaches, !ago uses deep !nns for these !fns.
+Deep !nns can give much more accurate approximations than previously used heuristics or
+shallow !fns.
+@alphago
+
+Specifically, !ago employs deep convolutional !nns that operate direcly on a 19x19 images
 of the Go board.
+The input to the !nets in !ago is a simple !repr of the current board:
+Several layers of images encode the positions of stones and hand-crafted features on the
+board in the current as well as past moves.
 The !pnet outputs a !prob distribution of !as that are most likely to lead to a win of the
 !g.
+This !p guides the search process towards promising moves.
 The !vnet predicts a scalar !v, approximating the outcome of the !g if both !pls were to
 select !as according to the !pnet.
 @alphago
 
-The main contribution of #citet("alphago") is to provide a pipeline for effective training
-of these !nns.
-- supervised training of !pnet on human expert !gs
-  - SL !pnet
-  - fast rollout !p
-- fine-tune the SL !pnet via RL selfplay to optimize for the goal of winning the !g
-  - opponents: random previous iteration
-- train the !vnet: use the !pnet to generate !hs of selfplay
+#[
 
-After training, the !pnet and !vnet are used in the !mcts.
+#let slnet = [SL !p !net]
+#let rlnet = [RL !p !net]
+
+A contribution of #citet("alphago") is to provide a method how to train these !nns.
+The authors use a multi-stage pipeline that includes supervised and !rl.
+The pipeline starts with existing training data in the form of Go games played by human
+experts.
+A !pnet is trained on this data in a supervised manner to predict moves that humans would
+play in a given board situation.
+In the paper, this !net is called the #slnet.
+This is actually not a novelty on its own, since previously CNNs have already been used
+for this task #cite("go_cnn_2008", "go_cnn_2014a", "go_cnn_2014b").
+@alphago
+
+However, the use of a larger convolutional !nns allowed them to reach a higher accuracy
+than previous attempts #cite("alphago", "go_cnn_2014a", "go_cnn_2014b").
+Large !nns are also slow to evaluate, which makes a big !pnet unsuitable for guiding
+rollouts during !mcts.
+Therefore, the authors also trained a smaller !pnet for rollouts.
+This rollout !p is less accurate, but an order of magnitude faster than the #slnet.
+@alphago
+
+The next stage in the training pipeline uses !rl and selfplay to improve the #slnet.
+The autors call the resulting !net #rlnet, it can be seen as a fine-tuned version of the
+#slnet.
+The idea is to train the !net towards the relevant goal of winning !gs, which does not
+necessarily align with predicting expert moves perfectly @mcts_balancing.
+@alphago
+
+First, the #rlnet is initialized to the same structure and weights of the #slnet.
+Then, games are played between two agents which select !as sampled from !preds of the
+#rlnet.
+This form of selfplay does not use any search.
+One agent uses the current version of the #rlnet, the other one a random older iteration.
+The authors argue that randomizing from a pool of opponents prevents overfitting and
+stabilizes training.
+The outcome of selfplay !gs is used to update the weights of the #rlnet via !p gradient.
+The final iteration of the #rlnet already plays Go better (without search) than the
+strongest available open-source Go program.
+@alphago
+
+The last stage of training is to learn a !v !fn that evaluates positions directly, without
+utilizing any rollouts.
+This !v !fn is implemented with a deep convolutional !nn as well.
+It is trained to predict the outcome of a !g under strong play of both !pls from the
+current board position.
+To prevent overfitting, a large trainig set consisting of diverse !gs with uncorrelated
+positions is required.
+The training set used for training the #slnet initially is unsuited in this regard.
+The authors therefore used selfplay with the #rlnet to generate a new training set
+containing positions from 30 million distinct !gs.
+@alphago
+
+The trained !nets are finally combined in a variant of !mcts:
+For the !as selection, !preds from the #slnet are used.
+The #slnet was found to perform better in this job than the stronger !p from the #rlnet.
+The !preds are combined with the !vs already present in the tree to balance guidance from
+the !pnet, exploitation and exploration.
+@alphago
+
+During the simulation phase, leaf !ns are evaluated with a combination of rollouts and the
+!vnet.
+Specifically, for a !s $s_L$, a rollout until !g end is performed using the fast rollout
+!p to yield a !v $z_L$.
+The rollout !v is blended with the !pred from the !vnet, $v(s_L)$, using a mixing factor
+$lambda$ to the overall !v $V(s_L)$.
+$ V(s_L) = (1 - lambda) v(s_L) + lambda z_L $
+The !algo performed best with a mixing factor $lambda = 0.5$, that is equal weighting of
+the rollouts and !vnet.
+However, even without any rollouts at all (with $lambda = 0$), !ago performed better than
+previous computer Go programs.
+@alphago
+
+After running the !mcts for a certain number of iterations, the move with the highest
+visit count from the root !n played in the !g.
+In the case where the "thinking time" for each move is limited, the maximum number of
+iterations depends on the speed of the !algo.
+To achieve more iterations in a give time budget, the authors also implemented a
+distributed version of !ago.
+It utilizes multiple machines with a total of 1202 CPUs and 176 GPUs to parallelize the
+search.
+This distributed version was able to beat a professional human player in 5 out of 5 !gs.
+@alphago
+
+]
 
 === !agoz
 
