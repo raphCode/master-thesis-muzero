@@ -910,6 +910,31 @@ of humans and !ago.
 
 === !az
 
+!az is the result of minor architectural changes to make !agoz compatible with two more
+board !gs, chess and shogi.
+It is a step towards a general !rl !algo that masters more than one !g.
+@azero
+
+!az uses the same !algo and !nn !arch for all three !gs.
+The two main changes over !agoz are:
+
+*No data augmentation*\
+!agoz's data augmentation step of rotating and flipping board !reprs is removed, because
+it exploits Go-specifid symmetries.
+!az therefore trains 8 times slower on the !g of Go than its precursor.
+
+*Shared !net for selfplay and training*\
+!agoz maintains separate !nns for selfplay and training, and switches them over when the
+new !net performs better than the current one.
+In contrast, !az only uses a single !net.
+It always uses the latest !net parameters for selfplay data generation.
+
+The publication shows that the !az training approach is feasable of generalisation by
+evaluating it on Go, chess and shogi.
+!az outperformed existing state-of-the-art programs in all of the !gs.
+The training success was also reported to be repeatable across multiple independant runs.
+@azero
+
 === !mz
 
 - original MuZero limitations
