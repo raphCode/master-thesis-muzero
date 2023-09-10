@@ -7,7 +7,7 @@ from collections.abc import Sequence
 
 from config import C
 from rl_player import RLBase
-from games.bases import Player, MatchData
+from games.bases import Player
 
 if TYPE_CHECKING:
     from networks import Networks
@@ -32,7 +32,7 @@ class PCBase(ABC):
         pass
 
     @abstractmethod
-    def get_players(self, match_data: MatchData) -> Sequence[Player]:
+    def get_players(self) -> Sequence[Player]:
         """
         Sequence of players that should take part in a game, called for each match.
         """
@@ -65,8 +65,7 @@ class SelfplayPC(PCBase):
         ]
         assert isinstance(self.players[0], RLBase)
 
-    def get_players(self, match_data: MatchData) -> list[RLBase]:
-        assert match_data.num_players == len(self.players)
+    def get_players(self) -> list[RLBase]:
         return self.players
 
     def update_networks(self, new_networks: Networks) -> None:

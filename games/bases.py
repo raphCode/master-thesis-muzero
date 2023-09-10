@@ -1,69 +1,16 @@
 from __future__ import annotations
 
-import itertools
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, TypedDict
-from functools import lru_cache
-from collections import defaultdict
-from collections.abc import Sequence, Collection
-
-import torch
-from attrs import frozen
 
 if TYPE_CHECKING:
+    import torch
+
     from util import ndarr_f32, ndarr_bool
-
-
-class Teams:
-    """
-    Contains information about which players are in a team.
-    """
-
-    teams: defaultdict[int, set[int]]
-
-    def __init__(self, team_definitions: Collection[Collection[int]]):
-        assert all(
-            len(t) > 1 for t in team_definitions
-        ), "All teams must have at least 2 players"
-        for ta, tb in itertools.combinations(team_definitions, 2):
-            assert set(ta).isdisjoint(tb), f"Teams are not disjoint: {ta} and {tb}"
-        self.teams = defaultdict(set)
-        for team in team_definitions:
-            for a, b in itertools.permutations(set(team), 2):
-                self.teams[a].add(b)
-
-    @lru_cache(maxsize=1024)
-    def __contains__(self, item: object) -> bool:
-        """
-        Tests wheter the given sequence of player ids are in the same team.
-        """
-        assert isinstance(item, Sequence)
-        assert len(item) > 1
-        assert all(isinstance(x, int) for x in item)
-        member, *rest = item
-        return self.teams[member].issuperset(rest)
-
-    def __getitem__(self, item: object) -> frozenset[int]:
-        """
-        Return the other team members for this player id.
-        """
-        assert isinstance(item, int)
-        return frozenset(self.teams[item])
-
-
-@frozen
-class MatchData:
-    """
-    Data which is static for a single match / playout.
-    """
-
-    num_players: int
-    teams: Teams
 
 
 class GameStateInitKwArgs(TypedDict):
     game: Game
-    match_data: MatchData
 
 
 class GameState(ABC):
@@ -72,12 +19,10 @@ class GameState(ABC):
     players and is mutated on moves.
     """
 
-    match_data: MatchData
     game: Game
 
-    def __init__(self, game: Game, match_data: MatchData):
+    def __init__(self, game: Game):
         self.game = game
-        self.match_data = match_data
 
     @property
     @abstractmethod

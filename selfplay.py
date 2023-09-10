@@ -47,8 +47,8 @@ class RLPlayers:
 
 def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     state = C.game.instance.new_initial_state()
-    players = player_controller.get_players(state.match_data)
-    assert len(players) == state.match_data.num_players
+    players = player_controller.get_players()
+    assert len(players) == C.game.instance.max_num_players
     rlp = RLPlayers(players)
 
     for pid, player in zip(rlp.pids, rlp.players):
