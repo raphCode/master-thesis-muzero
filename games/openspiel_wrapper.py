@@ -10,7 +10,7 @@ import torch.nn.functional as F
 
 from util import ndarr_f32, ndarr_bool, optional_map
 
-from .bases import Game, Teams, GameState, MatchData, GameStateInitKwArgs
+from .bases import Game, GameState, GameStateInitKwArgs
 
 
 class OpenSpielGameState(GameState):
@@ -91,7 +91,6 @@ class OpenSpielGameState(GameState):
 
 class OpenSpielGame(Game):
     game: pyspiel.Game
-    teams: Teams
     bad_move_reward: Optional[float]
     bad_move_action: Optional[int]
 
@@ -100,7 +99,6 @@ class OpenSpielGame(Game):
         game_name: str,
         bad_move_reward: Optional[Any] = None,
         bad_move_action: Optional[Any] = None,
-        teams: list[list[int]] = [],
         **kwargs: dict[str, Any],
     ):
         self.game = pyspiel.load_game(game_name, kwargs)
@@ -109,7 +107,6 @@ class OpenSpielGame(Game):
         assert (
             bad_move_reward is None or bad_move_action is None
         ), "At most one of 'bad_move_reward' or 'bad_move_action' must be given"
-        self.teams = Teams(teams)
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
         t = self.game.get_type()
         assert (
@@ -126,7 +123,6 @@ class OpenSpielGame(Game):
         return OpenSpielGameState(
             self.game.new_initial_state(),
             game=self,
-            match_data=MatchData(self.game.num_players(), self.teams),
         )
 
     @cached_property
