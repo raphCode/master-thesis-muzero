@@ -54,6 +54,7 @@
   }
 }
 
+#let root = n.with([])
 #let l = n.with($a$)
 #let r = n.with($b$)
 
@@ -125,6 +126,7 @@
       } else {
         // terminal node
         content((), util_cnt)
+        // TODO: anchor at top?
       }
     }, draw-edge: (from, to, node) => {
       let is_terminal = node.children.len() == 0

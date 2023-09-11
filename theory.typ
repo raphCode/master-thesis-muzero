@@ -337,7 +337,7 @@ can only be reached by working together in a way intended by the rules.
 
 #[
 
-#import "gametree.typ": draw_gametree, n, nodetree
+#import "drawings/gametree.typ": draw_gametree, n, nodetree
 
 In !gt, !gs can be modeled in different forms.
 These forms provide a formal !repr of the arbitrary rules of a !g.
@@ -436,7 +436,7 @@ Consider for example this !g in !exf, as shown in @fig_bi_sp:
 
 #[
 
-#import "gametree.typ": draw_gametree, n, l, r, nodetree, get_optimal_strategy
+#import "drawings/gametree.typ": draw_gametree, n, l, r, nodetree, get_optimal_strategy
 
 #let root = nodetree(
   backpropagate: true, 
@@ -497,7 +497,7 @@ Such self-enforcing !sty combinations are known as Nash equilibria.
 
 #[
 
-#import "gametree.typ": draw_gametree, l, r, nodetree, get_optimal_strategy
+#import "drawings/gametree.typ": draw_gametree, l, r, nodetree, get_optimal_strategy
 
 #let root = nodetree(
   backpropagate: true, 
@@ -612,7 +612,7 @@ in @fig_mcts_phases.
 
 #[
 
-#import "mcts.typ": draw_mcts
+#import "drawings/mcts.typ": draw_mcts
 
 #let labels = (
   [Selection],
