@@ -738,97 +738,116 @@ Like prior work, it is based on !mcts, enhanced with a !p and !v !fn.
 Unlike previous approaches, !ago uses deep !nns for these !fns.
 Deep !nns can give much more accurate approximations than previously used heuristics or
 shallow !fns.
-@alphago
 
-Specifically, !ago employs deep convolutional !nns that operate direcly on a 19x19 images
-of the Go board.
+Specifically, !ago employs deep convolutional !nns (CNN) that operate direcly on a 19x19
+images of the Go board.
 The input to the !nets in !ago is a simple !repr of the current board:
 Several layers of images encode the positions of stones and hand-crafted features on the
 board in the current as well as past moves.
-The !pnet outputs a !prob distribution of !as that are most likely to lead to a win of the
-!g.
-This !p guides the search process towards promising moves.
-The !vnet predicts a scalar !v, approximating the outcome of the !g if both !pls were to
-select !as according to the !pnet.
-@alphago
 
 #[
 
-#let slnet = [SL !p !net]
-#let rlnet = [RL !p !net]
+#let sl = $p_sigma$
+#let rl = $p_rho$
+#let roll = $p_pi$
+#let v = $v_theta$
 
-A contribution of #citet("alphago") is to provide a method how to train these !nns.
-The authors use a multi-stage pipeline that includes supervised and !rl.
-The pipeline starts with existing training data in the form of Go games played by human
-experts.
-A !pnet is trained on this data in a supervised manner to predict moves that humans would
-play in a given board situation.
-In the paper, this !net is called the #slnet.
+#let slnet = [SL !p !net #sl]
+#let rlnet = [RL !p !net #rl]
+#let rollnet = [rollout !p !net #roll]
+#let vnet = [!vnet #v]
+
+!ago uses multiple !nns for the !mcts.
+They are trained with a multi-stage pipeline that includes supervised and !rl.
+Some of the !nns are only used to generate training data for other !nets.
+
+The pipeline starts with supervised learning (SL) on the KGS Go dataset, which contains Go
+games played by human experts.
+A !nn trained on this data predicts which moves humans would play in a given board
+situation.
 This is actually not a novelty on its own, since previously CNNs have already been used
 for this task #cite("go_cnn_2008", "go_cnn_2014a", "go_cnn_2014b").
-@alphago
+However, the use of a larger convolutional !nn allowed them to reach a higher accuracy
+than previous attempts.
 
-However, the use of a larger convolutional !nns allowed them to reach a higher accuracy
-than previous attempts #cite("alphago", "go_cnn_2014a", "go_cnn_2014b").
-Large !nns are also slow to evaluate, which makes a big !pnet unsuitable for guiding
-rollouts during !mcts.
-Therefore, the authors also trained a smaller !pnet for rollouts.
-This rollout !p is less accurate, but an order of magnitude faster than the #slnet.
-@alphago
+Two !nns are trained on the KGS Go dataset, a big #slnet and a smaller one, the fast
+#rollnet.
+The #rollnet is less accurate, but an order of magnitude faster to evaluate than the
+#slnet.
 
-The next stage in the training pipeline uses !rl and selfplay to improve the #slnet.
+The next stage in the training pipeline uses !rl (RL) and selfplay to improve the #slnet.
 The autors call the resulting !net #rlnet, it can be seen as a fine-tuned version of the
 #slnet.
 The idea is to train the !net towards the relevant goal of winning !gs, which does not
 necessarily align with predicting expert moves perfectly @mcts_balancing.
-@alphago
 
 First, the #rlnet is initialized to the same structure and weights of the #slnet.
-Then, games are played between two agents which select !as sampled from !preds of the
+The #rlnet is then trained with !p gradient #cite("policy_gradient", "reinforce") to win
+more !gs against previous versions of the #rlnet.
+For this, games are played between two agents which select !as sampled from !preds of the
 #rlnet.
 This form of selfplay does not use any search.
 One agent uses the current version of the #rlnet, the other one a random older iteration.
 The authors argue that randomizing from a pool of opponents prevents overfitting and
 stabilizes training.
-The outcome of selfplay !gs is used to update the weights of the #rlnet via !p gradient.
 The final iteration of the #rlnet already plays Go better (without search) than the
 strongest available open-source Go program.
-@alphago
 
-The last stage of training is to learn a !v !fn that evaluates positions directly, without
-utilizing any rollouts.
-This !v !fn is implemented with a deep convolutional !nn as well.
-It is trained to predict the outcome of a !g under strong play of both !pls from the
-current board position.
-To prevent overfitting, a large trainig set consisting of diverse !gs with uncorrelated
-positions is required.
-The training set used for training the #slnet initially is unsuited in this regard.
-The authors therefore used selfplay with the #rlnet to generate a new training set
-containing positions from 30 million distinct !gs.
-@alphago
+The last stage trains a #vnet that evaluates positions directly, without utilizing any
+rollouts.
+It is trained in supervised manner to predict the !g outcome from the current board
+position, assuming strong !pls.
+A suitable dataset for this task requires a large number of Go !gs and strong play of both
+!pls.
+The authors used the #rlnet and selfplay to generate a new dataset that fulfills these
+requirements.
 
-The trained !nets are finally combined in a variant of !mcts:
-For the !as selection, !preds from the #slnet are used.
-The #slnet was found to perform better in this job than the stronger !p from the #rlnet.
-The !preds are combined with the !vs already present in the tree to balance guidance from
-the !pnet, exploitation and exploration.
-@alphago
+Finally, three !nets (the two !pnets #sl, #roll and the #vnet) are combined in a variant
+of !mcts (MCTS).
 
-During the simulation phase, leaf !ns are evaluated with a combination of rollouts and the
-!vnet.
-Specifically, for a !s $s_L$, a rollout until !g end is performed using the fast rollout
-!p to yield a !v $z_L$.
-The rollout !v is blended with the !pred from the !vnet, $v(s_L)$, using a mixing factor
-$lambda$ to the overall !v $V(s_L)$.
-$ V(s_L) = (1 - lambda) v(s_L) + lambda z_L $
-The !algo performed best with a mixing factor $lambda = 0.5$, that is equal weighting of
+In the MCTS selection phase, !preds from the #slnet are used.
+The #slnet was found to perform better in this job than the #rlnet.
+The !preds of the #slnet are combined with the !vs already present in the tree to balance
+guidance from the !net !preds, exploitation and exploration.
+
+Specifically, in the search tree, each edge stores an !a !v $Q(s, a)$, the visit count
+$N(s, a)$ and a prior !prob $P(s, a)$ derived from !preds from the #slnet.
+In each time step $t$ of the MCTS selection phase, the child !n corresponding to the !a
+$a_t$ is selected from the !s $s_t$
+$ a_t = limits("argmax")_a ( Q(s_t, a) + u(s_t, a)) $
+to maximize the !a !v plus a bonus.
+
+The bonus term $u(s, a)$ is initially proportional to the prior !prob but decays with
+repeated visits to encourage exploration:
+$ u(s, a) prop P(s, a) / (1 + N(s, a)) $
+
+The MCTS selection phase traverses the tree as usual, until time step $L$, where it
+reaches a leaf !n that may be expanded (if it is not a !ts).
+During expansion, the new !n corresponding to !s $s_L$ is processed by the #slnet to yield
+the !n's prior !probs:
+$ P(s_L, a) = #sl (a | s_L) $
+
+After expansion, the new !n is evaluated using a combination of !mc rollouts and the
+#vnet.
+Specifically, for the !s $s_L$, a rollout until !g end is performed using the #rollnet to
+yield a !v $z_L$.
+The rollout !v $z_L$ is blended with the !pred from the !vnet, $#v (s_L)$, to the overall
+!v $V(s_L)$, using a mixing factor $lambda$:
+$ V(s_L) = (1 - lambda) #v (s_L) + lambda z_L $
+
+The !algo performed best with a mixing factor $lambda = 0.5$, that is, equal weighting of
 the rollouts and !vnet.
 However, even without any rollouts at all (with $lambda = 0$), !ago performed better than
 previous computer Go programs.
-@alphago
 
-After running the !mcts for a certain number of iterations, the move with the highest
-visit count from the root !n played in the !g.
+One MCTS iteration is concluded by backpropagating $V(s_L)$ up in the tree, as usual.
+
+To decide on a move to play in !s $s_p$, a search tree is initialized with the root !n
+corresponding to $s_p$.
+A number of MCTS iterations is performed, and the !a $a_p$ with the highest visit count is
+played:
+$ a_p = limits("argmax")_a (N(s_p, a)) $
+
 In the case where the "thinking time" for each move is limited, the maximum number of
 iterations depends on the speed of the !algo.
 To achieve more iterations in a give time budget, the authors also implemented a

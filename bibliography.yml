@@ -556,3 +556,28 @@ computer_go:
     volume: 134
   page-range: 145-179
   doi: 10.1016/S0004-3702(01)00121-7
+policy_gradient:
+  type: article
+  title: Policy Gradient Methods for Reinforcement Learning with Function Approximation
+  date: 1999
+  author:
+    - "Sutton, Richard S."
+    - "McAllester, David"
+    - "Singh, Satinder"
+    - "Mansour, Yishay"
+  parent:
+    type: proceedings
+    title: Proceedings of the 12th International Conference on Neural Information Processing Systems
+    publisher: MIT Press
+  page-range: 1057-1063
+
+reinforce:
+  type: chapter
+  title: Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning
+  date: 1992
+  author: "Williams, Ronald J."
+  parent:
+    type: book
+    publisher: Springer US
+    isbn: 978-1-4615-3618-5
+  page-range: 5-32
