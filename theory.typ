@@ -595,6 +595,22 @@ by their !probs.
 
 ]
 
+==== !ZSUM !Gs
+
+For !2p !gs with !zsum payoffs, practical !impls of !bi may keep track of only a single
+!pl's payoff scalar in the !g tree, for example the first !pl.
+The payoff for the other !pl is implicitly given by the !zsum property.
+While such an !impl navigates the !g tree normally for moves of the first !pl (maximizing
+the payoff), it has to minimize the payoff for the other !pl.
+Such an !impl is known as minimax search.
+@ab_pruning
+
+Instead of selecting the minimum payoff for the other !pl, the payoff scalar can also be
+negated for the moves of the other !pl.
+In this case, the !algo can handle all moves in the same manner by maximizing the payoff.
+This variant is called negamax.
+@ab_pruning
+
 === Subgame Perfection
 
 An interesting property of the solutions visualized in @fig_bi_sp and @fig_bi_mp is that

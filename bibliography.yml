@@ -556,6 +556,19 @@ computer_go:
     volume: 134
   page-range: 145-179
   doi: 10.1016/S0004-3702(01)00121-7
+
+ab_pruning:
+  type: article
+  title: An Analysis of Alpha-Beta Pruning
+  date: 1975
+  author:
+    - "Knuth, Donald Ervin"
+    - "Moore, Ronald W."
+  parent:
+    title: Artificial Intelligence
+    volume: 6
+  page-range: 293-326
+
 policy_gradient:
   type: article
   title: Policy Gradient Methods for Reinforcement Learning with Function Approximation
