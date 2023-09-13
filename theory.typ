@@ -430,8 +430,11 @@ payoff.
 === !BI
 
 In the case of !pinf !gs with !seql moves, an optimal solution can be computed with a
-simple !algo.
-The !algo is best introduced with a !sp !g, as it makes the !g analysis straightforward.
+simple !algo, called !bi.
+
+==== !SP
+
+!Bi is best introduced with a !sp !g, as it makes the !g analysis straightforward.
 Consider for example this !g in !exf, as shown in @fig_bi_sp:
 
 #[
@@ -464,10 +467,11 @@ decision at #root.content can be identified to be #root.backprop_info.action wit
 reasoning.
 Since #root.content is already the root !n, the optimal !sty is thus
 ${ #get_optimal_strategy(root).join(" ") }$.
-This recursive process is known as !bi.
 @gtheo
 
 ]
+
+==== !MP
 
 In a !mp setting, the !stys of other !pls influence the course of the !g and thus the
 utility of !ss.
@@ -558,6 +562,38 @@ propagated upwards and assigned to !pl #node1.content's decision node.
 Analogously, !pl #root.content reasons that #root.backprop_info.action is his best choice.
 Overall, three rational !pls will choose the respective !as
 #get_optimal_strategy(root).join(", ").
+
+==== Chance Events
+
+#[
+
+#import "drawings/gametree.typ": draw_gametree, n, nodetree
+
+#let (p1, p2) = ((1, -2, 4), (-3, 0, 1))
+#let (Pa, Pb) = (0.4, 0.6)
+
+#let exp_payoff = p1.zip(p2).map(((a, b)) => a * Pa + b * Pb)
+
+If the !g involves chance events, chance !ns may be replaced by their expected outcome
+@gtheo.
+For example, consider the chance !n depicted in @fig_bi_chance with the two outcomes
+#repr(p1) and #repr(p2) and !probs #repr((Pa, Pb)) respectively.
+The expected payoff of #repr(exp_payoff) is calculated by weighting the possible payoffs
+by their !probs.
+
+
+#let root = nodetree(
+  exp_payoff,
+  n([P = #Pa], p1),
+  n([P = #Pb], p2),
+)
+
+#figure(
+  draw_gametree(root),
+  caption: [Expected payoff of a chance !n]
+) <fig_bi_chance>
+
+]
 
 === Subgame Perfection
 

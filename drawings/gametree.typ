@@ -47,6 +47,8 @@
   } else {
     if type(data) == "integer" {
       return (label: label, content: [#data], player: data, children: children.pos())
+    } else if type(data) == "array" {
+      return (label: label, content: [C], utility: data, children: children.pos())
     }
     assert(type(data) in ("content"), message: "Invalid node content!")
     // Assume single player
