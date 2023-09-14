@@ -799,10 +799,7 @@ board in the current as well as past moves.
 
 #[
 
-#let sl = $p_sigma$
-#let rl = $p_rho$
-#let roll = $p_pi$
-#let v = $v_theta$
+#import "drawings/alphago.typ": training_pipeline, sl, rl, roll, v
 
 #let slnet = [SL !p !net #sl]
 #let rlnet = [RL !p !net #rl]
@@ -811,7 +808,13 @@ board in the current as well as past moves.
 
 !ago uses multiple !nns for the !mcts.
 They are trained with a multi-stage pipeline that includes supervised and !rl.
+@fig_alphago_train shows an overview of the training process and the !nns used in !ago.
 Some of the !nns are only used to generate training data for other !nets.
+
+#figure(
+  training_pipeline,
+  caption: [The !ago training pipeline]
+) <fig_alphago_train>
 
 The pipeline starts with supervised learning (SL) on the KGS Go dataset, which contains Go
 games played by human experts.
