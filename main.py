@@ -62,6 +62,7 @@ def main(cfg: DictConfig) -> None:
             tb.add_graphs(C.networks.factory())
             while n < 100_000:
                 with torch.no_grad():
+                    pc.net.eval()
                     result = run_episode(pc, tb.create_step_logger(n))
                 n += result.moves
                 for traj in result.trajectories:
@@ -71,6 +72,7 @@ def main(cfg: DictConfig) -> None:
                 target_samples = (
                     rb.data_added * C.training.train_selfplay_ratio * rb.fullness
                 )
+                pc.net.train()
                 while rb.data_sampled < target_samples - batch_samples:
                     t.process_batch(rb.sample(), tb.create_step_logger(n))
     except KeyboardInterrupt:
