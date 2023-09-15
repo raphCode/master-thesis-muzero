@@ -635,6 +635,7 @@ Compared to all !pls adhering to their optimal !stys, this means:
 - in a cooperative !g: compensating for mistakes of teammates
 
 == !MCTS
+<sec_mcts>
 
 !Mcts (MCTS) is a stochastic !algo that can be applied to !seql decision problems to
 discover good !as.
@@ -822,9 +823,9 @@ Unlike previous approaches, !ago uses deep !nns for these !fns.
 Deep !nns can give much more accurate approximations than previously used heuristics or
 shallow !fns.
 
-Specifically, !ago employs deep convolutional !nns (CNN) that operate direcly on a 19x19
-images of the Go board.
-The input to the !nets in !ago is a simple !repr of the current board:
+Specifically, all !nets in !ago are deep convolutional !nns (CNN) that operate direcly on
+a 19x19 images of the Go board.
+The input to all !nets is a simple !repr of the current board:
 Several layers of images encode the positions of stones and hand-crafted features on the
 board in the current as well as past moves.
 
@@ -872,21 +873,33 @@ The #rlnet is then trained with !p gradient #cite("policy_gradient", "reinforce"
 more !gs against previous versions of the #rlnet.
 For this, games are played between two agents which select !as sampled from !preds of the
 #rlnet.
-This form of selfplay does not use any search.
 One agent uses the current version of the #rlnet, the other one a random older iteration.
 The authors argue that randomizing from a pool of opponents prevents overfitting and
 stabilizes training.
+
+The selfplay in !ago does not use any search.
 The final iteration of the #rlnet already plays Go better (without search) than the
 strongest available open-source Go program.
 
-The last stage trains a #vnet that evaluates positions directly, without utilizing any
-rollouts.
+The last stage trains a #vnet that evaluates positions directly.
 It is trained in supervised manner to predict the !g outcome from the current board
 position, assuming strong !pls.
 A suitable dataset for this task requires a large number of Go !gs and strong play of both
 !pls.
 The authors used the #rlnet and selfplay to generate a new dataset that fulfills these
 requirements.
+
+Specifically, each selfplay !g is carried out in three phases:
+First, a random number $U$ is sampled uniformly $U tilde.op "unif"{1, 450}$.
+Then, the moves at time steps $t = 1, ..., U - 1$ are sampled from !preds of the #slnet,
+$a_t tilde.op #sl (dot.c | s_t)$.
+Second, a single move $a_U$ is sampled from the legal moves.
+Lastly, the #rlnet is used to generate the remaining moves $t = U + 1, ..., T$ until the
+!g terminates, $a_t tilde.op #rl (dot.c | s_t)$.
+The !g is then scored to determine its outcome $z_T$.
+From every !g, only a single training example $(s_(U+1), z_T)$ is added to the selfplay
+dataset.
+The final dataset contains positions from 30 million distinct !gs.
 
 Finally, three !nets (the two !pnets #sl, #roll and the #vnet) are combined in a variant
 of !mcts (MCTS).
@@ -896,8 +909,10 @@ The #slnet was found to perform better in this job than the #rlnet.
 The !preds of the #slnet are combined with the !vs already present in the tree to balance
 guidance from the !net !preds, exploitation and exploration.
 
-Specifically, in the search tree, each edge stores an !a !v $Q(s, a)$, the visit count
-$N(s, a)$ and a prior !prob $P(s, a)$ derived from !preds from the #slnet.
+Specifically, in the search tree, each !n corresponds to a !g !s $s$, and the outgoing
+edges represent legal !as.
+Each edge stores an !a !v $Q(s, a)$, the visit count $N(s, a)$ and a prior !prob $P(s, a)$
+derived from !preds from the #slnet.
 In each time step $t$ of the MCTS selection phase, the child !n corresponding to the !a
 $a_t$ is selected from the !s $s_t$
 $ a_t = limits("argmax")_a ( Q(s_t, a) + u(s_t, a)) $
@@ -910,11 +925,11 @@ $ u(s, a) prop P(s, a) / (1 + N(s, a)) $
 The MCTS selection phase traverses the tree as usual, until time step $L$, where it
 reaches a leaf !n that may be expanded (if it is not a !ts).
 During expansion, the new !n corresponding to !s $s_L$ is processed by the #slnet to yield
-the !n's prior !probs:
+the prior !probs
 $ P(s_L, a) = #sl (a | s_L) $
 
-After expansion, the new !n is evaluated using a combination of !mc rollouts and the
-#vnet.
+During the MCTS simulation phase, the new !n is evaluated using a combination of !mc
+rollouts and the #vnet.
 Specifically, for the !s $s_L$, a rollout until !g end is performed using the #rollnet to
 yield a !v $z_L$.
 The rollout !v $z_L$ is blended with the !pred from the !vnet, $#v (s_L)$, to the overall
@@ -926,7 +941,9 @@ the rollouts and !vnet.
 However, even without any rollouts at all (with $lambda = 0$), !ago performed better than
 previous computer Go programs.
 
-One MCTS iteration is concluded by backpropagating $V(s_L)$ up in the tree, as usual.
+One MCTS iteration is concluded by backpropagating $V(s_L)$ up in the tree.
+All edges on the search path are updated so that $Q(s, a)$ represents the average !v of
+all simulations that passed through it, like described in @sec_mcts.
 
 To decide on a move to play in !s $s_p$, a search tree is initialized with the root !n
 corresponding to $s_p$.
@@ -941,7 +958,6 @@ distributed version of !ago.
 It utilizes multiple machines with a total of 1202 CPUs and 176 GPUs to parallelize the
 search.
 This distributed version was able to beat a professional human player in 5 out of 5 !gs.
-@alphago
 
 ]
 
