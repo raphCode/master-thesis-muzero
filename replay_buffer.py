@@ -84,7 +84,7 @@ class ReplayBuffer:
 
             nstep_end_terminal = game_completed and t + n == len(traj)
             if not nstep_end_terminal:
-                value_target += traj[t + n].mcts_value * self.discounts[n]
+                value_target += traj[t + n - 1].mcts_value * self.discounts[n]
 
             self.buffer.append(
                 (
