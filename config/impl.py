@@ -147,11 +147,13 @@ def populate_config(cfg: DictConfig) -> None:
         )
 
         def network_factory() -> Networks:
-            return Networks(
+            nets = Networks(
                 representation=RepresentationNetContainer(net_cfg.representation()),
                 prediction=PredictionNetContainer(net_cfg.prediction()),
                 dynamics=DynamicsNetContainer(net_cfg.dynamics()),
             )
+            nets.eval()
+            return nets
 
         return NetworkConfig(
             factory=network_factory,
