@@ -9,11 +9,6 @@ damit gut zeigen, dass man das Material verstanden hat.
 
 #import "thesis.typ": citet
 
-- RL terms and basics
-  - model-based
-  - planning
-  - !mcts
-
 == !RL
 
 !Rl refers to a subset of machine learning where a decision maker learns by trial and
@@ -1057,9 +1052,3 @@ The training success was also reported to be repeatable across multiple independ
 @azero
 
 === !mz
-
-- original MuZero limitations
-  - !pinf !gs
-  - !seql !gs
-  - single !pl / two !pl !zsum
-  - unique best strategy must exist (counterexample: starcraft)
