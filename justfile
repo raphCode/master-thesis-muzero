@@ -14,3 +14,6 @@ debug-catch *params: && clear-screen
     {{debug_cmd}} training=test networks=test game=os_catch {{params}}
 
 bisect-catch: (train-catch bisect_run_dir)
+
+train-2048 *params: clear-screen
+    {{train_cmd}} training=\"2048\" networks=\"2048\" game=os_2048 {{params}}
