@@ -43,9 +43,8 @@ class OpenSpielGameState(GameState):
         if self.is_chance:
             return np.zeros(self.game.max_num_players, dtype=np.float32)
         if self.invalid:
-            assert self.game.bad_move_reward is not None
             ret = np.zeros(self.game.max_num_players, dtype=np.float32)
-            ret[cast(int, self.state.current_player())] = self.game.bad_move_reward
+            ret[cast(int, self.state.current_player())] = self.game.bad_move_reward or 0
             return ret
         return np.array(self.state.rewards())
 
