@@ -1,4 +1,4 @@
-common_args := "players=single mcts=test "
+common_args := "players=single mcts=default "
 debug_cmd := "pudb main.py hydra.run.dir=/tmp/hydra_dbg " + common_args
 train_cmd := "python main.py " + common_args
 bisect_run_dir := "'hydra.run.dir=bisect/${now:%Y-%m-%d}/${now:%H-%M-%S}-'`git rev-parse --short HEAD`"
