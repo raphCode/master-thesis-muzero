@@ -287,9 +287,9 @@ For instance, chess and Go are deterministic !gs since the !g !s only depends on
 of the !pls.
 @gtheo
 
-==== Cooperation
+==== Cooperation and Collaboration
 
-!Gt can be divided into two branches, cooperative and non-cooperative.
+Traditional !gt divides !gs into two categories, cooperative and non-cooperative.
 The cooperative approach studies !gs where the rules are only broadly defined.
 In fact, the rules are kept implicit in the formal specification of the !g.
 @gtheo
@@ -313,20 +313,16 @@ devices.
 their payoff.
 @gtheo
 
-However, this can lead to seemingly cooperative behavior in some settings:
-!gs may have rules that require !pls to work together to achieve a mutually beneficial
-goal.
-This goal cannot be achieved by one !pl alone, so !pls are motivated to behave
-cooperatively.
-@gtheo
-
-The !gs studied in this thesis are strictly non-cooperative in a !gtic sense.
-To avoid any confusion, it is important to point out that this thesis refers to !gs being
-cooperative when:
-- all !pls act out of self-interest and
-- the rules of the !gs are designed to encourage cooperation.
-The latter is achieved by designing a !g outcome with a large payoff for all !pls which
-can only be reached by working together in a way intended by the rules.
+However, a third category can be identified:
+In a collaborative !g, all !pls work together as a team, sharing the outcomes and thus
+payoffs.
+A team is defined by a group of !pls who have the same interests, albeit the individual
+information !pls have may differ.
+Since the rewards and penalties of their !as are shared, the challenge in a collaborative
+!g is working together to maximize the team's payoff.
+In contrast, cooperation among individuals may involve different payoffs and goals of the
+different !pls.
+#cite("collaborative_games", "eco_theo_teams")
 
 === !Exf
 

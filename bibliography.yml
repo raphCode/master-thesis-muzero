@@ -594,3 +594,28 @@ reinforce:
     publisher: Springer US
     isbn: 978-1-4615-3618-5
   page-range: 5-32
+
+eco_theo_teams:
+  type: book
+  title: Economic Theory of Teams
+  date: 1972
+  author:
+    - "Marschak, J."
+    - "Radner, R."
+  publisher: Yale University Press
+  isbn: 9780835781077
+
+collaborative_games:
+  type: article
+  title: "Collaborative games: Lessons learned from board games"
+  date: 2006-03
+  author:
+    - "Zagal, José P."
+    - "Rick, Jochen"
+    - "Hsi, Idris"
+  parent:
+    title: Simulation & Gaming
+    issue: 1
+    volume: 37
+  page-range: 24-40
+  doi: 10.1177/1046878105282279
