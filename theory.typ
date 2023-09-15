@@ -755,8 +755,8 @@ evolved from traditional game playing programs.
 
 This section explores and explains the predecessors, they are listed in ascending order of
 publication date.
-They build on each other and eventually lead to !mz, which is explained in detail in the
-last section.
+They build on each other and eventually lead to !mz, which is explained in detail in
+@sec_muzero.
 
 Since the first two !algos, !ago and !agoz, focused on the !g of Go, I start with a
 overview of previous attempts at Computer Go.
@@ -768,7 +768,7 @@ on a 19x19 grid.
 Go has long been known as a very difficult !g for computers to play.
 The reason is the high complexity in the !g tree:
 A complete !g tree would be very large in both height (Go !gs can span hundreds of moves)
-and breadth (many possible actions at each board position).
+and breadth (e.g. the empty board provides $19^2 = #(19 * 19)$ possible actions).
 This makes an exhaustive search computationally intractable.
 #cite("computer_go", "phd_games")
 
@@ -1048,3 +1048,4 @@ The training success was also reported to be repeatable across multiple independ
 @azero
 
 === !mz
+<sec_muzero>
