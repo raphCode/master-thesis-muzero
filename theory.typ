@@ -418,12 +418,12 @@ In non-cooperative !gt, the goal of an optimal solution is always to maximizing 
 payoff.
 @gtheo
 
-=== !BI
+==== !BI
 
 In the case of !pinf !gs with !seql moves, an optimal solution can be computed with a
 simple !algo, called !bi.
 
-==== !SP
+===== !SP
 
 !Bi is best introduced with a !sp !g, as it makes the !g analysis straightforward.
 Consider for example this !g in !exf, as shown in @fig_bi_sp:
@@ -462,7 +462,7 @@ ${ #get_optimal_strategy(root).join(" ") }$.
 
 ]
 
-==== !MP
+===== !MP
 
 In a !mp setting, the !stys of other !pls influence the course of the !g and thus the
 utility of !ss.
@@ -554,7 +554,7 @@ Analogously, !pl #root.content reasons that #root.backprop_info.action is his be
 Overall, three rational !pls will choose the respective !as
 #get_optimal_strategy(root).join(", ").
 
-==== Chance Events
+===== Chance Events
 
 #[
 
@@ -586,7 +586,7 @@ by their !probs.
 
 ]
 
-==== !ZSUM !Gs
+===== !ZSUM !Gs
 
 For !2p !gs with !zsum payoffs, practical !impls of !bi may keep track of only a single
 !pl's payoff scalar in the !g tree, for example the first !pl.
@@ -602,7 +602,7 @@ In this case, the !algo can handle all moves in the same manner by maximizing th
 This variant is called negamax.
 @ab_pruning
 
-=== Subgame Perfection
+==== Subgame Perfection
 
 An interesting property of the solutions visualized in @fig_bi_sp and @fig_bi_mp is that
 they also contain optimal !as for !g !s which are not part of the overall optimal !sty.
