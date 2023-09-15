@@ -340,14 +340,14 @@ playing the !g.
 
 #let root = nodetree(
   [C],
-  n([$[1/2]$ heads], [1],
+  n([$P=1/2$ heads], [1],
     n([go], [2],
       n([left], (2, 3)),
       n([right], (4, 1)),
     ),
     n([stop], (-1, 0)),
   ),
-  n([tails $[1/2]$], [2],
+  n([tails $P=1/2$], [2],
     n([stop], (0, -1)),
     n([go], [1],
       n([left], (1, 2)),
