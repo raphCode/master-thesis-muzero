@@ -1,0 +1,2 @@
+lion-pytorch==0.0.7
+matplotlib==3.7.2

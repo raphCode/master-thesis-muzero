@@ -1,0 +1,10 @@
+black==23.3.0
+flake8-pyproject==1.2.3
+flake8-type-checking==2.4.0
+ipython==8.8.0
+isort==5.11.4
+mypy==1.2.0
+pip-chill==1.0.1
+pudb==2022.1.3
+pycln==2.1.3
+
