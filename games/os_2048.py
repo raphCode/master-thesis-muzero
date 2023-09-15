@@ -1,13 +1,29 @@
 from __future__ import annotations
 
 from copy import copy
-from typing import Any
+from typing import Any, cast
+from functools import cached_property
+
+import numpy as np
+import torch
 
 from .openspiel_wrapper import OpenSpielGame, OpenSpielGameState
 
 
 class TwentyEightyFourGameState(OpenSpielGameState):
     game: TwentyEightyFourGame
+
+    @property
+    def observation(self) -> tuple[torch.Tensor]:  # type: ignore [override]
+        shape = self.game.observation_shapes[0]
+        (n, *size) = shape
+        board = np.array(self.state.observation_tensor()).reshape(size)
+        assert np.all(board <= 2**n)
+        ret = np.full(shape, -1, dtype=np.float32)
+        for x in range(n):
+            mask = board == 2 ** (x + 1)
+            ret[x][mask] = 1
+        return (torch.tensor(ret),)
 
     @property
     def _external_legal_actions(self) -> set[int]:
@@ -26,13 +42,16 @@ class TwentyEightyFourGameState(OpenSpielGameState):
 
 class TwentyEightyFourGame(OpenSpielGame):
     abort_noops: int
+    layers: int
 
     def __init__(
         self,
         abort_noops: Any = True,
+        layers: Any = 11,
         **kwargs: dict[str, Any],
     ):
         self.abort_noops = bool(abort_noops)
+        self.layers = int(layers)
         super().__init__(game_name="2048", **kwargs)
 
     def new_initial_state(self) -> TwentyEightyFourGameState:
@@ -40,3 +59,9 @@ class TwentyEightyFourGame(OpenSpielGame):
             self.game.new_initial_state(),
             game=self,
         )
+
+    @cached_property
+    def observation_shapes(self) -> tuple[tuple[int, int, int]]:  # type: ignore [override] # noqa: E501
+        shape = cast(tuple[int, int], tuple(self.game.observation_tensor_shape()))
+        assert len(shape) == 2
+        return ((self.layers, *shape),)
