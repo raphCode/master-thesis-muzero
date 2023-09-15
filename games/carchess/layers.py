@@ -109,6 +109,7 @@ class Layer:
         n = len(self.pos) - 1
         self.cars = set((np.arange(n)[rng.random(n) < prepopulate]))
         self.moveable_cars = set()
+        self.spawn_counter = 0
 
     def update_spawn_count(self, random_number: int, max_density: float) -> None:
         # This double-counts / overestimates the capacity of fields sharing multiple lanes
