@@ -34,7 +34,7 @@ class OpenSpielGameState(GameState):
 
     @property
     def valid_actions_mask(self) -> ndarr_bool:
-        if self.game.bad_move_reward is not None or self.game.bad_move_action is not None:
+        if self.game.bad_move_reward is not None:
             return np.ones(self.game.max_num_actions, dtype=bool)
         mask = np.zeros(self.game.max_num_actions, dtype=bool)
         mask[list(self.state.legal_actions())] = True
@@ -75,13 +75,10 @@ class OpenSpielGameState(GameState):
     def apply_action(self, action: int) -> None:
         assert not self.is_terminal
         if action not in self.state.legal_actions():
-            if self.game.bad_move_action is not None:
-                self.state.apply_action_with_legality_check(self.game.bad_move_action)
-            else:
-                assert (
-                    self.game.bad_move_reward is not None
-                ), "Illegal action and no bad move reward or action specified!"
-                self.invalid = True
+            assert (
+                self.game.bad_move_reward is not None
+            ), "Illegal action and no bad move reward specified!"
+            self.invalid = True
         else:
             self.state.apply_action(action)
 
@@ -92,21 +89,15 @@ class OpenSpielGameState(GameState):
 class OpenSpielGame(Game):
     game: pyspiel.Game
     bad_move_reward: Optional[float]
-    bad_move_action: Optional[int]
 
     def __init__(
         self,
         game_name: str,
         bad_move_reward: Optional[Any] = None,
-        bad_move_action: Optional[Any] = None,
         **kwargs: dict[str, Any],
     ):
         self.game = pyspiel.load_game(game_name, kwargs)
         self.bad_move_reward = optional_map(float)(bad_move_reward)
-        self.bad_move_action = optional_map(int)(bad_move_action)
-        assert (
-            bad_move_reward is None or bad_move_action is None
-        ), "At most one of 'bad_move_reward' or 'bad_move_action' must be given"
         assert self.game.observation_tensor_layout() == pyspiel.TensorLayout.CHW
         t = self.game.get_type()
         assert (
