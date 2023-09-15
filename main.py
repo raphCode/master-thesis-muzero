@@ -60,7 +60,7 @@ def main(cfg: DictConfig) -> None:
         with TensorboardLogger(log_dir="tb") as tb:
             pc.net.jit()
             tb.add_graphs(C.networks.factory())
-            while n < 100_000:
+            while n < 400_000:
                 with torch.no_grad():
                     pc.net.eval()
                     result = run_episode(pc, tb.create_step_logger(n))
