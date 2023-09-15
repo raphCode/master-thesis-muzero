@@ -149,6 +149,7 @@ class StateNode(Node):
             # Just in case you want to disable the mask:
             # The correct place to do so is the game implementation. It must then return
             # an all-True mask and handle 'illegal' moves somehow.
+            probs += 1e-8
             probs[~valid_actions_mask] = 0
             probs /= probs.sum()
         super().__init__(
