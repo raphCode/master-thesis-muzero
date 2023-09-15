@@ -131,7 +131,7 @@ individuals make decisions in interactive situations.
 It is commonly used in economics, but has other widespread applications.
 @gtheo
 
-In this thesis we are interested in !gtic analysis of the behavior and interaction of
+In this thesis I am interested in !gtic analysis of the behavior and interaction of
 multiple !pls in a !g.
 !Gtic considerations can be used to find optimal behavior in a given !g under some
 assumptions.
@@ -207,20 +207,20 @@ However, comparable concepts have slightly different terminology in the two fiel
   caption: [Comparison of similar concepts in !gt and !rl],
 ) <tbl_gt_rl_terms>
 
-=== Types of !Gs
+=== Properties of !Gs
 
 !Gt may differentiate !gs according to different properties which are explained in the
 next chapters.
 
-==== !ZSUM
+==== Payoff Sum
 
 !Zsum !gs are !gs in which the sum of all !pls' payoffs equals zero for every outcome of
 the !g.
 It is a special case of the more general concept of constant-sum !gs, where all payoffs
-sum to constant value.
+sum to a constant value.
 In other words, a !pl may benefit only at the expense of other !pls.
-Examples of !2p !zsum !gs are tic-tac-toe, chess and Go, since only one !pl (payoff of 1)
-may win, while the other looses (payoff of -1).
+Examples of !2p !zsum !gs are tic-tac-toe, chess and Go, since only one !pl may win
+(payoff of 1), while the other looses (payoff of -1).
 Also poker is considered a !zsum !g, because a !pl wins exactly the amount which his
 opponents lose.
 
