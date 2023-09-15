@@ -362,7 +362,7 @@ playing the !g.
 ) <fig_exf_example>
 
 The !exf looks similar to a regular tree in computer science.
-It is accordinly also known as a gametree.
+It is accordinly also known as a !g tree.
 Each !n represents a !dp for a !pl, with the !g starting at the root !n.
 Outgoing edges from a !n are labeled with !as the !pl can choose.
 The leaf !ns are the outcomes of the !g and specify the payoff vectors.
@@ -385,7 +385,7 @@ If the !g continues, the other !pl is given a choice to go left or right, after 
 !g ends with the payoffs in the !tns.
 
 The !exf also allows an visual explanation of subgames.
-The !exf of a subgame is a subset of the original !g's gametree.
+The !exf of a subgame is a subset of the original !g's !g tree.
 In the example of @fig_exf_example, if a !g were to start at any of the !ns labeled with~1
 or~2 and shares all !ns below, this is a subgame of the original !g.
 @gtheo
