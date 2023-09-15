@@ -34,10 +34,8 @@ class OpenSpielGameState(GameState):
 
     @property
     def valid_actions_mask(self) -> ndarr_bool:
-        if self.game.bad_move_reward is not None:
-            return np.ones(self.game.max_num_actions, dtype=bool)
         mask = np.zeros(self.game.max_num_actions, dtype=bool)
-        mask[list(self.state.legal_actions())] = True
+        mask[list(self._external_legal_actions)] = True
         return mask
 
     @property
@@ -72,12 +70,26 @@ class OpenSpielGameState(GameState):
         probs[list(d.keys())] = list(d.values())
         return probs
 
+    @property
+    def _external_legal_actions(self) -> set[int]:
+        """
+        Publicly visible legal actions.
+        """
+        if self.game.bad_move_reward is not None:
+            return set(range(self.game.max_num_actions))
+        return set(self.state.legal_actions())
+
+    @property
+    def _internal_legal_actions(self) -> set[int]:
+        """
+        Actions that are treated as legal internally.
+        The difference to externally legal actions aborts the game with bad_move_reward.
+        """
+        return set(self.state.legal_actions())
+
     def apply_action(self, action: int) -> None:
         assert not self.is_terminal
-        if action not in self.state.legal_actions():
-            assert (
-                self.game.bad_move_reward is not None
-            ), "Illegal action and no bad move reward specified!"
+        if action not in self._internal_legal_actions:
             self.invalid = True
         else:
             self.state.apply_action(action)
