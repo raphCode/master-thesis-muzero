@@ -954,11 +954,10 @@ This distributed version was able to beat a professional human player in 5 out o
 
 === !agoz
 
-!agoz is similar to !ago:
-It also uses !mcts with !nns to play Go at super-human levels.
+!agoz by #citet("alphago_zero") is similar to !ago:
+It also uses MCTS with !nns to play Go at super-human levels.
 However, the authors improved over !ago by simplifing the !arch in several aspects, while
 also improving the playing strength.
-@alphago_zero
 
 The main changes over !ago are:
 
@@ -967,12 +966,10 @@ Most importantly, !agoz is trained solely by !rl and selfplay.
 !agoz uses !mcts for all the selfplay during training.
 This contrasts with !ago, which uses human data and supervised learning, as well as
 selfplay without any search.
-@alphago_zero
 
 *!Mcts*\
 The search in !agoz works the same way as in !ago, but without any rollouts.
 !agoz solely relies on the !net !v !preds to assign !vs in the search tree.
-@alphago_zero
 
 *!Net !arch*\
 !agoz only uses a single residual convolutional !nn with two output heads, predicting !p
@@ -981,13 +978,11 @@ The input to this unified !net are images only consisting of the Go stone positi
 extra feature planes are added.
 Contrastingly, !ago uses two separate !nns for !p and !v, and the !net input contains
 hand-crafted features.
-@alphago_zero
 
 During selfplay, a move is selected for each !pl using !mcts with 1600 iterations.
 To ensure diverse !g openings, the first 30 moves are sampled from the root !n visit count
 distribution.
 All subsequent moves are selected according to the !a with the highest visit count.
-@alphago_zero
 
 During !mcts, the !p !pred of the !nn guides !as selection, just like in !ago.
 However, dirichlet noise is blended into the !p !pred of the root !n to encourage
@@ -997,7 +992,6 @@ The selfplay !gs are recorded, where each recorded !traj contains:
 - the !g history (!g !ss)
 - the !g outcome (win/loss)
 - the search root !n visit counts for each !g !s
-@alphago_zero
 
 In parallel to the selfplay, a separate, but identical !nn is trained:
 A minibatch is sampled from a pool of the latest selfplay !traj !ss.
@@ -1005,7 +999,6 @@ For each !s, the !net's !v and !p head are optimized towards predicting the !g's
 and search visit count distribution, respectively.
 To provide data augmentation, random rotations and flips are performed on of the Go board
 !reprs that are used as !net inputs.
-@alphago_zero
 
 At regular intervals, a tournament evaluation is performed between the trained !net and
 the current selfplay !net.
@@ -1013,12 +1006,10 @@ If the trained !net wins by a margin of 55%, it subsequently becomes the new sel
 !net.
 This evaluation ensures the !net's playing strength and thus generated training data
 steadily improves.
-@alphago_zero
 
 !agoz's training process starts out with random selfplay.
 Over the course of 40 days and 29 million !gs, it learns Go capabilities that exceed those
 of humans and !ago.
-@alphago_zero
 
 === !az
 
