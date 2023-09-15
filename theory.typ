@@ -636,8 +636,8 @@ Compared to all !pls adhering to their optimal !stys, this means:
 
 == !MCTS
 
-!Mcts is a stochastic !algo that can be applied to !seql decision problems to discover
-good !as.
+!Mcts (MCTS) is a stochastic !algo that can be applied to !seql decision problems to
+discover good !as.
 It takes random samples in the decision space and collects the outcomes in a search tree
 that grows iteratively.
 The tree thus contains statistical evidence of available !a choices.
@@ -655,10 +655,9 @@ Lastly, MCTS can be utilized with little or no domain knowledge.
 
 !Mcts grows a tree #footnote[typically a !g tree] in an asymmetric fashion, expanding it
 by one !n in each iteration.
-Each !n in the tree contains a visit count, that indicated in how many iterations the !n
-was visited.
-A !n also keeps track of its mean !v as approximated by the !mc simulations.
-In the case of !mp !gs, this !v many be a vector with multiple entries, one for each !pl.
+Each !n in the tree represents a !g !s $s$ and stores a visit count $n_s$, that indicated
+in how many iterations the !n was visited.
+A !n also keeps track of its mean !v $v_s$ as approximated by the !mc simulations.
 In the basic variant, each iteration of the !algo consists of four phases, as illustrated
 in @fig_mcts_phases.
 
@@ -692,34 +691,66 @@ in @fig_mcts_phases.
   #strong(phase(n)):\
 ]
 
+The phases are executed in the following order, unlike noted otherwise:
+
 #phase_heading(1)
 The !algo descends the current tree and finds the most urgent location.
 Selection always begins at the root !n and, at each level, selects the next !n based on an
 !a determined by a tree !p.
 The tree !p aims to strike a balance between exploration (focus areas that are not sampled
-well yet) and exploitation (focus promising areas).
-The phase steps down the tree until the !n corresponding to the next selected !a is not
-contained in the tree yet.
+well yet) and exploitation (focus promising areas).\
+This phase terminates in two conditions:
+- a !ts of the !g / problem is reached. In this case, the !algo skips to #phase(3).
+- the !n corresponding to the next selected !a is not contained in the tree yet.
 #cite("mcts_survey", "mcts_review")
 
 #phase_heading(2)
 Adds a new child !n to the tree at the position determined by the #phase(1) phase.
-If the new !n represents a !ts of the !g / problem, the !algo directly skips to the
-#phase(4) phase.
 #cite("mcts_survey", "mcts_review")
 
 #phase_heading(3)
-Takes !as at uniform random until a !ts is reached and retrieves the outcome.
-The !algo's "!mc" property stems from the random selection of !as during this phase.
-The choice of !as can be refined with another !p, that is referred to as the rollout !p.
-Intermediate !ss visited during this phase are not stored or evaluated in any way.
+The goal of this phase is to determine a !v sample of the last selected !n.
+If the !n is already a !ts, the outcome $z$ of the !g can be used directly and the !algo
+skips to #phase(4).\
+In most cases however, the !n is somewhere "in the middle" of the !g.
+The !algo then takes !as at random until a !ts is reached.
+Subsequently the outcome $z$ of this !ts is used to proceed in the #phase(4) phase.
+#cite("mcts_survey", "mcts_review")
+
+How the !g's outcome is translated into a !n !v may depend on the specific !g and MCTS
+!impl.
+In the case of a !sp !g, the !v may equal the single payoff scalar @muzero.
+The MCTS !impl may also perform a stochastic equivalent to !bi, so in a !mp !g, a payoff
+vector with multiple entries may be required @mp_azero.
+For !2p !zsum !gs, a single payoff scalar may suffice, following the idea of minimax /
+negamax search #cite("azero", "ab_pruning").
+
+Intermediate !g !ss visited during this phase are not stored or evaluated in any way.
+The !algo's "!mc" property stems from the random choice of !as during this phase.
+An optimisation over random !as may be to sample !as from another !p, also referred to as
+the rollout !p.
 #cite("mcts_survey", "mcts_review", "alphago")
 
 #phase_heading(4)
-Propagates the information obtained from the #phase(3) upwards in the tree, updating all
-ancestor !ns.
-For each !n, the visit count is incremented and the mean !v is updated to include the
-result of the #phase(3).
+Propagates the !v $z$ obtained in the #phase(3) upwards in the tree, updating the
+statistics of all ancestor !ns.
+For each !n on the path to the root, the visit count $n_s$ is incremented and the !v
+statistics of the !n is updated to include $z$.
+#cite("mcts_survey", "mcts_review")
+
+For example, a MCTS !impl with scalar !vs may be interested in the average !v $v_s$ of all
+simulations that passed through the !s $s$.
+It can store the sum of all simulation !vs $u_s$, and use the visit count $n_s$ to
+calculate the !n !v
+$ v_s = cases(
+  u_s / n_s & "if" n_s eq.not 0,
+  0 & "else",
+) $
+During the #phase(4) phase, the following updates would then be performed:
+$ n_s' = n_s + 1 \
+  u_s' = u_s + z $
+
+#cite("muzero", "alphago")
 
 ]
 
