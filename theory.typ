@@ -768,7 +768,8 @@ on a 19x19 grid.
 Go has long been known as a very difficult !g for computers to play.
 The reason is the high complexity in the !g tree:
 A complete !g tree would be very large in both height (Go !gs can span hundreds of moves)
-and breadth (e.g. the empty board provides $19^2 = #(19 * 19)$ possible actions).
+and breadth (e.g. the empty board provides $19^2 = #(19 * 19)$ possible locations for
+placing a stone).
 This makes an exhaustive search computationally intractable.
 #cite("computer_go", "phd_games")
 
