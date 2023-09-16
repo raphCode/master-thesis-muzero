@@ -647,7 +647,7 @@ Lastly, MCTS can be utilized with little or no domain knowledge.
 
 !Mcts grows a tree #footnote[typically a !g tree] in an asymmetric fashion, expanding it
 by one !n in each iteration.
-Each !n in the tree represents a !g !s $s$ and stores a visit count $n_s$, that indicated
+Each !n in the tree represents a !g !s $s$ and stores a visit count $n_s$, that indicates
 in how many iterations the !n was visited.
 A !n also keeps track of its mean !v $v_s$ as approximated by the !mc simulations.
 In the basic variant, each iteration of the !algo consists of four phases, as illustrated
@@ -683,7 +683,7 @@ in @fig_mcts_phases.
   #strong(phase(n)):\
 ]
 
-The phases are executed in the following order, unlike noted otherwise:
+The phases are executed in the following order, unless noted otherwise:
 
 #phase_heading(1)
 The !algo descends the current tree and finds the most urgent location.
@@ -692,7 +692,7 @@ Selection always begins at the root !n and, at each level, selects the next !n b
 The tree !p aims to strike a balance between exploration (focus areas that are not sampled
 well yet) and exploitation (focus promising areas).\
 This phase terminates in two conditions:
-- a !ts of the !g / problem is reached. In this case, the !algo skips to #phase(3).
+- a !ts of the !g is reached. In this case, the !algo skips to #phase(3).
 - the !n corresponding to the next selected !a is not contained in the tree yet.
 #cite("mcts_survey", "mcts_review")
 
