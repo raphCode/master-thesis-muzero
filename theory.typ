@@ -806,6 +806,7 @@ The performance of these approaches is limited, reaching only strong amateur lev
 #cite("fuego", "pachi", "go_learn_patterns").
 
 === !ago
+<sec_alphago>
 
 !ago by #citet("alphago") is a novel and successful approach to the !g of Go with the full
 19x19 board size.
@@ -963,53 +964,74 @@ The main changes over !ago are:
 
 *Training*\
 Most importantly, !agoz is trained solely by !rl and selfplay.
-!agoz uses !mcts for all the selfplay during training.
+!agoz uses MCTS for all the selfplay during training.
 This contrasts with !ago, which uses human data and supervised learning, as well as
 selfplay without any search.
 
 *!Mcts*\
-The search in !agoz works the same way as in !ago, but without any rollouts.
+The search in !agoz works the same way as in !ago, but does not use any rollouts during
+the MCTS.
 !agoz solely relies on the !net !v !preds to assign !vs in the search tree.
 
 *!Net !arch*\
-!agoz only uses a single residual convolutional !nn with two output heads, predicting !p
-and !v together.
+!agoz only uses a single CNN $f_theta$ with two output heads, predicting !p $p$ and !v $v$
+together: $(p, v) = f_theta (s)$.
 The input to this unified !net are images only consisting of the Go stone positions, no
 extra feature planes are added.
 Contrastingly, !ago uses two separate !nns for !p and !v, and the !net input contains
 hand-crafted features.
 
-During selfplay, a move is selected for each !pl using !mcts with 1600 iterations.
-To ensure diverse !g openings, the first 30 moves are sampled from the root !n visit count
-distribution.
-All subsequent moves are selected according to the !a with the highest visit count.
+The !agoz training pipeline performs these tasks in parallel:
+- optimizing the !nn's parameters $theta_i$ from recent selfplay data
+- evaluating selfplay !pls $alpha_theta_i$
+- using the the best performing !pl so far, $alpha_theta_*$ to generate new selfplay data
 
-During !mcts, the !p !pred of the !nn guides !as selection, just like in !ago.
-However, dirichlet noise is blended into the !p !pred of the root !n to encourage
-exploration.
-In place of !mc rollouts, !v !preds are used.
-The selfplay !gs are recorded, where each recorded !traj contains:
-- the !g history (!g !ss)
-- the !g outcome (win/loss)
-- the search root !n visit counts for each !g !s
+Specifically, selfplay with the !pl $alpha_theta_*$ is carried out in the following
+manner:
+At each !s $s$ of the !g, a !mcts with 1600 iterations is performed.
+The MCTS executes like in !ago with $lambda = 0$, that is, without any rollouts.
+A !nn $f_theta_*$ guides the search process by !p !preds $p(a, s)$ and provides !v
+estimates $v(s)$, for details see @sec_alphago.
+An distinction to !ago is that the image of the Go board is randomly rotated or flipped
+before using it as the input for the !nn.
+This data augmentation step exploits symmetries of the !g of Go and aims to reduce !pred
+bias.
 
-In parallel to the selfplay, a separate, but identical !nn is trained:
-A minibatch is sampled from a pool of the latest selfplay !traj !ss.
-For each !s, the !net's !v and !p head are optimized towards predicting the !g's outcome
-and search visit count distribution, respectively.
-To provide data augmentation, random rotations and flips are performed on of the Go board
-!reprs that are used as !net inputs.
+The search outputs !probs $pi$ of playing each possible move, proportional to the visit
+counts of the root !n in the search tree, $pi(a | s) prop N(s, a)$.
+To ensure diverse !g openings, the first 30 moves are sampled from $pi$, so
+$a_t tilde.op pi_t$ for $t = 0, ..., 29$.
+The rest of the moves are selected according to the !a $a_t$ with the highest visit count
+$a_t = limits("argmax")_a ( N(s_t, a) )$.
+!Gs are played until an terminal condition is reached, and the outcome of the !g is scored
+as $z$.
 
-At regular intervals, a tournament evaluation is performed between the trained !net and
-the current selfplay !net.
-If the trained !net wins by a margin of 55%, it subsequently becomes the new selfplay
-!net.
-This evaluation ensures the !net's playing strength and thus generated training data
-steadily improves.
+Dirichlet noise is blended into the !p !preds $p$ of the root !n to encourage exploration,
+specifically the prior !probs $P(s, a)$ are calculated as
+$ P(s, a) = (1 - epsilon) p_a + epsilon eta_a $
+with $eta_a tilde.op "Dir"(0.03)$ and $epsilon = 0.25$.
+Adding exploration this way ensures all moves may be tried, but the search can still
+overrule bad !as.
+
+The !nn $f_theta_i$ is trained on samples $(s, pi, z)$ drawn from the latest selfplay !gs.
+Random rotations and reflections of the input image to the !nn are used to provide data
+augmentation.
+Mean-squared error and cross-entropy is used to align the !net's !preds 
+$(p, v) = f_theta_i (s)$ with the search !probs $pi$ and !g outcome $z$, respectively.
+Specifically, the !net is optimized using gradient descent on the loss !fn
+$ l = (z - v)^2 - pi "log" p + c norm(theta)^2 $
+where the last term is used for L2 weight normalisation.
+
+New versions of the !nn $f_theta_i$ are evaluated in a tournament against the current
+selfplay !pl $alpha_theta_*$ before they may be used for the selfplay data generation.
+If the new !pl $alpha_theta_i$ wins 55% of the !gs against $alpha_theta_*$, it becomes the new
+$alpha_theta_*$.
+This ensures the highest quality data is generated for !nn training.
 
 !agoz's training process starts out with random selfplay.
 Over the course of 40 days and 29 million !gs, it learns Go capabilities that exceed those
-of humans and !ago.
+of humans and its precursor !ago.
+
 
 === !az
 
