@@ -60,14 +60,17 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     scores = np.zeros(len(rlp.players))
 
     def commit_step(action: int) -> None:
-        if state.is_chance:
-            target_policy = state.chance_outcomes
-            turn_status = TurnStatus.CHANCE_PLAYER.target_index
-        else:
-            target_policy = None
-            turn_status = state.current_player_id
+        target_policy = state.chance_outcomes if state.is_chance else None
 
         state.apply_action(action)
+
+        def get_turn_status() -> int:
+            if state.is_terminal:
+                return TurnStatus.TERMINAL_STATE.target_index
+            if state.is_chance:
+                return TurnStatus.CHANCE_PLAYER.target_index
+            return state.current_player_id
+
         nonlocal scores
         rewards = state.rewards
         scores += rewards
@@ -79,7 +82,7 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
                 TrajectoryState.from_training_info(
                     player.create_training_info(),
                     target_policy=target_policy,
-                    turn_status=turn_status,
+                    turn_status=get_turn_status(),
                     action=action,
                     reward=rewards,
                 )
