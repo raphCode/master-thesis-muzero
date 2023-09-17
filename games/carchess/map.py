@@ -55,6 +55,9 @@ class Map:
                 self.layers.append(l)
 
     def reset(self, prepopulate: float = 0.3, init_red_rate: float = 0.5) -> None:
+        self.car_observation.cache_clear()
+        self.tl_observation.cache_clear()
+        self.spawn_count_observation.cache_clear()
         self.tl.reset(init_red_rate)
         for layer in self.layers:
             layer.reset(prepopulate)
@@ -71,6 +74,7 @@ class Map:
         random_number: int,
         max_density: float,
     ) -> None:
+        self.spawn_count_observation.cache_clear()
         self.layers[layer_id].update_spawn_count(random_number, max_density)
 
     def update_spawn_counts_random(
@@ -79,18 +83,22 @@ class Map:
         max_spawn: int,
         max_density: float,
     ) -> None:
+        self.spawn_count_observation.cache_clear()
         random_numbers = rng.integers(
             min_spawn, max_spawn, endpoint=True, size=len(self.layers)
         )
         for l, n in zip(self.layers, random_numbers):
             l.update_spawn_count(n, max_density)
 
+    @cache
     def tl_observation(self) -> ndarr_int:
         return self.tl.observation_map
 
+    @cache
     def car_observation(self) -> ndarr_int:
         return np.stack([l.car_mask.astype(int) for l in self.layers])
 
+    @cache
     def spawn_count_observation(self, max_density: float = 1) -> ndarr_int:
         # plus one for zero count plane
         max_spawn = int(self.max_lane_capacity * max_density) + 1
@@ -116,6 +124,7 @@ class Map:
     def tl_flat_action(self, flat_index: int) -> None:
         w, h = self.size
         assert 0 < flat_index < w * h
+        self.tl_observation.cache_clear()
         self.tl.toggle_at(divmod(flat_index, w))
 
     def _get_collisions(self) -> tuple[list[Pos], int]:
@@ -125,6 +134,9 @@ class Map:
         return (list(zip(x, y)), crash_map.sum())
 
     def simulation_step(self) -> tuple[int, int]:
+        self.car_observation.cache_clear()
+        self.spawn_count_observation.cache_clear()
+
         # local function with local cache:
         # cache is correctly evicted after each simulation step
         @cache
