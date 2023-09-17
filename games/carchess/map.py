@@ -3,7 +3,7 @@ from __future__ import annotations
 import itertools
 from os import path
 from string import ascii_lowercase, ascii_uppercase
-from typing import TYPE_CHECKING, Any, Optional, TypeAlias
+from typing import TYPE_CHECKING, Any, Optional, TypeAlias, cast
 from pathlib import Path
 from functools import cache, cached_property
 from contextlib import suppress
@@ -43,14 +43,13 @@ class Map:
             return img[:, :, -1] > 0
 
         self.tl = TrafficLights(alpha_mask(read_map_img("tl.png")))
-        shape = self.tl.lights.shape
         self.layers = []
         with suppress(FileNotFoundError):
             for layer_id in itertools.count(1):
                 img = read_map_img(f"{layer_id}.png")
-                assert img.shape[:2] == shape, (
-                    f"Shape of layer {layer_id} map {img.shape[:2]} "
-                    f"does not match the shape of the traffic light map {shape}"
+                assert img.shape[:2] == self.size, (
+                    f"Size of layer {layer_id} map {img.shape[:2]} "
+                    f"does not match the size of the traffic light map {self.size}"
                 )
                 max_color = img[:, :, :-1].max(axis=-1)
                 l = Layer(max_color * alpha_mask(img))
@@ -99,6 +98,10 @@ class Map:
     @cached_property
     def observation_shape(self) -> tuple[int, int, int]:
         return (1 + 3 * len(self.layers), *self.tl.lights.shape)  # type: ignore [return-value] # noqa: E501
+
+    @cached_property
+    def size(self) -> tuple[int, int]:
+        return cast(tuple[int, int], self.tl.lights.shape)
 
     def toggle_tl(self, pos: Pos) -> None:
         self.tl.toggle_at(pos)
@@ -166,7 +169,7 @@ class Map:
         return ret
 
     def ascii_art(self) -> str:
-        field = np.full(self.tl.lights.shape, " ", dtype=str)
+        field = np.full(self.size, " ", dtype=str)
         for n, layer in enumerate(self.layers):
             # x, y = zip(*layer.car_pos)
             field[self.tl.lights] = "o"
