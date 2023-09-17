@@ -3,14 +3,13 @@ from __future__ import annotations
 import itertools
 from os import path
 from string import ascii_lowercase, ascii_uppercase
-from typing import TYPE_CHECKING, Any, Optional, TypeAlias, cast
+from typing import TYPE_CHECKING, TypeAlias, cast
 from pathlib import Path
 from functools import cache, cached_property
 from contextlib import suppress
 
 import numpy as np
 import imageio.v3 as iio
-import numpy.typing as npt
 
 from .layers import Layer, TrafficLights
 
@@ -86,24 +85,29 @@ class Map:
         for l, n in zip(self.layers, random_numbers):
             l.update_spawn_count(n, max_density)
 
-    def get_car_observations(self) -> list[npt.NDArray[Any]]:
-        channels: list[npt.NDArray[Any]] = []
-        for l in self.layers:
-            channels.extend(l.observation_maps)
-        return channels
+    def tl_observation(self) -> ndarr_int:
+        return self.tl.observation_map
 
-    def get_observation(
-        self, car_observations: Optional[list[npt.NDArray[Any]]] = None
-    ) -> ndarr_f64:
-        if car_observations is None:
-            car_observations = self.get_car_observations()
-        return np.stack(
-            [self.tl.observation_map] + car_observations,
-        )
+    def car_observation(self) -> ndarr_int:
+        return np.stack([l.car_mask.astype(int) for l in self.layers])
+
+    def spawn_count_observation(self, max_density: float = 1) -> ndarr_int:
+        # plus one for zero count plane
+        max_spawn = int(self.max_lane_capacity * max_density) + 1
+        spawn_map = np.zeros([max_spawn, *self.size], dtype=int)
+        for l in self.layers:
+            count, mask = l.spawn_count_observation
+            spawn_map[count] += mask
+        return spawn_map
 
     @cached_property
-    def observation_shape(self) -> tuple[int, int, int]:
-        return (1 + 3 * len(self.layers), *self.tl.lights.shape)  # type: ignore [return-value] # noqa: E501
+    def lane_observation(self) -> ndarr_f64:
+        return np.stack([l.lane_observation for l in self.layers])
+
+    @cached_property
+    def max_lane_capacity(self) -> int:
+        # first and last field are not included in max capacity calculation
+        return max(len(l.pos) - 2 for l in self.layers)
 
     @cached_property
     def size(self) -> tuple[int, int]:
