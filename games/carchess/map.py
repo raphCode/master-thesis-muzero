@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import itertools
 from os import path
+from string import ascii_lowercase, ascii_uppercase
 from typing import TYPE_CHECKING, Any, Optional, TypeAlias
 from pathlib import Path
 from functools import cache, cached_property
@@ -163,3 +164,15 @@ class Map:
                 l.plot(ax, offset=(n / len(self.layers) - 0.5) / 2, color=colors[n])
             )
         return ret
+
+    def ascii_art(self) -> str:
+        field = np.full(self.tl.lights.shape, " ", dtype=str)
+        for n, layer in enumerate(self.layers):
+            # x, y = zip(*layer.car_pos)
+            field[self.tl.lights] = "o"
+            field[self.tl.closed] = "x"
+            for x, y in layer.car_pos:
+                s = ascii_lowercase if self.tl.closed[x, y] else ascii_uppercase
+                field[x, y] = s[n]
+            field[*layer.pos[0]] = layer.spawn_counter
+        return np.array_str(field)
