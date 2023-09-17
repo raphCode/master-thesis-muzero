@@ -109,8 +109,10 @@ class Map:
     def size(self) -> tuple[int, int]:
         return cast(tuple[int, int], self.tl.lights.shape)
 
-    def toggle_tl(self, pos: Pos) -> None:
-        self.tl.toggle_at(pos)
+    def tl_flat_action(self, flat_index: int) -> None:
+        w, h = self.size
+        assert 0 < flat_index < w * h
+        self.tl.toggle_at(divmod(flat_index, w))
 
     def _get_collisions(self) -> tuple[list[Pos], int]:
         car_map = sum(l.car_mask.astype(int) for l in self.layers)
