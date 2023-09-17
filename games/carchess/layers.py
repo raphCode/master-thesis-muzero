@@ -156,6 +156,11 @@ class Layer:
         self.moveable_cars = set()
         return reached_goal
 
+    def maybe_spawn_car(self) -> None:
+        if self.spawn_counter > 0 and 0 not in self.cars:
+            self.cars.add(0)
+            self.spawn_counter -= 1
+
     def remove_cars(self, pos: Iterable[Pos]) -> None:
         self.cars.difference_update(map(self.index_at, pos))
 
