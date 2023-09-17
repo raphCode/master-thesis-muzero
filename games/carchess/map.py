@@ -67,12 +67,18 @@ class Map:
             random_layer.remove_cars(coll_pos)
 
     def update_spawn_count_explicit(
-        self, layer_id: int, random_number: int, max_density: float
+        self,
+        layer_id: int,
+        random_number: int,
+        max_density: float,
     ) -> None:
         self.layers[layer_id].update_spawn_count(random_number, max_density)
 
     def update_spawn_counts_random(
-        self, min_spawn: int, max_spawn: int, max_density: float
+        self,
+        min_spawn: int,
+        max_spawn: int,
+        max_density: float,
     ) -> None:
         random_numbers = rng.integers(
             min_spawn, max_spawn, endpoint=True, size=len(self.layers)
