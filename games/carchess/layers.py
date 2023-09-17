@@ -186,14 +186,17 @@ class Layer:
         return ret
 
     @property
-    def observation_maps(self) -> tuple[ndarr_f64, ndarr_int, ndarr_int]:
+    def lane_observation(self) -> ndarr_f64:
         x, y = zip(*self.pos)
         lane_map = np.full(self.size, -1)
         lane_map[x, y] = np.linspace(1, 0, len(self.pos))
-        spawn_map = np.zeros(self.size, dtype=int)
-        spawn_map[self.pos[0]] = self.spawn_counter
-        car_map = self.car_mask.astype(int) * 2 - 1
-        return lane_map, car_map, spawn_map
+        return lane_map
+
+    @property
+    def spawn_count_observation(self) -> tuple[int, ndarr_bool]:
+        spawn_map = np.zeros(self.size, dtype=bool)
+        spawn_map[self.pos[0]] = True
+        return self.spawn_counter, spawn_map
 
     def plot(self, ax: Axes, offset: float, **kwargs: Any) -> list[PlotData]:
         def coords(pos: ndarr_f64) -> tuple[ndarr_f64, ndarr_f64]:
