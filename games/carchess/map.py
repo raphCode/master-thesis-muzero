@@ -142,6 +142,7 @@ class Map:
         goal_cars = 0
         for l in self.layers:
             goal_cars += l.advance_cars()
+            l.maybe_spawn_car()
         # check collisions
         coll_pos, crashed_cars = self._get_collisions()
         for l in self.layers:
