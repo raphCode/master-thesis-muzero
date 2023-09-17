@@ -51,8 +51,8 @@ class Map:
                     f"Shape of layer {layer_id} map {img.shape[:2]} "
                     f"does not match the shape of the traffic light map {shape}"
                 )
-                red_channel = img[:, :, 0]
-                l = Layer(red_channel * alpha_mask(img))
+                max_color = img[:, :, :-1].max(axis=-1)
+                l = Layer(max_color * alpha_mask(img))
                 self.layers.append(l)
 
     def reset(self, prepopulate: float = 0.3, init_red_rate: float = 0.5) -> None:
