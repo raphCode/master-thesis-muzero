@@ -66,8 +66,8 @@ class TrainingData:
     Similar to TrajectoryState, but in a form more convenient for network training.
     A list of TrainingData is a complete training batch, it stores multiple continous
     sections of game trajectories stacked in the batch dimension.
-    The list length is between min_trajectory_length and max_trajectory_length, and the
-    stacked height inside each tensor of a single TrainingData is batch_size.
+    The list length is unroll_length, and the stacked height inside each tensor of a
+    single TrainingData is batch_size.
 
                     timestep / list index
     list[TrainingData]    0 1 2 3 4
@@ -75,23 +75,18 @@ class TrainingData:
                     trajectory move number
     trajectory a  0 1 2 3|4 5 6 7 8|9 ...      ^
     trajectory b         |0 1 2 3 4|5 6 7 8 9  | batch_size
-    trajectory c      0 1|2 3 4 D D|           v
+    trajectory c      0 1|2 3 4 5 6|           v
                           <------->
-                 [min-max]_trajectory_length
-
-    D = dummy TrainingData to pad trajectories beyond their end up to batch trajectory
-    length
+                        unroll_length
 
     Due to the nature of batching, each timestep is processed at once, but may contain
-    different types of trajectory states (initial state, observation / own move, other
-    player move).
+    different types of trajectory states (observation / own move, other player move).
     To select the correct behavior during training for each trajectory, this requires the
     use of boolean masks.
     """
 
     # masks:
     is_observation: Tensor
-    is_data: Tensor
 
     observations: tuple[Tensor, ...]
     turn_status: Tensor
@@ -102,25 +97,9 @@ class TrainingData:
 
     @classmethod  # type: ignore [misc]
     @property
-    @cast("functools._lru_cache_wrapper[TrainingData]", functools.cache)
-    def dummy(cls) -> TrainingData:
-        """
-        Dummy data for padding trajectories ending early inside the batch.
-        Designed to use as little memory as possible:
-        - tensor instances with identical data reused internally
-        - returned TrainingData instance cached for future calls
-        """
-        cache = TensorCache()
-        return cls(
-            is_observation=cache.tensor(False),
-            is_data=cache.tensor(False),
-            observations=tuple(map(torch.zeros, C.game.instance.observation_shapes)),
-            turn_status=cache.tensor(0, dtype=torch.long),  # index tensor needs long
-            action_onehot=cache.zeros(C.game.instance.max_num_actions, dtype=torch.long),
-            target_policy=cache.zeros(C.game.instance.max_num_actions),
-            value_target=cache.zeros(C.game.instance.max_num_players),
-            reward=cache.zeros(C.game.instance.max_num_players),
-        )
+    @cast("functools._lru_cache_wrapper[tuple[Tensor, ...]]", functools.cache)
+    def empty_observation(_) -> tuple[Tensor, ...]:
+        return tuple(map(torch.zeros, C.game.instance.observation_shapes))
 
     @classmethod
     def from_trajectory_state(
@@ -134,10 +113,9 @@ class TrainingData:
             cache = TensorCache()
         return cls(
             is_observation=cache.tensor(ts.observations is not None),
-            is_data=cache.tensor(True),
             observations=ts.observations
             if ts.observations is not None
-            else cls.dummy.observations,
+            else cls.empty_observation,
             turn_status=cache.tensor(
                 TurnStatus.TERMINAL_STATE.target_index if is_terminal else ts.turn_status,
                 dtype=torch.long,

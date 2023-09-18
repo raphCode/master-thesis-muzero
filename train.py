@@ -169,15 +169,12 @@ class Trainer:
             mask: Optional[Tensor] = None,
         ) -> Tensor:
             """
-            Masked loss, with the mask defaulting to the current step's is_data.
             criterion is expected to not perform any data reduction:
             The results are summed over the batch dimension to calculate a final average
             after summing all unroll steps.
             The average is calculated over the remaining loss result dimensions.
             """
-            if mask is None:
-                mask = step.is_data
-            loss = criterion(prediction[mask], target[mask])
+            loss = criterion(prediction, target)
             return loss.view(loss.shape[0], -1).mean(dim=1).sum()
 
         pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
@@ -187,6 +184,7 @@ class Trainer:
         counts = LossCounts()
 
         first = batch[0]
+        batch_size = len(first.reward)
         latent: Tensor
 
         for step in batch:
@@ -196,15 +194,13 @@ class Trainer:
                     assert step.is_observation.all()
                     latent = obs_latent
                 else:
+                    mask = step.is_observation
                     losses.latent += ml(
                         pdist,
-                        latent.flatten(start_dim=1),
-                        obs_latent.flatten(start_dim=1),
-                        mask=step.is_observation,
+                        latent[mask].flatten(start_dim=1),
+                        obs_latent[mask].flatten(start_dim=1),
                     )
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
-
-            counts.data += cast(int, step.is_data.count_nonzero().item())
 
             value_logits, policy_logits = self.nets.prediction.raw_forward(
                 latent,
@@ -221,6 +217,7 @@ class Trainer:
             losses.reward += ml(cross, reward_logits, reward_target)
             losses.turn += ml(cross, turn_status_logits, step.turn_status)
 
+        counts.data = C.training.unroll_length * batch_size
         losses /= counts
 
         self.slaw.step(losses)

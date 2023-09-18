@@ -68,7 +68,7 @@ def main(cfg: DictConfig) -> None:
                 for traj in result.trajectories:
                     rb.add_trajectory(traj, result.game_completed)
                 pc.net.update_rescalers(rb)
-                batch_samples = C.training.batch_size * C.training.max_trajectory_length
+                batch_samples = C.training.batch_size * C.training.unroll_length
                 target_samples = (
                     rb.data_added * C.training.train_selfplay_ratio * rb.fullness
                 )

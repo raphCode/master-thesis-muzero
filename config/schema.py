@@ -138,8 +138,7 @@ class LossWeights:
 class TrainConfig:
     train_selfplay_ratio: float
     batch_size: int
-    min_trajectory_length: int
-    max_trajectory_length: int
+    unroll_length: int
     discount_factor: float
     n_step_horizon: int
     replay_buffer_size: int
