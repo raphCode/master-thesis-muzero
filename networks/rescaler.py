@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, TypeVar, cast
 
 import torch
 import torch.nn as nn
@@ -8,10 +8,9 @@ import torch.nn.functional as F
 from torch import Tensor
 from torch.jit import TopLevelTracedModule
 
-from util import copy_type_signature
+from util import ndarr_f32, copy_type_signature
 
-if TYPE_CHECKING:
-    from util import ndarr_f32
+T = TypeVar("T", ndarr_f32, Tensor)
 
 
 class RescalerPy:
@@ -28,11 +27,11 @@ class RescalerPy:
         eps = 1e-4
         self.support = torch.linspace(low - eps, high + eps, n)
 
-    def normalize(self, value: ndarr_f32) -> ndarr_f32:
+    def normalize(self, value: T) -> T:
         """
         [min, max] range to [0, 1]
         """
-        return (value - self.min) / (self.max - self.min)
+        return ((value - self.min) / (self.max - self.min)).clip(0, 1)
 
     @property
     def min(self) -> float:
