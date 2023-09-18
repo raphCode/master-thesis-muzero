@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, TypeVar, Protocol, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import torch
 import torch.nn as nn
@@ -10,18 +10,8 @@ from torch.jit import TopLevelTracedModule
 
 from util import copy_type_signature
 
-T = TypeVar("T")
-
-
-class SupportsRescaling(Protocol):
-    def __sub__(self: T, other: float) -> T:
-        ...
-
-    def __truediv__(self: T, other: float) -> T:
-        ...
-
-
-R = TypeVar("R", bound=SupportsRescaling)
+if TYPE_CHECKING:
+    from util import ndarr_f32
 
 
 class RescalerPy:
@@ -38,7 +28,7 @@ class RescalerPy:
         eps = 1e-4
         self.support = torch.linspace(low - eps, high + eps, n)
 
-    def normalize(self, value: R) -> R:
+    def normalize(self, value: ndarr_f32) -> ndarr_f32:
         """
         [min, max] range to [0, 1]
         """
