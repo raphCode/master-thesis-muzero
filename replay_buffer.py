@@ -115,9 +115,9 @@ class ReplayBuffer:
         for _ in range(retry_limit * C.training.batch_size):
             start_index = random.randrange(len(self.buffer))
             traj_id, traj = self.buffer[start_index]
-            minlen_id, _ = self.buffer[start_index + C.training.min_trajectory_length - 1]
-            if traj.is_observation and traj_id == minlen_id:
-                sampled_starts.add((start_index, traj_id))
+            unroll_len_id, _ = self.buffer[start_index + C.training.unroll_length - 1]
+            if traj.is_observation and traj_id == unroll_len_id:
+                sampled_starts.add(start_index)
             if len(sampled_starts) == C.training.batch_size:
                 break
         else:
@@ -125,24 +125,15 @@ class ReplayBuffer:
                 f"Underfull batch size: {len(sampled_starts)}/{C.training.batch_size}"
             )
 
-        # Walk forward in the buffer from the start indices, collecting the trajectory
-        # states until the maximum length is reached or all trajectories ended.
+        # Walk forward in the buffer from the start indices, collecting trajectory states
         batch = []
-        for n in range(C.training.max_trajectory_length):
+        for n in range(C.training.unroll_length):
             batch_step = []
-            is_data = False
-            for start_index, start_traj_id in sorted(sampled_starts):
-                traj_id, data = self.buffer[start_index + n]
-                if traj_id == start_traj_id:
-                    is_data = True
-                    self.data_sampled += 1
-                else:
-                    data = TrainingData.dummy
+            for start_index in sorted(sampled_starts):
+                _, data = self.buffer[start_index + n]
                 batch_step.append(data)
-            if not is_data:
-                # all trajectories ended early
-                break
             batch.append(TrainingData.stack_batch(batch_step))
+        self.data_sampled += len(sampled_starts) * C.training.unroll_length
         return batch
 
     @property

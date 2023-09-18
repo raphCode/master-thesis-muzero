@@ -1,7 +1,6 @@
 batch_size: 128
 train_selfplay_ratio: 100
-min_trajectory_length: 3
-max_trajectory_length: ${.min_trajectory_length}
+unroll_length: 3
 discount_factor: 0.98
 n_step_horizon: ${.max_steps_per_game}
 replay_buffer_size: 10_000
