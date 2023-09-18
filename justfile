@@ -8,10 +8,10 @@ clear-screen:
     clear
 
 train-catch *params: clear-screen
-    {{train_cmd}} training=test networks=test game=os_catch {{params}}
+    {{train_cmd}} training=catch networks=catch game=os_catch {{params}}
 
 debug-catch *params: && clear-screen
-    {{debug_cmd}} training=test networks=test game=os_catch {{params}}
+    {{debug_cmd}} training=catch networks=catch game=os_catch {{params}}
 
 bisect-catch: (train-catch bisect_run_dir)
 
