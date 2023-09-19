@@ -1,4 +1,4 @@
-#import "@preview/cetz:0.1.0": canvas, draw, tree, coordinate, vector
+#import "@preview/cetz:0.1.1": canvas, draw, tree, coordinate, vector
 
 #let backprop(node, parent_player: none) = {
   node.parent_player = parent_player
