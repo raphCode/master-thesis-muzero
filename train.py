@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 import attrs
 import numpy as np
 import torch
+import torch.nn.functional as F
 from attrs import Factory, define
 from toolz import dicttoolz  # type: ignore
 from torch import Tensor, nn
@@ -212,6 +213,11 @@ class Trainer:
                         obs_latent[mask].flatten(start_dim=1),
                     )
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
+
+            tbs.add_scalar(
+                f"latent cosine similarity/unroll {n}",
+                F.cosine_similarity(latent[0:1], latent[1:], dim=1).mean(),
+            )
 
             value_logits, policy_logits = self.nets.prediction.raw_forward(
                 latent,
