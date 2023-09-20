@@ -180,7 +180,7 @@ class Trainer:
         pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
 
-        losses = Losses()
+        loss = Losses()
         counts = LossCounts()
 
         first = batch[0]
@@ -195,7 +195,7 @@ class Trainer:
                     latent = obs_latent
                 else:
                     mask = step.is_observation
-                    losses.latent += ml(
+                    loss.latent += ml(
                         pdist,
                         latent[mask].flatten(start_dim=1),
                         obs_latent[mask].flatten(start_dim=1),
@@ -206,27 +206,27 @@ class Trainer:
                 latent,
             )
             value_target = self.nets.prediction.value_scale.get_target(step.value_target)
-            losses.value += ml(cross, value_logits, value_target)
-            losses.policy += ml(cross, policy_logits, step.target_policy)
+            loss.value += ml(cross, value_logits, value_target)
+            loss.policy += ml(cross, policy_logits, step.target_policy)
 
             latent, reward_logits, turn_status_logits = self.nets.dynamics.raw_forward(
                 latent,
                 step.action_onehot,
             )
             reward_target = self.nets.dynamics.reward_scale.get_target(step.reward)
-            losses.reward += ml(cross, reward_logits, reward_target)
-            losses.turn += ml(cross, turn_status_logits, step.turn_status)
+            loss.reward += ml(cross, reward_logits, reward_target)
+            loss.turn += ml(cross, turn_status_logits, step.turn_status)
 
         counts.data = C.training.unroll_length * batch_size
-        losses /= counts
+        loss /= counts
 
-        self.slaw.step(losses)
+        self.slaw.step(loss)
         weights = self.slaw.weights
 
-        total_loss = losses.weighted_sum(weights)
+        total_loss = loss.weighted_sum(weights)
 
-        for k, loss in attrs.asdict(losses).items():
-            tbs.add_scalar(f"loss/{k}", loss)
+        for k, l in attrs.asdict(loss).items():
+            tbs.add_scalar(f"loss/{k}", l)
         for k, weight in weights.items():
             tbs.add_scalar(f"loss weight/{k}", weight)
 
