@@ -41,6 +41,14 @@ class Losses:
     policy: Tensor = zero_tensor
     turn: Tensor = zero_tensor
 
+    def __add__(self, other: Losses) -> Losses:
+        d1 = attrs.asdict(self)
+        d2 = attrs.asdict(other)
+        return Losses(**dicttoolz.merge_with(sum, d1, d2))
+
+    def __div__(self, div: float) -> Losses:
+        return Losses(**dicttoolz.valmap(lambda x: x / div, attrs.asdict(self)))
+
     def weighted_sum(self, weights: dict[str, float]) -> Tensor:
         """
         Multiplies each loss component with the same-named weight and returns the sum.
@@ -180,14 +188,17 @@ class Trainer:
         pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
 
-        loss = Losses()
+        step_losses = []
         counts = LossCounts()
 
         first = batch[0]
         batch_size = len(first.reward)
         latent: Tensor
 
-        for step in batch:
+        for n, step in enumerate(batch):
+            loss = Losses()
+            step_losses.append(loss)
+
             if step.is_observation.any():
                 obs_latent = self.nets.representation(*step.observations)
                 if step is first:
@@ -195,7 +206,7 @@ class Trainer:
                     latent = obs_latent
                 else:
                     mask = step.is_observation
-                    loss.latent += ml(
+                    loss.latent = ml(
                         pdist,
                         latent[mask].flatten(start_dim=1),
                         obs_latent[mask].flatten(start_dim=1),
@@ -206,19 +217,24 @@ class Trainer:
                 latent,
             )
             value_target = self.nets.prediction.value_scale.get_target(step.value_target)
-            loss.value += ml(cross, value_logits, value_target)
-            loss.policy += ml(cross, policy_logits, step.target_policy)
+            loss.value = ml(cross, value_logits, value_target)
+            loss.policy = ml(cross, policy_logits, step.target_policy)
 
             latent, reward_logits, turn_status_logits = self.nets.dynamics.raw_forward(
                 latent,
                 step.action_onehot,
             )
             reward_target = self.nets.dynamics.reward_scale.get_target(step.reward)
-            loss.reward += ml(cross, reward_logits, reward_target)
-            loss.turn += ml(cross, turn_status_logits, step.turn_status)
+            loss.reward = ml(cross, reward_logits, reward_target)
+            loss.turn = ml(cross, turn_status_logits, step.turn_status)
+
+            for k, l in attrs.asdict(loss).items():
+                if k == "latent":
+                    continue
+                tbs.add_scalar(f"loss: unroll {n}/{k}", l / batch_size)
 
         counts.data = C.training.unroll_length * batch_size
-        loss /= counts
+        loss = sum(step_losses, start=Losses()) / counts
 
         self.slaw.step(loss)
         weights = self.slaw.weights
