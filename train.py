@@ -220,6 +220,13 @@ class Trainer:
             loss.value = ml(cross, value_logits, value_target)
             loss.policy = ml(cross, policy_logits, step.target_policy)
 
+            def log_mean_grad(tag: str, grad: Tensor) -> None:
+                tbs.add_scalar(tag, grad.abs().mean())
+
+            latent.register_hook(
+                functools.partial(log_mean_grad, f"latent gradient/unroll {n}")
+            )  # type: ignore [no-untyped-call]
+
             latent, reward_logits, turn_status_logits = self.nets.dynamics.raw_forward(
                 latent,
                 step.action_onehot,
