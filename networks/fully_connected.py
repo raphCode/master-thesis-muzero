@@ -163,9 +163,9 @@ class FcDynamics(DynamicsNet):
 
     def forward(
         self,
-        latent: Tensor,
+        latent_in: Tensor,
         action_onehot: Tensor,
     ) -> tuple[Tensor, Tensor, Tensor]:
-        latent, reward, turn = self.fc_reshape(latent, action_onehot)
-        latent = self.act(latent)
-        return latent, reward, turn
+        latent_out, reward, turn = self.fc_reshape(latent_in, action_onehot)
+        latent_out = self.act(latent_out)
+        return latent_in + latent_out, reward, turn
