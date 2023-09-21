@@ -1,13 +1,15 @@
 import math
 import itertools
-from typing import Any, Optional, cast
+from typing import Any, Type, Optional, cast
 from collections.abc import Sequence
 
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
-from .bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
+from util import copy_type_signature
+
+from .bases import DynamicsNet, PredictionNet, RepresentationNet
 
 
 class GenericFc(nn.Module):
@@ -43,30 +45,32 @@ class GenericFc(nn.Module):
         return y
 
 
-class FcBase(GenericFc, NetBase):
+class FlatReshaper(nn.Module):
     out_shapes: Sequence[Sequence[int]]
 
     def __init__(
         self,
         in_shapes: Sequence[Sequence[int]],
         out_shapes: Sequence[Sequence[int]],
+        module: Type[nn.Module] = GenericFc,
         **kwargs: Any,
     ):
+        super().__init__()
         self.out_shapes = out_shapes
-        super().__init__(
+        self.mod = module(
             input_width=sum(map(math.prod, in_shapes)),
             output_width=sum(map(math.prod, out_shapes)),
             **kwargs,
         )
 
-    def reshape_forward(self, *inputs: Tensor) -> tuple[Tensor, ...]:
+    def forward(self, *inputs: Tensor) -> tuple[Tensor, ...]:
         def reshape_maybe(tensor: Tensor, shape: Sequence[int]) -> Tensor:
             if len(shape) > 1 and math.prod(shape) > 0:
                 return tensor.reshape(-1, *shape)
             return tensor
 
         out_tensors = torch.split(
-            self.fc_forward(*inputs),
+            self.mod(*inputs),
             list(map(math.prod, self.out_shapes)),
             dim=-1,
         )
@@ -75,12 +79,17 @@ class FcBase(GenericFc, NetBase):
             for tensor, shape in zip(out_tensors, self.out_shapes)
         )
 
+    @copy_type_signature(forward)  # provide typed __call__ interface
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return super().__call__(*args, **kwargs)
 
-class FcRepresentation(FcBase, RepresentationNet):
+
+class FcRepresentation(RepresentationNet):
     def __init__(self, latent_features: int, **kwargs: Any):
         from config import C
 
-        super().__init__(
+        super().__init__()
+        self.fc_reshape = FlatReshaper(
             in_shapes=C.game.instance.observation_shapes,
             out_shapes=[[latent_features]],
             **kwargs,
@@ -90,14 +99,15 @@ class FcRepresentation(FcBase, RepresentationNet):
         self,
         *observations: Tensor,
     ) -> Tensor:
-        return self.reshape_forward(*observations)[0]
+        return self.fc_reshape(*observations)[0]
 
 
-class FcPrediction(FcBase, PredictionNet):
+class FcPrediction(PredictionNet):
     def __init__(self, **kwargs: Any):
         from config import C
 
-        super().__init__(
+        super().__init__()
+        self.fc_reshape = FlatReshaper(
             in_shapes=[
                 C.networks.latent_shape,
             ],
@@ -111,16 +121,17 @@ class FcPrediction(FcBase, PredictionNet):
     def forward(self, latent: Tensor) -> tuple[Tensor, Tensor]:
         return cast(
             tuple[Tensor, Tensor],
-            self.reshape_forward(latent),
+            self.fc_reshape(latent),
         )
 
 
-class FcDynamics(FcBase, DynamicsNet):
+class FcDynamics(DynamicsNet):
     def __init__(self, **kwargs: Any):
         from mcts import TurnStatus
         from config import C
 
-        super().__init__(
+        super().__init__()
+        self.fc_reshape = FlatReshaper(
             in_shapes=[
                 C.networks.latent_shape,
                 [C.game.instance.max_num_actions],
@@ -140,5 +151,5 @@ class FcDynamics(FcBase, DynamicsNet):
     ) -> tuple[Tensor, Tensor, Tensor]:
         return cast(
             tuple[Tensor, Tensor, Tensor],
-            self.reshape_forward(latent, action_onehot),
+            self.fc_reshape(latent, action_onehot),
         )
