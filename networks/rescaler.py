@@ -116,11 +116,14 @@ class Rescaler(RescalerPy, nn.Module):
         return mse * loss  # type: ignore [no-any-return]
 
     def jit(self) -> RescalerJit:
+        B = 1
+        S = len(self.support)
+        V = 1
         traced_mod = torch.jit.trace_module(  # type: ignore [no-untyped-call]
             self,
             dict(
-                forward=torch.zeros(len(self.support), 1),
-                get_target=torch.zeros(1, 1),
+                forward=torch.zeros(B, S, V),
+                calculate_loss=(torch.zeros(B, S, V), torch.zeros(B, V)),
             ),
         )
         object.__setattr__(traced_mod, "__class__", RescalerJit)
