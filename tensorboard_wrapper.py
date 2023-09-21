@@ -65,6 +65,12 @@ class TensorboardLogger(AbstractContextManager["TensorboardLogger"]):
         graph = GraphDef(node=nodes, versions=VersionDef(producer=22))
         self.sw._get_file_writer().add_onnx_graph(graph)  # type: ignore [no-untyped-call]
 
+    def add_custom_scalars_layout(
+        self,
+        **layouts: dict[str, tuple[Literal["Multiline"] | Literal["Margin"], list[str]]],
+    ) -> None:
+        self.sw.add_custom_scalars(layouts)  # type: ignore [no-untyped-call]
+
     def create_step_logger(self, step: int) -> TBStepLogger:
         return TBStepLogger(self.sw, step)
 
