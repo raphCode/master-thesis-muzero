@@ -4,11 +4,11 @@ from typing import Any, Type, Optional, cast
 from collections.abc import Sequence
 
 import torch
-import torch.nn.functional as F
 from torch import Tensor, nn
 
 from util import copy_type_signature
 
+from .util import NecroReLu
 from .bases import DynamicsNet, PredictionNet, RepresentationNet
 
 
@@ -22,6 +22,7 @@ class GenericFc(nn.Module):
         input_width: int,
         output_width: int,
         *,
+        act_out: bool = False,
         hidden_depth: int = 2,
         width: Optional[int] = None,
         **kwargs: Any,
@@ -30,19 +31,33 @@ class GenericFc(nn.Module):
         if width is None:
             width = input_width
         widths = [input_width] + [width] * hidden_depth + [output_width]
-        self.fc_layers = [nn.Linear(a, b) for a, b in itertools.pairwise(widths)]
-        for n, layer in enumerate(self.fc_layers):
-            self.add_module(f"fc{n}", layer)
+        self.act_out = act_out
+        self.fcs, self.acts, self.norms = zip(
+            *[
+                (nn.Linear(a, b), NecroReLu(), nn.LayerNorm(a, elementwise_affine=False))
+                for a, b in itertools.pairwise(widths)
+            ]
+        )
+        for n, fc in enumerate(self.fcs):
+            self.add_module(f"Fc{n}", fc)
+        for n, act in enumerate(self.acts):
+            self.add_module(f"Act{n}", act)
+        for n, norm in enumerate(self.norms):
+            self.add_module(f"norm{n}", norm)
 
-    def fc_forward(self, *inputs: Tensor) -> Tensor:
+    def forward(self, *inputs: Tensor) -> Tensor:
         x = torch.cat([i.flatten(1) for i in inputs], dim=1)
-        for fc in self.fc_layers:
-            x_in = x
-            y = fc(x)  # type: Tensor
-            x = F.relu(y)
-            if fc.in_features == fc.out_features:
-                x = x + x_in  # skip connection / ResNet
-        return y
+        last = self.fcs[-1]
+        for fc, act, norm in zip(self.fcs, self.acts, self.norms):
+            x = norm(x)
+            x = fc(x)
+            if fc is not last or self.act_out:
+                x = act(x)
+        return x
+
+    @copy_type_signature(forward)  # provide typed __call__ interface
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return super().__call__(*args, **kwargs)
 
 
 class FlatReshaper(nn.Module):
@@ -92,6 +107,7 @@ class FcRepresentation(RepresentationNet):
         self.fc_reshape = FlatReshaper(
             in_shapes=C.game.instance.observation_shapes,
             out_shapes=[[latent_features]],
+            act_out=True,
             **kwargs,
         )
 
@@ -143,13 +159,13 @@ class FcDynamics(DynamicsNet):
             ],
             **kwargs,
         )
+        self.act = NecroReLu()
 
     def forward(
         self,
         latent: Tensor,
         action_onehot: Tensor,
     ) -> tuple[Tensor, Tensor, Tensor]:
-        return cast(
-            tuple[Tensor, Tensor, Tensor],
-            self.fc_reshape(latent, action_onehot),
-        )
+        latent, reward, turn = self.fc_reshape(latent, action_onehot)
+        latent = self.act(latent)
+        return latent, reward, turn
