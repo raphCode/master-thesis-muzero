@@ -29,7 +29,7 @@ class GenericFc(nn.Module):
     ):
         super().__init__(**kwargs)
         if width is None:
-            width = input_width
+            width = int(input_width * 1.2)
         widths = [input_width] + [width] * hidden_depth + [output_width]
         self.act_out = act_out
         self.fcs, self.acts, self.norms = zip(
