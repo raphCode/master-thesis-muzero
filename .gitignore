@@ -17,4 +17,4 @@ Session.vim
 Sessionx.vim
 
 # hydra run output directory
-outputs/
+*outputs*/
