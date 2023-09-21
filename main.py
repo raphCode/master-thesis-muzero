@@ -5,6 +5,7 @@ import shutil
 import logging
 from typing import TYPE_CHECKING
 
+import attrs
 import hydra
 import torch
 from hydra.core.config_store import ConfigStore
@@ -58,6 +59,27 @@ def main(cfg: DictConfig) -> None:
     n = 0
     try:
         with TensorboardLogger(log_dir="tb") as tb:
+            tb.add_custom_scalars_layout(
+                unroll={
+                    f"loss {k}": (
+                        "Multiline",
+                        [f"loss: unroll \\d+/{k}"],
+                    )
+                    for k in attrs.asdict(C.training.loss_weights).keys()
+                }
+                | {
+                    "latent gradient": (
+                        "Multiline",
+                        ["latent gradient/unroll \\d+"],
+                    )
+                }
+                | {
+                    "mean latent similarity": (
+                        "Multiline",
+                        ["latent cosine similarity/unroll \\d+"],
+                    )
+                }
+            )
             pc.net.jit()
             tb.add_graphs(C.networks.factory())
             while n < 400_000:
