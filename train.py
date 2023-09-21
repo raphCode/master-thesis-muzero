@@ -146,6 +146,37 @@ class SLAW:
         return dict(zip(self.auto_weight_names, self.w)) | self.fixed_weights
 
 
+class BalancedCrossEntropy:
+    nfreqs: Optional[Tensor]
+    beta: float
+
+    def __init__(self, beta: float = 0.99):
+        self.nfreqs = None
+        self.beta = beta
+
+    def __call__(self, logits: Tensor, target: Tensor) -> Tensor:
+        num_classes = logits.shape[1]
+        batchsize = logits.shape[0]
+        logits = logits.reshape(-1, num_classes)
+        if target.dim() == 1:
+            freqs = torch.bincount(target, minlength=num_classes + 1)[:-1]
+        else:
+            target = target.reshape(-1, num_classes)
+            freqs = target.sum(dim=0)
+        nf = freqs / batchsize
+        if self.nfreqs is None:
+            self.nfreqs = nf
+        self.nfreqs = self.beta * self.nfreqs + (1 - self.beta) * nf
+        w = (1 / num_classes) / (self.nfreqs + 1e-8)
+        return F.cross_entropy(logits, target, reduction="sum")
+
+
+def grad_scale(x: Tensor, scale: float = 0.5) -> Tensor:
+    forward = x
+    backward = scale * x
+    return backward + (forward - backward).detach()
+
+
 class Trainer:
     def __init__(self, nets: Networks):
         self.nets = nets
@@ -188,6 +219,9 @@ class Trainer:
 
         pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
+        cos = functools.partial(
+            nn.CosineEmbeddingLoss(reduction="sum"), target=torch.ones(1)
+        )
 
         step_losses = []
         counts = LossCounts()
@@ -207,11 +241,10 @@ class Trainer:
                     latent = obs_latent
                 else:
                     mask = step.is_observation
-                    loss.latent = ml(
-                        pdist,
+                    loss.latent = cos(
                         latent[mask].flatten(start_dim=1),
                         obs_latent[mask].flatten(start_dim=1),
-                    )
+                    ).sum()
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
 
             tbs.add_scalar(
@@ -237,7 +270,7 @@ class Trainer:
             )  # type: ignore [no-untyped-call]
 
             latent, reward_logits, turn_status_logits = self.nets.dynamics.raw_forward(
-                latent,
+                grad_scale(latent, 1),
                 step.action_onehot,
             )
             loss.turn = ml(cross, turn_status_logits, step.turn_status)
