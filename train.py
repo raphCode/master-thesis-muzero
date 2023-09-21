@@ -216,9 +216,12 @@ class Trainer:
             value_logits, policy_logits = self.nets.prediction.raw_forward(
                 latent,
             )
-            value_target = self.nets.prediction.value_scale.get_target(step.value_target)
-            loss.value = ml(cross, value_logits, value_target)
             loss.policy = ml(cross, policy_logits, step.target_policy)
+            loss.value = ml(
+                self.nets.prediction.value_scale.calculate_loss,
+                value_logits,
+                step.value_target,
+            )
 
             def log_mean_grad(tag: str, grad: Tensor) -> None:
                 tbs.add_scalar(tag, grad.abs().mean())
@@ -231,9 +234,12 @@ class Trainer:
                 latent,
                 step.action_onehot,
             )
-            reward_target = self.nets.dynamics.reward_scale.get_target(step.reward)
-            loss.reward = ml(cross, reward_logits, reward_target)
             loss.turn = ml(cross, turn_status_logits, step.turn_status)
+            loss.reward = ml(
+                self.nets.dynamics.reward_scale.calculate_loss,
+                reward_logits,
+                step.reward,
+            )
 
             for k, l in attrs.asdict(loss).items():
                 if k == "latent":

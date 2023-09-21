@@ -87,20 +87,25 @@ class Rescaler(RescalerPy, nn.Module):
             torch.tensordot(F.softmax(logits, dim=1), self.support, dims=([1], [0])),
         )
 
-    def get_target(self, x: Tensor) -> Tensor:
+    def calculate_loss(self, logits: Tensor, target: Tensor) -> Tensor:
         """
         value in [min, max] range -> target support probability distribution
-        Shapes: (B, V) -> (B, S, V)
+        Shapes:
+          logits: (B, S, V)
+          target: (B, V)
+          return: (B, V)
         """
         n = len(self.support)
         mini, maxi = self.support[[0, -1]]
-        i = ((x - mini) / (maxi - mini) * (n - 1)).to(dtype=torch.int64)
+        i = ((target - mini) / (maxi - mini) * (n - 1)).to(dtype=torch.int64)
         i = i.clamp(0, n - 2)
         low = self.support[i]
         high = self.support[i + 1]
-        lerp = ((x - low) / (high - low)).unsqueeze(-1)
-        result = F.one_hot(i, n) * (1 - lerp) + F.one_hot(i + 1, n) * lerp
-        return cast(Tensor, result.transpose(1, -1))
+        lerp = (target - low) / (high - low)
+
+        loss_low = F.cross_entropy(logits, i, reduction="none")
+        loss_high = F.cross_entropy(logits, i + 1, reduction="none")
+        return loss_low * (1 - lerp) + loss_high * lerp
 
     def jit(self) -> RescalerJit:
         traced_mod = torch.jit.trace_module(  # type: ignore [no-untyped-call]
