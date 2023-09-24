@@ -4,7 +4,7 @@ node_action_fn:
 node_target_policy_fn:
     _target_: fn.policy.HandlePlayerNodes
     policy_fn:
-        _target_: fn.policy.FromExpandedValues
+        _target_: fn.policy.FromExpandedNormValues
         softmax_temp: 0.3
 node_selection_score_fn: ${fn:fn.selection.sample_from_prior}
 iterations_move_selection: 20

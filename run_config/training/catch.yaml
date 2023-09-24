@@ -1,22 +1,22 @@
-batch_size: 512
+batch_size: 128
 train_selfplay_ratio: 100
-unroll_length: 2
+unroll_length: 3
 discount_factor: 1
 n_step_horizon: ${.max_steps_per_game}
-replay_buffer_size: 30_000
+replay_buffer_size: 15_000
 max_steps_per_game: 1000
 latent_dist_pnorm: 2
 optimizer:
     _target_: torch.optim.Adam
-    weight_decay: 1e-6
+    weight_decay: 1e-3
 learning_rates:
-    base: 2e-4
+    base: 1e-3
     dynamics: 1
     prediction: 1
     representation: 1
 loss_weights:
-    latent: 1
-    value: 10
-    reward: 10
+    latent: 0.1
+    value: 1
+    reward: 1
     policy: 1
     turn: 1
