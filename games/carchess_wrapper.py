@@ -32,6 +32,7 @@ class CarchessGameState(GameState):
     reward: float
     num_chance_outcomes: Optional[int]
     info: str
+    score: float
 
     def __init__(self, m: Map, **kwargs: Unpack[GameStateInitKwArgs]):
         def state_machine() -> StateGen:
@@ -71,6 +72,7 @@ class CarchessGameState(GameState):
 
         super().__init__(**kwargs)
         self.map = m
+        self.score = 0
         self.sm = state_machine()
         self._update_state()
 
@@ -137,9 +139,13 @@ class CarchessGameState(GameState):
         else:
             assert self.action_mask[action]
         self._update_state(action)
+        self.score += self.reward
 
     def __repr__(self) -> str:
-        return f"Round: {self.round + 1}\n{self.info}\n" + self.map.ascii_art()
+        return (
+            f"Round: {self.round + 1} Score: {self.score}\n"
+            f"{self.info}\n" + self.map.ascii_art()
+        )
 
 
 class CarchessGame(Game):
