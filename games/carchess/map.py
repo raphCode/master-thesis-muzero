@@ -88,7 +88,7 @@ class Map:
             min_spawn, max_spawn, endpoint=True, size=len(self.layers)
         )
         for l, n in zip(self.layers, random_numbers):
-            l.update_spawn_count(n, max_density)
+            l.update_spawn_count(int(n), max_density)
 
     @cache
     def tl_observation(self) -> ndarr_int:
