@@ -30,7 +30,7 @@ class CarchessGameState(GameState):
     curr_player: Optional[int]
     action_mask: ndarr_bool
     reward: float
-    num_chance_outcomes: Optional[int]
+    spawn_capacity: Optional[int]
     info: str
     score: float
 
@@ -55,12 +55,11 @@ class CarchessGameState(GameState):
                     f"Simulation result ({self.game.simulation_steps} steps): "
                     f"{g} goal, {c} crash, reward: {reward}\n"
                 )
-                num_chance_outcomes = self.game.max_spawn - self.game.min_spawn
-                for n in range(len(self.map.layers)):
+                for n, l in enumerate(self.map.layers):
                     chance_action = (
                         yield None,
                         reward,
-                        num_chance_outcomes,
+                        l.remaining_spawn_capacity(self.game.max_density),
                         info + f"Spawn count update layer {n}",
                     )
                     info = ""
@@ -82,9 +81,9 @@ class CarchessGameState(GameState):
         if self.curr_player is None:
             # chance node
             assert isinstance(data, int)
-            self.num_chance_outcomes = data
+            self.spawn_capacity = data
         else:
-            self.num_chance_outcomes = None
+            self.spawn_capacity = None
             assert isinstance(data, np.ndarray)
             self.action_mask = data
 
@@ -118,8 +117,8 @@ class CarchessGameState(GameState):
 
     @property
     def is_chance(self) -> bool:
-        assert (self.num_chance_outcomes is not None) == (self.curr_player is None)
-        return self.num_chance_outcomes is not None
+        assert (self.spawn_capacity is not None) == (self.curr_player is None)
+        return self.spawn_capacity is not None
 
     @property
     def current_player_id(self) -> int:
@@ -128,14 +127,17 @@ class CarchessGameState(GameState):
 
     @property
     def chance_outcomes(self) -> ndarr_f32:
-        assert self.num_chance_outcomes is not None
-        c = np.zeros(self.game.max_num_actions, dtype=np.float32)
-        c[: self.num_chance_outcomes] = 1 / self.num_chance_outcomes
-        return c
+        assert self.spawn_capacity is not None
+        b = np.arange(self.game.min_spawn, self.game.max_spawn + 1)
+        b = np.minimum(self.spawn_capacity, b)
+        counts = np.bincount(b).astype(np.float32)
+        counts /= counts.sum()
+        counts.resize(self.game.max_num_actions, refcheck=False)
+        return counts
 
     def apply_action(self, action: int) -> None:
-        if self.num_chance_outcomes is not None:
-            assert action < self.num_chance_outcomes
+        if self.spawn_capacity is not None:
+            assert action <= self.spawn_capacity
         else:
             assert self.action_mask[action]
         self._update_state(action)
@@ -199,7 +201,7 @@ class CarchessGame(Game):
     @cached_property
     def max_num_actions(self) -> int:
         w, h = self.map.size
-        return max(w * h, self.max_spawn - self.min_spawn)
+        return max(w * h, self.max_spawn)
 
     @cached_property
     def max_num_players(self) -> int:
