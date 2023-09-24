@@ -63,6 +63,8 @@ class Node(ABC):
     latent: Tensor
 
     value_sum: ndarr_f32
+    value_max: ndarr_f32
+    value_min: ndarr_f32
     visit_count: int
     reward: ndarr_f32
     value_pred: ndarr_f32
@@ -89,6 +91,8 @@ class Node(ABC):
         self.children = dict()
         self.visit_count = 0
         self.value_sum = np.zeros_like(reward)
+        self.value_min = np.zeros_like(reward)
+        self.value_max = np.zeros_like(reward)
         self.mcts = mcts
 
     @property
@@ -111,6 +115,8 @@ class Node(ABC):
 
     def add_value(self, value: ndarr_f32) -> None:
         self.value_sum += value
+        self.value_min = np.minimum(self.value_min, value)
+        self.value_max = np.maximum(self.value_max, value)
         self.visit_count += 1
 
     def get_create_child(self, action: int) -> Node:
