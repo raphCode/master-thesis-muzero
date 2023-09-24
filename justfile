@@ -5,7 +5,7 @@ train-catch:
   clear; python main.py mcts=default training=catch networks=catch game=os_catch players=single
 
 debug-carchess:
-  pudb main.py mcts=default training=carchess networks=carchess game=carchess players=single; clear
+  pudb main.py mcts=default training=carchess networks=carchess game=carchess players=single training.batch_size=64 training.replay_buffer_size=5000; clear
 
 train-carchess:
   clear; python main.py mcts=default training=carchess networks=carchess game=carchess players=single
