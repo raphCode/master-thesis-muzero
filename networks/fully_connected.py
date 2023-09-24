@@ -50,7 +50,7 @@ class GenericFc(nn.Module):
         last = self.fcs[-1]
         for fc, act, norm in zip(self.fcs, self.acts, self.norms):
             x = fc(x)
-            x = norm(x)
+            # x = norm(x)
             if fc is not last or self.act_out:
                 x = act(x)
         return x
