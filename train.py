@@ -5,6 +5,7 @@ import logging
 import operator
 import functools
 from typing import TYPE_CHECKING, Any, Callable, Optional, cast
+from contextlib import suppress
 
 import attrs
 import numpy as np
@@ -199,6 +200,7 @@ class Trainer:
                 ),
             ]
         )
+        self.grads = np.ones(C.training.unroll_length)
 
     def process_batch(self, batch: list[TrainingData], tbs: TBStepLogger) -> None:
         # TODO: move tensors to GPU
@@ -262,13 +264,19 @@ class Trainer:
                 value_logits,
                 step.value_target,
             )
+            grad_target = self.grads.mean()
+            tbs.add_scalar("latent gradient/target", grad_target)
 
-            def log_mean_grad(tag: str, grad: Tensor) -> None:
-                tbs.add_scalar(tag, grad.abs().mean())
+            def grad_hook(grad: Tensor, n: int) -> None:
+                m = torch.linalg.vector_norm(grad).item()
+                tbs.add_scalar(f"latent gradient/unroll {n}", m)
+                self.grads[n] = m
+                return grad / m * grad_target
 
-            latent.register_hook(
-                functools.partial(log_mean_grad, f"latent gradient/unroll {n}")
-            )  # type: ignore [no-untyped-call]
+            with suppress(RuntimeError):
+                latent.register_hook(
+                    functools.partial(grad_hook, n=n)
+                )  # type: ignore [no-untyped-call]
 
             latent, reward_logits, turn_status_logits = self.nets.dynamics.raw_forward(
                 grad_scale(latent, 1),
