@@ -133,7 +133,8 @@ def populate_config(cfg: DictConfig) -> None:
     C.fill_from(attrs.evolve(C, game=cfg.game))
     log.info(
         f"Game instance: {C.game.instance}, "
-        f"observation shapes: {C.game.instance.observation_shapes}"
+        f"observation shapes: {C.game.instance.observation_shapes} "
+        f"({sum(map(math.prod, C.game.instance.observation_shapes))} elements)"
     )
 
     def create_runtime_network_config(net_cfg: NetworkSchema) -> NetworkConfig:
