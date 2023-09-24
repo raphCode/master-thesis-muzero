@@ -1,4 +1,4 @@
-batch_size: 128
+batch_size: 64
 train_selfplay_ratio: 50
 unroll_length: 7
 discount_factor: 1
@@ -10,7 +10,7 @@ optimizer:
     _target_: torch.optim.Adam
     weight_decay: 1e-4
 learning_rates:
-    base: 1e-3
+    base: 5e-4
     dynamics: 1
     prediction: 1
     representation: 1
