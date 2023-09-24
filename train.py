@@ -129,16 +129,18 @@ class SLAW:
         """
         Update internal loss weights based on the current training step's losses.
         """
-        n = len(self.auto_weight_names) * len(losses)
-        if n == 0:
+        if len(self.auto_weight_names) == 0:
             return
         get_fields = operator.attrgetter(*self.auto_weight_names)
         l = np.array([[t.item() for t in get_fields(loss)] for loss in losses])
-        assert l.size == n
+        n = np.count_nonzero(l)
+        if n == 0:
+            return
+        mask = l != 0
         self.a = self.beta * self.a + (1 - self.beta) * l**2
         self.b = self.beta * self.b + (1 - self.beta) * l
         s = np.maximum(1e-5, np.sqrt(self.a - self.b**2))
-        self.w = (n / s) / np.sum(1 / s)
+        self.w[mask] = (n / s[mask]) / np.sum(1 / s[mask])
 
     @property
     def weights(self) -> list[dict[str, float]]:
@@ -268,7 +270,7 @@ class Trainer:
                     self.nets.prediction.value_scale(value_logits), step.value_target
                 ),
             )
-            
+
             grad_target = self.grads.mean()
             tbs.add_scalar("latent gradient/target", grad_target)
 
