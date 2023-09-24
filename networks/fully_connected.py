@@ -49,8 +49,8 @@ class GenericFc(nn.Module):
         x = torch.cat([i.flatten(1) for i in inputs], dim=1)
         last = self.fcs[-1]
         for fc, act, norm in zip(self.fcs, self.acts, self.norms):
-            x = norm(x)
             x = fc(x)
+            x = norm(x)
             if fc is not last or self.act_out:
                 x = act(x)
         return x
