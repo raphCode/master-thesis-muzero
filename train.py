@@ -221,7 +221,7 @@ class Trainer:
         pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
         cos = functools.partial(
-            nn.CosineEmbeddingLoss(reduction="sum"), target=torch.ones(1)
+            nn.CosineEmbeddingLoss(reduction="mean"), target=torch.ones(1)
         )
 
         step_losses = []
@@ -245,7 +245,7 @@ class Trainer:
                     loss.latent = cos(
                         latent[mask].flatten(start_dim=1),
                         obs_latent[mask].flatten(start_dim=1),
-                    ).sum()
+                    ).mean()
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
 
             tbs.add_scalar(
