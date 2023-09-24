@@ -15,7 +15,11 @@
   let join_nonbreaking = h(0pt, weak: true) + [~]
   set cite(brackets: true, style: "chicago-author-date")
   show cite.where(brackets: true): it => "[" + cite(..it.keys, brackets: false)  + "]"
-  show math.equation: it => join_nonbreaking + it
+  show math.equation: it => if not it.block {
+    h(0pt, weak: true) + [~] + it
+  } else {
+    it
+  }
 
   show regex("(?i:on the other hand)"): m => {
     panic("Prof. Andre only allows to use this phrase with 'on one hand' beforehand!")
