@@ -119,31 +119,32 @@ class SLAW:
             self.fixed_weights[k] = float(v)
 
         n = len(self.auto_weight_names)
-        self.a = np.zeros(n)
-        self.b = np.zeros(n)
-        self.w = np.ones(n)
+        self.a = np.zeros((C.training.unroll_length, n))
+        self.b = np.zeros((C.training.unroll_length, n))
+        self.w = np.ones((C.training.unroll_length, n))
         self.beta = mavg_beta
 
-    def step(self, losses: Losses) -> None:
+    def step(self, *losses: Losses) -> None:
         """
         Update internal loss weights based on the current training step's losses.
         """
-        n = len(self.auto_weight_names)
+        n = len(self.auto_weight_names) * len(losses)
         if n == 0:
             return
         get_fields = operator.attrgetter(*self.auto_weight_names)
-        l = np.array([t.item() for t in get_fields(losses)])
+        l = np.array([[t.item() for t in get_fields(loss)] for loss in losses])
+        assert l.size == n
         self.a = self.beta * self.a + (1 - self.beta) * l**2
         self.b = self.beta * self.b + (1 - self.beta) * l
         s = np.maximum(1e-5, np.sqrt(self.a - self.b**2))
         self.w = (n / s) / np.sum(1 / s)
 
     @property
-    def weights(self) -> dict[str, float]:
+    def weights(self) -> list[dict[str, float]]:
         """
         Return the calculated loss weights.
         """
-        return dict(zip(self.auto_weight_names, self.w)) | self.fixed_weights
+        return [dict(zip(self.auto_weight_names, w)) | self.fixed_weights for w in self.w]
 
 
 class BalancedCrossEntropy:
@@ -283,20 +284,19 @@ class Trainer:
             for k, l in attrs.asdict(loss).items():
                 if k == "latent":
                     continue
-                tbs.add_scalar(f"loss: unroll {n}/{k}", l / batch_size)
+                tbs.add_scalar(f"loss: unroll {n}/{k}", l)
 
-        counts.data = C.training.unroll_length * batch_size
-        loss = sum(step_losses, start=Losses()) / counts
+        self.slaw.step(*step_losses)
 
-        self.slaw.step(loss)
         weights = self.slaw.weights
 
-        total_loss = loss.weighted_sum(weights)
+        total_loss = sum(sl.weighted_sum(w) for sl, w in zip(step_losses, weights))
 
-        for k, l in attrs.asdict(loss).items():
+        for k, l in attrs.asdict(sum(step_losses, start=Losses())).items():
             tbs.add_scalar(f"loss/{k}", l)
-        for k, weight in weights.items():
-            tbs.add_scalar(f"loss weight/{k}", weight)
+        for n, d in enumerate(weights):
+            for k, w in d.items():
+                tbs.add_scalar(f"loss weight: unroll {n}/{k}", w)
 
         self.optimizer.zero_grad()
         total_loss.backward()  # type: ignore [no-untyped-call]
