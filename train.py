@@ -220,7 +220,6 @@ class Trainer:
             loss = criterion(prediction, target)
             return loss.view(loss.shape[0], -1).mean(dim=1).sum()
 
-        pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
         cos = functools.partial(
             nn.CosineEmbeddingLoss(reduction="mean"), target=torch.ones(1)
@@ -230,7 +229,6 @@ class Trainer:
         counts = LossCounts()
 
         first = batch[0]
-        batch_size = len(first.reward)
         latent: Tensor
 
         for n, step in enumerate(batch):
