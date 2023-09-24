@@ -262,6 +262,13 @@ class Trainer:
                 value_logits,
                 step.value_target,
             )
+            tbs.add_scalar(
+                f"value mse/unroll {n}",
+                F.mse_loss(
+                    self.nets.prediction.value_scale(value_logits), step.value_target
+                ),
+            )
+            
             grad_target = self.grads.mean()
             tbs.add_scalar("latent gradient/target", grad_target)
 
@@ -285,6 +292,11 @@ class Trainer:
                 self.nets.dynamics.reward_scale.calculate_loss,
                 reward_logits,
                 step.reward,
+            )
+            # tbs.add_histogram(f"reward logits/unroll {n}", reward_logits)
+            tbs.add_scalar(
+                f"reward mse/unroll {n}",
+                F.mse_loss(self.nets.dynamics.reward_scale(reward_logits), step.reward),
             )
 
             for k, l in attrs.asdict(loss).items():

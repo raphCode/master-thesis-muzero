@@ -79,6 +79,18 @@ def main(cfg: DictConfig) -> None:
                         ["latent cosine similarity/unroll \\d+"],
                     )
                 }
+                | {
+                    "reward mse": (
+                        "Multiline",
+                        ["reward mse/unroll \\d+"],
+                    )
+                }
+                | {
+                    "value mse": (
+                        "Multiline",
+                        ["value mse/unroll \\d+"],
+                    )
+                }
             )
             pc.net.jit()
             tb.add_graphs(C.networks.factory())
