@@ -51,6 +51,32 @@ class FromExpandedValues(SoftmaxTemp):
 assert_fn_type(FromExpandedValues())
 
 
+class FromExpandedNormValues(SoftmaxTemp):
+    """
+    Creates a policy by applying a softmax to the child mcts value estimates, normalized
+    to the min and max values found in the search tree.
+    Unexpanded actions are excluded from the softmax und become a policy value of zero.
+    """
+
+    def __call__(self, node: Node) -> ndarr_f32:
+        assert isinstance(node, StateNode)
+        assert node.player is not TurnStatus.CHANCE_PLAYER
+        assert len(node.children) > 0
+        values = [
+            child.reward[node.player] + child.value[node.player]
+            for child in node.children.values()
+        ]
+        mini = node.value_min[node.player]
+        maxi = node.value_max[node.player]
+        nv = (np.array(values) - mini) / (maxi - mini)
+        policy = np.zeros(C.game.instance.max_num_actions, dtype=np.float32)
+        policy[list(node.children.keys())] = softmax(nv, self.temp)
+        return policy
+
+
+assert_fn_type(FromExpandedNormValues())
+
+
 class HandlePlayerNodes:
     """
     Handles player nodes in the search tree with the given policy fn, resorts to returning
