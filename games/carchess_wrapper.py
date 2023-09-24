@@ -51,8 +51,8 @@ class CarchessGameState(GameState):
 
                 reward = goal * self.game.reward_goal + crash * self.game.reward_crash
                 info = (
-                    f"Simulation result ({self.game.simulation_steps} steps):"
-                    " {g} goal, {c} crash, reward: {reward}\n"
+                    f"Simulation result ({self.game.simulation_steps} steps): "
+                    f"{g} goal, {c} crash, reward: {reward}\n"
                 )
                 num_chance_outcomes = self.game.max_spawn - self.game.min_spawn
                 for n in range(len(self.map.layers)):
