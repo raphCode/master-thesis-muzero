@@ -65,10 +65,9 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     def commit_step(action: int) -> None:
         target_policy = state.chance_outcomes if state.is_chance else None
 
-        state.apply_action(action)
+        print(">" * 5, "action:", action)
 
-        print("=" * 3 + f"step {n_step + 1}")
-        print(repr(state))
+        state.apply_action(action)
 
         def get_turn_status() -> int:
             if state.is_terminal:
