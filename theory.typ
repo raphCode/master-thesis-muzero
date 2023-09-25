@@ -7,7 +7,7 @@ In Research-papern ist hierfür meist kein Platz aber in einer Abschlussarbeit k
 damit gut zeigen, dass man das Material verstanden hat.
 */
 
-#import "thesis.typ": citet
+#import "thesis.typ": citet, no-mangle
 
 == !RL
 
@@ -931,8 +931,8 @@ $ V(s_L) = (1 - lambda) #v (s_L) + lambda z_L $
 
 The !algo performed best with a mixing factor $lambda = 0.5$, that is, equal weighting of
 the rollouts and !vnet.
-However, even without any rollouts at all (with $lambda = 0$), !ago performed better than
-previous computer Go programs.
+However, even without any rollouts at all (#no-mangle($lambda = 0$)), !ago performed better
+than previous computer Go programs.
 
 One MCTS iteration is concluded by backpropagating $V(s_L)$ up in the tree.
 All edges on the search path are updated so that $Q(s, a)$ represents the average !v of

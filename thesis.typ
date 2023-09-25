@@ -1,3 +1,5 @@
+#let no-mangle(body) = [#body<no-mangle>]
+
 #let thesis(
   doc,
 ) = {
@@ -15,7 +17,7 @@
   let join_nonbreaking = h(0pt, weak: true) + [~]
   set cite(brackets: true, style: "chicago-author-date")
   show cite.where(brackets: true): it => "[" + cite(..it.keys, brackets: false)  + "]"
-  show math.equation: it => if not it.block {
+  show math.equation: it => if not it.block and it.at("label", default: none) != <no-mangle> {
     h(0pt, weak: true) + [~] + it
   } else {
     it
