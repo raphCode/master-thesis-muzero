@@ -8,15 +8,15 @@ max_steps_per_game: 1000
 latent_dist_pnorm: 2
 optimizer:
     _target_: torch.optim.Adam
-    weight_decay: 1e-4
+    weight_decay: 1e-3
 learning_rates:
     base: 5e-4
     dynamics: 1
     prediction: 1
     representation: 1
 loss_weights:
-    latent: 0.2
-    value: 0.1
+    latent: 0.1
+    value: 0.2
     reward: 1
-    policy: 5e-3
-    turn: 5
+    policy: 1e-2
+    turn: 1
