@@ -1,6 +1,4 @@
-#import"@preview/cetz:0.1.1"
-
-#set page(width: auto, height: auto)
+#import "@preview/cetz:0.1.1"
 
 #let pairwise(vec) = {
   vec.zip(vec.slice(1))
