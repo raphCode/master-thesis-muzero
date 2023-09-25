@@ -1,5 +1,9 @@
+import os
 import math
+import shutil
 import logging
+import subprocess
+from os import path
 from types import UnionType
 from typing import Any, Iterable, Optional, cast
 
@@ -195,3 +199,29 @@ def populate_config(cfg: DictConfig) -> None:
     assert all(check_players(Player))
     msg = "There must be at least one RLBase player involved to collect training data!"
     assert any(check_players(RLBase)), msg
+
+
+def copy_source_code() -> None:
+    def u(s: str) -> bytes:
+        return s.encode("utf-8")
+
+    n = 0
+    try:
+        git_toplevel = subprocess.check_output(
+            "git rev-parse --show-toplevel".split(" ")
+        ).strip()
+        files = subprocess.check_output(
+            "git ls-files --cached --modified --other --exclude-standard".split(" "),
+            cwd=git_toplevel,
+        ).splitlines()
+        for file in files:
+            if not file.endswith(u(".py")):
+                continue
+            target = path.join(u("sources"), file)
+            os.makedirs(path.dirname(target), exist_ok=True)
+            shutil.copyfile(path.join(git_toplevel, file), target)
+            n += 1
+    except Exception as e:
+        log.error(f"Failed copying source code: {e}")
+    else:
+        log.info(f"Copied {n} python files to ./sources/ directory")

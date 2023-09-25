@@ -15,6 +15,7 @@ from config import C
 from selfplay import run_episode
 from config.impl import (
     populate_config,
+    copy_source_code,
     monkeypatch_dictconfig,
     register_omegaconf_resolvers,
 )
@@ -51,6 +52,7 @@ def main(cfg: DictConfig) -> None:
             shutil.rmtree(cwd)
 
     logging.captureWarnings(True)
+    copy_source_code()
     populate_config(cfg)
 
     pc = SelfplayPC(C.players.instances)
