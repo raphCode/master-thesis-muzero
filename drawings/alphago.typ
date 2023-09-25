@@ -1,4 +1,4 @@
-#import "@preview/cetz:0.1.1"
+#import "@preview/cetz:0.1.1": canvas, draw
 
 #let pairwise(vec) = {
   vec.zip(vec.slice(1))
@@ -9,8 +9,8 @@
 #let roll = $p_pi$
 #let v = $v_theta$
 
-#let training_pipeline = cetz.canvas(length:1cm, {
-  import cetz.draw: *
+#let training_pipeline = canvas(length:1cm, {
+  import draw: *
 
   let margin(ct, name, anchor_at: none, x: 0.1) = {
     let a(n, offset) = anchor(n, (rel: offset, to: "g." + n))
