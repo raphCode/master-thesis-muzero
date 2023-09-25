@@ -76,7 +76,7 @@
     content((rel: (y: -0.1), to: name + ".bottom"), align(center, ct), anchor: "top")
   }
 
-  let text(pos, ct, anchor) = margin(content(pos, align(center, emph(ct))), none, anchor_at: anchor, x: 0.2)
+  let text(pos, ct, anchor) = content(pos, align(center, emph(ct)), anchor: anchor, padding: 0.2)
 
   let arrow(from, to, name: none) = {
     line(from, to, mark: (end: ">"), name: name)
