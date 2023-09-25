@@ -12,23 +12,23 @@
 #let training_pipeline = canvas(length:1cm, {
   import draw: *
 
-  let margin(ct, name, anchor_at: none, x: 0.1) = {
-    let a(n, offset) = anchor(n, (rel: offset, to: "g." + n))
+  let padding(content, name: none, anchor: none, amount: 0.1) = {
+    let a(n, x, y) = draw.anchor(n, (rel: (x * amount, y * amount), to: "content." + n))
     group({
-      group(ct, name: "g")
-      a("left", (x: -x))
-      a("right", (x: x))
-      a("bottom", (y: -x))
-      a("top", (y: x))
-      a("bottom-left", (-x, -x))
-      a("bottom-right", (x, -x))
-      a("top-left", (-x, x))
-      a("top-right", (x, x))
-    }, name: name, anchor: anchor_at)
+      group(content, name: "content")
+      a("left", -1, 0)
+      a("right", 1, 0)
+      a("bottom", 0, -1)
+      a("top", 0, 1)
+      a("bottom-left", -1, -1)
+      a("bottom-right", 1, -1)
+      a("top-left", -1, 1)
+      a("top-right", 1, 1)
+    }, name: name, anchor: anchor)
   }
 
   let dataset(pos, ct, name: "") = {
-    margin({
+    padding({
       set-origin(pos)
       scale(0.3)
 
@@ -43,13 +43,13 @@
       circle((0, n), radius: r)
       line((r, 0), (r, n))
       line((-r, 0), (-r, n))
-    }, name)
+    }, name: name)
     content((rel: (y: 0.1), to: name + ".top"), align(center, ct + [\
     Games]), anchor: "bottom")
   }
 
   let net(pos, ct, name: "") = {
-    margin({
+    padding({
       set-origin(pos)
       set-style(stroke: 0.7pt)
       let units = (2, 3, 2)
@@ -72,7 +72,7 @@
           circle(p, fill: white, radius: 0.1)
         }
       }
-    }, name)
+    }, name: name)
     content((rel: (y: -0.1), to: name + ".bottom"), align(center, ct), anchor: "top")
   }
 
