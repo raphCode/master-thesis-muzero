@@ -250,7 +250,6 @@ sutton:
     - "Barto, Andrew G."
   publisher: MIT Press
   isbn: 978-0262039246
-  url: http://incompleteideas.net/book/the-book-2nd.html
 
 val_pred_net:
   type: article
