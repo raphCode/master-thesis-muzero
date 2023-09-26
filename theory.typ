@@ -35,7 +35,7 @@ At each time $t$, the !ag receives an !obs of the current !s $s_t in S$ and then
 an !a $a_(t+1) in A(s)$ to take.
 The !a transitions the !env to a new !s $s_(t+1)$ and generates a numerical !r $r_(t+1) in
 R subset RR$ for the !ag.
-$S$, $A$ and $R$ denote the set of all !ss, !as and !rs respectively.
+$S$<no-join>, $A$<join-right> and $R$ denote the set of all !ss, !as and !rs respectively.
 @sutton
 
 Note that the subscript used to represent an !a that occurred between $s_t$ and $s_(t+1)$
@@ -107,7 +107,7 @@ The !exret describes the expected value of the !ret $G_t$ in !s $s_t$, if the !p
 followed.
 It is therefore also called the !v $v_pi(s)$ and defined as
 $ v_pi(s) eq.def EE_pi [G_t|s_t=s] = EE_pi [sum_(k=0)^(n-1) gamma^k r_(t+k+1)
-#move(dy: -3pt, scale(y: 300%, $|$)) s_t=s] $
+#move(dy: -3pt, scale(y: 300%, [$|$<no-join>])) s_t=s] $
 for a !s $s_t$ when following !p $pi$.
 @sutton
 
@@ -340,14 +340,14 @@ playing the !g.
 
 #let root = nodetree(
   [C],
-  n([$P=1/2$ heads], [1],
+  n([$P=1/2$<no-join> heads], [1],
     n([go], [2],
       n([left], (2, 3)),
       n([right], (4, 1)),
     ),
     n([stop], (-1, 0)),
   ),
-  n([tails $P=1/2$], [2],
+  n([tails $P=1/2$<no-join>], [2],
     n([stop], (0, -1)),
     n([go], [1],
       n([left], (1, 2)),

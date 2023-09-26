@@ -57,8 +57,8 @@
 }
 
 #let root = n.with([])
-#let l = n.with($a$)
-#let r = n.with($b$)
+#let l = n.with([$a$<no-join>])
+#let r = n.with([$b$<no-join>])
 
 #let nodetree(root_content, ..nodes, backpropagate: false) = {
   let root = n([], root_content, ..nodes)
