@@ -624,7 +624,7 @@ Subgame perfection is an desireable property of a solution, since it allows !pls
 to other !pl's deviations from the optimal !sty.
 Compared to all !pls adhering to their optimal !stys, this means:
 - in a non-cooperative !g: exploiting opponent's mistakes, to potentially achieve a higher payoff
-- in a cooperative !g: compensating for mistakes of teammates
+- in a collaborative !g: compensating for mistakes of teammates
 
 == !MCTS
 <sec_mcts>
