@@ -1,6 +1,7 @@
 
 #let thesis(
   doc,
+  debug_equation_join: false,
 ) = {
   set page(
     margin: (x: 12.5%, y: 8.7%),
@@ -25,12 +26,20 @@
       let size = measure(eq, sty)
       let threshold = measure(h(3em), sty)
       if size.width < threshold.width and allow_join_left {
+        if debug_equation_join {
+          join_nonbreaking
+          [$<-$<no-join>]
+        }
         join_nonbreaking
       }
     })
     eq
     if eq_label == <join-right> {
       join_nonbreaking
+      if debug_equation_join {
+        [$->$<no-join>]
+        join_nonbreaking
+      }
     }
   }
 
