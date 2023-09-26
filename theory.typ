@@ -447,16 +447,17 @@ Consider for example this !g in !exf, as shown in @fig_bi_sp:
 ) <fig_bi_sp>
 
 The optimal !sty can now be computed bottom-up, starting at the leaf !ns:
-If the !pl were already at !dp #node1.content, he would certainly choose !a
-#node1.backprop_info.action since this results in the bigger payoff of
-#node1.backprop_info.utility over all alternatives.
-Therefore, !n #node1.content can be assigned an utility of #node1.backprop_info.utility.
-Likewise, the utility of !dp #node2.content can be determined to be
-#node2.backprop_info.utility, as the !pl would always choose #node2.backprop_info.action.
-Now that the utilities of #node1.content and #node2.content are found, the optimal
-decision at #root.content can be identified to be #root.backprop_info.action with the same
-reasoning.
-Since #root.content is already the root !n, the optimal !sty is thus
+If the !pl were already at~!dp #node1.content, he would certainly choose
+!a~#node1.backprop_info.action since this results in the bigger payoff
+of~#node1.backprop_info.utility over all alternatives.
+Therefore, !n~#node1.content can be assigned an utility of~#node1.backprop_info.utility.
+Likewise, the utility of !dp~#node2.content can be determined to
+be~#node2.backprop_info.utility, as the !pl would always
+choose~#node2.backprop_info.action.
+Now that the utilities of~#node1.content and~#node2.content are found, the
+optimal decision at~#root.content can be identified to be~#root.backprop_info.action with
+the same reasoning.
+Since~#root.content is already the root !n, the optimal !sty is thus
 ${ #get_optimal_strategy(root).join(" ") }$.
 @gtheo
 
@@ -524,35 +525,35 @@ the same number.
 The tree looks a bit more complicated since a !mp !g involves payoff vectors instead of
 single scalar payoffs.
 However, the reasoning is exactly the same as in the !sp scenario:
-Starting at the last !dps in the tree, !pl #node_leftmost.content can decide which !a to
+Starting at the last !dps in the tree, !pl~#node_leftmost.content can decide which !a to
 take.
 He is only interested in maximizing his payoff, so he only looks a the third entry of the
 payoff vectors.
 In @fig_bi_mp, this is illustrated by underlining the respective entry in the tuple of
 payoffs.
-In the specific case of the leftmost !dp in the tree, !pl #node_leftmost.content has the
-possible outcomes
-#node_leftmost.children.map(c => str(c.utility.at(c.parent_player - 1))).join(" and ").
-As the higher payoff is #node_leftmost.backprop_info.utility, he will always choose !a
-#node_leftmost.backprop_info.action.
-Thus, the leftmost !n can be assigned the payoff vector #repr(node_leftmost.utility) since
+In the specific case of the leftmost !dp in the tree, !pl~#node_leftmost.content has the
+possible
+outcomes~#node_leftmost.children.map(c => str(c.utility.at(c.parent_player - 1))).join(" and ").
+As the higher payoff is~#node_leftmost.backprop_info.utility, he will always choose
+!a~#node_leftmost.backprop_info.action.
+Thus, the leftmost !n can be assigned the payoff vector~#repr(node_leftmost.utility) since
 that is how the !g will end from this !dp onwards.
 
-Similarly, the other !ns of !pl #node_leftmost.content can be processed and utilities
-assigned that maximize !pl #node_leftmost.content's payoff.
-Next, we can move one step upwards in the tree, looking at !pl #node1.content's decision.
+Similarly, the other !ns of !pl~#node_leftmost.content can be processed and utilities
+assigned that maximize !pl~#node_leftmost.content's payoff.
+Next, we can move one step upwards in the tree, looking at !pl~#node1.content's decision.
 He is only interested in the payoffs relevant to him, which are in the second entry of the
 payoff vectors.
 Again, this is illustrated in @fig_bi_mp with underlining the corresponding entries.
-Consider for instance the left !n labeled with #node1.content:
-The !pl will choose !a #node1.backprop_info.action, since that gives him the higher payoff
-of #node1.backprop_info.utility.
-In the !exf, this means the utility #repr(node1.utility) of the respective child !n can be
-propagated upwards and assigned to !pl #node1.content's decision node.
+Consider for instance the left !n labeled with~#node1.content:
+The !pl will choose !a~#node1.backprop_info.action, since that gives him the higher payoff
+of~#node1.backprop_info.utility.
+In the !exf, this means the utility~#repr(node1.utility) of the respective child !n can be
+propagated upwards and assigned to !pl~#node1.content's decision node.
 
-Analogously, !pl #root.content reasons that #root.backprop_info.action is his best choice.
-Overall, three rational !pls will choose the respective !as
-#get_optimal_strategy(root).join(", ").
+Analogously, !pl~#root.content reasons that~#root.backprop_info.action is his best choice.
+Overall, three rational !pls will choose the respective
+!as~#get_optimal_strategy(root).join(", ").
 
 ===== Chance Events
 
@@ -606,11 +607,11 @@ This variant is called negamax.
 
 An interesting property of the solutions visualized in @fig_bi_sp and @fig_bi_mp is that
 they also contain optimal !as for !g !s which are not part of the overall optimal !sty.
-For example, in @fig_bi_mp, the right !n of !pl #node2.content is not part of the optimal
+For example, in @fig_bi_mp, the right !n of !pl~#node2.content is not part of the optimal
 play.
-However, if !pl #node2.content would ever find himself in this !g !s (maybe through a
-mishap of !pl #root.content), he knows that his best option is
-#node2.backprop_info.action.
+However, if !pl~#node2.content would ever find himself in this !g !s (maybe through a
+mishap of !pl~#root.content), he knows that his best option
+is~#node2.backprop_info.action.
 
 ]
 
