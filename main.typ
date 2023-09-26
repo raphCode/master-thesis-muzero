@@ -1,6 +1,8 @@
 #import "thesis.typ": thesis
 #import "substitutions.typ"
 
+#show footnote.entry: substitutions.subs
+
 #show: doc => thesis(
   doc,
 )
