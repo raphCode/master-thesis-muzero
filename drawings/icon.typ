@@ -2,6 +2,62 @@
 #import "util.typ": padding, pairwise
 #import draw: *
 
+#let minitree(pos, name: none) = group({
+  set-origin(pos)
+  let data = (0, (0, 0, 0), (0, 0, 0))
+  let nodesize = 0.1
+  set-origin((nodesize, -nodesize))
+  //set-style(stroke: 0.5pt)
+  tree.tree(
+    data,
+    spread: 0.3,
+    grow: 0.4,
+    draw-node: (_, _) => circle((), radius: nodesize),
+    draw-edge: (from, to, _) => {
+      line(
+        (a: from, number: nodesize, abs: true, b: to),
+        (a: to, number: nodesize, abs: true, b: from),
+      )
+    }, name: "tree")
+    anchor("center", "tree")
+}, anchor: "bottom-right", name: name)
+
+#let tic_tac_toe(pos, n: 5, name: none) = group({
+  set-origin(pos)
+  scale(0.4)
+  set-style(
+    fill: none,
+    stroke: 1pt,
+  )
+  let size = 3
+  set-origin((-size / 2, -size / 2))
+  for i in range(1, size) {
+    line((0, i), (size, i))
+    line((i, 0), (i, size))
+  }
+  let moves = (
+    (0, 0),
+    (1, 1),
+    (1, 2),
+    (0, 2),
+    (2, 0),
+    (1, 0),
+    (2, 2),
+    (2, 1),
+    (0, 1),
+  )
+  for (move, coord) in moves.slice(0, n).enumerate() {
+    let pos = (rel: (0.5, 0.5), to: coord)
+    let r = 0.3
+    if calc.even(move) {
+      circle(pos, radius: r)
+    } else {
+      line((rel: (-r, -r), to: pos), (rel: (r, r), to : pos))
+      line((rel: (-r, r), to: pos), (rel: (r, -r), to : pos))
+    }
+  }
+}, name: name)
+
 #let network(pos, ct, name: "") = {
   padding({
     set-origin(pos)
@@ -29,3 +85,4 @@
   }, name: name)
   content((rel: (y: -0.1), to: name + ".bottom"), align(center, ct), anchor: "top")
 }
+

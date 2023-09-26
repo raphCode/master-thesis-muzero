@@ -20,6 +20,12 @@
   }, name: name, anchor: anchor)
 }
 
+#let export_anchors(obj) = {
+  for-each-anchor(obj, (name) => {
+    anchor(obj + "-" + name, ())
+  })
+}
+
 #let bez_vert(a, b, x: 2) = {
   let c = (rel: (0, -x), to: a)
   let d = (rel: (0, x), to: b)
@@ -30,4 +36,9 @@
   let c = (rel: (x, 0), to: a)
   let d = (rel: (-x, 0), to: b)
   bezier(a, b, c, d, mark: (end: ">"), name: name)
+}
+
+#let bez90(start, end, flip: false, ..args) = {
+  let (h, v) = if flip { (end, start) } else { (start, end) }
+  bezier(start, end, (horizontal: h, vertical: v), ..args)
 }

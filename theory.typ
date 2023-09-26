@@ -10,6 +10,7 @@ damit gut zeigen, dass man das Material verstanden hat.
 #import "thesis.typ": citet
 
 == !RL
+<sec_rl>
 
 !Rl refers to a subset of machine learning where a decision maker learns by trial and
 error while interacting with its !env.  
@@ -956,6 +957,7 @@ This distributed version was able to beat a professional human player in 5 out o
 ]
 
 === !agoz
+<sec_alphago_zero>
 
 !agoz by #citet("alphago_zero") is similar to !ago:
 It also uses MCTS with !nns to play Go at super-human levels.
@@ -1064,3 +1066,107 @@ The training success was also reported to be repeatable across multiple independ
 
 === !mz
 <sec_muzero>
+
+!mz by #citet("muzero") is yet another improvement over !az in terms of generalization.
+!az uses a simulator during the tree search to obtain the !g !s for a hypothetical !seq of
+!as.
+In contrast, !mz learns a dynamic model of the !g and uses it in the !mcts to plan ahead.
+In fact, this allows !mz's application to broader set of !envs including single !pl !gs
+and non-zero !rs at intermediate steps.
+The authors applied !mz to the !gs Go, shogi, chess and the complete Atari suite.
+In the case of board !gs, it matched the performance of !az and in the Atari !env it
+outperformed existing approaches.
+
+#[
+
+#import "drawings/muzero.typ": rep, dyn, pred, mcts, training
+
+Just like !az, !mz uses a !net #pred for !preds inside the search tree.
+However, !mz introduces two additional !nns #rep and #dyn.
+The !dnet #dyn learns !s transitions of the !env:
+Given a !s $s^t$ and a hypothetical !a $a^t$, #dyn<join-right> predicts the next !s
+$s^(t+1)$ and !r $r^(t+1)$ the !env will respond with.
+The !ss $s^t$ are encoded in a learnt latent space, so a !rnet #rep translates !obss into
+!latreps.
+
+To differentiate !ss and !as occuring in a !g !traj from those used by !net inferences, I
+introduce the following notation:
+!Ss and !rs occuring in a !g are marked with subscript, so the !s and !a at time $t$ are
+$s_t$ and $a_t$, respectively.
+A superscript is added to denote !ss predicted by the !nns, so for example
+$#rep (s_t) = s_t^0$.
+The superscript is increased for each inference step with the !dnet #dyn, for example
+$s_t^1 = #dyn (s_t^0, a^0)$.
+In some cases, the subscript may be omitted to simplify notation.
+
+The !dnet can be applied recurrently, so any !r $r^n$ and !s $s^n$ $n$<join-right> time
+steps ahead can be predicted given a starting !s $s^0$ and a series of hypothetical !as 
+$a^0, a^1, ..., a^n$:
+$ (s^t, r^t) = #dyn (s^(t-1), a^t) $
+This process is used during !mcts, as visualized in @fig_muzero_mcts.
+To decide on an !a in !g !s $s$, a search tree is initialized with the !g !obs:
+$s^0 = #rep (s)$.
+During the MCTS expansion phase, the !dnet #dyn is used to obtain the next !s $s^(n+1)$
+and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^n$.
+
+The MCTS simulation phase executes like in !az, where #pred predicts a !v estimate and
+search !p of a newly expanded !n $s^n$:
+$(v^n, p^n) = #pred (s^n)$
+
+#figure(
+  mcts,
+  caption: [!Mcts in !mz]
+) <fig_muzero_mcts>
+
+
+Like !az, !mz uses selfplay with MCTS to generate training data.
+For each selfplay step at time $t$ the data $(s_t, a_t, r_t, pi_t, z_t)$ is recorded.
+The first three entries contain the !s of the !env, executed !a and received !r,
+respectively.
+$pi_t$<join-right> denotes the search !p, like in !mz's precursors.
+For details see @sec_alphago_zero.
+$z_t$<join-right> is the RL sample !ret as introduced in @sec_rl.
+In the case of board !gs, it is equal to the final outcome of the !g $z$, like in !mz's
+precedessors.
+For Atari !gs, $z_t$<join-right> is calculated to be a n-step !ret.
+
+#[
+
+#let series(x, end: $K$) = $#x _t, #x _(t+1), ..., #x _end$
+#let loss(letter, target, pred, start: 0) = $sum_(k=start)^K l^letter (target _(t+k), pred _t^k)$
+
+During training, the !dnet is unrolled for $K$ steps and aligned with a !seq of !env !ss,
+!as and !rs from the selfplay data.
+Specifically, a training example beginning at time step $t$ consists of the tuple
+$(s_t, (series(a)), (series(r)), (series(pi)), z_t)$, where $K$ is the unroll length, a
+hyperparameter.
+The process is illustrated in @fig_muzero_training for $K=2$ and $z_t = z$ for all $t$.
+
+#figure(
+  training,
+  caption: [
+    Training setup in !mz in the case of board !gs, unrolled for~2 steps.
+    Gray arrows indicate training losses.
+  ]
+) <fig_muzero_training>
+
+First, a !latrep $s_t^0$ is obtained using the !rnet: $s_t^0 = #rep (s_t)$.
+Then, the !dnet #dyn is applied recurrently $K-1$ times with the !as from the !traj
+$series(a)$.
+This yields !latreps for the !ss $s_t^1, s_t^2, ..., s_t^K$ and corresponding !r !preds
+$r_t^1, r_t^2, ..., r_t^K$.
+At each unroll step $n = 0, 1, ..., K$, the !pnet #pred predicts a !v and !p $(v^n, p^n)$
+from the !latrep $s_t^n$.
+
+Losses for the !r, !p and !v !preds are calculated at each unroll step to align the !net
+!preds with the actually occurred !rs $r_t$, search !ps $pi_t$ and sample !rets $z_t$.
+Specifically, the total loss $l_t$ for an unroll !seq starting at $s_t$ and with length
+$K$ is given by
+$ l_t = loss(p, pi, p) + loss(v, z, v) + loss(r, r, r, start: 1) $
+with $l^p$, $l^v$<join-right> and $l^r$ being loss !fns for !p, !v and !r, respectively.
+The parameters of the three !nns are updated jointly via backpropagation on the total loss
+$l$.
+
+]
+
+]
