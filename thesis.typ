@@ -1,4 +1,3 @@
-#let no-mangle(body) = [#body<no-mangle>]
 
 #let thesis(
   doc,
