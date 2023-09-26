@@ -13,13 +13,18 @@
     justify: true,
   )
   set heading(numbering: "1.")
-  let join_nonbreaking = h(0pt, weak: true) + [~]
+
   set cite(brackets: true, style: "chicago-author-date")
   show cite.where(brackets: true): it => "[" + cite(..it.keys, brackets: false)  + "]"
-  show math.equation: it => if not it.block and it.at("label", default: none) != <no-mangle> {
-    h(0pt, weak: true) + [~] + it
-  } else {
-    it
+
+  show math.equation.where(block: false): eq => {
+    let join_nonbreaking = h(0pt, weak: true) + [~] + h(0pt, weak: true)
+    let eq_label = eq.at("label", default: none)
+    let allow_join_left = eq_label != <no-join>
+    if allow_join_left {
+      join_nonbreaking
+    }
+    eq
   }
 
   show regex("(?i:on the other hand)"): m => {

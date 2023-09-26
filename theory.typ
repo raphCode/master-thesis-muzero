@@ -931,7 +931,7 @@ $ V(s_L) = (1 - lambda) #v (s_L) + lambda z_L $
 
 The !algo performed best with a mixing factor $lambda = 0.5$, that is, equal weighting of
 the rollouts and !vnet.
-However, even without any rollouts at all ($lambda = 0$<no-mangle>), !ago performed better
+However, even without any rollouts at all ($lambda = 0$<no-join>), !ago performed better
 than previous computer Go programs.
 
 One MCTS iteration is concluded by backpropagating $V(s_L)$ up in the tree.
