@@ -21,9 +21,13 @@
     let join_nonbreaking = h(0pt, weak: true) + [~] + h(0pt, weak: true)
     let eq_label = eq.at("label", default: none)
     let allow_join_left = eq_label != <no-join>
-    if allow_join_left {
-      join_nonbreaking
-    }
+    style(sty => {
+      let size = measure(eq, sty)
+      let threshold = measure(h(3em), sty)
+      if size.width < threshold.width and allow_join_left {
+        join_nonbreaking
+      }
+    })
     eq
   }
 
