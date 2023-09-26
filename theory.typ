@@ -83,7 +83,7 @@ $ G_t eq.def r_(t+1) + r_(t+2) + r_(t+3) + ... + r_n $
 
 Another approach is to use a discounted !r.
 The intuition is to value !rs far in the future less than immediate !rs.
-For this purpose, a hyperparameter #sym.gamma is introduced, called the !df.
+For this purpose, a hyperparameter $gamma$ is introduced, called the !df.
 The !ret $G_t$ is then calculated as
 $ G_t eq.def r_(t+1) + gamma r_(t+2) + gamma^2 r_(t+3) + ... =
 sum_(k=0)^(n-1) gamma^k r_(t+k+1) $
@@ -103,12 +103,12 @@ $s_t=s$.
 
 Since the !p makes statements about the future behavior of the !ag, one can now define the
 !exret.
-The !exret describes the expected value of the !ret $G_t$ in !s $s_t$, if the !p #sym.pi
-is followed.
+The !exret describes the expected value of the !ret $G_t$ in !s $s_t$, if the !p $pi$ is
+followed.
 It is therefore also called the !v $v_pi(s)$ and defined as
 $ v_pi(s) eq.def EE_pi [G_t | s_t=s] = EE_pi [sum_(k=0)^(n-1) gamma^k r_(t+k+1)
 #move(dy: -3pt, scale(y: 300%, $|$)) s_t=s] $
-for a !s $s_t$ when following !p #sym.pi.
+for a !s $s_t$ when following !p $pi$.
 @sutton
 
 The !v is thus an estimate of how good it is for the !ag to be in a particular !s,
