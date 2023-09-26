@@ -20,7 +20,7 @@
   show math.equation.where(block: false): eq => {
     let join_nonbreaking = h(0pt, weak: true) + [~] + h(0pt, weak: true)
     let eq_label = eq.at("label", default: none)
-    let allow_join_left = eq_label != <no-join>
+    let allow_join_left = eq_label not in (<no-join>, <join-right>)
     style(sty => {
       let size = measure(eq, sty)
       let threshold = measure(h(3em), sty)
@@ -29,6 +29,9 @@
       }
     })
     eq
+    if eq_label == <join-right> {
+      join_nonbreaking
+    }
   }
 
   show regex("(?i:on the other hand)"): m => {
