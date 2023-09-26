@@ -1056,7 +1056,7 @@ new !net performs better than the current one.
 In contrast, !az only uses a single !net.
 It always uses the latest !net parameters for selfplay data generation.
 
-The publication shows that the !az training approach is feasable of generalisation by
+The publication shows that the !az training approach is feasable of generalization by
 evaluating it on Go, chess and shogi.
 !az outperformed existing state-of-the-art programs in all of the !gs.
 The training success was also reported to be repeatable across multiple independant runs.
