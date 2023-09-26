@@ -1,6 +1,10 @@
 #import "@preview/cetz:0.1.1": canvas, draw
 #import draw: *
 
+#let pairwise(vec) = {
+  vec.zip(vec.slice(1))
+}
+
 #let padding(content, name: none, anchor: none, amount: 0.1) = {
   let a(n, x, y) = draw.anchor(n, (rel: (x * amount, y * amount), to: "content." + n))
   group({
