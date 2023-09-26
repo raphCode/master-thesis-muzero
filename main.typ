@@ -8,6 +8,8 @@
 )
 
 #substitutions.subs[
+  #outline()
+
   #include "introduction.typ"
   #include "theory.typ"
   #include "related_work.typ"
