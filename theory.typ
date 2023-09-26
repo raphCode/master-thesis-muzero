@@ -52,7 +52,7 @@ Finite means the sets of possible !ss $S$, !as $A$ and !rs $R$ each have a finit
 of elements.
 Beside these sets, a !mdp is characterized by the dynamics !fn $p : S times R times S
 times A -> [0, 1]$:
-$ p(s', r | s, a) eq.def Pr{s_(t+1)=s', r_(t+1)=r | s_t=s, a_t=a} $
+$ p(s', r|s, a) eq.def Pr{s_(t+1)=s', r_(t+1)=r|s_t=s, a_t=a} $
 for all $s', s in S, r in R, a in A(s)$.
 
 It describes the !prob of the !env ending up in !s $s'$ and yielding !r $r$ when executing
@@ -106,7 +106,7 @@ Since the !p makes statements about the future behavior of the !ag, one can now 
 The !exret describes the expected value of the !ret $G_t$ in !s $s_t$, if the !p $pi$ is
 followed.
 It is therefore also called the !v $v_pi(s)$ and defined as
-$ v_pi(s) eq.def EE_pi [G_t | s_t=s] = EE_pi [sum_(k=0)^(n-1) gamma^k r_(t+k+1)
+$ v_pi(s) eq.def EE_pi [G_t|s_t=s] = EE_pi [sum_(k=0)^(n-1) gamma^k r_(t+k+1)
 #move(dy: -3pt, scale(y: 300%, $|$)) s_t=s] $
 for a !s $s_t$ when following !p $pi$.
 @sutton
@@ -885,10 +885,10 @@ requirements.
 Specifically, each selfplay !g is carried out in three phases:
 First, a random number $U$ is sampled uniformly $U tilde.op "unif"{1, 450}$.
 Then, the moves at time steps $t = 1, ..., U - 1$ are sampled from !preds of the #slnet,
-$a_t tilde.op #sl (dot.c | s_t)$.
+$a_t tilde.op #sl (dot.c|s_t)$.
 Second, a single move $a_U$ is sampled from the legal moves.
 Lastly, the #rlnet is used to generate the remaining moves $t = U + 1, ..., T$ until the
-!g terminates, $a_t tilde.op #rl (dot.c | s_t)$.
+!g terminates, $a_t tilde.op #rl (dot.c|s_t)$.
 The !g is then scored to determine its outcome $z_T$.
 From every !g, only a single training example $(s_(U+1), z_T)$ is added to the selfplay
 dataset.
@@ -919,7 +919,7 @@ The MCTS selection phase traverses the tree as usual, until time step $L$, where
 reaches a leaf !n that may be expanded (if it is not a !ts).
 During expansion, the new !n corresponding to !s $s_L$ is processed by the #slnet to yield
 the prior !probs
-$ P(s_L, a) = #sl (a | s_L) $
+$ P(s_L, a) = #sl (a|s_L) $
 
 During the MCTS simulation phase, the new !n is evaluated using a combination of !mc
 rollouts and the #vnet.
@@ -999,7 +999,7 @@ This data augmentation step exploits symmetries of the !g of Go and aims to redu
 bias.
 
 The search outputs !probs $pi$ of playing each possible move, proportional to the visit
-counts of the root !n in the search tree, $pi(a | s) prop N(s, a)$.
+counts of the root !n in the search tree, $pi(a|s) prop N(s, a)$.
 To ensure diverse !g openings, the first 30 moves are sampled from $pi$, so
 $a_t tilde.op pi_t$ for $t = 0, ..., 29$.
 The rest of the moves are selected according to the !a $a_t$ with the highest visit count
