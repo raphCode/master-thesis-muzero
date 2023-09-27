@@ -24,7 +24,7 @@ hast.
   - unstable behavior of original setup: UCT scores and visit count policy
 - application to carchess / !mp !g
 
-#import "related_work.typ": sscl
+#let sscl = [SSCL]
 
 === Symmetric #sscl
 
