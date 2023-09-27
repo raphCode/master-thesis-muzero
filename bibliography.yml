@@ -618,3 +618,31 @@ collaborative_games:
     volume: 37
   page-range: 24-40
   doi: 10.1177/1046878105282279
+
+puct:
+  type: article
+  title: Multi-armed bandits with episode context
+  date: 2011-08-26
+  author: "Rosin, Christopher D."
+  parent:
+    title: Annals of Mathematics and Artificial Intelligence
+    issue: 3
+    volume: 61
+  page-range: 203-230
+  doi: 10.1007/s10472-011-9258-6
+
+uct:
+  type: article
+  title: Bandit Based Monte-Carlo Planning
+  date: 2006
+  author:
+    - "Kocsis, Levente"
+    - "Szepesvári, Csaba"
+  parent:
+    type: proceedings
+    title: "Machine Learning: ECML 2006"
+    volume: 2006
+    publisher: Springer Berlin Heidelberg
+    isbn: 978-3-540-45375-8
+  page-range: 282-293
+  doi: 10.1007/11871842_29

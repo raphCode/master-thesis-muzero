@@ -929,6 +929,11 @@ The bonus term $u(s, a)$ is initially proportional to the prior !prob but decays
 repeated visits to encourage exploration:
 $ u(s, a) prop P(s, a) / (1 + N(s, a)) $
 
+This selection strategy is a variant of the UCT !algo.
+UCT (and its name) itself is derived from applying the UCB (Upper Confidence Bounds) !algo
+to trees.
+#cite("puct", "uct", "alphago")
+
 The MCTS selection phase traverses the tree as usual, until time step $L$, where it
 reaches a leaf !n that may be expanded (if it is not a !ts).
 During expansion, the new !n corresponding to !s $s_L$ is processed by the #slnet to yield
