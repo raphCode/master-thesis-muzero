@@ -6,6 +6,7 @@ hast.
 */
 
 #import "thesis.typ": citet, blockquote
+#import "drawings/muzero.typ": rep, dyn, pred
 
 - MuZero implementation
   - mcts behavior customizeable
@@ -23,6 +24,51 @@ hast.
 - interplay of mcts policy and selection function
   - unstable behavior of original setup: UCT scores and visit count policy
 - application to carchess / !mp !g
+
+The original !mz !impl is limited to a specific class of !gs.
+I begin by reviewing the limitations of !mz and the reasons behind them, and then move on
+to a discussion of how I extend the !arch to more general !gs.
+
+=== !mz Limitations
+<sec_muzero_limitations>
+
+!mz is limited to single-!ag !envs and !2p !zsum !gs.
+Furthermore, all !gs are expected to be deterministic and of !pinf.
+These limitations are briefly discussed in the following.
+
+==== Determinism
+
+In order to plan ahead, the future !s of the !env must be predictable for an intial !s $s$
+and given !seq of !as.
+The !dnet #dyn in !mz is a deterministic !fn and no chance !ss are modeled in the !arch.
+Perhaps unexpecdly, #citet("stochastic_muzero") show that !mz's performance falls short in
+a stochastic !env compared to other methods that model stochasticity.
+
+==== !PINF
+Accurately planning ahead also relies on unambiguously identifying the initial state $s$.
+From a !gtic standpoint, this requires the !g to be with !pr and of !pinf (See @sec_pr and
+@sec_pinf, respectively).
+In the context of !rl, this means that an !obs must uniquely identify the current !s of
+the !env.
+
+This aspect best illustrated by example of the fifty moves rule in chess:
+If 50 moves pass without a capture or a pawn moved, the !g may end in a draw.
+While a human can deduce a history of moves from successive board !ss, the !mz !ag starts
+each move afresh, given only the current !obs.
+The current board !s is therefore not enough !i to distinguish a regular !g situation from
+one where the fifty-move rule applies.
+@muzero
+
+==== !ZSUM !Gs
+
+In the !2p setting, !mz assumes that the !g is !zsum.
+This assumption is built into the !arch itself, because it performs negamax search (see
+@sec_negamax) during MCTS @muzero.
+This also implicitly hardcodes an alternating turn order between the two !pls.
+
+Negamax exploits the !zsum property by using only a single scalar for a !n's !v.
+The design of the !nns (#dyn<join-right> and #pred) in !mz follow this choice and also
+only predict a single scalar for !s !vs and transition !rs.
 
 #let sscl = [SSCL]
 

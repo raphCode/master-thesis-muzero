@@ -125,7 +125,7 @@ There are no future !rs possible.
 This section introduces basic !gtic concepts, just enough to provide justification for the
 design and behavior of !mz.
 It also provides foundations to discuss the limitations of the original !mz !impl in
-TODO: label.
+@sec_muzero_limitations.
 
 !Gt is a broad interdisciplinary field that uses mathematical models to analyze how
 individuals make decisions in interactive situations.
@@ -230,6 +230,7 @@ This situation arises when modeling real-world economic situations, as there may
 gains from trades.
 
 ==== !I
+<sec_pinf>
 
 An important distinction are !gs of !pinf and !impinf.
 A !pinf !g is one in which every !pl, at every !dp in the !g, has full knowledge of the !h
@@ -254,6 +255,7 @@ concealed.
 @gtheo
 
 ==== !PR
+<sec_pr>
 
 The concept of perfect recall describes that a !pl never forgets all his past choices and
 information he got.
