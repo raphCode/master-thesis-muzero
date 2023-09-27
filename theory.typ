@@ -1106,8 +1106,8 @@ $s^(t+1)$ and !r $r^(t+1)$ the !env will respond with.
 The !ss $s^t$ are encoded in a learnt latent space, so a !rnet #rep translates !obss into
 !latreps.
 
-To differentiate !ss and !as occuring in a !g !traj from those used by !net inferences, I
-introduce the following notation:
+To differentiate !ss and !as occuring in an !env !traj from those used by !net inferences,
+I introduce the following notation:
 !Ss and !rs occuring in a !g are marked with subscript, so the !s and !a at time $t$ are
 $s_t$ and $a_t$, respectively.
 A superscript is added to denote !ss predicted by the !nns, so for example
@@ -1117,7 +1117,7 @@ $s_t^1 = #dyn (s_t^0, a^0)$.
 In some cases, the subscript may be omitted to simplify notation.
 
 The !dnet can be applied recurrently, so any !r $r^n$ and !s $s^n$ $n$<join-right> time
-steps ahead can be predicted given a starting !s $s^0$ and a series of hypothetical !as 
+steps ahead can be predicted given an initial !s $s^0$ and a series of hypothetical !as
 $a^0, a^1, ..., a^n$:
 $ (s^t, r^t) = #dyn (s^(t-1), a^t) $
 This process is used during !mcts, as visualized in @fig_muzero_mcts.
