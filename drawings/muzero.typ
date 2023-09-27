@@ -26,9 +26,9 @@
       stroke: none,
     )
     anchor("end", plain_end)
-    let size = 0.2
+    let size = 0.3
     let (symbol, txt) = if net == "repr" {
-      let s = 1.7 * size
+      let s = 1.6 * size
       (
         {
           get-ctx(ctx => {
@@ -40,7 +40,7 @@
         rep
       )
     } else if net == "pred" {
-      let s = 1 * size
+      let s = 0.85 * size
       (rect((-s, -s), (s, s)), pred)
     } else {
       (circle((0, 0), radius: size), dyn)
@@ -247,8 +247,8 @@
               padding: 0.05
             )
 
-            net_inference(offset(-arrowdist), offset(-1.3), "pred")
-            content(offset(-1.4), $ v^#n, p^#n $, anchor: a_pred)
+            net_inference(offset(-arrowdist), offset(-1.5), "pred")
+            content(offset(-1.6), $ v^#n, p^#n $, anchor: a_pred)
 
             let a = (a: parent, number: arrowdist, abs: true, b: "node")
             content(
