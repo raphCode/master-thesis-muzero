@@ -92,7 +92,8 @@ They lead up to an understanding of the !mz !algo and its precursors.
 After that, related !algos are reviewed, highlighting their differences, strengths and
 limitations.
 
-Builing on this study of prior work and theoretical foundations, I propose:
+Building on this study of prior work and theoretical foundations, I present two
+contributions:
 - an extension of !mz to !mp !gs including chance events and arbitrary !rs.
 - performance enhancements to improve the training time.
 
