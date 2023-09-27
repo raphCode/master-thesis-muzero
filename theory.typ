@@ -601,6 +601,7 @@ by their !probs.
 ]
 
 ===== !ZSUM !Gs
+<sec_negamax>
 
 For !2p !gs with !zsum payoffs, practical !impls of !bi may keep track of only a single
 !pl's payoff scalar in the !g tree, for example the first !pl.

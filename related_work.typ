@@ -14,23 +14,30 @@ here.
 
 == !Mp !az
 
-!mz was originally implemented for !sp !gs, as well as for !2p !zsum !gs.
-While no !mp version for !mz itself exists, #citet("mp_azero") extended the predecessor
+While no !mp version for !mz itself exists, #citet("mp_azero") extended its predecessor
 !algo !az to !mp capabilities.
 
-Importantly, they relax the assumption of the !g being !zsum:
-A !zsum !g involves two !pls where one !pl's gain comes with an equivalent loss for the
-other !pl.
-The !az (and in turn !mz) !algo make use of this fact by directly predicting how good the
-current position is for the current !pl by a scalar !v output of the !pnet
-#cite("azero", "muzero").
-The !mp extension predicts a !v vector instead, which provides an estimate of the expected
-individual utilities for all !pls at the same time.
+The original !impl of !az heavily relies on the !zsum property for some architectural
+simplifications:
+The !mcts performs a negamax search (see @sec_negamax for details), which only uses a
+scalar for describing the !v of !ns.
+The !nn subsequently also only predicts scalar !vs.
+@azero
 
-Likewise, they also extend the !g to return scores for each !pl at the end instead of a
-single outcome.
-Naturally, the !algo rotates over the list of all !pls instead of alternating between two
-!pls @azero.
+!Mp !az drops the assumption of the !g being !zsum by extending the search !vs to vectors.
+
+Specifically, an $n$<join-right> !pl !g returns a score vector with $n$<join-right>
+components, where the component at index $i$ denotes the indvidual outcome for !pl $i$.
+Likewise, !vs predicted by the !nn and in search tree !ns are also extended to vectors.
+MCTS backpropagation is performed with the !v vectors, updating all components in each
+visited !n.
+
+Naturally, the !mcts rotates over the !pls in turn order.
+When selecting a !n's children, the !algo seeks to maximize component $i$ of the !v
+vector, where $i$ denotes the !pl currently at turn.
+This !algo is known as $max^n$ search @mcts_survey and similar to the !mp !bi introduced
+in @sec_bi_mp.
+
 They evaluate their work on !mp versions of Connect 4 and Tic-Tac-Toe:
 The !nets learn to encode knowledge of the !g into search, indicating that the proposed
 !mp strategy works in principle.
