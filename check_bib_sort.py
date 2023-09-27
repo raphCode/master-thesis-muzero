@@ -23,6 +23,7 @@ key_order = [
     "date",
     "author",
     "publisher",
+    "organization",
     "isbn",
     "parent",
     "page-range",
