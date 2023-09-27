@@ -253,6 +253,17 @@ The card !g poker is an example of an !impinf !g because the other !pls' cards a
 concealed.
 @gtheo
 
+==== !PR
+
+The concept of perfect recall describes that a !pl never forgets all his past choices and
+information he got.
+This allows !pls to unabigously separate past, present und future !ss.
+@gtheo
+
+!Pr is often assumed in !gt, since it is a requirement for e.g. the rationality of !pls,
+which is explained in @sec_bi_mp.
+@gtheo
+
 ==== Simultaneous / !Seql Moves
 
 !Gs can be classified according to whether the !pls make their moves at the same time or
@@ -465,6 +476,7 @@ ${ #get_optimal_strategy(root).join(" ") }$.
 ]
 
 ===== !MP
+<sec_bi_mp>
 
 In a !mp setting, the !stys of other !pls influence the course of the !g and thus the
 utility of !ss.
