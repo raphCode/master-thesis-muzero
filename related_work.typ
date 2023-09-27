@@ -57,7 +57,7 @@ loss:
 
 #[
 
-#import "drawings/muzero.typ": rep, dyn, pred
+#import "drawings/muzero.typ": rep, dyn, pred, training
 
 They notice that the !dnet #dyn should map to same !latrep as the !rnet #rep for the same
 !g !ss.
@@ -77,6 +77,12 @@ $ s_t^x = cases(
   #dyn (s_t^(x-1), a_(t+x-1)) & "else",
 ) $
 The idea of the additional similarity loss is to match $s_t^n$ to $s_(t+n)^0$.
+This is illustrated in @fig_effzero_loss.
+
+#figure(
+  training(draw_latent_loss: true, draw_pnet: false, draw_reward_loss: false),
+  caption: [The latent loss introduced in !effz, indicated by the gray arrows.]
+) <fig_effzero_loss>
 
 The authors employ a stop-gradient operation on the side of $s_(t+n)^0$, meaning that
 gradients from the similarity loss are not applied to the !rnet #rep.
@@ -84,5 +90,6 @@ This is due to the fact that they closely modeled their !arch after !simsiam @si
 self-supervised framework that learns !latreps for images.
 The authors further justify this decision by treating $s_t^n$ as the more accurate
 representation and therefore using it as a target for the !dnet's !preds.
+In @fig_effzero_loss, this is reflected by the unidirectional gray loss arrows.
 
 ]

@@ -53,15 +53,24 @@
   }, name: name)
 }
 
-#let training = canvas(length: 1cm, {
-  let nodesize = 0.35
-  let arrowdist = 0.5
+#let training(draw_pnet: true, draw_reward_loss: true, draw_latent_loss: false) = canvas(length: 1cm, {
+  let nodesize = 0.45
+  let arrowdist = nodesize + 0.15
 
   let col(n) = "col_" + str(n)
 
   let states = (3, 4, 5, 9)
 
   let t(n) = if n == 0 [ $t$ ] else [ $t + #n$ ]
+
+  let node(dy, label, name: none) = {
+    padding(
+      circle((rel: (y: -dy), to: "obs"), radius: nodesize),
+      name: name,
+      amount: arrowdist - nodesize,
+    )
+    content(name, label)
+  }
 
   let draw_column(n) = group({
     let last = n == states.len() - 1
@@ -78,39 +87,33 @@
       anchor: "bottom",
     )
     if not last {
-      padding(
-        circle((rel: (y: -3), to: "obs"), radius: nodesize),
-        name: "node",
-        amount: arrowdist - nodesize,
-      )
+      node(if draw_latent_loss {6} else {3}, $ s_t^#n $, name: "node")
       export_anchors("node")
-      content(
-        "node",
-        $ s_t^#n $,
-      )
-      content(
-        (rel: (y: -2), to: "node"),
-        $ v_t^#n $,
-        anchor: "top",
-        name: "value",
-        padding: 0.2
-      )
-      content(
-        (rel: (y: 0.2), to: "value.bottom"),
-        $ p_t^#n $,
-        anchor: "top",
-        name: "policy_pred",
-        padding: 0.2,
-      )
-      net_inference(
-        "node.bottom",
-        "value.top",
-        "pred",
-      )
-      export_anchors("value")
-      minitree((rel: (y: -2.5), to: "policy_pred"), name: "tree")
-      content("tree.top", $ pi_#t(n) $, anchor: "bottom", padding: 0.1, name: "policy_tree")
-      loss_arrow_style(line("policy_tree.top", "policy_pred.bottom"))
+      if draw_pnet {
+        content(
+          (rel: (y: -2), to: "node"),
+          $ v_t^#n $,
+          anchor: "top",
+          name: "value",
+          padding: 0.2
+        )
+        content(
+          (rel: (y: 0.2), to: "value.bottom"),
+          $ p_t^#n $,
+          anchor: "top",
+          name: "policy_pred",
+          padding: 0.2,
+        )
+        net_inference(
+          "node.bottom",
+          "value.top",
+          "pred",
+        )
+        export_anchors("value")
+        minitree((rel: (y: -2.5), to: "policy_pred"), name: "tree")
+        content("tree.top", $ pi_#t(n) $, anchor: "bottom", padding: 0.1, name: "policy_tree")
+        loss_arrow_style(line("policy_tree.top", "policy_pred.bottom"))
+      }
     }
     if first {
       net_inference(
@@ -118,6 +121,14 @@
         "node.top",
         "repr",
       )
+    } else if draw_latent_loss and not last {
+      node(3, $ s_(t+#n)^0 $, name: "node2")
+      net_inference(
+        "obs.bottom",
+        "node2.top",
+        "repr",
+      )
+      loss_arrow_style(line("node2.bottom", (rel: (y: arrowdist + 0.15), to: "node")))
     }
   }, name: "col_" + str(n))
 
@@ -164,14 +175,19 @@
       $ a_#t(n - 1) $,
       anchor: "bottom-left",
     )
-    loss_arrow_style({
-      bez_vert(
+    if draw_reward_loss {
+      loss_arrow_style(bez_vert(
         "reward_game.bottom",
         (rel: (y: 0.15), to: "reward_dyn.top"),
-        x: 1
-      )
-      line(col(n) + ".value-left", value_loss_offset(col(n - 1) + ".value-right"))
-    })
+        x: if draw_latent_loss {3} else {1},
+      ))
+    }
+    if draw_pnet {
+      loss_arrow_style(line(
+        col(n) + ".value-left",
+        value_loss_offset(col(n - 1) + ".value-right"),
+      ))
+    }
   }, name: "conn_" + str(n))
 
   let connect_last() = group({
@@ -183,10 +199,12 @@
     line(from, (from, p, to))
     line((to, p, from), to)
     action_and_reward(n, $ z $)
-    loss_arrow_style(bez90(
-      "reward_game.bottom",
-      value_loss_offset("col_" + str(n - 1) + ".value-right"),
-    ))
+    if draw_pnet {
+      loss_arrow_style(bez90(
+        "reward_game.bottom",
+        value_loss_offset("col_" + str(n - 1) + ".value-right"),
+      ))
+    }
   })
 
   for (n, _) in states.enumerate() {
