@@ -5,7 +5,7 @@ repos:
         name: Check hayagriva bibliography key sort order
         entry: ./check_bib_sort.py
         language: python
-        files: "bibliography.yaml"
+        files: "bibliography.yml"
         additional_dependencies: ["pyyaml"]
       - id: check_typst_compile
         name: Check if the document compiles without errors
