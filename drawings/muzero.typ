@@ -53,7 +53,11 @@
   }, name: name)
 }
 
-#let training(draw_pnet: true, draw_reward_loss: true, draw_latent_loss: false) = canvas(length: 1cm, {
+#let training(
+  draw_pnet: true,
+  draw_reward_loss: true,
+  draw_latent_loss: false,
+) = canvas(length: 1cm, {
   let nodesize = 0.45
   let arrowdist = nodesize + 0.15
 
