@@ -49,6 +49,50 @@ The !nets learn to encode knowledge of the !g into search, indicating that the p
 !mp strategy works in principle.
 Performance-wise the !algo places itself below human experts.
 
+== !smz
+
+#[
+
+#import "drawings/muzero.typ": rep, dyn, pred, training
+#import "drawings/afterstates.typ": afterstates
+
+#citet("stochastic_muzero") extend !mz to stochastic, but observable !envs.
+The original !mz !algo is limited to deterministic !envs, due to the deterministic !preds
+of the !dnet #dyn.
+
+!smz makes use of !afs when modeling the !env.
+These !afs occur after each !a of the !ag and represent an hypothetical !s of the !env
+before it has transitioned to a true !s @sutton.
+The idea is visualized in @fig_afterstates.
+In stochastic !envs, !afs therefore can be viewed as a !s of uncertainty from which a
+definitive outcome will emerge.
+From a !gtic viewpoint, !afs may represent decision points of chance events.
+
+Note that in this section, the superscript in $s_t^i$ has a special meaning in contrast to
+the rest of the thesis:
+It is used to differentiate distinct !ss the stochastic !env may transition to, from the
+same !s-!a pair.
+
+#figure(
+  afterstates,
+  caption: [Afterstates in !smz]
+) <fig_afterstates>
+
+The transition from the !af $a s_t$ to the true !s $s_(t+1)^i$ is modeled using a chance
+outcome $c_t^i$ from a finite set of $C$<join-right> possible chance outcomes.
+This allows to use a deterministic model $cal(M)$ for !env transitions:
+$cal(M)$ receives a !s $s_t$, the !a taken $a_t$ and a chance outcome $c_t^i$:
+$ (s_(t+1), r_(t+1)) = cal(M) (s_t, a_t, c_t^i) $
+This way, the task of learning stochastic transitions can be reduced to learning !afs and
+distributions over the chance outcomes:
+$ Pr(s_(t+1)^i|a s_t) = Pr(c_t^i|a s_t) $
+
+In contrast, the !mz !impl of this thesis does not learn chance events from !env
+interactions.
+Instead, the !dnet is provided explicitly with the information which !g !s are chance
+events and the !probs of possible chance outcomes.
+
+]
 
 == !effz
 <rw_effzero>

@@ -11,6 +11,9 @@ az:
 mz:
   singular: MuZero
   plural: null
+smz:
+  singular: Stochastic MuZero
+  plural: null
 effz:
   singular: EfficientZero
   plural: null
@@ -56,6 +59,7 @@ p: policy
 v: value
 s: state
 n: node
+af: afterstate
 ts: terminal state
 tn: terminal node
 ag: agent
