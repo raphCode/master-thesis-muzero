@@ -1117,7 +1117,8 @@ The !dnet can be applied recurrently, so any !r $r^n$ and !s $s^n$ $n$<join-righ
 steps ahead can be predicted given an initial !s $s^0$ and a series of hypothetical !as
 $a^0, a^1, ..., a^(n-1)$:
 $ (s^t, r^t) = #dyn (s^(t-1), a^(t-1)) $
-This process is used during !mcts, as visualized in @fig_muzero_mcts.
+
+The recurrent inference is used during !mcts, as visualized in @fig_muzero_mcts.
 To decide on an !a in !g !s $s$, a search tree is initialized with the !g !obs:
 $s^0 = #rep (s)$.
 During the MCTS expansion phase, the !dnet #dyn is used to obtain the next !s $s^(n+1)$
