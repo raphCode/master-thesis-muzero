@@ -55,7 +55,8 @@
 
 #let training(
   draw_pnet: true,
-  draw_reward_loss: true,
+  dynamics_env: none,
+  dynamics_net: n => ($ r_t^#n $, ),
   draw_latent_loss: false,
 ) = canvas(length: 1cm, {
   let nodesize = 0.45
@@ -66,6 +67,14 @@
   let states = (3, 4, 5, 9)
 
   let t(n) = if n == 0 [ $t$ ] else [ $t + #n$ ]
+
+  if dynamics_env == none {
+    dynamics_env = n => { if n == -1 { ($ z $, ) } else { () } }
+  }
+
+  let stack_dynamics(fn, n) = stack(..fn(n), spacing: 2pt)
+  let stack_env = stack_dynamics.with(dynamics_env)
+  let stack_net = stack_dynamics.with(dynamics_net)
 
   let node(dy, label, name: none) = {
     padding(
@@ -91,7 +100,12 @@
       anchor: "bottom",
     )
     if not last {
-      node(if draw_latent_loss {6} else {3}, $ s_t^#n $, name: "node")
+      get-ctx(ctx => {
+        let (_, h1) = measure(stack_env(n), ctx)
+        let (_, h2) = measure(stack_net(n), ctx)
+        let dist = if draw_latent_loss { 6 } else { calc.max(h1 + h2 + 2.5, 3) }
+        node(dist, $ s_t^#n $, name: "node")
+      })
       export_anchors("node")
       if draw_pnet {
         content(
@@ -161,7 +175,7 @@
     let (from, to) = obs_from_to(n)
     line(from, to, mark: (end: ">"))
     set-style(content: (padding: 0.1))
-    action_and_reward(n, $ r_#t(n) $)
+    action_and_reward(n, stack_env(n))
     net_inference(
       col(n - 1) + ".node-right",
       col(n) + ".node-left",
@@ -170,7 +184,7 @@
     )
     content(
       "dyn.end",
-      $ r_t^#n $,
+      stack_net(n),
       anchor: "bottom-right",
       name: "reward_dyn",
     )
@@ -179,7 +193,7 @@
       $ a_#t(n - 1) $,
       anchor: "bottom-left",
     )
-    if draw_reward_loss {
+    if dynamics_net(n).len() > 0 {
       loss_arrow_style(bez_vert(
         "reward_game.bottom",
         (rel: (y: 0.15), to: "reward_dyn.top"),
@@ -202,7 +216,7 @@
     let p = 0.2
     line(from, (from, p, to))
     line((to, p, from), to)
-    action_and_reward(n, $ z $)
+    action_and_reward(n, stack_env(-1)) 
     if draw_pnet {
       loss_arrow_style(bez90(
         "reward_game.bottom",

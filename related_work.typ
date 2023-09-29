@@ -130,8 +130,16 @@ The idea of the additional similarity loss is to match $s_t^n$ to $s_(t+n)^0$.
 This is illustrated in @fig_effzero_loss.
 
 #figure(
-  training(draw_latent_loss: true, draw_pnet: false, draw_reward_loss: false),
-  caption: [The latent loss introduced in !effz, indicated by the gray arrows.]
+  training(
+    draw_latent_loss: true,
+    draw_pnet: false,
+    dynamics_env: n => (),
+    dynamics_net: n => (),
+  ),
+  caption: [
+    The latent loss introduced in !effz, indicated by the gray arrows.
+    The other !mz losses are omitted for clarity.
+  ]
 ) <fig_effzero_loss>
 
 The authors employ a stop-gradient operation on the side of $s_(t+n)^0$, meaning that
