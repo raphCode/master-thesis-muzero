@@ -1076,7 +1076,7 @@ It always uses the latest !net parameters for selfplay data generation.
 The publication shows that the !az training approach is feasable of generalization by
 evaluating it on Go, chess and shogi.
 !az outperformed existing state-of-the-art programs in all of the !g, including its
-precursor !ago in the case of Go .
+precursor !ago in the case of Go.
 The training success was also reported to be repeatable across multiple independant runs.
 
 === !mz
