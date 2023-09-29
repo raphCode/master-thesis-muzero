@@ -1083,11 +1083,14 @@ The training success was also reported to be repeatable across multiple independ
 <sec_muzero>
 
 !mz by #citet("muzero") is yet another improvement over !az in terms of generalization.
-!az uses a simulator during the tree search to obtain the !g !s for a hypothetical !seq of
-!as.
-In contrast, !mz learns a dynamic model of the !g and uses it in the !mcts to plan ahead.
-In fact, this allows !mz's application to broader set of !envs including single !pl !gs
-and non-zero !rs at intermediate steps.
+!mz learns a dynamic model of the !g, solely from interactions, and uses it in the !mcts
+to plan ahead.
+In contrast, !az uses an explicit simulator during the tree search to obtain !g !s for a
+!seq of hypothetical !as.
+This simulator represents domain knowledge of the !env.
+
+By learning a model instead, the !mz !arch can generalize to different !envs, including
+single !pl !gs and non-zero !rs at intermediate steps.
 The authors applied !mz to the !gs Go, shogi, chess and the complete Atari suite.
 In the case of board !gs, it matched the performance of !az and in the Atari !env it
 outperformed existing approaches.
