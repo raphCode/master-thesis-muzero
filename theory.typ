@@ -927,10 +927,9 @@ The bonus term $u(s, a)$ is initially proportional to the prior !prob but decays
 repeated visits to encourage exploration:
 $ u(s, a) prop P(s, a) / (1 + N(s, a)) $
 
-This selection strategy is a variant of the UCT !algo.
-UCT (and its name) itself is derived from applying the UCB (Upper Confidence Bounds) !algo
-to trees.
-#cite("puct", "uct", "alphago")
+The selection !sty maximizes over a probabilistic upper confidence tree @puct.
+Such formulas (and variants) are therefore also referred to as "pUCT formulas".
+#cite("alphago", "muzero", "stochastic_muzero")
 
 The MCTS selection phase traverses the tree as usual, until time step $L$, where it
 reaches a leaf !n that may be expanded (if it is not a !ts).
