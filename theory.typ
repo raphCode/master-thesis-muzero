@@ -57,6 +57,7 @@ It describes the !prob of the !env ending up in !s $s'$ and yielding !r $r$ when
 @sutton
 
 === !Epis and !Rets
+<sec_rl_ret>
 
 In some scenarios the interaction between !ag and !env naturally ends at some point, that
 is, there exists a final time step $t_n$.
@@ -1130,15 +1131,32 @@ $s^0 = #rep (s)$.
 During the MCTS expansion phase, the !dnet #dyn is used to obtain the next !s $s^(n+1)$
 and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^n$.
 
-The MCTS simulation phase executes like in !az, where #pred predicts a !v estimate and
-search !p of a newly expanded !n $s^n$:
-$(v^n, p^n) = #pred (s^n)$
-
 #figure(
   mcts,
   caption: [!Mcts in !mz]
 ) <fig_muzero_mcts>
 
+
+The MCTS simulation phase executes like in !az, where #pred predicts a !v estimate and
+search !p of a newly expanded !n $s^n$:
+$ (v^n, p^n) = #pred (s^n) $
+
+Traditional MCTS assumes no intermediate !rs and backpropagates a single simulation result
+$z$ through the search tree #cite("mcts_survey", "mcts_review").
+However, the backpropagation in !mz needs to take intermediate rewards into account.
+The !v to backpropagate is updated for every parent !n $s^n$ on the search path.
+
+Specifically, each !n $s^n$ sees a backpropagated !v $z^n$ which is computed from the
+discounted child backpropagation !v $z^(n+1)$ and the transition !r $r^(n+1)$:
+$ z^n = gamma z^(n+1) + r^(n+1) $
+This is equivalent to the calculation of the discounted !ret in !rl, introduced in
+@sec_rl_ret.
+
+The !n statistics of $s^n$ are updated with $z^n$, for example by averaging like outlined
+in @sec_mcts_backprop.
+
+The simulation !v $z^L$ of the leaf !n $s^L$ is obtained from a !pred of #pred, the same
+way as in !az.
 
 Like !az, !mz uses selfplay with MCTS to generate training data.
 For each selfplay step at time $t$ the data $(s_t, a_t, r_t, pi_t, z_t)$ is recorded.
