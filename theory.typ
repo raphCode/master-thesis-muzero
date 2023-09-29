@@ -83,7 +83,7 @@ The intuition is to value !rs far in the future less than immediate !rs.
 For this purpose, a hyperparameter $gamma$ is introduced, called the !df.
 The !ret $G_t$ is then calculated as
 $ G_t eq.def r_(t+1) + gamma r_(t+2) + gamma^2 r_(t+3) + ... =
-sum_(k=0)^(n-1) gamma^k r_(t+k+1) $
+sum_(k=1)^(n-t) gamma^(k-1) r_(t+k) $
 where $0 <= gamma <= 1$.
 
 The !df affects how valuable future !rs appear in the present moment:
