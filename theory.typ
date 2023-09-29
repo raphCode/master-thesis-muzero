@@ -1172,7 +1172,7 @@ For Atari !gs, $z_t$<join-right> is calculated to be a n-step !ret.
 #[
 
 #let series(x, end: $K$) = $#x _t, #x _(t+1), ..., #x _end$
-#let loss(letter, target, pred, start: 0) = $sum_(k=start)^K l^letter (target _(t+k), pred _t^k)$
+#let loss(letter, target, pred, start: 0) = $sum_(k=start)^K ell^letter (target _(t+k), pred _t^k)$
 
 During training, the !dnet is unrolled for $K$ steps and aligned with a !seq of !env !ss,
 !as and !rs from the selfplay data.
