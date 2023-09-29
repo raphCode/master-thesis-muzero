@@ -33,7 +33,7 @@ This concept can be mathematically modeled with !mdps.
 
 Specifically, an !ag interacts with its !env in discrete time steps $t = 0, 1, 2, ...$.
 At each time $t$, the !ag receives an !obs of the current !s $s_t in S$ and then chooses
-an !a $a_(t+1) in A(s)$ to take.
+an !a $a_t in A$ to take.
 The !a transitions the !env to a new !s $s_(t+1)$ and generates a numerical !r $r_(t+1) in
 R subset RR$ for the !ag.
 $S$<no-join>, $A$<join-right> and $R$ denote the set of all !ss, !as and !rs respectively.
