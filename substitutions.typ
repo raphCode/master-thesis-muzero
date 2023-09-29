@@ -67,5 +67,7 @@
     }
   )
 
+  show regex("\bmaxn\b"): [max#super[n]]
+
   body
 }

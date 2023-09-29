@@ -20,22 +20,28 @@ While no !mp version for !mz itself exists, #citet("mp_azero") extended its pred
 The original !impl of !az heavily relies on the !zsum property for some architectural
 simplifications:
 The !mcts performs a negamax search (see @sec_negamax for details), which only uses a
-scalar for describing the !v of !ns.
+scalar for describing the !v of !ns @ab_pruning.
 The !nn subsequently also only predicts scalar !vs.
 @azero
 
-!Mp !az drops the assumption of the !g being !zsum by extending the search !vs to vectors.
+!Mp !az drops the assumption of the !g being !zsum.
+This makes it necessary to extend the scalar quantities used in the !algo to vectors.
 
-Specifically, an $n$<join-right> !pl !g returns a score vector with $n$<join-right>
-components, where the component at index $i$ denotes the indvidual outcome for !pl $i$.
-Likewise, !vs predicted by the !nn and in search tree !ns are also extended to vectors.
-MCTS backpropagation is performed with the !v vectors, updating all components in each
-visited !n.
+Specifically, an $n$<join-right> !pl !g returns a score vector $arrow(z)$:
+$ arrow(z) = [z_1, z_2, ... z_n] in RR^n $
+Each component $z_i$ denotes the indvidual outcome for !pl $i$.
+Likewise, !n !vs in the search tree and !preds by the !nn are extended to vectors
+$arrow(v) in RR^n$.
+
+MCTS backpropagation is performed with the vectors.
+The computations used to update !n statistics are performed with elementwise vector
+operations.
+This updates each vector component independently.
 
 Naturally, the !mcts rotates over the !pls in turn order.
-When selecting a !n's children, the !algo seeks to maximize component $i$ of the !v
-vector, where $i$ denotes the !pl currently at turn.
-This !algo is known as $max^n$ search @mcts_survey and similar to the !mp !bi introduced
+When selecting a !n's children, the !algo seeks to maximize component $v_i$ of the !v
+vector $arrow(v)$, where $i$ denotes the !pl currently at turn.
+This !algo is known as maxn search @mcts_survey and similar to the !mp !bi introduced
 in @sec_bi_mp.
 
 They evaluate their work on !mp versions of Connect 4 and Tic-Tac-Toe:
