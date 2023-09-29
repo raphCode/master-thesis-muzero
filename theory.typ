@@ -638,7 +638,6 @@ Compared to all !pls adhering to their optimal !stys, this means:
 - in a collaborative !g: compensating for mistakes of teammates
 
 == !MCTS
-<sec_mcts>
 
 !Mcts (MCTS) is a stochastic !algo that can be applied to !seql decision problems to
 discover good !as.
@@ -691,13 +690,10 @@ in @fig_mcts_phases.
 
 #let phase(n) = labels.at(n - 1)
 
-#let phase_heading(n) = [
-  #strong(phase(n)):\
-]
-
 The phases are executed in the following order, unless noted otherwise:
 
-#phase_heading(1)
+=== #phase(1)
+
 The !algo descends the current tree and finds the most urgent location.
 Selection always begins at the root !n and, at each level, selects the next !n based on an
 !a determined by a tree !p.
@@ -708,11 +704,13 @@ This phase terminates in two conditions:
 - the !n corresponding to the next selected !a is not contained in the tree yet.
 #cite("mcts_survey", "mcts_review")
 
-#phase_heading(2)
+=== #phase(2)
+
 Adds a new child !n to the tree at the position determined by the #phase(1) phase.
 #cite("mcts_survey", "mcts_review")
 
-#phase_heading(3)
+=== #phase(3)
+
 The goal of this phase is to determine a !v sample of the last selected !n.
 If the !n is already a !ts, the outcome $z$ of the !g can be used directly and the !algo
 skips to #phase(4).\
@@ -735,7 +733,9 @@ An optimisation over random !as may be to sample !as from another !p, also refer
 the rollout !p.
 #cite("mcts_survey", "mcts_review", "alphago")
 
-#phase_heading(4)
+=== #phase(4)
+<sec_mcts_backprop>
+
 Propagates the !v $z$ obtained in the #phase(3) upwards in the tree, updating the
 statistics of all ancestor !ns.
 For each !n on the path to the root, the visit count $n_s$ is incremented and the !v
@@ -953,7 +953,7 @@ than previous computer Go programs.
 
 One MCTS iteration is concluded by backpropagating $V(s_L)$ up in the tree.
 All edges on the search path are updated so that $Q(s, a)$ represents the average !v of
-all simulations that passed through it, like described in @sec_mcts.
+all simulations that passed through it, like described in @sec_mcts_backprop.
 
 To decide on a move to play in !s $s_p$, a search tree is initialized with the root !n
 corresponding to $s_p$.
