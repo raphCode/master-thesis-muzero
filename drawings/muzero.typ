@@ -1,5 +1,5 @@
 #import "@preview/cetz:0.1.1": canvas, draw, tree, coordinate
-#import "util.typ": bez90, padding, export_anchors, bez_vert
+#import "util.typ": bez90, padding, export_anchors, bez_vert, bez_hor
 #import "icon.typ": tic_tac_toe, minitree
 #import draw: *
 
@@ -56,8 +56,9 @@
 #let training(
   draw_pnet: true,
   dynamics_env: none,
-  dynamics_net: n => ($ r_t^#n $, ),
+  dynamics_net: none,
   draw_latent_loss: false,
+  value_target: "outcome",
 ) = canvas(length: 1cm, {
   let nodesize = 0.45
   let arrowdist = nodesize + 0.15
@@ -69,7 +70,18 @@
   let t(n) = if n == 0 [ $t$ ] else [ $t + #n$ ]
 
   if dynamics_env == none {
-    dynamics_env = n => { if n == -1 { ($ z $, ) } else { () } }
+    if value_target == "return" {
+      dynamics_env = n => { (if n == -1 { $ r_T $ } else { $ r_(t+#n) $ }, ) }
+    } else if value_target == "outcome" {
+      dynamics_env = n => { (if n == -1 { $ z $ } else [], ) }
+    }
+  }
+  if dynamics_net == none {
+    if value_target == "return" {
+      dynamics_net = n => ($ r_t^#n $, )
+    } else if value_target == "outcome" {
+      dynamics_net = n => ()
+    }
   }
 
   let stack_dynamics(fn, n) = stack(..fn(n), spacing: 2pt)
@@ -88,8 +100,9 @@
   let draw_column(n) = group({
     let last = n == states.len() - 1
     let first = n == 0
+    let col_offset = 4
     padding(
-      tic_tac_toe((4 * n, 0), n: states.at(n)),
+      tic_tac_toe((n * col_offset, 0), n: states.at(n)),
       name: "obs",
       amount: 0.2
     )
@@ -109,7 +122,7 @@
       export_anchors("node")
       if draw_pnet {
         content(
-          (rel: (y: -2), to: "node"),
+          (rel: (y: -2.5), to: "node"),
           $ v_t^#n $,
           anchor: "top",
           name: "value",
@@ -128,9 +141,19 @@
           "pred",
         )
         export_anchors("value")
-        minitree((rel: (y: -2.5), to: "policy_pred"), name: "tree")
-        content("tree.top", $ pi_#t(n) $, anchor: "bottom", padding: 0.1, name: "policy_tree")
-        loss_arrow_style(line("policy_tree.top", "policy_pred.bottom"))
+        if value_target == "outcome" {
+          anchor("value_target", (rel: (1.6, 0.5), to: "value.top"))
+          loss_arrow_style(bez_hor("value_target", "value.right", x: -1))
+        } else if value_target == "return" {
+          content(
+            (rel: (x: col_offset / 2), to: "value"),
+            $ G_#t(n) $,
+            padding: 0.1,
+            name: "return",
+          )
+          loss_arrow_style(line("return.left", "value.right"))
+          export_anchors("return")
+        }
       }
     }
     if first {
@@ -167,8 +190,6 @@
     )
   }
 
-  let value_loss_offset(pos) = (rel: (x: 0.1), to: pos)
-
   let connect_prev(n) = group({
     assert(n > 0)
     assert(n < states.len() - 1)
@@ -193,17 +214,18 @@
       $ a_#t(n - 1) $,
       anchor: "bottom-left",
     )
+    if draw_pnet and value_target == "outcome" {
+      loss_arrow_style(line(
+        col(n - 1) + ".value_target",
+        col(n) + ".value_target",
+        mark: (end: none),
+      ))
+    }
     if dynamics_net(n).len() > 0 {
       loss_arrow_style(bez_vert(
         "reward_game.bottom",
         (rel: (y: 0.15), to: "reward_dyn.top"),
         x: if draw_latent_loss {3} else {1},
-      ))
-    }
-    if draw_pnet {
-      loss_arrow_style(line(
-        col(n) + ".value-left",
-        value_loss_offset(col(n - 1) + ".value-right"),
       ))
     }
   }, name: "conn_" + str(n))
@@ -218,10 +240,21 @@
     line((to, p, from), to)
     action_and_reward(n, stack_env(-1)) 
     if draw_pnet {
-      loss_arrow_style(bez90(
-        "reward_game.bottom",
-        value_loss_offset("col_" + str(n - 1) + ".value-right"),
-      ))
+      if value_target == "outcome" {
+        loss_arrow_style(bez90(
+          "reward_game.bottom",
+          col(n - 1) + ".value_target",
+          mark: (end: none),
+        ))
+      } else if value_target == "return" {
+        content(
+          (rel: (0, 1), to: col(n - 1) + ".return-top-left"),
+          $ G_t = sum_(k=1)^(T-t) gamma^(k-1) r_(t+k) $,
+          anchor: "bottom-left",
+          frame: "rect",
+          padding: 0.1,
+        )
+      }
     }
   })
 
