@@ -1203,8 +1203,13 @@ Specifically, the total loss $l_t$ for an unroll !seq starting at $s_t$ and with
 $K$ is given by
 $ l_t = loss(p, pi, p) + loss(v, z, v) + loss(r, r, r, start: 1) $
 with $l^p$, $l^v$<join-right> and $l^r$ being loss !fns for !p, !v and !r, respectively.
+
 The parameters of the three !nns are updated jointly via backpropagation on the total loss
-$l$.
+$l$, in an end-to-end manner.
+No other constraints are given on the !latreps, such as reconstructing the original !obs
+or matching the true !s of the !env.
+The !nets are free to learn any !repr that correctly estimates the !p, !v and !r !fn and
+can invent any dynamics helpful for accurate planning.
 
 ]
 
