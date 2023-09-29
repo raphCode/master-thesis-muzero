@@ -43,10 +43,6 @@ Note that the subscript used to represent an !a that occurred between $s_t$ and 
 varies in different literature:
 Some associate this !a with time step $t$ @sutton, others with $t+1$ @muzero.
 In this thesis, I will follow the first convention given in #citet("sutton").
-Further confusion may arise when comparing this to the !impl that accompanies this thesis:
-I store tuples $(s_t, a_t, r_(t+1))$ together at the same array index because this is most
-convenient for training.
-
 
 The concept of !seql decision making can be formalized with finite !mdps.
 Finite means the sets of possible !ss $S$, !as $A$ and !rs $R$ each have a finite number
