@@ -959,7 +959,7 @@ To decide on a move to play in !s $s_p$, a search tree is initialized with the r
 corresponding to $s_p$.
 A number of MCTS iterations is performed, and the !a $a_p$ with the highest visit count is
 played:
-$ a_p = limits("argmax")_a (N(s_p, a)) $
+$ a_p = limits("argmax")_a ( N(s_p, a) ) $
 
 In the case where the "thinking time" for each move is limited, the maximum number of
 iterations depends on the speed of the !algo.
