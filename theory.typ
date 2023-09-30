@@ -116,6 +116,15 @@ In !tss, the !v is always zero per definition:
 There are no future !rs possible.
 @sutton
 
+The definition of the !v !fn as the discounted sum of future !rs enables to calculate
+another type of !ret:
+The n-step !ret sums only a truncated !seq of the next $n$ !rs and substitutes the rest with
+the !ag's current !v !fn:
+$ G_t eq.def r_(t+1) + gamma r_(t+2) + ... + gamma^(n-1) r_(t+n) + gamma^n v_pi (s_(t+n)) =
+gamma^n v_pi (s_(t+n)) + sum_(k=1)^n gamma^(k-1) r_(t+k) $
+This use of the !ag's current !v !fn is known as bootstrapping.
+@sutton
+
 == !GT
 
 This section introduces basic !gtic concepts, just enough to provide justification for the
