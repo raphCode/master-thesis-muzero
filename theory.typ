@@ -60,15 +60,15 @@ It describes the !prob of the !env ending up in !s $s'$ and yielding !r $r$ when
 <sec_rl_ret>
 
 In some scenarios the interaction between !ag and !env naturally ends at some point, that
-is, there exists a final time step $t_n$.
+is, there exists a final time step $T$.
 In !gs this happens when the match is over.
 In !rl such a series of interactions is called an !epi.
 @sutton
 
-The !seq of visited !ss $s_0, s_1, s_2, ..., s_n$ is referred to as a !traj.
+The !seq of visited !ss $s_0, s_1, s_2, ..., s_T$ is referred to as a !traj.
 Depending on the context, a !traj may also include the !as and !rs associated with the
 transitions between !ss.
-The last !s $s_n$ is also called the !ts. 
+The last !s $s_T$ is also called the !ts. 
 @sutton
 
 To translate multiple !rs earned over a period of time into a singular value that guides
@@ -77,14 +77,14 @@ The !ret is a specific !fn of the !r !seq.
 The !ag's learning objective is then defined as maximizing the !exret.
 In a simple case, the !ret $G_t$ may be defined as the sum of all !rs occurring after time
 step $t$:
-$ G_t eq.def r_(t+1) + r_(t+2) + r_(t+3) + ... + r_n $
+$ G_t eq.def r_(t+1) + r_(t+2) + r_(t+3) + ... + r_T $
 
 Another approach is to use a discounted !r.
 The intuition is to value !rs far in the future less than immediate !rs.
 For this purpose, a hyperparameter $gamma$ is introduced, called the !df.
 The !ret $G_t$ is then calculated as
 $ G_t eq.def r_(t+1) + gamma r_(t+2) + gamma^2 r_(t+3) + ... =
-sum_(k=1)^(n-t) gamma^(k-1) r_(t+k) $
+sum_(k=1)^(T-t) gamma^(k-1) r_(t+k) $
 where $0 <= gamma <= 1$.
 
 The !df affects how valuable future !rs appear in the present moment:
@@ -104,7 +104,7 @@ Since the !p makes statements about the future behavior of the !ag, one can now 
 The !exret describes the expected value of the !ret $G_t$ in !s $s_t$, if the !p $pi$ is
 followed.
 It is therefore also called the !v $v_pi(s)$ and defined as:
-$ v_pi(s) eq.def EE_pi [G_t|s_t=s] = EE_pi [sum_(k=0)^(n-1) gamma^k r_(t+k+1)
+$ v_pi(s) eq.def EE_pi [G_t|s_t=s] = EE_pi [sum_(k=0)^(T-1) gamma^k r_(t+k+1)
 #move(dy: -3pt, scale(y: 300%, [$|$<no-join>])) s_t=s] $
 @sutton
 
