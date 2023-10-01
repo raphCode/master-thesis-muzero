@@ -1112,6 +1112,8 @@ The authors applied !mz to the !gs Go, shogi, chess and the complete Atari suite
 In the case of board !gs, it matched the performance of !az and in the Atari !env it
 outperformed existing approaches.
 
+==== !DNET
+
 #[
 
 #import "drawings/muzero.typ": rep, dyn, pred, mcts, training
@@ -1144,6 +1146,8 @@ for simplicity of notation.
 For example, if one is only interested in the !ss produced by the !dnet, the following
 notation is also valid:
 $ s^t = #dyn (s^(t-1), a^(t-1)) $
+
+==== !MCTS
 
 The recurrent inference is used during !mcts, as visualized in @fig_muzero_mcts.
 To decide on an !a in !g !s $s$, a search tree is initialized with the !g !obs:
@@ -1193,6 +1197,8 @@ For Atari !gs, $z_t$<join-right> is calculated to be a n-step !ret.
 
 #let series(x, end: $K$) = $#x _t, #x _(t+1), ..., #x _end$
 #let loss(letter, target, pred, start: 0) = $sum_(k=start)^K ell^letter (target _(t+k), pred _t^k)$
+
+==== Training
 
 During training, the !dnet is unrolled for $K$ steps and aligned with a !seq of !env !ss,
 !as and !rs from the selfplay data.
