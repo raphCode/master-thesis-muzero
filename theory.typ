@@ -752,17 +752,18 @@ For each !n on the path to the root, the visit count $n_s$ is incremented and th
 statistics of the !n is updated to include $z$.
 #cite("mcts_survey", "mcts_review")
 
-For example, a MCTS !impl with scalar !vs may be interested in the average !v $v_s$ of all
+For example, a pratical MCTS !impl may be interested in the average !v $v_s$ of all
 simulations that passed through the !s $s$.
-It can store the sum of all simulation !vs $u_s$, and use the visit count $n_s$ to
-calculate the !n !v
+It can store the sum of all simulation !vs $u_s$, and divide by the visit count $n_s$ to
+calculate the average !n !v $v_s$
 $ v_s = cases(
   u_s / n_s & "if" n_s eq.not 0,
   0 & "else",
 ) $
-During the #phase(4) phase, the following updates would then be performed:
-$ n_s' = n_s + 1 \
-  u_s' = u_s + z $
+During the #phase(4) phase, the following updates would then be performed to incorporate a
+simulation result $z$ in the statistics:
+$ n_s colon.eq n_s + 1 \
+  u_s colon.eq u_s + z $
 
 #cite("muzero", "alphago")
 
