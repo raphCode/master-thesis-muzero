@@ -65,11 +65,29 @@ one where the fifty-move rule applies.
 In the !2p setting, !mz assumes that the !g is !zsum.
 This assumption is built into the !arch itself, because it performs negamax search (see
 @sec_negamax) during MCTS @muzero.
-This also implicitly hardcodes an alternating turn order between the two !pls.
 
 Negamax exploits the !zsum property by using only a single scalar for a !n's !v.
 The design of the !nns (#dyn<join-right> and #pred) in !mz follows this choice and also
 only predict a single scalar for !s !vs and transition !rs.
+
+==== Fixed Turn Order
+
+The limitation to !gs with up to two !pls implicitly makes assumptions about the turn
+order.
+In !sp !gs, trivially only one !pl can be at turn.
+
+In !gs with 2 !pls, alternating turns are assumed.
+This is not a limitation in practice, since possible special turn order mechanics can be
+modeled with the set of available !as $A$.
+
+As an contrived example, consider castling in chess:
+It may be viewed as two successive turns of the same !pl, moving king and rook separately.
+However, by expanding the !a set $A$ with a castling move, the assumption about
+alternating turn order still holds.
+
+The alternating turn order is exploited by the negamax search !impl.
+For single-!ag !envs, negamax is disabled altogether.
+@muzero
 
 #let sscl = [SSCL]
 
