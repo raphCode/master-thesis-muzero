@@ -57,7 +57,6 @@ It describes the !prob of the !env ending up in !s $s'$ and yielding !r $r$ when
 @sutton
 
 === !Epis and !Rets
-<sec_rl_ret>
 
 In some scenarios the interaction between !ag and !env naturally ends at some point, that
 is, there exists a final time step $T$.
@@ -93,6 +92,7 @@ reduced by a factor of $gamma^(k-1)$ compared to if it had arrived immediately.
 @sutton
 
 === !Ps and !V !Fns
+<sec_rl_nstep>
 
 A !p is a formal description of the !ag's behavior.
 Given a !s $s_t$, the !p $pi(a|s)$ denotes the !prob that the !ag chooses !a $a_t=a$ if
@@ -1169,20 +1169,39 @@ search !p of a newly expanded !n $s^leaf$:
 $ (v^leaf, p^leaf) = #pred (s^leaf) $
 
 Traditional MCTS assumes no intermediate !rs and backpropagates a single simulation result
-$z$ through the search tree #cite("mcts_survey", "mcts_review").
-However, the backpropagation in !mz needs to take intermediate rewards into account.
-The !v to backpropagate is updated for every parent !n $s^n$ on the search path.
+through the search tree #cite("mcts_survey", "mcts_review").
+However, the backpropagation in !mz needs to take intermediate rewards into account
+#footnote[in the general case. When applied to board !gs without intermediate !rs, the !r
+!preds are ignored and MCTS backpropagation is performed as in !az.].
+The !v to backpropagate is updated for every parent !n on the search path.
+
+#let fn = footnote[technically no !mc simulation takes place, but the result of an inference of
+#pred on the just expanded !n $s^leaf$ is used. I just adhere to the general terminology of
+MCTS here.]
+
+Specifically, let the search path consist of the !ns $s^0, s^1, ..., s^leaf$, where $s^leaf$
+is the newly expanded leaf !n.
+For $k = leaf...0$ an n-step !ret is calculated, bootstrapped from the simulation#fn !v
+$v^leaf$:
+$ G^k = sum_(i=1)^(leaf-k) gamma^(i-1) r_(k+i) + gamma^(leaf-k) v^leaf $
+This is equivalent to the calculation of the discounted n-step !ret in !rl, introduced in
+@sec_rl_nstep.
+
+#let s = $s^k$
+#let ac = $a^(k+1)$
+#let N = $N(#s, #ac)$
+#let Q = $Q(#s, #ac)$
+#let G = $G^(k+1)$
+
+The statistics for each !n $s^k$ for $k = leaf-1...0$ are updated with the respektive #G:
+$ #Q colon.eq frac(#N times #Q + #G, #N + 1) \
+  #N colon.eq #N + 1 $
 
 ]
 
-Specifically, each !n $s^n$ sees a backpropagated !v $z^n$ which is computed from the
-discounted child backpropagation !v $z^(n+1)$ and the transition !r $r^(n+1)$:
-$ z^n = gamma z^(n+1) + r^(n+1) $
-This is equivalent to the calculation of the discounted !ret in !rl, introduced in
-@sec_rl_ret.
+This is equivalent to the formulas for a pratical !impl keeping track of average !n !vs,
+outlined in @sec_mcts_backprop.
 
-The !n statistics of $s^n$ are updated with $z^n$, for example by averaging like outlined
-in @sec_mcts_backprop.
 
 The simulation !v $z^L$ of the leaf !n $s^L$ is obtained from a !pred of #pred, the same
 way as in !az.
