@@ -1215,34 +1215,41 @@ $ #Q colon.eq frac(#N times #Q + #G, #N + 1) \
 This is equivalent to the formulas for a pratical !impl keeping track of average !n !vs,
 outlined in @sec_mcts_backprop.
 
+==== Training
 
-The simulation !v $z^L$ of the leaf !n $s^L$ is obtained from a !pred of #pred, the same
-way as in !az.
+The exact training procedure differs slightly depending on the type of !g.
+I explain the training setup for !2p board !gs first, as it is most similar to !mz's
+precursors.
+
+===== Board !Gs
 
 Like !az, !mz uses selfplay with MCTS to generate training data.
-For each selfplay step at time $t$ the data $(s_t, a_t, r_t, pi_t, z_t)$ is recorded.
-The first three entries contain the !s of the !env, executed !a and received !r,
-respectively.
-$pi_t$<join-right> denotes the search !p, like in !mz's precursors.
-For details see @sec_alphago_zero.
-$z_t$<join-right> is the RL sample !ret as introduced in @sec_rl.
-In the case of board !gs, it is equal to the final outcome of the !g $z$, like in !mz's
-precedessors.
-For Atari !gs, $z_t$<join-right> is calculated to be a n-step !ret.
+For each selfplay step at time $t$ the data $(s_t, a_t, pi_t, z)$ is recorded.
+The first two entries contain the !s of the !env and executed !a respectively.
+$pi_t$<join-right> denotes the search !p, as derived from the root !n, like in !mz's
+precursors (see @sec_alphago_zero for details).
+$z$ is the final outcome of the !g, indicating a win, loss or draw.
 
 #[
 
-#let series(x, end: $K$) = $#x _t, #x _(t+1), ..., #x _end$
-#let loss(letter, target, pred, start: 0) = $sum_(k=start)^K ell^letter (target _(t+k), pred _t^k)$
+#let series(x, start: 0, end: $K$) = {
+  let sub(n) = { if n == 0 {} else { $+#n$ } }
+  let item(n) = math.attach(x, b: $t$ + sub(n))
+  $#item(start), #item(start + 1), ..., #x _#end$
+}
+#let series_p = series($pi$)
+#let series_a = series($a$, end: $K - 1$)
+#let series_r = series($r$, start: 1)
+#let series_g = series($G$, start: 1)
 
-==== Training
+#let loss(letter, target, pred, start: 0) = $sum_(k=start)^K ell^letter (pred _t^k, target)$
 
-During training, the !dnet is unrolled for $K$ steps and aligned with a !seq of !env !ss,
-!as and !rs from the selfplay data.
+For training, the !dnet is unrolled for $K$ steps and aligned with a !seq of !env !ss and
+!as from a selfplay !traj.
 Specifically, a training example beginning at time step $t$ consists of the tuple
-$(s_t, (series(a)), (series(r)), (series(pi)), z_t)$, where $K$ is the unroll length, a
-hyperparameter.
-The process is illustrated in @fig_muzero_training for $K=2$ and $z_t = z$ for all $t$.
+$(s_t, (#series_a), (#series_p), z)$, where $K$ is the unroll length, a hyperparameter.
+
+The process is illustrated in @fig_muzero_training_board for $K=2$:
 
 #figure(
   training(
@@ -1252,29 +1259,57 @@ The process is illustrated in @fig_muzero_training for $K=2$ and $z_t = z$ for a
     Training setup in !mz in the case of board !gs, unrolled for~2 steps.
     Thick arrows indicate training losses.
   ]
-) <fig_muzero_training>
+) <fig_muzero_training_board>
 
 First, a !latrep $s_t^0$ is obtained using the !rnet: $s_t^0 = #rep (s_t)$.
 Then, the !dnet #dyn is applied recurrently $K-1$ times with the !as from the !traj
-$series(a)$.
-This yields !latreps for the !ss $s_t^1, s_t^2, ..., s_t^K$ and corresponding !r !preds
-$r_t^1, r_t^2, ..., r_t^K$.
+#series_a.
+This yields !latreps for the !ss $s_t^1, s_t^2, ..., s_t^K$.
+The !r !preds are ignored since board !gs have no intermediate !rs.
 At each unroll step $n = 0, 1, ..., K$, the !pnet #pred predicts a !v and !p $(v^n, p^n)$
 from the !latrep $s_t^n$.
 
-Losses for the !r, !p and !v !preds are calculated at each unroll step to align the !net
-!preds with the actually occurred !rs $r_t$, search !ps $pi_t$ and sample !rets $z_t$.
-Specifically, the total loss $l_t$ for an unroll !seq starting at $s_t$ and with length
-$K$ is given by
-$ l_t = loss(p, pi, p) + loss(v, z, v) + loss(r, r, r, start: 1) $
-with $l^p$, $l^v$<join-right> and $l^r$ being loss !fns for !p, !v and !r, respectively.
+Losses for the !p and !v !preds are calculated at each unroll step to align the !preds of
+#pred with the search !ps $pi_t$ and !g outcome $z$.
+Specifically, the total loss $ell_t$ for an unroll !seq starting at $s_t$ with length $K$ is
+given by
+$ ell_t = loss(p, pi_(t+k), p) + loss(v, z, v) $
+with $ell^p$<join-right> and $ell^v$ being loss !fns for !p and !v, respectively.
 
 The parameters of the three !nns are updated jointly via backpropagation on the total loss
-$l$, in an end-to-end manner.
+$ell$, in an end-to-end manner.
 No other constraints are given on the !latreps, such as reconstructing the original !obs
 or matching the true !s of the !env.
-The !nets are free to learn any !repr that correctly estimates the !p, !v and !r !fn and
-can invent any dynamics helpful for accurate planning.
+The !nets are free to learn any !repr that correctly estimates the !p and !v !fn, they can
+invent any dynamics helpful for accurate planning.
+
+===== Atari !Gs
+
+When applied to !envs with intermediate !rs, such as the Atari suite, !r !preds are
+included in the training.
+
+The data from a single time step $t$ of selfplay is extended with the !r experienced:
+$(s_t, a_t, r_(t+1), pi_t, G_t)$.
+The last item of the tuple is also updated:
+It now contains the n-step !ret $G_t$ instead of the final outcome of the !g $z$.
+
+Likewise, a training sample includes the !seq of sample !rets and $K - 1$ experienced !rs:
+$ (s_t, (#series_a), (#series_r), (#series_p), (#series_g)) $
+The !dnet is unrolled in the same manner, and an additional !r loss $ell^r$ is introduced.
+The total loss thus becomes
+$ ell_t = loss(p, pi_(t+k), p) + loss(v, G_(t+k), v) + loss(r, r_(t+k), r, start: 1) $
+
+@fig_muzero_training_atari illustrated the updated training setup:
+
+#figure(
+  training(
+    value_target: "return",
+  ),
+  caption: [
+    Training setup in !mz for Atari !gs, unrolled for~2 steps.
+    Thick arrows indicate training losses.
+  ]
+) <fig_muzero_training_atari>
 
 ]
 
