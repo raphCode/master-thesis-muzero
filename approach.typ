@@ -41,10 +41,11 @@ These limitations are briefly discussed in the following.
 In order to plan ahead, the future !s of the !env must be predictable for an intial !s $s$
 and given !seq of !as.
 The !dnet #dyn in !mz is a deterministic !fn and no chance !ss are modeled in the !arch.
-Perhaps unexpecdly, #citet("stochastic_muzero") show that !mz's performance falls short in
-a stochastic !env compared to other methods that model stochasticity.
+Perhaps unexpectedly, #citet("stochastic_muzero") show that !mz's performance falls short
+in a stochastic !env compared to other methods that model stochasticity.
 
 ==== !PINF
+
 Accurately planning ahead also relies on unambiguously identifying the initial state $s$.
 From a !gtic standpoint, this requires the !g to be with !pr and of !pinf (See @sec_pr and
 @sec_pinf, respectively).
@@ -67,7 +68,7 @@ This assumption is built into the !arch itself, because it performs negamax sear
 This also implicitly hardcodes an alternating turn order between the two !pls.
 
 Negamax exploits the !zsum property by using only a single scalar for a !n's !v.
-The design of the !nns (#dyn<join-right> and #pred) in !mz follow this choice and also
+The design of the !nns (#dyn<join-right> and #pred) in !mz follows this choice and also
 only predict a single scalar for !s !vs and transition !rs.
 
 #let sscl = [SSCL]
