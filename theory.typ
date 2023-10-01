@@ -1160,6 +1160,19 @@ and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^
   caption: [!Mcts in !mz]
 ) <fig_muzero_mcts>
 
+The selection of !ns happens according to a pUCT formula (introduced in @sec_alphago).
+Specifically, in !s $s^k$, the child !n corresponding to the !a $a^k$ is selected
+$ a^k = limits("argmax")_a { Q(s, a) + P(s, a) frac(sqrt(sum_b N(s, b)), 1 + N(s, a))
+[c_1 + log(frac(sum_b N(s, b) + c_2 + 1, c_2))] } $
+where $a, b$ are !as.
+$N(s, a)$ and $P(s, a)$ denote the visit count and prior !prob of the child !n
+corresponding to !a $a$, respectively.
+$Q(s, a)$ includes the !r $r^(k+1)$ from the transition between !s $s^k$ to $s^(k+1)$
+under !a $a$.
+The constants $c_1$<join-right> and $c_2$ are hyperparameters to control the influence of
+the !p $P(s, a)$ relative to the !v $Q(s, a)$ for higher visit counts.
+#citet("muzero") used $c_1 = 1.25$ and $c_2 = 19652$.
+
 #[
 
 #let leaf = $L$
