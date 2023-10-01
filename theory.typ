@@ -964,6 +964,13 @@ One MCTS iteration is concluded by backpropagating $V(s_L)$ up in the tree.
 All edges on the search path are updated so that $Q(s, a)$ represents the average !v of
 all simulations that passed through it, like described in @sec_mcts_backprop.
 
+Each !n $s$ in the search tree is only processed once by the !nns, when the !n is
+expanded.
+The resulting !v $v(s) = #v (s)$ and !p $p(s) = #sl (s)$ (represented by the edge !probs
+$P(s, a)$) are stored in the tree and reused for the next MCTS iterations.
+In other words, per iteration, the tree grows by one !n (as usual), and !net inference is
+performed on the new !n only.
+
 To decide on a move to play in !s $s_p$, a search tree is initialized with the root !n
 corresponding to $s_p$.
 A number of MCTS iterations is performed, and the !a $a_p$ with the highest visit count is
