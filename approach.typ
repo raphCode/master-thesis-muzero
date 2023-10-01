@@ -32,9 +32,9 @@ to a discussion of how I extend the !arch to more general !gs.
 === !mz Limitations
 <sec_muzero_limitations>
 
-!mz is limited to single-!ag !envs and !2p !zsum !gs.
+The !impl of !mz is designed for single-!ag !envs and !2p !zsum !gs.
 Furthermore, all !gs are expected to be deterministic and of !pinf.
-These limitations are briefly discussed in the following.
+The causes of these limitations and some implications are briefly discussed below.
 
 ==== Determinism
 
