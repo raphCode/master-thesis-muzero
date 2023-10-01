@@ -44,7 +44,7 @@ vector $arrow(v)$, where $i$ denotes the !pl currently at turn.
 This !algo is known as maxn search @mcts_survey and similar to the !mp !bi introduced
 in @sec_bi_mp.
 
-They evaluate their work on !mp versions of Connect 4 and Tic-Tac-Toe:
+They evaluate their work on !mp versions of Connect 4 and !ttt:
 The !nets learn to encode knowledge of the !g into search, indicating that the proposed
 !mp strategy works in principle.
 Performance-wise the !algo places itself below human experts.

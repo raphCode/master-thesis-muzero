@@ -225,8 +225,8 @@ the !g.
 It is a special case of the more general concept of constant-sum !gs, where all payoffs
 sum to a constant value.
 In other words, a !pl may benefit only at the expense of other !pls.
-Examples of !2p !zsum !gs are tic-tac-toe, chess and Go, since only one !pl may win
-(payoff of 1), while the other looses (payoff of -1).
+Examples of !2p !zsum !gs are !ttt, chess and Go, since only one !pl may win (payoff of
+1), while the other looses (payoff of -1).
 Also poker is considered a !zsum !g, because a !pl wins exactly the amount which his
 opponents lose.
 

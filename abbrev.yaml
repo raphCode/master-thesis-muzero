@@ -86,6 +86,9 @@ exf: extensive form
 rps:
   singular: Rock, Paper, Scissors
   plural: null
+ttt:
+  singular: Tic-Tac-Toe
+  plural: null
 exut: expected utility
 zsum: zero-sum
 gtic:
