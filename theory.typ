@@ -1160,15 +1160,20 @@ and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^
   caption: [!Mcts in !mz]
 ) <fig_muzero_mcts>
 
+#[
+
+#let leaf = $L$
 
 The MCTS simulation phase executes like in !az, where #pred predicts a !v estimate and
-search !p of a newly expanded !n $s^n$:
-$ (v^n, p^n) = #pred (s^n) $
+search !p of a newly expanded !n $s^leaf$:
+$ (v^leaf, p^leaf) = #pred (s^leaf) $
 
 Traditional MCTS assumes no intermediate !rs and backpropagates a single simulation result
 $z$ through the search tree #cite("mcts_survey", "mcts_review").
 However, the backpropagation in !mz needs to take intermediate rewards into account.
 The !v to backpropagate is updated for every parent !n $s^n$ on the search path.
+
+]
 
 Specifically, each !n $s^n$ sees a backpropagated !v $z^n$ which is computed from the
 discounted child backpropagation !v $z^(n+1)$ and the transition !r $r^(n+1)$:
