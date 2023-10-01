@@ -137,7 +137,7 @@ This is illustrated in @fig_effzero_loss.
     dynamics_net: n => (),
   ),
   caption: [
-    The latent loss introduced in !effz, indicated by the gray arrows.
+    The latent loss introduced in !effz, indicated by the thick arrows.
     The other !mz losses are omitted for clarity.
   ]
 ) <fig_effzero_loss>
@@ -148,6 +148,6 @@ This is due to the fact that they closely modeled their !arch after !simsiam @si
 self-supervised framework that learns !latreps for images.
 The authors further justify this decision by treating $s_t^n$ as the more accurate
 representation and therefore using it as a target for the !dnet's !preds.
-In @fig_effzero_loss, this is reflected by the unidirectional gray loss arrows.
+In @fig_effzero_loss, this is reflected by the unidirectional thick loss arrows.
 
 ]

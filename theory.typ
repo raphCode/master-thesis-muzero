@@ -1207,7 +1207,7 @@ The process is illustrated in @fig_muzero_training for $K=2$ and $z_t = z$ for a
   ),
   caption: [
     Training setup in !mz in the case of board !gs, unrolled for~2 steps.
-    Gray arrows indicate training losses.
+    Thick arrows indicate training losses.
   ]
 ) <fig_muzero_training>
 
