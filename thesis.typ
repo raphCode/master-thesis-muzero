@@ -1,4 +1,3 @@
-
 #let thesis(
   doc,
   debug_equation_join: false,
