@@ -13,6 +13,7 @@
     justify: true,
   )
   set heading(numbering: "1.")
+  show heading.where(level: 1): hd => pagebreak(weak: true) + hd
 
   set cite(brackets: true, style: "chicago-author-date")
   show cite.where(brackets: true): it => "[" + cite(..it.keys, brackets: false)  + "]"
