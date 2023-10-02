@@ -1167,11 +1167,14 @@ $ a^k = limits("argmax")_a { Q(s, a) + P(s, a) frac(sqrt(sum_b N(s, b)), 1 + N(s
 where $a, b$ are !as.
 $N(s, a)$ and $P(s, a)$ denote the visit count and prior !prob of the child !n
 corresponding to !a $a$, respectively.
-$Q(s, a)$ includes the !r $r^(k+1)$ from the transition between !s $s^k$ to $s^(k+1)$
-under !a $a$.
+
 The constants $c_1$<join-right> and $c_2$ are hyperparameters to control the influence of
 the !p $P(s, a)$ relative to the !v $Q(s, a)$ for higher visit counts.
 #citet("muzero") used $c_1 = 1.25$ and $c_2 = 19652$.
+
+In contrast to !az, $Q(s, a)$ consists not only of the child !n !v, it must also include
+the transition !r:
+$ Q(s^k, a^k) = gamma v^(k+1) + r^(k+1) $ 
 
 #[
 
