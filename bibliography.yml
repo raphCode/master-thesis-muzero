@@ -660,3 +660,14 @@ uct:
     isbn: 978-3-540-45375-8
   page-range: 282-293
   doi: 10.1007/11871842_29
+
+vq_vae:
+  type: article
+  title: Neural Discrete Representation Learning
+  date: 2017-11-02
+  author: 
+    - Aaron van den Oord
+    - Oriol Vinyals
+    - Koray Kavukcuoglu
+  parent: *arxiv
+  doi: 10.48550/arXiv.1711.00937

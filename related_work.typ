@@ -71,8 +71,8 @@ From a !gtic viewpoint, !afs may represent decision points of chance events.
 
 Note that in this section, the superscript in $s_t^i$ has a special meaning in contrast to
 the rest of the thesis:
-It is used to differentiate distinct !ss the stochastic !env may transition to, from the
-same !s-!a pair.
+It is used to differentiate distinct stochastic outcomes the !env may transition to, from
+the same !s-!a pair.
 
 #figure(
   afterstates,
@@ -85,13 +85,48 @@ This allows to use a deterministic model $cal(M)$ for !env transitions:
 $cal(M)$ receives a !s $s_t$, the !a taken $a_t$ and a chance outcome $c_t^i$:
 $ (s_(t+1), r_(t+1)) = cal(M) (s_t, a_t, c_t^i) $
 This way, the task of learning stochastic transitions can be reduced to learning !afs and
-distributions over the chance outcomes:
-$ Pr(s_(t+1)^i|a s_t) = Pr(c_t^i|a s_t) $
+distributions over the chance outcomes.
 
-In contrast, the !mz !impl of this thesis does not learn chance events from !env
-interactions.
-Instead, the !dnet is provided explicitly with the information which !g !s are chance
-events and the !probs of possible chance outcomes.
+#[
+
+#let ad = $phi$
+#let ap = $psi$
+#let adist = $sigma$
+
+#let afd = [!af dynamics #ad]
+#let afp = [!af !pred #ap]
+
+In pratice, !smz introduces two new !nns, the #afd and #afp.
+They are comparable to the normal dynamics and !pnet, respectively.
+
+Specifically, the #afd predicts an !af $a s_t$ for a given !s-!a pair $s_t, a_t$:
+$ a s_t = ad (s_t, a_t) $
+The #afp outputs a !v $Q_t$ for an !af $a s_t$ and a !prob distribution
+$adist_t = Pr(c_t^i|a s_t)$ over the chance outcomes:
+$ (Q_t, adist_t) = ap (a s_t) $
+
+The regular !dnet #dyn takes the role of predicting the transition from an !af $a s_t$ to
+a true !s $s_(k+1)$ under chance outcome $c_t^i$:
+$ s_(t+1), r_(t+1) = dyn (a s_t, c_t^i) $
+
+The inference of !env dynamics from a !s-!a pair $s_t, a_t$ thus becomes a multi-step
+process:
+First, an !af $a s_t$ is predicted by $ad (s_t, a_t)$.
+Then, the distribution over chance outcomes is obtained: $adist_t = ap (a s_t)$.
+Finally, a chance outcome is sampled $c_t^i tilde.op adist_t$ and the next !s $s_(t+1)$ is
+obtained using $s_(t+1) = dyn (a s_t, c_t^i)$.
+
+!smz employs a variant of a Vector Quantised Variational AutoEncoder (VQ-VAE) @vq_vae to
+learn the chance transitions and their !probs $adist$ through interactions of the !env.
+VQ-VAEs have a fixed codebook size, set by a hyperparameter, which limits the number of
+possible outputs.
+In !smz, it is set to the maximum number of distinct chance outcomes in the !g or higher.
+
+]
+
+Stochastic MuZero matches the performance of !mz in deterministic !envs.
+It outperforms previous approaches in stochastic domains, such as the !g 2048 and
+backgammon.
 
 ]
 
