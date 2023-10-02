@@ -307,6 +307,7 @@ of the !pls.
 @gtheo
 
 ==== Cooperation and Collaboration
+<sec_gt_collab>
 
 Traditional !gt divides !gs into two categories, cooperative and non-cooperative.
 The cooperative approach studies !gs where the rules are only broadly defined.

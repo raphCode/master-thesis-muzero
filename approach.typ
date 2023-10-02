@@ -75,6 +75,110 @@ The alternating turn order is exploited by the negamax search !impl.
 For single-!ag !envs, negamax is disabled altogether.
 @muzero
 
+== Extension to !MP, Stochastic and General Sum !Gs
+
+I propose an extension of !mz to more general !gs than the original !impl is capable of.
+This includes !gs with chance events, more than two !pls, and therefore arbitrary payoffs.
+
+Planning ahead in a !g with more than one !pl requires some !i or assumptions about the
+behavior of other !pls.
+In a !2p !zsum !g, the behavior of the opponent !pl is easy to model:
+He will always try to minimize the score of the other !pl.
+This assumption does not hold for general-sum !gs with arbitrary payoffs.
+
+My extension of !mz to !mp !gs is inspired from the !mp !bi in !gt.
+It assumes a non-cooperative setting, where each !pl tries to maximize his individual
+payoff, like introduced in @sec_bi_mp.
+
+I perform a number of changes to the !algo.
+
+=== Individual !Vs
+
+#[
+#let vector(x) = $arrow(#x) = [#x _1, #x _2, ..., #x _n] in RR^n$
+
+!Mp !bi requires to keep track of the individual !exuts and !rs for each !pl.
+I follow the design of !mp !az @mp_azero (see @sec_mp_azero) and replace all scalars
+describing an !env !r, !s or !n !v, with vectors.
+In an !env with $n$ !ags, these !r and !v vectors consist of $n$ components:
+$ vector(r) \
+  vector(v) $
+Each component $r_i$ and $v_i$ denotes the individual !r and !v of !ag $i$, respectively.
+
+#let (r1, r2, r3) = (2, -1, 0)
+
+For example, the !r $arrow(r) = [r1, r2, r3]$ indicates that the first !ag was rewarded
+with~#r1, the second !ag received a !r of~#r2, and the third !ag got no !r.
+#assert(r3 == 0)
+]
+
+Note that in a collaborative !g, all individual !rs are shared, as outlined in
+@sec_gt_collab:
+$ r_i = r "for" 1 <= i <= n $
+
+=== Turn Order !Pred
+<sec_mod_turn>
+
+Making informed decisions within the search tree requires not only individual !rs and !vs,
+but also an understanding who can make a decision at a particular !n.
+In !mz, the turn order is hardcoded by using negamax search in !2p !gs.
+
+To achieve a more general !algo, my !impl does not make any assumptions about the turn
+order.
+Instead, the next !pl at turn is learnt by the !dnet #dyn.
+
+I added an additional output head $w$ to the !dnet #dyn:
+$ (s^n, r^n, w^n) = #dyn (s^(n-1), a^(n-1)) $
+which predicts the !pl $w^n$ at turn in !s
+$s^n$.
+It is implemented as a categorical distribution $T$ over the set of !pls $W$:
+$ T(s, w) = Pr(w|s) $
+
+During MCTS, for each !s $s^n$ encountered, the current !pl $w^n$ is assumed to be the one
+with the highest predicted !prob:
+$ w^n = limits("argmax")_(w in W) ( T(s^n, w) ) $
+
+The turn output $w$ is trained like the !r $arrow(r)$, based on ground-truth labels given
+by the !g simulator during selfplay.
+
+=== maxn !MCTS
+
+Following !mp !bi (@sec_bi_mp), the MCTS selection phase considers !n !vs for the !pl currently at turn
+only.
+Specifically, each !n !v is a vector:
+$ arrow(Q)(s^n, a^n) = gamma arrow(v)^(n+1) + arrow(r)^(n+1) $
+Let $Q_i (s, a)$ denote the $i$<no-join>-th component of this vector.
+
+In !s $s^k$, maxn-MTCS then selects an !a $a^k$ as to maximize $Q_i (s^k, a^k)$ where $i =
+w^k$, the !pl currently at turn, as outlined in @sec_mod_turn:
+$ a^k = limits("argmax")_a ( arrow(Q)_w_i (s, a) + u(s, a) ) $
+where $u(s, a)$ represents some bonus term to incorporate exploration and the prior !probs
+$P(s^k, a^k)$ into the decision.
+
+=== Chance events
+
+I model stochastic !envs with an explicit chance !pl.
+He is at turn whenever a chance event occurs in the !g.
+
+#[
+#let wc = $w_frak(C)$
+
+The occurrence of chance events is given by the !dnet as part of the turn order !pred $w$.
+An additional special !pl #wc is added to the set of !pls $W$:
+$ W' = W union {wc} $
+
+If $w^n = #wc$, the current decision !n $s^n$ is assumed to be a chance event.
+The !probs of the different chance outcomes are predicted by the !pnet #pred.
+During MCTS, child !ns of a chance event $s^n$ are selected solely according to the !p $p^n$.
+
+Like the current !pl at turn, the occurrence of chance events is trained on ground-truth
+labels given by the !g simulator.
+The !g simulator also provides the exact chance outcomes $c_t$ if !s $s_t$ is a chance
+event.
+These outcomes are used as targets during training for the !p $p$ as predicted by #pred.
+
+]
+
 #let sscl = [SSCL]
 
 === Symmetric #sscl
