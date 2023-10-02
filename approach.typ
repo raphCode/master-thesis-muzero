@@ -29,14 +29,14 @@ The original !mz !impl is limited to a specific class of !gs.
 I begin by reviewing the limitations of !mz and the reasons behind them, and then move on
 to a discussion of how I extend the !arch to more general !gs.
 
-=== !mz Limitations
+== !mz Limitations
 <sec_muzero_limitations>
 
 The !impl of !mz is designed for single-!ag !envs and !2p !zsum !gs.
 Furthermore, all !gs are expected to be deterministic and of !pinf.
 The causes of these limitations and some implications are briefly discussed below.
 
-==== Determinism
+=== Determinism
 
 In order to plan ahead, the future !s of the !env must be predictable for an intial !s $s$
 and given !seq of !as.
@@ -44,7 +44,7 @@ The !dnet #dyn in !mz is a deterministic !fn and no chance !ss are modeled in th
 Perhaps unexpectedly, #citet("stochastic_muzero") show that !mz's performance falls short
 in a stochastic !env compared to other methods that model stochasticity.
 
-==== !PINF
+=== !PINF
 
 Accurately planning ahead also relies on unambiguously identifying the initial state $s$.
 From a !gtic standpoint, this requires the !g to be with !pr and of !pinf (See @sec_pr and
@@ -60,7 +60,7 @@ The current board !s is therefore not enough !i to distinguish a regular !g situ
 one where the fifty-move rule applies.
 @muzero
 
-==== !ZSUM !Gs
+=== !ZSUM !Gs
 
 In the !2p setting, !mz assumes that the !g is !zsum.
 This assumption is built into the !arch itself, because it performs negamax search (see
@@ -70,7 +70,7 @@ Negamax exploits the !zsum property by using only a single scalar for a !n's !v.
 The design of the !nns (#dyn<join-right> and #pred) in !mz follows this choice and also
 only predict a single scalar for !s !vs and transition !rs.
 
-==== Fixed Turn Order
+=== Fixed Turn Order
 
 The limitation to !gs with up to two !pls implicitly makes assumptions about the turn
 order.
