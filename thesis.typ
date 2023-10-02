@@ -12,7 +12,7 @@
   set par(
     justify: true,
   )
-  set heading(numbering: "1.")
+  set heading(numbering: "I - A 1.1:")
   show heading.where(level: 1): hd => pagebreak(weak: true) + hd
 
   set cite(brackets: true, style: "chicago-author-date")
