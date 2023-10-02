@@ -91,6 +91,7 @@ It assumes a non-cooperative setting, where each !pl tries to maximize his indiv
 payoff, like introduced in @sec_bi_mp.
 
 I perform a number of changes to the !algo.
+The updated training setup with all modifications is visualized in @fig_raphzero_training.
 
 === Individual !Vs
 
@@ -116,6 +117,9 @@ Note that in a collaborative !g, all individual !rs are shared, as outlined in
 @sec_gt_collab:
 $ r_i = r "for" 1 <= i <= n $
 
+This modification is reflected in @fig_raphzero_training by adding vector arrows
+$arrow(x)$ to !mp data.
+
 === Turn Order !Pred
 <sec_mod_turn>
 
@@ -140,6 +144,9 @@ $ w^n = limits("argmax")_(w in W) ( T(s^n, w) ) $
 
 The turn output $w$ is trained like the !r $arrow(r)$, based on ground-truth labels given
 by the !g simulator during selfplay.
+
+@fig_raphzero_training shows this change by the added $w$ in the !env transitions and
+!dnet !preds.
 
 === maxn !MCTS
 
@@ -176,6 +183,33 @@ labels given by the !g simulator.
 The !g simulator also provides the exact chance outcomes $c_t$ if !s $s_t$ is a chance
 event.
 These outcomes are used as targets during training for the !p $p$ as predicted by #pred.
+
+Chance events are represented by a dice in @fig_raphzero_training
+#footnote[ignore the fact that the !g !ttt actually has no chance events].
+Note that a chance event $s_t$ differs from regular !g !ss in the figure in two aspects:
+- the !p target for training #pred are the chance outcomes $c_t$
+- the target for the turn order !preds $w$ is the constant chance !pl #wc
+
+#import "drawings/muzero.typ": rep, dyn, pred, training
+
+#let chance_state = 1
+#let t(n) = if n == -1 { $T$ } else { $t+#n$ }
+
+#figure(
+  training(
+    dynamics_env: n => {
+      (
+        $ arrow(r)_#t(n) $,
+        if (n - 1) != chance_state { $ w_#t(n) $ } else { $ wc $ },
+      )
+    },
+    dynamics_net: n => ($ arrow(r)_t^#n $, $ w_t^#n $),
+    use_vectors: true,
+    value_target: "return",
+    chance_event: chance_state,
+  ),
+  caption: [Training setup of my !impl of !mz for stochastic multi-agent !envs]
+) <fig_raphzero_training>
 
 ]
 

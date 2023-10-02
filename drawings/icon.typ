@@ -86,3 +86,25 @@
   content((rel: (y: -0.1), to: name + ".bottom"), align(center, ct), anchor: "top")
 }
 
+#let dice(pos, name: none) = group({
+  set-origin(pos)
+
+  let side(x, y, number: none) = group({
+    rotate((x: -90deg * x, y: 90deg * y))
+    set-origin((0, 0, -1))
+    rect((-1, -1), (1, 1), stroke: 0.5pt)
+    set-style(fill: black, radius: 0.1)
+    circle((0, 0))
+    for i in range(4) {
+      if number == 5 or calc.rem(i, 2) == 0 and number == 3 {
+        circle((45deg + i * 90deg, 0.7))
+      }
+    }
+  })
+
+  scale(0.3)
+
+  side(1, 1, number: 1)
+  side(0, 1, number: 3)
+  side(0, 0, number: 5)
+}, name: name)

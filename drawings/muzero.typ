@@ -1,9 +1,11 @@
 #import "@preview/cetz:0.1.1": canvas, draw, tree, coordinate
 #import "util.typ": bez90, padding, export_anchors, bez_vert, bez_hor
-#import "icon.typ": tic_tac_toe, minitree
+#import "icon.typ": tic_tac_toe, minitree, dice
 #import draw: *
 
 #let (rep, dyn, pred) = ($h$, $g$, $f$)
+
+#let vectorize_maybe(use_vectors, cnt) = if use_vectors { $arrow(cnt)$ } else { cnt }
 
 #let loss_arrow_style(content) = group({
   let s = gray + 3pt
@@ -58,6 +60,8 @@
   dynamics_env: none,
   dynamics_net: none,
   draw_latent_loss: false,
+  chance_event: none,
+  use_vectors: false,
   value_target: "outcome",
 ) = canvas(length: 1cm, {
   let nodesize = 0.45
@@ -68,6 +72,8 @@
   let states = (3, 4, 5, 9)
 
   let t(n) = if n == 0 [ $t$ ] else [ $t + #n$ ]
+
+  let vectorize = vectorize_maybe.with(use_vectors)
 
   if dynamics_env == none {
     if value_target == "return" {
@@ -102,7 +108,11 @@
     let first = n == 0
     let col_offset = 4
     padding(
-      tic_tac_toe((n * col_offset, 0), n: states.at(n)),
+      if n == chance_event {
+        dice((n * col_offset, 0))
+      } else {
+        tic_tac_toe((n * col_offset, 0), n: states.at(n))
+      },
       name: "obs",
       amount: 0.2
     )
@@ -123,7 +133,7 @@
       if draw_pnet {
         content(
           (rel: (y: -2.5), to: "node"),
-          $ v_t^#n $,
+          $ vectorize(v)_t^#n $,
           anchor: "top",
           name: "value",
           padding: 0.2
@@ -147,13 +157,23 @@
         } else if value_target == "return" {
           content(
             (rel: (x: col_offset / 2), to: "value"),
-            $ G_#t(n) $,
+            $ vectorize(G)_#t(n) $,
             padding: 0.1,
             name: "return",
           )
           loss_arrow_style(line("return.left", "value.right"))
           export_anchors("return")
         }
+        let policy
+        if n == chance_event {
+          dice((rel: (y: -2.5), to: "policy_pred"), name: "policy_icon")
+          policy = $c$
+        } else {
+          minitree((rel: (y: -2.5), to: "policy_pred"), name: "policy_icon")
+          policy = $pi$
+        }
+        content("policy_icon.top", $ #policy _#t(n) $, anchor: "bottom", padding: 0.1, name: "policy_target")
+        loss_arrow_style(line("policy_target.top", "policy_pred.bottom"))
       }
     }
     if first {
