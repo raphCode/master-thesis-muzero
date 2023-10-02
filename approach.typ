@@ -248,7 +248,18 @@ useful !i in the latent space from the !obs and !seq of !as, respectively.
 Consequently, I see no risk of latent collapse in the !effz !arch, and propose to remove
 the stop-gradient operation.
 
-=== !TNs in the !MCTS
+=== !TNs in the MCTS
+
+#box(stroke: red+3pt, inset:5pt, radius:10%)[
+TODO: Reason for !tns does not feel properly justified yet.\
+Chapter is thus WIP.\
+Maybe a better reasoning is that !nns tend to go "haywire" when used on input data never
+encountered during training.
+This might lead to !preds which are very off for !ns after !tns, biasing statistics of the
+whole tree.
+Treating !tns as "absorbing" during training means every !a must be trained, which is not
+very elegant and may not generalize.
+]
 
 In !az, the !mcts uses a perfect simulator to determine the next !g !s for hypothetical
 !as.
@@ -256,22 +267,28 @@ Naturally, this simulator also indicates when the !g is over and there are no fu
 moves to search for @azero.
 These !tss are an important concept in !RL, since their value is by definition zero:
 no future !rs can occur @sutton.
-Additionally, in !gs, the !r is often sparse, meaning that a non-zero !r occurs only at
-the end of the !g.
-In this case, the !r of !tss is the only driving force behind learning a good !p.
 
-Likewise, in the !mcts, !tns are important anchors that provide a known, ground-truth !r
-and !v:
-During search, !rs and !vs of !ns are backpropagated upward along the search path from
-children to parents.
-Backpropagation from !tns provides upstream !ns with valuable !i that ultimately allows
-the !ag to make an informed decision about what !a to take.
-In fact, by applying this process iteratively, it is possible to evaluate !as for !g !ss
-many steps before the end of the !g.
+Tss play an important role in the case of $n$<no-join>-step !rets:
+!Rets are exact for the last $n$ steps of a training !traj, because only !env !rs are
+summed.
+A training !traj ending at time $T$ thus has ground-thruth targets for the !vs
+$v^(T-n), v^(T-n+1), ..., v^T$.
+For previous time steps $t < T-n$, the !rets are bootstrapped with the !ag's !v !fn
+$v_(t+n)$.
+The accuracy of the training targets thus depends on the !vs estimated by the !ag.
+
+In !mz, the n-step !ret is bootstrapped with the !v of the root !n from the tree search.
+It is therefore desireable if the !v in the search tree are accurate for timesteps near
+!ts.
+!N !vs in a !mc search tree depend on !vs backpropagated from child !ns.
+This recursive condition repeats until a !tn is reached, where the !env ultimately
+provides an outcome.
+In the case where !rs are sparse (zero most of the time, nonzero in !ts), !tns represent
+ground-thruth anchors for !vs in the search because their !v is taken from the !env.
 
 !mz replaces the perfect simulator with the !dnet, which provides !r !preds for
 transitions between !ns.
-is unexpected that !mz does not include any concept of !tns:
+I finde it unexpected that !mz does not include any concept of !tns:
 
 #blockquote("muzero")[
   _MuZero_ does not give special treatment to terminal nodes and always uses the value
@@ -280,65 +297,12 @@ is unexpected that !mz does not include any concept of !tns:
   by treating terminal states as absorbing states during training.
 ]
 
-As the search progresses past a !tn, the predicted !rs and !vs past the !tn are
-backpropagated in the same way as for any other !n.
-However, it's crucial to note that since the !v of a !ts is by definition zero,
-backpropagating any non-zero value to a !tn is unsound.
-Under the assumption that the !nets are able to accurately predict the terminal !r,
-backpropagation effectively renders the !TNs unreliable.
+#[
 
-In general, these scenarios are possible regarding !tss:
-- Ignore !tss during search and training
-- Train zero !v and !r for !ss beyond the end
-- Predict the occurrence of !tss:
-  - Disallow searching past !tns
-  - Only create child !ns with zero !v and !r
+#let wt = $w_frak(T)$
 
-Completely ignoring !tns forces the !nets to predict values for !latreps beyond the !g end
-they were never trained on, which produces nonsense.
-If values of large magnitude are output, it can even lead to numerical instabilities when
-operations like softmax are applied to the predictions.
+My approach is to enhance the turn order !pred $w$ with another special !pl, the terminal !pl #wt.
+He is at turn when the !g (!env) reached a !ts.
+This allows the MCTS to not expand !ns beyond !tss.
 
-Learning zero !rs and !vs for !ss beyond terminal ones, as !mz does, seems reasonable.
-However, it incurs some overhead during training:
-The !dnet and !pnet must be unrolled for a number of steps beyond the !tss, which requires
-more computational power.
-Also, the !nets might fail to generalize beyond the unrolled horizon, simply because they
-were never trained that far.
-This brings us back to the first scenario, if the tree search continues further beyond the
-end of the !g than was anticipated during training.
-
-In this thesis, I chose the third option because it allows !tss to be modeled accurately
-during the search without extra computational cost.
-I implemented it by adding a scalar output to the !dnet, which is trained to predict
-whether the !g ends at the next !s.
-Adding the output to the !dnet is favorable over the !pnet, since no additional !g !ss
-have to be added during training.
-Moreover, if we consider the idea of using the !pnet to classify whether a certain !g !s
-is terminal, we have to use a !latrep to encode the !s.
-However, a !ts has neither an !obs nor a meaningful !v or !p, so it makes little sense to
-associate it with a !latrep#footnote[albeit that would be possible].
-
-Once !tss are predicted, the search behavior can be adjusted.
-The simplest approach seems to be to simply abort the search beyond !tns and not allow any
-further visits to that !n.
-However, this introduces a problem:
-!mz builds the !p target using the visit counts of the search !ns.
-Blocking the search from continuing past !tns skews these visit counts.
-Since !ns are blocked from being visited, other !ns must be selected instead, resulting in
-visit counts that do not accurately represent the ideal !p.
-
-Even if the !impl takes into account updating the visit counts, disallowing further
-expansion beyond !tn can still be problematic:
-The terminal !pred may be wrong, and the !g may actually continue beyond the assumed !tn.
-In this case there are no search !ns available for the next move.
-While the original !mz !arch has no issue with this, this paper outlines possible future
-work where this makes a difference.
-
-A better alternative is to force the !r and !v of each !tn child to zero.
-The child relationship is considered transitive in this context, meaning that
-grandchildren and all reachable child !ns have these values set to zero.
-
-This approach also generalizes to arbitrary search depths in the sense that once a !ts is
-predicted, all child !ns beyond the first !tn are set to zero !r and !v.
-This is all achieved without the !nets having to learn anything about beyond-!tss.
+]
