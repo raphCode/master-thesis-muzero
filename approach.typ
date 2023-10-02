@@ -8,22 +8,6 @@ hast.
 #import "thesis.typ": citet, blockquote
 #import "drawings/muzero.typ": rep, dyn, pred
 
-- MuZero implementation
-  - mcts behavior customizeable
-    - node selection
-    - policy calculation
-    - action selection
-  - supports arbitrary games
-  - pytorch
-  - typed codebase, passes mypy
-- extensions / variants:
-  - efficient zero
-  - !tss
-  - chance !ss
-  - multiplayer support: teams, prediction of current player
-- interplay of mcts policy and selection function
-  - unstable behavior of original setup: UCT scores and visit count policy
-- application to carchess / !mp !g
 
 The original !mz !impl is limited to a specific class of !gs.
 I begin by reviewing the limitations of !mz and the reasons behind them, and then move on
@@ -163,8 +147,6 @@ many steps before the end of the !g.
 !mz replaces the perfect simulator with the !dnet, which provides !r !preds for
 transitions between !ns.
 is unexpected that !mz does not include any concept of !tns:
-
-// literal quote from paper ok?
 
 #blockquote("muzero")[
   _MuZero_ does not give special treatment to terminal nodes and always uses the value
