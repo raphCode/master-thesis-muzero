@@ -213,53 +213,40 @@ Note that a chance event $s_t$ differs from regular !g !ss in the figure in two 
 
 ]
 
-#let sscl = [SSCL]
+== Further Enhancements
 
-=== Symmetric #sscl
+Furthermore, I implemented the following modifications:
 
-As outlined in @rw_effzero, #citet("effzero") already layed the groundwork for remarkable
-improvements in !sampeff by introducing the #sscl.
-However, their adoption of the stop-gradient operation from !simsiam @simsiam may have
-been short-sighted:
+=== Symmetric Latent Similarity Loss
 
-In !simsiam, a Siamese !net is used to learn !latreps from images in a self-supervised
-manner.
-The !arch consists of two identical subnetworks that take an original and an augmented
-input image, respectively, and produce a !latrep each.
-During training, a distance metric is used to compare these !latreps for the same input
-image.
-By minimizing the distance between these !reprs, the !net is encouraged to learn a robust
-and discriminative latent space that encodes useful features in the images.
-However, without careful design, the model can collapse into trivial solutions where all
-learned !reprs end up being very similar or even identical.
-The main idea of !simsiam is that a stop-gradient operation effectively solves this
-problem.
-@simsiam
+As outlined in @rw_effzero, #citet("effzero") already layed the groundwork for
+improvements in !sampeff by introducing a similarity loss between !preds of #rep and dyn.
+However, I thank that their adoption of the stop-gradient operation from !simsiam @simsiam
+may have been short-sighted:
 
-However, !effz operates in an !rl setting rather than a self-supervised one.
-This means that the !env provides explicit training data in the form of !obs and !rs.
-This data is used to train the !nets in a supervised manner, requiring them to generate
-diverse !ps, !vs, and !rs from a given !obs and !seq of !as.
-The exchange of !i between the different !!nets is facilitated by the !latreps.
-If the !latreps were to collapse, it would become impossible to predict meaningful or
-distinct output values.
+In !simsiam, the task is to learn discriminative !latreps from input data in a
+self-supervised manner.
+Self-supervised learning may suffer from collapsed solutions, where all learned !reprs end
+up being very similar or even identical @ss_decorr.
+#citet("simsiam") show that a stop-gradient is effective in preventing collapsed solutions
+in their !arch.
 
-This insight is consistent with the principle of contrastive self-supervised learning,
-where additional negative samples are used to prevent the collapse of !latreps:
-Distinct input images are fed through the two subnetworks, while the training objective is
-to increase the divergence between their corresponding !latreps.
-@simclr
+However, #citet("ss_decorr") show that it is possible to learn significant !latreps
+without the use of a stop-gradient mechanism:
+The only requirement is that a decorrelation mechanism of some form must be present in the
+!arch that penalizes collapsed solutions.
 
-It has been shown that it is possible to learn significant !latreps without the use of
-negative samples or the stop-gradient mechanism:
-#citet("ss_decorr") demonstrate that introducing a decorrelation in the latent space can
-effectively steer the !net towards a non-collapsed !latrep.
-In !mz, demanding different outputs from the !pnet and !dnet (!v/!p and !r, respectively)
-for different !latreps can be seen as the decorrelation mechanism.
+In !mz, I hypothesize that a decorrelation is already achieved by the training losses
+$ell^r$, $ell^p$<join-right> and $ell^v$.
 
-Consequently, there is no risk of !latrep collapse in the !mz !arch, making the inclusion
-of a stop-gradient operation unnecessary.
+Intuitively, if the !latreps of #rep and #dyn were to collapse, the !r, !p and !v !preds
+can not match their targets.
+Subsequently, the training loss would stay high.
+In order to accurately predict these quantities, #pred<join-right> and #dyn must encode
+useful !i in the latent space from the !obs and !seq of !as, respectively.
 
+Consequently, I see no risk of latent collapse in the !effz !arch, and propose to remove
+the stop-gradient operation.
 
 === !TNs in the !MCTS
 
