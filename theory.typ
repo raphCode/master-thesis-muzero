@@ -1295,6 +1295,7 @@ The data from a single time step $t$ of selfplay is extended with the !r experie
 $(s_t, a_t, r_(t+1), pi_t, G_t)$.
 The last item of the tuple is also updated:
 It now contains the n-step !ret $G_t$ instead of the final outcome of the !g $z$.
+This n-step !ret is bootstrapped with the !v of the MCTS root !n.
 
 Likewise, a training sample includes the !seq of sample !rets and $K - 1$ experienced !rs:
 $ (s_t, (#series_a), (#series_r), (#series_p), (#series_g)) $
