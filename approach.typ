@@ -38,15 +38,16 @@ The causes of these limitations and some implications are briefly discussed belo
 
 === Determinism
 
-In order to plan ahead, the future !s of the !env must be predictable for an intial !s $s$
-and given !seq of !as.
+In order to plan ahead, the future !s of the !env must be predictable for an intial !s
+$s^0$ and given !seq of !as.
 The !dnet #dyn in !mz is a deterministic !fn and no chance !ss are modeled in the !arch.
 Perhaps unexpectedly, #citet("stochastic_muzero") show that !mz's performance falls short
 in a stochastic !env compared to other methods that model stochasticity.
 
 === !PINF
 
-Accurately planning ahead also relies on unambiguously identifying the initial state $s$.
+Accurately planning ahead also relies on unambiguously identifying the initial state
+$s^0$.
 From a !gtic standpoint, this requires the !g to be with !pr and of !pinf (See @sec_pr and
 @sec_pinf, respectively).
 In the context of !rl, this means that an !obs must uniquely identify the current !s of
