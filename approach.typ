@@ -50,14 +50,14 @@ Accurately planning ahead also relies on unambiguously identifying the initial s
 $s^0$.
 From a !gtic standpoint, this requires the !g to be with !pr and of !pinf (See @sec_pr and
 @sec_pinf, respectively).
-In the context of !rl, this means that an !obs must uniquely identify the current !s of
+In the context of !rl, it also means that an !obs must uniquely capture the current !s of
 the !env.
 
-This aspect best illustrated by example of the fifty moves rule in chess:
+This aspect is best illustrated by the example of the fifty-moves rule in chess:
 If 50 moves pass without a capture or a pawn moved, the !g may end in a draw.
 While a human can deduce a history of moves from successive board !ss, the !mz !ag starts
 each move afresh, given only the current !obs.
-The current board !s is therefore not enough !i to distinguish a regular !g situation from
+The current board is therefore not enough !i to distinguish a regular !g situation from
 one where the fifty-move rule applies.
 @muzero
 
@@ -78,11 +78,12 @@ order.
 In !sp !gs, trivially only one !pl can be at turn.
 
 In !gs with 2 !pls, alternating turns are assumed.
-This is not a limitation in practice, since possible special turn order mechanics can be
+This is not a limitation in practice, since the turn order mechanics of any !g can be
 modeled with the set of available !as $A$.
 
 As an contrived example, consider castling in chess:
-It may be viewed as two successive turns of the same !pl, moving king and rook separately.
+It may be viewed as two consecutive turns of the same !pl, moving king and rook
+separately.
 However, by expanding the !a set $A$ with a castling move, the assumption about
 alternating turn order still holds.
 
