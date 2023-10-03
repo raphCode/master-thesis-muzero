@@ -4,6 +4,7 @@
 ) = {
   set page(
     margin: (x: 12.5%, y: 8.7%),
+    numbering: "1/1",
   )
   set text(
     font: "New Computer Modern",
