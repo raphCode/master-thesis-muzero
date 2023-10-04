@@ -344,7 +344,7 @@ In contrast, cooperation among individuals may involve different payoffs and goa
 different !pls.
 #cite("collaborative_games", "eco_theo_teams")
 
-=== !Exf
+=== !EXF
 
 #[
 
