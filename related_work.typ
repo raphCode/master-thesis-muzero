@@ -167,7 +167,7 @@ This is illustrated in @fig_effzero_loss.
 
 #figure(
   training(
-    draw_latent_loss: true,
+    latent_loss: "unidirectional",
     draw_pnet: false,
     dynamics_env: n => (),
     dynamics_net: n => (),

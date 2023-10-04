@@ -7,10 +7,14 @@
 
 #let vectorize_maybe(use_vectors, cnt) = if use_vectors { $arrow(cnt)$ } else { cnt }
 
-#let loss_arrow_style(content, ..args) = group({
+#let loss_arrow_style(content, bidi: false, ..args) = group({
   let s = gray + 3pt
+  let mark = (end: ">", stroke: s, size: 0.2, fill: gray)
+  if bidi {
+    mark.start = ">"
+  }
   set-style(
-    mark: (end: ">", stroke: s, size: 0.2, fill: gray),
+    mark: mark,
     stroke: s,
   )
   content
@@ -59,7 +63,7 @@
   draw_pnet: true,
   dynamics_env: none,
   dynamics_net: none,
-  draw_latent_loss: false,
+  latent_loss: "",
   chance_event: none,
   use_vectors: false,
   value_target: "outcome",
@@ -130,7 +134,7 @@
       get-ctx(ctx => {
         let (_, h1) = measure(stack_env(n), ctx)
         let (_, h2) = measure(stack_net(n), ctx)
-        let dist = if draw_latent_loss { 6 } else { calc.max(h1 + h2 + 2.5, 3) }
+        let dist = if latent_loss != "" { 6 } else { calc.max(h1 + h2 + 2.5, 3) }
         node(dist, $ s_t^#n $, name: "node")
       })
       export_anchors("node")
@@ -189,16 +193,21 @@
         "node.top",
         "repr",
       )
-    } else if draw_latent_loss and not last {
+    } else if latent_loss != "" and not last {
       node(3, $ s_(t+#n)^0 $, name: "node2")
       net_inference(
         "obs.bottom",
         "node2.top",
         "repr",
       )
+      let bidi = latent_loss == "bidirectional"
       loss_arrow_style(
-        line("node2.bottom", (rel: (y: arrowdist + 0.15), to: "node")),
+        line(
+          (rel: (y: int(bidi) * -0.15), to: "node2.bottom"),
+          (rel: (y: arrowdist + 0.15), to: "node")
+        ),
         name: "loss_arrow_latent",
+        bidi: bidi,
       )
       content("loss_arrow_latent", $ #loss_label_latent $, anchor: "left", padding: 0.2)
     }
@@ -256,7 +265,7 @@
       loss_arrow_style(bez_vert(
         "reward_game.bottom",
         (rel: (y: 0.15), to: "reward_dyn.top"),
-        x: if draw_latent_loss {3} else {1},
+        x: if latent_loss != "" {3} else {1},
       ), name: "loss_arrow_dynamics")
       content("loss_arrow_dynamics", $ #loss_label_dynamics $, anchor: "right", padding: 0.2)
     }
