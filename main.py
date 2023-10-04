@@ -94,7 +94,7 @@ def main(cfg: DictConfig) -> None:
                     )
                 }
             )
-            pc.net.jit()
+            # pc.net.jit()
             tb.add_graphs(C.networks.factory())
             while n < 5e6:
                 with torch.no_grad():

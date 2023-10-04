@@ -32,6 +32,14 @@ class Networks(nn.Module):
     def __attrs_pre_init__(self) -> None:
         super().__init__()
 
+    def __attrs_post_init__(self) -> None:
+        from networks.hack import hack
+
+        for name, mod in self.named_modules():
+            if isinstance(mod, nn.Linear):
+                hack(mod, name="weight", label=name)
+                hack(mod, name="bias", label=name)
+
     def jit(self) -> None:
         def reassign_jittable_submodules(mod: nn.Module) -> None:
             for name, submod in mod.named_children():
