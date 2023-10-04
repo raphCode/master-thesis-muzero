@@ -7,5 +7,5 @@ prediction:
     hidden_depth: 2
 dynamics:
     _target_: networks.fully_connected.FcDynamics
-    hidden_depth: 5
+    hidden_depth: 3
 scalar_support_size: 100
