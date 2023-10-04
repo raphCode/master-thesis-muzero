@@ -7,14 +7,14 @@
 
 #let vectorize_maybe(use_vectors, cnt) = if use_vectors { $arrow(cnt)$ } else { cnt }
 
-#let loss_arrow_style(content) = group({
+#let loss_arrow_style(content, ..args) = group({
   let s = gray + 3pt
   set-style(
     mark: (end: ">", stroke: s, size: 0.2, fill: gray),
     stroke: s,
   )
   content
-})
+}, ..args)
 
 #let net_inference(from, to, net, name: none) = {
   line(from, to, mark: (end: ">"))
@@ -63,6 +63,9 @@
   chance_event: none,
   use_vectors: false,
   value_target: "outcome",
+  loss_label_value: $ell^v$,
+  loss_label_policy: $ell^p$,
+  loss_label_dynamics: $ell^r$,
 ) = canvas(length: 1cm, {
   let nodesize = 0.45
   let arrowdist = nodesize + 0.15
@@ -153,7 +156,8 @@
         export_anchors("value")
         if value_target == "outcome" {
           anchor("value_target", (rel: (1.6, 0.5), to: "value.top"))
-          loss_arrow_style(bez_hor("value_target", "value.right", x: -1))
+          loss_arrow_style(bez_hor("value_target", "value.right", x: -1), name: "loss_arrow_value")
+          content("loss_arrow_value", $ #loss_label_value $, anchor: "left", padding: 0.2)
         } else if value_target == "return" {
           content(
             (rel: (x: col_offset / 2), to: "value"),
@@ -161,7 +165,8 @@
             padding: 0.1,
             name: "return",
           )
-          loss_arrow_style(line("return.left", "value.right"))
+          loss_arrow_style(line("return.left", "value.right", name: "loss_value"), name: "loss_arrow_value")
+          content("loss_arrow_value", $ #loss_label_value $, anchor: "bottom", padding: 0.2)
           export_anchors("return")
         }
         let policy
@@ -173,7 +178,8 @@
           policy = $pi$
         }
         content("policy_icon.top", $ #policy _#t(n) $, anchor: "bottom", padding: 0.1, name: "policy_target")
-        loss_arrow_style(line("policy_target.top", "policy_pred.bottom"))
+        loss_arrow_style(line("policy_target.top", "policy_pred.bottom"), name: "loss_arrow_policy")
+        content("loss_arrow_policy", $ #loss_label_policy $, anchor: "left", padding: 0.2)
       }
     }
     if first {
@@ -246,7 +252,8 @@
         "reward_game.bottom",
         (rel: (y: 0.15), to: "reward_dyn.top"),
         x: if draw_latent_loss {3} else {1},
-      ))
+      ), name: "loss_arrow_dynamics")
+      content("loss_arrow_dynamics", $ #loss_label_dynamics $, anchor: "right", padding: 0.2)
     }
   }, name: "conn_" + str(n))
 
