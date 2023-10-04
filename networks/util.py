@@ -13,6 +13,7 @@ class NecroReLu(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         forward = F.relu(x)
         backward = F.leaky_relu(x)
+        backward = forward
         return backward + (forward - backward).detach()
 
     @copy_type_signature(forward)  # provide typed __call__ interface
