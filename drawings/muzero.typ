@@ -65,6 +65,7 @@
   value_target: "outcome",
   loss_label_value: $ell^v$,
   loss_label_policy: $ell^p$,
+  loss_label_latent: $ell^l$,
   loss_label_dynamics: $ell^r$,
 ) = canvas(length: 1cm, {
   let nodesize = 0.45
@@ -195,7 +196,11 @@
         "node2.top",
         "repr",
       )
-      loss_arrow_style(line("node2.bottom", (rel: (y: arrowdist + 0.15), to: "node")))
+      loss_arrow_style(
+        line("node2.bottom", (rel: (y: arrowdist + 0.15), to: "node")),
+        name: "loss_arrow_latent",
+      )
+      content("loss_arrow_latent", $ #loss_label_latent $, anchor: "left", padding: 0.2)
     }
   }, name: "col_" + str(n))
 

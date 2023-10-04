@@ -162,7 +162,7 @@ $ s_t^x = cases(
   #rep (s_t) & "if" x = 0,
   #dyn (s_t^(x-1), a_(t+x-1)) & "else",
 ) $
-The idea of the additional similarity loss is to match $s_t^n$ to $s_(t+n)^0$.
+The idea of the additional similarity loss $ell^l$ is to match $s_t^n$ to $s_(t+n)^0$.
 This is illustrated in @fig_effzero_loss.
 
 #figure(
@@ -173,7 +173,7 @@ This is illustrated in @fig_effzero_loss.
     dynamics_net: n => (),
   ),
   caption: [
-    The latent loss introduced in !effz, indicated by the thick arrows.
+    The latent loss $ell^l$ introduced in !effz, indicated by the thick arrows.
     The other !mz losses are omitted for clarity.
   ]
 ) <fig_effzero_loss>
