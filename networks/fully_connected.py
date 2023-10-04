@@ -168,4 +168,4 @@ class FcDynamics(DynamicsNet):
     ) -> tuple[Tensor, Tensor, Tensor]:
         latent_out, reward, turn = self.fc_reshape(latent_in, action_onehot)
         latent_out = self.act(latent_out)
-        return latent_in + latent_out, reward, turn
+        return latent_out, reward, turn
