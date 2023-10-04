@@ -265,7 +265,7 @@
       loss_arrow_style(bez_vert(
         "reward_game.bottom",
         (rel: (y: 0.15), to: "reward_dyn.top"),
-        x: if latent_loss != "" {3} else {1},
+        x: if latent_loss != "" {2} else {1},
       ), name: "loss_arrow_dynamics")
       content("loss_arrow_dynamics", $ #loss_label_dynamics $, anchor: "right", padding: 0.2)
     }
