@@ -194,6 +194,11 @@ Note that a chance event $s_t$ differs from regular !g !ss in the figure in two 
 - the !p target for training #pred are the chance outcomes $c_t$
 - the target for the turn order !preds $w$ is the constant chance !pl #wc
 
+#box[
+=== Training Setup Illustration
+
+The training setup with my proposed modifications is summarized in @fig_raphzero_training:
+
 #import "drawings/muzero.typ": rep, dyn, pred, training
 
 #let chance_state = 1
@@ -216,6 +221,7 @@ Note that a chance event $s_t$ differs from regular !g !ss in the figure in two 
   caption: [Training setup of my !impl of !mz for stochastic multi-agent !envs]
 ) <fig_raphzero_training>
 
+]
 ]
 
 == Further Enhancements
