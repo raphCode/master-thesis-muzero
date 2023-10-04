@@ -1248,8 +1248,8 @@ $z$ is the final outcome of the !g, indicating a win, loss or draw.
 
 #let loss(letter, target, pred, start: 0) = $sum_(k=start)^K ell^letter (pred _t^k, target)$
 
-For training, the !dnet is unrolled for $K$ steps and aligned with a !seq of !env !ss and
-!as from a selfplay !traj.
+For training, the !dnet #dyn is unrolled for $K$ steps and aligned with a !seq of !env !ss
+and !as from a selfplay !traj.
 Specifically, a training example beginning at time step $t$ consists of the tuple
 $(s_t, (#series_a), (#series_p), z)$, where $K$ is the unroll length, a hyperparameter.
 
