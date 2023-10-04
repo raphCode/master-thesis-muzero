@@ -1,7 +1,7 @@
 representation:
     _target_: networks.fully_connected.FcRepresentation
     hidden_depth: 5
-    latent_features: 100
+    latent_shape: [2, 100]
 prediction:
     _target_: networks.fully_connected.FcPrediction
     hidden_depth: 10

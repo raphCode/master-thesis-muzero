@@ -100,13 +100,13 @@ class FlatReshaper(nn.Module):
 
 
 class FcRepresentation(RepresentationNet):
-    def __init__(self, latent_features: int, **kwargs: Any):
+    def __init__(self, latent_shape: list[int], **kwargs: Any):
         from config import C
 
         super().__init__()
         self.fc_reshape = FlatReshaper(
             in_shapes=C.game.instance.observation_shapes,
-            out_shapes=[[latent_features]],
+            out_shapes=[latent_shape],
             act_out=True,
             **kwargs,
         )
