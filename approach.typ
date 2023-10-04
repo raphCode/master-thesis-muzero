@@ -142,11 +142,15 @@ During MCTS, for each !s $s^n$ encountered, the current !pl $w^n$ is assumed to 
 with the highest predicted !prob:
 $ w^n = limits("argmax")_(w in W) ( T(s^n, w) ) $
 
-The turn output $w$ is trained like the !r $arrow(r)$, based on ground-truth labels given
-by the !g simulator during selfplay.
+The turn output $w$ is trained like the !r $arrow(r)$, based on ground-truth labels $w_t$
+given by the !g simulator during selfplay.
+For this purpose an additional loss term is introduced
+$ ell^w (w_(t+n), w_t^n) $
+which aligns the !net !preds $w_t^n$ with their respective targets $w_(t+n)$ for all
+$n = 1...K$, where $K$ is the unroll length.
 
 @fig_raphzero_training shows this change by the added $w$ in the !env transitions and
-!dnet !preds.
+!dnet !preds, as well as the additional loss symbol $ell^w$.
 
 === maxn !MCTS
 
@@ -204,6 +208,7 @@ Note that a chance event $s_t$ differs from regular !g !ss in the figure in two 
       )
     },
     dynamics_net: n => ($ arrow(r)_t^#n $, $ w_t^#n $),
+    loss_label_dynamics: $ell^r, ell^w$,
     use_vectors: true,
     value_target: "return",
     chance_event: chance_state,
