@@ -103,6 +103,14 @@ def main(cfg: DictConfig) -> None:
                 n += result.moves
                 for traj in result.trajectories:
                     rb.add_trajectory(traj, result.game_completed)
+                if True:
+                    if rb.fullness == 1:
+                        import pickle
+
+                        with open("data.pkl", "wb") as f:
+                            pickle.dump(rb, f)
+                            return
+                    continue
                 pc.net.update_rescalers(rb)
                 batch_samples = C.training.batch_size * C.training.unroll_length
                 target_samples = (

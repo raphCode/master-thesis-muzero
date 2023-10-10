@@ -159,3 +159,12 @@ class ReplayBuffer:
 
     def __len__(self) -> int:
         return len(self.buffer)
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state["cache"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.cache = TensorCache()
