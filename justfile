@@ -7,6 +7,9 @@ train-catch:
 debug-carchess:
   pudb main.py mcts=default training=carchess networks=carchess game=carchess players=single training.batch_size=64 training.replay_buffer_size=5000 hydra.run.dir=/tmp/hydr_dbg; clear
 
+data-train-carchess:
+  clear; python just_train.py mcts=default training=carchess networks=carchess game=carchess players=single
+
 train-carchess:
   clear; python main.py mcts=default training=carchess networks=carchess game=carchess players=single
 
