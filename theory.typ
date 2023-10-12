@@ -264,7 +264,7 @@ concealed.
 
 The concept of perfect recall describes that a !pl never forgets all his past choices and
 information he got.
-This allows !pls to unabigously separate past, present und future !ss.
+This allows !pls to unambiguously separate past, present und future !ss.
 @gtheo
 
 !Pr is often assumed in !gt, since it is a requirement for e.g. the rationality of !pls,
@@ -1095,7 +1095,7 @@ The publication shows that the !az training approach is feasable of generalizati
 evaluating it on Go, chess and shogi.
 !az outperformed existing state-of-the-art programs in all of the !g, including its
 precursor !ago in the case of Go.
-The training success was also reported to be repeatable across multiple independant runs.
+The training success was also reported to be repeatable across multiple independent runs.
 
 === !mz
 <sec_muzero>
