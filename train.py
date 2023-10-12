@@ -120,9 +120,9 @@ class SLAW:
             self.fixed_weights[k] = float(v)
 
         n = len(self.auto_weight_names)
-        self.a = np.zeros((C.training.unroll_length, n))
-        self.b = np.zeros((C.training.unroll_length, n))
-        self.w = np.ones((C.training.unroll_length, n))
+        self.a = np.zeros((1, n))
+        self.b = np.zeros((1, n))
+        self.w = np.ones((1, n))
         self.beta = mavg_beta
 
     def step(self, *losses: Losses) -> None:
@@ -224,7 +224,7 @@ class Trainer:
 
         cross = nn.CrossEntropyLoss(reduction="none")
         cos = functools.partial(
-            nn.CosineEmbeddingLoss(reduction="mean"), target=torch.ones(1)
+            nn.CosineEmbeddingLoss(reduction="sum"), target=torch.ones(1)
         )
 
         step_losses = []
@@ -247,7 +247,7 @@ class Trainer:
                     loss.latent = cos(
                         latent[mask].flatten(start_dim=1),
                         obs_latent[mask].flatten(start_dim=1),
-                    ).mean()
+                    )
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
 
             tbs.add_scalar(
@@ -306,17 +306,18 @@ class Trainer:
                     continue
                 tbs.add_scalar(f"loss: unroll {n}/{k}", l)
 
-        self.slaw.step(*step_losses)
+        counts.data = C.training.unroll_length * C.training.batch_size
+        total = sum(step_losses, start=Losses()) / counts
+        self.slaw.step(total)
 
-        weights = self.slaw.weights
+        weights = self.slaw.weights[0]
 
-        total_loss = sum(sl.weighted_sum(w) for sl, w in zip(step_losses, weights))
+        total_loss = total.weighted_sum(weights)
 
-        for k, l in attrs.asdict(sum(step_losses, start=Losses())).items():
+        for k, l in attrs.asdict(total).items():
             tbs.add_scalar(f"loss/{k}", l)
-        for n, d in enumerate(weights):
-            for k, w in d.items():
-                tbs.add_scalar(f"loss weight: unroll {n}/{k}", w)
+        for k, w in weights.items():
+            tbs.add_scalar(f"loss weight/{k}", w)
 
         self.optimizer.zero_grad()
         total_loss.backward()  # type: ignore [no-untyped-call]
