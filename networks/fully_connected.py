@@ -172,3 +172,47 @@ class FcDynamics(DynamicsNet):
         latent_out = self.act(latent_out)
         latent_out = self.bn(latent_out)
         return latent_out, reward, turn
+
+
+class GRUDynamics(DynamicsNet):
+    def __init__(self, **kwargs: Any):
+        from mcts import TurnStatus
+        from config import C
+
+        super().__init__()
+        assert len(C.networks.latent_shape) == 2
+        depth, hidden = C.networks.latent_shape
+
+        self.gru = nn.GRU(
+            input_size=C.game.instance.max_num_actions,
+            hidden_size=hidden,
+            num_layers=depth,
+        )
+
+        self.fc_reshape = FlatReshaper(
+            in_shapes=[
+                [C.game.instance.max_num_actions],
+                C.networks.latent_shape,
+            ],
+            out_shapes=[
+                [C.networks.scalar_support_size, C.game.instance.max_num_players],
+                [C.game.instance.max_num_players + len(TurnStatus)],
+            ],
+            **kwargs,
+        )
+
+    def forward(
+        self,
+        latent_in: Tensor,
+        action_onehot: Tensor,
+    ) -> tuple[Tensor, Tensor, Tensor]:
+        def gru_reshape(
+            gru: nn.Module, input: Tensor, h0: Tensor
+        ) -> tuple[Tensor, Tensor]:
+            out, hn = gru(input.unsqueeze(0), h0.transpose(0, 1))
+            return out.squeeze(0), hn.transpose(0, 1)
+
+        action_onehot = action_onehot.to(dtype=torch.float32)
+        _, latent_out = gru_reshape(self.gru, action_onehot, latent_in)
+        reward, turn = self.fc_reshape(latent_out, action_onehot)
+        return latent_out, reward, turn
