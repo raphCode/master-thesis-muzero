@@ -79,6 +79,9 @@ For single-!ag !envs, negamax is disabled altogether.
 
 I propose an extension of !mz to more general !gs than the original !impl is capable of.
 This includes !gs with chance events, more than two !pls, and therefore arbitrary payoffs.
+The modified !algo retains compatibility with the original !mz !envs (board !gs and the
+Atari suite) as special cases.
+The !gs are still required to be with !pinf.
 
 Planning ahead in a !g with more than one !pl requires some !i or assumptions about the
 behavior of other !pls.
@@ -87,10 +90,16 @@ He will always try to minimize the score of the other !pl.
 This assumption does not hold for general-sum !gs with arbitrary payoffs.
 
 My extension of !mz to !mp !gs is inspired from the !mp !bi in !gt.
-It assumes a non-cooperative setting, where each !pl tries to maximize his individual
-payoff, like introduced in @sec_bi_mp.
+My reasoning is that the subgame perfection of !bi solutions enables the RL !ag to learn a
+behavior that exhibits strong play, regardless of the !as of other !pls.
+Specifically, when the other !pls act optimally, the overall play should be close to the
+!gtic optimal solution.
+Even if the other !pls do not perform optimally, the !ag should still be able to play
+reasonably.
+This is especially important in collaborative !gs, as it allows the !ag to compensate for
+bad teammates.
 
-I perform a number of changes to the !algo.
+I perform a number of changes to !mz.
 The updated training setup with all modifications is visualized in @fig_raphzero_training.
 
 === Individual !Vs
@@ -125,11 +134,13 @@ $arrow(x)$ to !mp data.
 
 Making informed decisions within the search tree requires not only individual !rs and !vs,
 but also an understanding who can make a decision at a particular !n.
-In !mz, the turn order is hardcoded by using negamax search in !2p !gs.
+In !mz, the turn order is hardcoded for !sp and !2p !gs and therefore represents domain
+knowledge about the !env.
 
 To achieve a more general !algo, my !impl does not make any assumptions about the turn
 order.
 Instead, the next !pl at turn is learnt by the !dnet #dyn.
+I chose this design since in !mp !gs, the next !pl at turn may depend on the !h of !as.
 
 I added an additional output head $w$ to the !dnet #dyn:
 $ (s^n, r^n, w^n) = #dyn (s^(n-1), a^(n-1)) $
