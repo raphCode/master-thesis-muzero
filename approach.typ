@@ -102,7 +102,7 @@ bad teammates.
 I perform a number of changes to !mz.
 The updated training setup with all modifications is visualized in @fig_raphzero_training.
 
-=== Individual !Vs
+=== Per-!PL !Vs
 
 #[
 #let vector(x) = $arrow(#x) = [#x _1, #x _2, ..., #x _n] in RR^n$
@@ -177,7 +177,7 @@ $ a^k = limits("argmax")_a ( arrow(Q)_w_i (s, a) + u(s, a) ) $
 where $u(s, a)$ represents some bonus term to incorporate exploration and the prior !probs
 $P(s^k, a^k)$ into the decision.
 
-=== Chance events
+=== Chance Events
 
 I model stochastic !envs with an explicit chance !pl.
 He is at turn whenever a chance event occurs in the !g.
