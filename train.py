@@ -267,7 +267,8 @@ class Trainer:
             tbs.add_scalar(
                 f"value mse/unroll {n}",
                 F.mse_loss(
-                    self.nets.prediction.value_scale(value_logits), step.value_target
+                    self.nets.prediction.value_scale(value_logits.detach()),
+                    step.value_target,
                 ),
             )
 
@@ -298,7 +299,9 @@ class Trainer:
             # tbs.add_histogram(f"reward logits/unroll {n}", reward_logits)
             tbs.add_scalar(
                 f"reward mse/unroll {n}",
-                F.mse_loss(self.nets.dynamics.reward_scale(reward_logits), step.reward),
+                F.mse_loss(
+                    self.nets.dynamics.reward_scale(reward_logits.detach()), step.reward
+                ),
             )
 
             for k, l in attrs.asdict(loss).items():
