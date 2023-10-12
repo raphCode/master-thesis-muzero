@@ -11,6 +11,7 @@ from .bases import RepresentationNet
 
 class NecroReLu(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
+        return F.celu(x)
         forward = F.relu(x)
         backward = F.leaky_relu(x)
         backward = forward
