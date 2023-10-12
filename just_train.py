@@ -83,13 +83,7 @@ def main(cfg: DictConfig) -> None:
                     "latent cosine similarity",
                     "reward mse",
                     "value mse",
-                    "alpha",
-                    *[f"dyn {-i}" for i in range(1, 10)],
                 ),
-                latent={
-                    f"unroll {n}": ("Multiline", [f"dyn -\\d+/unroll {n}"])
-                    for n in range(8)
-                },
             )
             # net.jit()
             tb.add_graphs(C.networks.factory())
