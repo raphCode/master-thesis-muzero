@@ -93,7 +93,7 @@ def main(cfg: DictConfig) -> None:
                 n += result.moves
                 for traj in result.trajectories:
                     rb.add_trajectory(traj, result.game_completed)
-                if True:
+                if False:
                     if rb.fullness == 1:
                         import pickle
 
