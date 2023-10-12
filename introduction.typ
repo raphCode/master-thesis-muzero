@@ -27,7 +27,7 @@ Consequently, the branching factor is very high in the !g tree: the number of po
 outcomes escalates with each additional move searched ahead.
 To have a reasonable chance of discovering an appropriate move by chance, a prohibitively
 large number of options must be evaluated.
-As a result, traditional search approaches are computationally infeasible.
+As a result, traditional search approaches are computationally infeasible on the !g of Go.
 
 Even with an appropriate search approach, there remains the problem of evaluating specific
 board conditions.
@@ -38,7 +38,7 @@ impact on the rest of the !g.
 
 Nevertheless, in 2018, #citet("azero") advanced upon this technology with !az, which was
 able to master three different board !gs: Go, Chess and Shogi.
-This is notable given that previous !algos relied heavily on specific domain-related !i,
+This is notable given that previous !algos relied heavily on specific domain-specific !i,
 such as the individual !g rules.
 The ability of a single !algo to excel in several distinct !envs highlights its
 versatility~- a key goal of !rl.
@@ -73,7 +73,7 @@ dynamics.
 This way, even the above example of optimizing video encoding can be mastered.
 Perhaps surprisingly, !mz also matches !az's performance in the aforementioned board !gs.
 Moreover, it also performs well on the Atari suite of 57 video !gs, demonstrating the
-ability to generalise across many domains. @muzero
+ability to generalize across many domains. @muzero
 
 While !mz's capabilities are impressive, the original !impl is limited in a number of
 ways.
@@ -101,4 +101,4 @@ This thesis is accompanied by an !impl of !mz that includes modifications as pro
 me and in prior work.
 With this !impl, the modifications are experimentally evaluated on two aspects:
 First, an ablation study compares the influence of the different performance enhancements.
-Second, I confirm my !mp extension is able to learn a cooperative !mp !g.
+Second, I confirm my !mp extension is able to learn a collaborative !mp !g.
