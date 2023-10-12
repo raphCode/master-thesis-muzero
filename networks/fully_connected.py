@@ -34,7 +34,7 @@ class GenericFc(nn.Module):
         self.act_out = act_out
         self.fcs, self.acts, self.norms = zip(
             *[
-                (nn.Linear(a, b), NecroReLu(), nn.LayerNorm(b, elementwise_affine=False))
+                (nn.utils.weight_norm(nn.Linear(a, b)), NecroReLu(), nn.BatchNorm1d(b))
                 for a, b in itertools.pairwise(widths)
             ]
         )
