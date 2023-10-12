@@ -110,12 +110,13 @@ class FcRepresentation(RepresentationNet):
             act_out=True,
             **kwargs,
         )
+        self.bn = nn.BatchNorm1d(latent_shape[0])
 
     def forward(
         self,
         *observations: Tensor,
     ) -> Tensor:
-        return self.fc_reshape(*observations)[0]
+        return self.bn(self.fc_reshape(*observations)[0])
 
 
 class FcPrediction(PredictionNet):
@@ -160,6 +161,7 @@ class FcDynamics(DynamicsNet):
             **kwargs,
         )
         self.act = NecroReLu()
+        self.bn = nn.BatchNorm1d(C.networks.latent_shape)
 
     def forward(
         self,
@@ -168,4 +170,5 @@ class FcDynamics(DynamicsNet):
     ) -> tuple[Tensor, Tensor, Tensor]:
         latent_out, reward, turn = self.fc_reshape(latent_in, action_onehot)
         latent_out = self.act(latent_out)
+        latent_out = self.bn(latent_out)
         return latent_out, reward, turn
