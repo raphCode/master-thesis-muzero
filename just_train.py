@@ -60,7 +60,7 @@ def main(cfg: DictConfig) -> None:
     populate_config(cfg)
 
     log.info("Loading data...")
-    with open("/home/raph/master_thesis/implementation/data.pkl", "rb") as f:
+    with open(hydra.utils.to_absolute_path("data.pkl"), "rb") as f:
         rb = pickle.load(f)
     net = C.networks.factory()
     t = Trainer(net)

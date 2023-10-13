@@ -207,19 +207,17 @@ def copy_source_code() -> None:
 
     n = 0
     try:
-        git_toplevel = subprocess.check_output(
-            "git rev-parse --show-toplevel".split(" ")
-        ).strip()
+        orig_cwd = u(hydra.utils.get_original_cwd())
         files = subprocess.check_output(
             "git ls-files --cached --modified --other --exclude-standard".split(" "),
-            cwd=git_toplevel,
+            cwd=orig_cwd,
         ).splitlines()
         for file in files:
             if not file.endswith(u(".py")):
                 continue
             target = path.join(u("sources"), file)
             os.makedirs(path.dirname(target), exist_ok=True)
-            shutil.copyfile(path.join(git_toplevel, file), target)
+            shutil.copyfile(path.join(orig_cwd, file), target)
             n += 1
     except Exception as e:
         log.error(f"Failed copying source code: {e}")
