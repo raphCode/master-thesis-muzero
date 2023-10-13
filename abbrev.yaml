@@ -91,6 +91,9 @@ ttt:
   plural: null
 exut: expected utility
 zsum: zero-sum
+coll:
+  singular: collaborative
+  plural: null
 gtic:
   singular: game theoretic
   plural: null

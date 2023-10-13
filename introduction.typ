@@ -101,4 +101,4 @@ This thesis is accompanied by an !impl of !mz that includes modifications as pro
 me and in prior work.
 With this !impl, the modifications are experimentally evaluated on two aspects:
 First, an ablation study compares the influence of the different performance enhancements.
-Second, I confirm my !mp extension is able to learn a collaborative !mp !g.
+Second, I confirm my !mp extension is able to learn a !coll !mp !g.

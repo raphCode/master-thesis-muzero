@@ -342,12 +342,11 @@ their payoff.
 @gtheo
 
 However, a third category can be identified:
-In a collaborative !g, all !pls work together as a team, sharing the outcomes and thus
-payoffs.
+In a !coll !g, all !pls work together as a team, sharing the outcomes and thus payoffs.
 A team is defined by a group of !pls who have the same interests, albeit the individual
 information !pls have may differ.
-Since the rewards and penalties of their !as are shared, the challenge in a collaborative
-!g is working together to maximize the team's payoff.
+Since the rewards and penalties of their !as are shared, the challenge in a !coll !g is
+working together to maximize the team's payoff.
 In contrast, cooperation among individuals may involve different payoffs and goals of the
 different !pls.
 #cite("collaborative_games", "eco_theo_teams")
@@ -654,7 +653,7 @@ Subgame perfection is an desireable property of a solution, since it allows !pls
 to other !pl's deviations from the optimal !sty.
 Compared to all !pls adhering to their optimal !stys, this means:
 - in a non-cooperative !g: exploiting opponent's mistakes, to potentially achieve a higher payoff
-- in a collaborative !g: compensating for mistakes of teammates
+- in a !coll !g: compensating for mistakes of teammates
 
 == !MCTS
 

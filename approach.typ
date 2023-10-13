@@ -96,8 +96,8 @@ Specifically, when the other !pls act optimally, the overall play should be clos
 !gtic optimal solution.
 Even if the other !pls do not perform optimally, the !ag should still be able to play
 reasonably.
-This is especially important in collaborative !gs, as it allows the !ag to compensate for
-bad teammates.
+This is especially important in !coll !gs, as it allows the !ag to compensate for bad
+teammates.
 
 I perform a number of changes to !mz.
 The updated training setup with all modifications is visualized in @fig_raphzero_training.
@@ -122,8 +122,7 @@ with~#r1, the second !ag received a !r of~#r2, and the third !ag got no !r.
 #assert(r3 == 0)
 ]
 
-Note that in a collaborative !g, all individual !rs are shared, as outlined in
-@sec_gt_collab:
+Note that in a !coll !g, all individual !rs are shared, as outlined in @sec_gt_collab:
 $ r_i = r "for" 1 <= i <= n $
 
 This modification is reflected in @fig_raphzero_training by adding vector arrows
