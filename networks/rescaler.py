@@ -104,7 +104,15 @@ class Rescaler(RescalerPy, nn.Module):
 
         lerp = ((target - low) / (high - low)).unsqueeze(-1)
         target_probs = F.one_hot(i, n) * (1 - lerp) + F.one_hot(i + 1, n) * lerp
-        return F.cross_entropy(logits, target_probs.transpose(1, -1), reduction="none")
+        loss= F.cross_entropy(logits, target_probs.transpose(1, -1), reduction="none")
+
+        values = self(logits.detach())
+        mse = F.mse_loss(
+            self.normalize(values),
+            self.normalize(target),
+            reduction="none",
+        )
+        return mse * loss  # type: ignore [no-any-return]
 
     def jit(self) -> RescalerJit:
         B = 1
