@@ -278,8 +278,6 @@ class Trainer:
             def grad_hook(grad: Tensor, n: int) -> None:
                 m = torch.linalg.vector_norm(grad).item()
                 tbs.add_scalar(f"latent gradient/unroll {n}", m)
-                self.grads[n] = m
-                return grad / m * grad_target
 
             with suppress(RuntimeError):
                 latent.register_hook(
