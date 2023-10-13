@@ -181,7 +181,7 @@ Payoffs for multiple !pls are noted as a tuple, also called a payoff vector in t
 The !gs considered in thesis are finite, meaning that the number of possible choices is
 limited.
 Finiteness also applies to the length of the !g, it should end at some point.
-This may sound trivial since most !gs encountered in the real world are finite.
+This may sound trivial, since most !gs encountered in the real world are finite.
 However, !gt is not limited to finite !gs.
 It is therefore important to note that some of the !gt statements in this chapter only
 apply to finite !gs.
@@ -189,11 +189,11 @@ apply to finite !gs.
 
 !Gs that involve randomness, such as throwing a dice, are said to have chance events.
 These chance events can be seen as !dps where a special !pl, the chance !pl, has his turn.
-A dice throw can therefore be modelled with a !dp of the chance !pl with 6 possible !as,
-all with equal !probs.
+For example, a dice throw can be modelled with a !dp of the chance !pl with 6 possible
+!as, all with equal !probs.
 @gtheo
 
-A behavior is described by a !sty:
+A !pl's behavior is described by a !sty:
 It can be seen as a complete plan which describes which move to take at any given !dp of
 the !g.
 @gtheo
@@ -214,9 +214,9 @@ However, comparable concepts have slightly different terminology in the two fiel
     [!pl], [!ag],
     [decision / move / !a], [!a],
     [!sty], [!p],
-    [outcome], [!ts],
-    [payoff], [terminal !r],
-    [!exut], [!exret],
+    [payoff], [!r],
+    [outcome], [sum of all experienced !rs],
+    [!exut], [!v / !exret],
     [!h], [!traj],
   ),
   caption: [Comparison of similar concepts in !gt and !rl],
@@ -240,15 +240,15 @@ Also poker is considered a !zsum !g, because a !pl wins exactly the amount which
 opponents lose.
 
 Contrastingly, in non-!zsum !gs, no restriction is imposed on the payoff vectors.
-This situation arises when modeling real-world economic situations, as there may be
-gains from trades.
+This situation arises, for example, when modeling real-world economic situations, as there
+may be gains from trades.
 
 ==== !I
 <sec_pinf>
 
 An important distinction are !gs of !pinf and !impinf.
-A !pinf !g is one in which every !pl, at every !dp in the !g, has full knowledge of the !h
-of the !g and the previous moves of all other !pls.
+A !pinf !g is one in which every !pl, at every !dp, has full knowledge of the !h of the !g
+and the previous moves of all other !pls.
 A !pl is thus fully and unambiguously informed about the current !s of the !g when he is
 at turn.
 Chess and Go are examples of !gs with !pinf.
@@ -261,9 +261,8 @@ An example is backgammon: when a !pl needs to make a decision, he has !pinf abou
 number the dice rolled.
 
 Conversely, a !g with !impinf leaves !pls in the dark about the exact !s of the !g.
-!Pls having to make a decision do not observe enough !i to distinguish between several
-past !g !hs.
-They thus have to make decisions under uncertainty.
+A !pl at a !dp does not observe enough !i to distinguish between several past !g !hs.
+He thus has to make a decision under uncertainty.
 The card !g poker is an example of an !impinf !g because the other !pls' cards are
 concealed.
 @gtheo
@@ -387,19 +386,19 @@ playing the !g.
 
 #figure(
   draw_gametree(root),
-  caption: [!Exf example of an artificial !g with two !pls and a chance event]
+  caption: [!Exf example of an contrived !g with two !pls and a chance event]
 ) <fig_exf_example>
 
 The !exf looks similar to a regular tree in computer science.
-It is accordinly also known as a !g tree.
-Each !n represents a !dp for a !pl, with the !g starting at the root !n.
+It is accordingly also known as a !g tree.
+Each !n represents a !dp for a single !pl, with the !g starting at the root !n.
 Outgoing edges from a !n are labeled with !as the !pl can choose.
 The leaf !ns are the outcomes of the !g and specify the payoff vectors.
 In summary, it can be stated that the !exf enumerates all possible !hs of the !g in a
 tree-like form.
 @gtheo
 
-An example of the !exf of an artificial !g is given in @fig_exf_example.
+An example of the !exf of an contrived !g is given in @fig_exf_example.
 The root !n denotes the start of the !g, in the example it is labeled with~C.
 In this case the !n is meant to represent a chance event, specifically a coin flip.
 Therefore, it has two possible outcomes with equal !probs of $1/2$ each, and the edges are
@@ -411,7 +410,7 @@ The first !pl to move has two available !as, _stop_ and _go_.
 The former ends the !g immediatly with a reward of~-1 for the !pl which chose _stop_, and
 zero for the other one.
 If the !g continues, the other !pl is given a choice to go left or right, after which the
-!g ends with the payoffs in the !tns.
+!g ends with the payoffs specified in the !tns.
 
 The !exf also allows an visual explanation of subgames.
 The !exf of a subgame is a subset of the original !g's !g tree.
