@@ -111,6 +111,7 @@ class FcRepresentation(RepresentationNet):
             **kwargs,
         )
         self.bn = nn.BatchNorm1d(latent_shape[0])
+        self.bn = nn.LayerNorm(latent_shape)
 
     def forward(
         self,
@@ -162,6 +163,7 @@ class FcDynamics(DynamicsNet):
         )
         self.act = NecroReLu()
         self.bn = nn.BatchNorm1d(C.networks.latent_shape)
+        self.bn = nn.LayerNorm(C.networks.latent_shape)
 
     def forward(
         self,
@@ -200,6 +202,7 @@ class GRUDynamics(DynamicsNet):
             ],
             **kwargs,
         )
+        self.bn = nn.LayerNorm(C.networks.latent_shape)
 
     def forward(
         self,
@@ -215,4 +218,4 @@ class GRUDynamics(DynamicsNet):
         action_onehot = action_onehot.to(dtype=torch.float32)
         _, latent_out = gru_reshape(self.gru, action_onehot, latent_in)
         reward, turn = self.fc_reshape(latent_out, action_onehot)
-        return latent_out, reward, turn
+        return self.bn(latent_out), reward, turn
