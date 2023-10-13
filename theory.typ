@@ -79,13 +79,17 @@ In a simple case, the !ret $G_t$ may be defined as the sum of all !rs occurring 
 step $t$:
 $ G_t eq.def r_(t+1) + r_(t+2) + r_(t+3) + ... + r_T $
 
+#[
+#import "common.typ": exret_formula
+
 Another approach is to use a discounted !r.
 The intuition is to value !rs far in the future less than immediate !rs.
 For this purpose, a hyperparameter $gamma$ is introduced, called the !df.
 The !ret $G_t$ is then calculated as
-$ G_t eq.def r_(t+1) + gamma r_(t+2) + gamma^2 r_(t+3) + ... =
-sum_(k=1)^(T-t) gamma^(k-1) r_(t+k) $
+$ G_t eq.def r_(t+1) + gamma r_(t+2) + gamma^2 r_(t+3) + ... = #exret_formula $
 where $0 <= gamma <= 1$.
+
+]
 
 The !df affects how valuable future !rs appear in the present moment:
 For example, a !r that arrives k time steps in the future will have its current value
@@ -100,13 +104,18 @@ Given a !s $s_t$, the !p $pi(a|s)$ denotes the !prob that the !ag chooses !a $a_
 $s_t=s$.
 @sutton
 
+#[
+#import "common.typ": exret_formula
+
 Since the !p makes statements about the future behavior of the !ag, one can now define the
 !exret:
 It describes the expected value of the !ret $G_t$ in !s $s_t$, if the !p $pi$ is followed.
 It is therefore also called the !v $v_pi (s)$ and defined as:
-$ v_pi (s) eq.def EE_pi [G_t|s_t=s] = EE_pi [sum_(k=0)^(T-1) gamma^k r_(t+k+1)
+$ v_pi (s) eq.def EE_pi [G_t|s_t=s] = EE_pi [#exret_formula
 #move(dy: -3pt, scale(y: 300%, [$|$<no-join>])) s_t=s] $
 @sutton
+
+]
 
 The !v is thus an estimate of how good it is for the !ag to be in a particular !s,
 measured by the objective !fn, the !ret.

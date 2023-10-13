@@ -1,6 +1,7 @@
 #import "@preview/cetz:0.1.1": canvas, draw, tree, coordinate
 #import "util.typ": bez90, padding, export_anchors, bez_vert, bez_hor
 #import "icon.typ": tic_tac_toe, minitree, dice
+#import "../common.typ": exret_formula
 #import draw: *
 
 #let (rep, dyn, pred) = ($h$, $g$, $f$)
@@ -290,7 +291,7 @@
       } else if value_target == "return" {
         content(
           (rel: (0, 1), to: col(n - 1) + ".return-top-left"),
-          $ G_t = sum_(k=1)^(T-t) gamma^(k-1) r_(t+k) $,
+          $ G_t = #exret_formula $,
           anchor: "bottom-left",
           frame: "rect",
           padding: 0.1,
