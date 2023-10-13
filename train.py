@@ -48,6 +48,9 @@ class Losses:
         d2 = attrs.asdict(other)
         return Losses(**dicttoolz.merge_with(sum, d1, d2))
 
+    def __mul__(self, mul: float) -> Losses:
+        return Losses(**dicttoolz.valmap(lambda x: x * mul, attrs.asdict(self)))
+
     def __div__(self, div: float) -> Losses:
         return Losses(**dicttoolz.valmap(lambda x: x / div, attrs.asdict(self)))
 
@@ -232,8 +235,12 @@ class Trainer:
 
         first = batch[0]
         latent: Tensor
+        stepsize=10_000
+        now = tbs.step
 
         for n, step in enumerate(batch):
+            if (n-0) * stepsize > now:
+                break
             loss = Losses()
             step_losses.append(loss)
 
@@ -308,7 +315,13 @@ class Trainer:
                 tbs.add_scalar(f"loss: unroll {n}/{k}", l)
 
         counts.data = C.training.unroll_length * C.training.batch_size
-        total = sum(step_losses, start=Losses()) / counts
+        total = step_losses[0]
+        for n, sl in enumerate(step_losses[1:]):
+            start = stepsize * (n+0)
+            x = np.interp(now, [start, start+stepsize], [0,1])
+            total += sl * max(1e-6, x*x)
+        total /= counts
+        #total = sum(step_losses, start=Losses()) / counts
         self.slaw.step(total)
 
         weights = self.slaw.weights[0]
