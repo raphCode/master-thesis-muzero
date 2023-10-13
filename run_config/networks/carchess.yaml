@@ -1,12 +1,13 @@
 representation:
     _target_: networks.fully_connected.FcRepresentation
-    hidden_depth: 0
-    latent_shape: [3, 200]
+    hidden_depth: 1
+    width: 500
+    latent_shape: [500]
 prediction:
     _target_: networks.fully_connected.FcPrediction
     hidden_depth: 2
 dynamics:
-    _target_: networks.fully_connected.GRUDynamics
-    hidden_depth: 1
+    _target_: networks.fully_connected.FcDynamics
+    hidden_depth: 2
 scalar_support_size: 100
 # TRY GRU
