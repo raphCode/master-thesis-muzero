@@ -620,11 +620,11 @@ by their !probs.
 <sec_negamax>
 
 For !2p !gs with !zsum payoffs, practical !impls of !bi may keep track of only a single
-!pl's payoff scalar in the !g tree, for example the first !pl.
+payoff scalar in the !g tree, for example the payoff of the first !pl.
 The payoff for the other !pl is implicitly given by the !zsum property.
-While such an !impl navigates the !g tree normally for moves of the first !pl (maximizing
-the payoff), it has to minimize the payoff for the other !pl.
-Such an !impl is known as minimax search.
+Such an !impl navigates the !g tree by maximizing the payoff for moves of the first !pl
+and minimizing the payoff for moves the other !pl.
+This !impl is known as minimax search.
 @ab_pruning
 
 Instead of selecting the minimum payoff for the other !pl, the payoff scalar can also be
