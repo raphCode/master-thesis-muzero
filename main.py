@@ -63,6 +63,8 @@ def main(cfg: DictConfig) -> None:
     pc = SelfplayPC(C.players.instances)
     rb = ReplayBuffer()
     t = Trainer(pc.net)
+    if torch.cuda.is_available():
+        pc.net.cuda()
     n = 0
     try:
         with TensorboardLogger(log_dir="tb") as tb:

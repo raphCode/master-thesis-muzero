@@ -212,7 +212,7 @@ class GRUDynamics(DynamicsNet):
         def gru_reshape(
             gru: nn.Module, input: Tensor, h0: Tensor
         ) -> tuple[Tensor, Tensor]:
-            out, hn = gru(input.unsqueeze(0), h0.transpose(0, 1))
+            out, hn = gru(input.unsqueeze(0), h0.transpose(0, 1).contiguous())
             return out.squeeze(0), hn.transpose(0, 1)
 
         action_onehot = action_onehot.to(dtype=torch.float32)
