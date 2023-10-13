@@ -14,7 +14,7 @@ damit gut zeigen, dass man das Material verstanden hat.
 
 !Rl refers to a subset of machine learning where a decision maker learns by trial and
 error while interacting with its !env.  
-The decision maker takes !as that affect the !s of their !env, receives !r or penalties
+The decision maker takes !as that affect the !s of their !env, receives !rs or penalties
 based on how it performs, and updates its behavior based on this feedback.
 The goal is to learn a behavior that leads to positive outcomes.
 @sutton
@@ -50,7 +50,7 @@ of elements.
 Beside these sets, a !mdp is characterized by the dynamics !fn $p : S times R times S
 times A -> [0, 1]$:
 $ p(s', r|s, a) eq.def Pr{s_(t+1)=s', r_(t+1)=r|s_t=s, a_t=a} $
-for all $s', s in S, r in R, a in A(s)$.
+for all $s', s in S, r in R, a in A$.
 
 It describes the !prob of the !env ending up in !s $s'$ and yielding !r $r$ when executing
 !a $a$ in !s $s$.
@@ -66,14 +66,15 @@ In !rl such a series of interactions is called an !epi.
 
 The !seq of visited !ss $s_0, s_1, s_2, ..., s_T$ is referred to as a !traj.
 Depending on the context, a !traj may also include the !as and !rs associated with the
-transitions between !ss.
+transitions between these !ss.
 The last !s $s_T$ is also called the !ts. 
 @sutton
 
 To translate multiple !rs earned over a period of time into a singular value that guides
 the agent in making optimal decisions, we use the concept of a !ret.
-The !ret is a specific !fn of the !r !seq.
-The !ag's learning objective is then defined as maximizing the !exret.
+The !ret is a !fn of the !r !seq.
+The !ag's learning objective is then defined as maximizing the !exret#footnote[for details
+about how the _expected_ !ret is defined, see @sec_rl_exret_and_nstep].
 In a simple case, the !ret $G_t$ may be defined as the sum of all !rs occurring after time
 step $t$:
 $ G_t eq.def r_(t+1) + r_(t+2) + r_(t+3) + ... + r_T $
@@ -92,7 +93,7 @@ reduced by a factor of $gamma^(k-1)$ compared to if it had arrived immediately.
 @sutton
 
 === !Ps and !V !Fns
-<sec_rl_nstep>
+<sec_rl_exret_and_nstep>
 
 A !p is a formal description of the !ag's behavior.
 Given a !s $s_t$, the !p $pi(a|s)$ denotes the !prob that the !ag chooses !a $a_t=a$ if
@@ -100,9 +101,8 @@ $s_t=s$.
 @sutton
 
 Since the !p makes statements about the future behavior of the !ag, one can now define the
-!exret.
-The !exret describes the expected value of the !ret $G_t$ in !s $s_t$, if the !p $pi$ is
-followed.
+!exret:
+It describes the expected value of the !ret $G_t$ in !s $s_t$, if the !p $pi$ is followed.
 It is therefore also called the !v $v_pi (s)$ and defined as:
 $ v_pi (s) eq.def EE_pi [G_t|s_t=s] = EE_pi [sum_(k=0)^(T-1) gamma^k r_(t+k+1)
 #move(dy: -3pt, scale(y: 300%, [$|$<no-join>])) s_t=s] $
@@ -116,10 +116,10 @@ In !tss, the !v is always zero per definition:
 There are no future !rs possible.
 @sutton
 
-The definition of the !v !fn as the discounted sum of future !rs enables to calculate
-another type of !ret:
-The n-step !ret sums only a truncated !seq of the next $n$ !rs and substitutes the rest with
-the !ag's current !v !fn:
+The definition of the !v as the discounted sum of future !rs enables to calculate another
+type of !ret:
+The n-step !ret sums a truncated !seq of the next $n$ !rs and substitutes the rest with
+the !ag's current !v !fn $v_pi (s)$:
 $ G_t eq.def r_(t+1) + gamma r_(t+2) + ... + gamma^(n-1) r_(t+n) + gamma^n v_pi (s_(t+n)) =
 gamma^n v_pi (s_(t+n)) + sum_(k=1)^n gamma^(k-1) r_(t+k) $
 This use of the !ag's current !v !fn is known as bootstrapping.
@@ -1202,7 +1202,7 @@ For $k = leaf...0$ an n-step !ret is calculated, bootstrapped from the simulatio
 $v^leaf$:
 $ G^k = sum_(i=1)^(leaf-k) gamma^(i-1) r_(k+i) + gamma^(leaf-k) v^leaf $
 This is equivalent to the calculation of the discounted n-step !ret in !rl, introduced in
-@sec_rl_nstep.
+@sec_rl_exret_and_nstep.
 
 #let s = $s^k$
 #let ac = $a^(k+1)$
