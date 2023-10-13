@@ -1089,7 +1089,7 @@ The two main changes over !agoz are:
 
 *No data augmentation*\
 !agoz's data augmentation step of rotating and flipping board !reprs is removed, because
-it exploits Go-specifid symmetries.
+it exploits Go-specific symmetries.
 The data augmentation provided an eightfold increase in training data, !az therefore
 trains 8 times slower on the !g of Go than its precursor.
 
