@@ -14,7 +14,7 @@ learning_rates:
     prediction: 1
     representation: 1
 loss_weights:
-    latent: 1
+    latent: 0.1
     value: 1
     reward: 1
     policy: 1
