@@ -82,13 +82,10 @@ class Rescaler(RescalerPy, nn.Module):
         support logits -> actual value in [min, max] range
         Shapes: (B, S, V) -> (B, V)
         """
-        lerp = F.sigmoid(logits[:, -1, :])
-        i = torch.argmax(logits[:, :-1, :], dim=1)
-
-        low = self.support[i]
-        high = self.support[i + 1]
-
-        return low * (1-lerp) +high*lerp
+        return cast(
+            Tensor,
+            torch.tensordot(F.softmax(logits, dim=1), self.support, dims=([1], [0])),
+        )
 
     def calculate_loss(self, logits: Tensor, target: Tensor) -> Tensor:
         """
@@ -102,19 +99,12 @@ class Rescaler(RescalerPy, nn.Module):
         mini, maxi = self.support[[0, -1]]
         i = ((target - mini) / (maxi - mini) * (n - 1)).to(dtype=torch.int64)
         i = i.clamp(0, n - 2)
-
-        loss_support = F.cross_entropy(logits[:, :-1, :], i, reduction="none")
-
         low = self.support[i]
         high = self.support[i + 1]
-        lerp = ((target - low) / (high - low))
 
-        loss_lerp = F.mse_loss(logits[:, -1,:], lerp, reduction="none")
-
-        return loss_lerp + loss_support
-
+        lerp = ((target - low) / (high - low)).unsqueeze(-1)
         target_probs = F.one_hot(i, n) * (1 - lerp) + F.one_hot(i + 1, n) * lerp
-        loss = F.cross_entropy(logits, target_probs.transpose(1, -1), reduction="none")
+        loss= F.cross_entropy(logits, target_probs.transpose(1, -1), reduction="none")
 
         values = self(logits.detach())
         mse = F.mse_loss(
