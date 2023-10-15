@@ -73,8 +73,9 @@ class Rescaler(RescalerPy, nn.Module):
 
     support: Tensor
 
-    def __init__(self, support_size: int, *args: Any, **kwargs: Any):
+    def __init__(self, support_size: int, temperature: float=0.1,*args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
+        self.temp=temperature
         self.register_buffer("support", torch.linspace(0, 1, support_size))
 
     def forward(self, logits: Tensor) -> Tensor:
@@ -82,9 +83,10 @@ class Rescaler(RescalerPy, nn.Module):
         support logits -> actual value in [min, max] range
         Shapes: (B, S, V) -> (B, V)
         """
+        softmax = F.softmax(logits/self.temp, dim=1)
         return cast(
             Tensor,
-            torch.tensordot(F.softmax(logits, dim=1), self.support, dims=([1], [0])),
+            torch.tensordot(softmax, self.support, dims=([1], [0])),
         )
 
     def calculate_loss(self, logits: Tensor, target: Tensor) -> Tensor:
@@ -104,7 +106,7 @@ class Rescaler(RescalerPy, nn.Module):
 
         lerp = ((target - low) / (high - low)).unsqueeze(-1)
         target_probs = F.one_hot(i, n) * (1 - lerp) + F.one_hot(i + 1, n) * lerp
-        loss= F.cross_entropy(logits, target_probs.transpose(1, -1), reduction="none")
+        return F.cross_entropy(logits/self.temp, target_probs.transpose(1, -1), reduction="none")
 
         values = self(logits.detach())
         mse = F.mse_loss(
