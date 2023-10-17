@@ -139,6 +139,7 @@ class StateNode(Node):
         reward: ndarr_f32,
         current_player: CurrentPlayer,
         mcts: MCTS,
+        *,
         valid_actions_mask: Optional[ndarr_bool] = None,
         policy_override: Optional[ndarr_f32] = None,
     ):
