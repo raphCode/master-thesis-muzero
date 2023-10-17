@@ -61,6 +61,10 @@ def main(cfg: DictConfig) -> None:
     n = 0
     try:
         with TensorboardLogger(log_dir="tb") as tb:
+
+            def unroll_multiline_layout(*tags: str) -> dict[str, tuple[str, list[str]]]:
+                return {t: ("Multiline", [t + r"/unroll \d+"]) for t in tags}
+
             tb.add_custom_scalars_layout(
                 unroll={
                     f"loss {k}": (
@@ -69,18 +73,10 @@ def main(cfg: DictConfig) -> None:
                     )
                     for k in attrs.asdict(C.training.loss_weights).keys()
                 }
-                | {
-                    "latent gradient": (
-                        "Multiline",
-                        ["latent gradient/unroll \\d+"],
-                    )
-                }
-                | {
-                    "mean latent similarity": (
-                        "Multiline",
-                        ["latent cosine similarity/unroll \\d+"],
-                    )
-                }
+                | unroll_multiline_layout(  # type: ignore [operator]
+                    "latent gradient",
+                    "latent cosine similarity",
+                ),
             )
             tb.add_graphs(C.networks.factory())
             while True:
