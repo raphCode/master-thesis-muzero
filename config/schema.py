@@ -54,7 +54,6 @@ if TYPE_CHECKING:  # RUNTIME TYPES
     OptimizerPartial = functools.partial[Optimizer]
 
     from networks.bases import DynamicsNet, PredictionNet, RepresentationNet
-    from player_controller import PlayerPartial
 
     DynamicsNetPartial = functools.partial[DynamicsNet]
     PredictionNetPartial = functools.partial[PredictionNet]
@@ -66,7 +65,6 @@ if TYPE_CHECKING:  # RUNTIME TYPES
 else:  # OMEGACONF SCHEMA TYPES
     # For omegaconf, just use a dataclass that requires the _target_ config key
     Game = Instance
-    PlayerPartial = PlayerPartialInstance
     OptimizerPartial = PartialInstance
 
     DynamicsNetPartial = PartialInstance
@@ -92,8 +90,7 @@ class MctsConfig:
     node_action_fn: ActionFn
     node_target_policy_fn: PolicyFn
     node_selection_score_fn: SelectionFn
-    iterations_move_selection: int
-    iterations_value_estimate: int
+    iterations: int
 
 
 @frozen(kw_only=True)
@@ -150,24 +147,17 @@ class TrainConfig:
 
 
 @frozen
-class PlayerConfig:
-    instances: list[PlayerPartial]
-
-
-@frozen
 class BaseConfig:
     game: GameConfig
     mcts: MctsConfig
     networks: NetworkContainer
     training: TrainConfig
-    players: PlayerConfig
     defaults: Optional[list[Any]] = [
         "_self_",
         {"game": MISSING},
         {"mcts": MISSING},
         {"networks": MISSING},
         {"training": MISSING},
-        {"players": MISSING},
         {"hydra.job": "hydra_job_config"},
     ]
 
@@ -178,7 +168,6 @@ class BaseConfig:
             mcts=None,  # type:ignore [arg-type]
             networks=None,  # type:ignore [arg-type]
             training=None,  # type:ignore [arg-type]
-            players=None,  # type:ignore [arg-type]
             defaults=None,
         )
 

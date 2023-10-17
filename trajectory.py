@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import operator
 import functools
-from typing import TYPE_CHECKING, Any, Iterable, Optional, TypeAlias, cast
+from typing import TYPE_CHECKING, Iterable, Optional, TypeAlias, cast
 
 import attrs
 import torch
@@ -16,19 +16,15 @@ from config import C
 if TYPE_CHECKING:
     # only needed for type annotations, can't import uncondionally due to import cycles
     from util import ndarr_f32
-    from rl_player import TrainingInfo
 
 
 @frozen(kw_only=True)
 class TrajectoryState:
     """
-    A list of TrajectoryStates represents a game trajectory a RLPlayer experienced.
-    The data is intended to train a reinforcement learning agent and is thus
-    agent-centric, e.g. recorded rewards are only valid for the agent which recorded the
-    trajectory. In a multiplayer scenario therefore each agent has its own list of
-    TrajectoryStates.
-    The first TrajectoryState in a list is assumed to be the initial game state and thus
-    should use inital tensors during network training.
+    A list of TrajectoryStates represents a game trajectory.
+    Each TrajectoryState corresponds to a game state.
+    Prediction targets for the dynamics network actually refer to the next state,
+    specifically the reward and turn status.
     """
 
     observations: Optional[tuple[Tensor, ...]]
@@ -37,27 +33,6 @@ class TrajectoryState:
     target_policy: ndarr_f32
     mcts_value: ndarr_f32
     reward: ndarr_f32
-
-    @classmethod
-    def from_training_info(
-        cls,
-        info: TrainingInfo,
-        *args: Any,
-        target_policy: Optional[ndarr_f32] = None,
-        turn_status: int,
-        action: int,
-        reward: ndarr_f32,
-    ) -> TrajectoryState:
-        if target_policy is None:
-            target_policy = info.target_policy
-        return cls(
-            observations=info.observations,
-            turn_status=turn_status,
-            action=action,
-            target_policy=target_policy,
-            mcts_value=info.mcts_value,
-            reward=reward,
-        )
 
 
 @frozen(kw_only=True)
