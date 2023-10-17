@@ -82,7 +82,6 @@ def main(cfg: DictConfig) -> None:
                     )
                 }
             )
-            pc.net.jit()
             tb.add_graphs(C.networks.factory())
             while True:
                 with torch.no_grad():
