@@ -4,8 +4,7 @@ import shutil
 import logging
 import subprocess
 from os import path
-from types import UnionType
-from typing import Any, Iterable, Optional, cast
+from typing import Any, Optional, cast
 
 import attrs
 import hydra
@@ -15,7 +14,7 @@ from omegaconf import OmegaConf, DictConfig, ListConfig
 
 from util import get_output_shape
 from networks import Networks
-from games.bases import Game, Player
+from games.bases import Game
 from config.schema import BaseConfig, NetworkConfig, NetworkSchema
 from networks.containers import (
     DynamicsNetContainer,
@@ -183,22 +182,6 @@ def populate_config(cfg: DictConfig) -> None:
 
     # Network container check the implementation types themselves
     C.networks.factory()
-
-    def net_msg(net_type: str) -> str:
-        return f"{net_type} must be subclass of {net_type.upper()}Net!"
-
-    def check_players(cls: type | UnionType) -> Iterable[bool]:
-        return (
-            isinstance(p.func, type) and issubclass(p.func, cls)
-            for p in C.players.instances
-        )
-
-    # avoid circular imports:
-    from rl_player import RLBase
-
-    assert all(check_players(Player))
-    msg = "There must be at least one RLBase player involved to collect training data!"
-    assert any(check_players(RLBase)), msg
 
 
 def copy_source_code() -> None:

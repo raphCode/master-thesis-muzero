@@ -1,3 +1,0 @@
-
-instances:
-    - _target_: rl_player.PerfectInformationRLPlayer
