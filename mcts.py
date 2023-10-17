@@ -168,7 +168,9 @@ class StateNode(Node):
         reward: ndarr_f32,
         current_player: CurrentPlayer,
         mcts: MCTS,
+        *,
         valid_actions_mask: Optional[ndarr_bool] = None,
+        policy_override: Optional[ndarr_f32] = None,
     ):
         self.mask = valid_actions_mask
         self.player = current_player
@@ -185,7 +187,7 @@ class StateNode(Node):
             latent=latent,
             reward=reward,
             value_pred=value_pred.detach().cpu().numpy(),
-            probs=probs,
+            probs=probs if policy_override is None else policy_override,
             mcts=mcts,
         )
 
@@ -207,8 +209,6 @@ class StateNode(Node):
     def debug_description(self) -> str:
         if self.player is TurnStatus.CHANCE_PLAYER:
             return "Chance"
-        elif self.player is self.mcts.own_pid:
-            return "Decision"
         else:
             return f"Player {self.player}"
 
@@ -275,13 +275,6 @@ class TerminalNode(Node):
 
 
 class MCTS:
-    """
-    Stores and manages a search tree for an agent.
-    The MCTS instance lives as long as the agent because it stores networks and a mcts
-    config specific for the agent.
-    """
-
-    own_pid: int
     root: Node
     nets: Networks
     cfg: MctsConfig
@@ -294,20 +287,20 @@ class MCTS:
         self.nets = nets
         self.cfg = cfg
 
-    def reset_new_game(self, player_id: int) -> None:
-        self.own_pid = player_id
-
     def new_root(
         self,
         latent: Tensor,
-        valid_actions_mask: Optional[ndarr_bool] = None,
+        player_id: int,
+        valid_actions_mask: Optional[ndarr_bool],
+        policy_override: Optional[ndarr_f32] = None,
     ) -> None:
         self.root = StateNode(
             latent,
             np.zeros(C.game.instance.max_num_players, dtype=np.float32),
-            self.own_pid,
+            player_id,
             self,
             valid_actions_mask=valid_actions_mask,
+            policy_override=policy_override,
         )
 
     def ensure_visit_count(self, count: int) -> None:
@@ -352,18 +345,18 @@ class MCTS:
         assert len(policy) == C.game.instance.max_num_actions
         return policy
 
-    def advance_root(self, action: int) -> None:
+    def get_latent_at(self, action: int) -> Tensor:
         """
-        Replace the root node with its child of the given action.
+        Return the latent of the child node with the specified action.
         """
-        self.root = self.root.get_create_child(action)
+        return self.root.get_create_child(action).latent
 
     def debug_dump_tree(self, maxdepth: int = 5) -> str:
         return "\n".join(
             [
                 "Value: " + repr(self.nets.prediction.value_scale),
                 "Reward: " + repr(self.nets.dynamics.reward_scale),
-                f"MC tree for player {self.own_pid}:",
+                f"MC tree:",
                 self.root.debug_dump_tree(maxdepth),
             ]
         )
