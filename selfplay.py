@@ -1,20 +1,20 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
-from collections.abc import Iterable, Sequence
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 from attrs import frozen
 
-from mcts import TurnStatus
+from mcts import MCTS, TurnStatus
 from config import C
-from rl_player import RLBase
 from trajectory import TrajectoryState
 
 if TYPE_CHECKING:
-    from games.bases import Player
-    from player_controller import PCBase
+    import torch
+
+    from util import ndarr_f32
+    from networks import Networks
     from tensorboard_wrapper import TBStepLogger
 
 rng = np.random.default_rng()
@@ -26,42 +26,24 @@ log = logging.getLogger(__name__)
 class SelfplayResult:
     moves: int
     game_completed: bool
-    trajectories: Sequence[list[TrajectoryState]]
+    trajectory: list[TrajectoryState]
 
 
-class RLPlayers:
-    """
-    Small helper class to bundle RLPlayers instances, their player ids and trajectories.
-    """
-
-    pids: tuple[int, ...]
-    players: tuple[RLBase, ...]
-    trajectories: tuple[list[TrajectoryState], ...]
-
-    def __init__(self, all_players: Iterable[RLBase | Player]):
-        self.pids, self.players = zip(
-            *((pid, p) for pid, p in enumerate(all_players) if isinstance(p, RLBase))
-        )
-        self.trajectories = tuple([] for _ in self.players)
-
-
-def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
+def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
     state = C.game.instance.new_initial_state()
-    players = player_controller.get_players()
-    assert len(players) == C.game.instance.max_num_players
-    rlp = RLPlayers(players)
+    traj = []
+    n_players = C.game.instance.max_num_players
+    scores = np.zeros(n_players)
+    mcts = MCTS(nets, C.mcts)
+    seen_obs = False
 
-    for pid, player in zip(rlp.pids, rlp.players):
-        player.reset_new_game(pid)
-
-    # RL players that already had their first move
-    started_pids = set[int]()
-
-    scores = np.zeros(len(rlp.players))
-
-    def commit_step(action: int) -> None:
-        target_policy = state.chance_outcomes if state.is_chance else None
-
+    def commit_step(
+        action: int,
+        *,
+        obs: Optional[tuple[torch.Tensor, ...]],
+        target_policy: ndarr_f32,
+        mcts_value: Optional[ndarr_f32] = None,
+    ) -> None:
         state.apply_action(action)
 
         def get_turn_status() -> int:
@@ -75,19 +57,41 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
         rewards = state.rewards
         scores += rewards
 
-        for player, pid, traj in zip(rlp.players, rlp.pids, rlp.trajectories):
-            if pid not in started_pids:
-                continue
-            traj.append(
-                TrajectoryState.from_training_info(
-                    player.create_training_info(),
-                    target_policy=target_policy,
-                    turn_status=get_turn_status(),
-                    action=action,
-                    reward=rewards,
-                )
+        if not seen_obs:
+            # no point in recording a trajectory before the first observation
+            return
+
+        traj.append(
+            TrajectoryState(
+                observations=obs,
+                turn_status=get_turn_status(),
+                action=action,
+                target_policy=target_policy,
+                mcts_value=mcts_value
+                if mcts_value is not None
+                else np.zeros(n_players, dtype=np.float32),
+                reward=rewards,
             )
-            player.advance_game_state(action)
+        )
+
+    def update_mcts(
+        latent: torch.Tensor,
+        chance_outcomes: Optional[ndarr_f32] = None,
+    ) -> None:
+        if chance_outcomes is not None:
+            mcts.new_root(
+                latent=latent,
+                player_id=TurnStatus.CHANCE_PLAYER.target_index,
+                valid_actions_mask=None,
+                policy_override=chance_outcomes,
+            )
+        else:
+            mcts.new_root(
+                latent=latent,
+                player_id=state.current_player_id,
+                valid_actions_mask=state.valid_actions_mask,
+            )
+        mcts.ensure_visit_count(mcts.cfg.iterations)
 
     for n_step in range(C.training.max_steps_per_game):
         if state.is_terminal:
@@ -97,14 +101,27 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
         if state.is_chance:
             chance_outcomes = state.chance_outcomes
             action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
-            commit_step(action)
+            if seen_obs:
+                update_mcts(mcts.get_latent_at(action), chance_outcomes)
+            commit_step(
+                action,
+                obs=None,
+                target_policy=chance_outcomes,
+                mcts_value=None,
+            )
             continue
 
-        curr_pid = state.current_player_id
-        action = players[curr_pid].request_action(state)
-        started_pids.add(curr_pid)
-
-        commit_step(action)
+        seen_obs = True
+        obs = state.observation
+        latent = nets.representation.si(*obs)
+        update_mcts(latent)
+        action = mcts.get_action()
+        commit_step(
+            action,
+            obs=obs,
+            target_policy=mcts.get_policy(),
+            mcts_value=mcts.root.value,
+        )
 
     tbs.add_scalar("selfplay/game length", n_step)
     trunc_msg = " (truncated)" * (not state.is_terminal)
@@ -115,4 +132,4 @@ def run_episode(player_controller: PCBase, tbs: TBStepLogger) -> SelfplayResult:
     for n, score in enumerate(scores):
         tbs.add_scalar(f"selfplay/score{n:02d}", score)
 
-    return SelfplayResult(n_step, state.is_terminal, rlp.trajectories)
+    return SelfplayResult(n_step, state.is_terminal, traj)

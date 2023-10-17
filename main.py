@@ -21,7 +21,6 @@ from config.impl import (
 )
 from config.schema import BaseConfig
 from replay_buffer import ReplayBuffer
-from player_controller import SelfplayPC
 from tensorboard_wrapper import TensorboardLogger
 
 if TYPE_CHECKING:
@@ -55,9 +54,9 @@ def main(cfg: DictConfig) -> None:
     copy_source_code()
     populate_config(cfg)
 
-    pc = SelfplayPC(C.players.instances)
+    nets = C.networks.factory()
     rb = ReplayBuffer()
-    t = Trainer(pc.net)
+    t = Trainer(nets)
     n = 0
     try:
         with TensorboardLogger(log_dir="tb") as tb:
@@ -78,21 +77,20 @@ def main(cfg: DictConfig) -> None:
                     "latent cosine similarity",
                 ),
             )
-            pc.net.jit()
+            nets.jit()
             tb.add_graphs(C.networks.factory())
             while True:
                 with torch.no_grad():
-                    pc.net.eval()
-                    result = run_episode(pc, tb.create_step_logger(n))
+                    nets.eval()
+                    result = run_episode(nets, tb.create_step_logger(n))
                 n += result.moves
-                for traj in result.trajectories:
-                    rb.add_trajectory(traj, result.game_completed)
-                pc.net.update_rescalers(rb)
+                rb.add_trajectory(result.trajectory, result.game_completed)
+                nets.update_rescalers(rb)
                 batch_samples = C.training.batch_size * C.training.unroll_length
                 target_samples = (
                     rb.data_added * C.training.train_selfplay_ratio * rb.fullness
                 )
-                pc.net.train()
+                nets.train()
                 while rb.data_sampled < target_samples - batch_samples:
                     t.process_batch(rb.sample(), tb.create_step_logger(n))
     except KeyboardInterrupt:
