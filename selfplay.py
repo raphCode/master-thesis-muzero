@@ -30,6 +30,7 @@ class SelfplayResult:
 
 
 def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
+    need_chance_values = C.training.n_step_horizon < C.training.max_steps_per_game
     state = C.game.instance.new_initial_state()
     traj = []
     n_players = C.game.instance.max_num_players
@@ -93,6 +94,7 @@ def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
             )
         mcts.ensure_visit_count(mcts.cfg.iterations)
 
+    n_mcts_chance = 0
     for n_step in range(C.training.max_steps_per_game):
         if state.is_terminal:
             n_step -= 1
@@ -101,8 +103,9 @@ def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
         if state.is_chance:
             chance_outcomes = state.chance_outcomes
             action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
-            if seen_obs:
+            if state.is_chance and need_chance_values and seen_obs:
                 update_mcts(mcts.get_latent_at(action), chance_outcomes)
+                n_mcts_chance += 1
             commit_step(
                 action,
                 obs=None,
@@ -121,6 +124,16 @@ def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
             obs=obs,
             target_policy=mcts.get_policy(),
             mcts_value=mcts.root.value,
+        )
+
+    if need_chance_values and len(traj) < C.training.n_step_horizon:
+        # When the game trajectory is shorter than the n-step horizon, the MCTS values for
+        # intermediate chance values will never be used.
+        # Consider adjusting the n-step horizon either lower (to make use of the values)
+        # or higher (>= max_steps_per_game to disable MCTS values for chance events)
+        log.warn(
+            f"Computed MCTS values for {n_mcts_chance} chance events which will never "
+            "be used"
         )
 
     tbs.add_scalar("selfplay/game length", n_step)
