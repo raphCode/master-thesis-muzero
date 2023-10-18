@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shutil
 import logging
+import traceback
 from typing import TYPE_CHECKING
 
 import attrs
@@ -49,6 +50,14 @@ def main(cfg: DictConfig) -> None:
         )
         if input(msg) == "y":
             shutil.rmtree(cwd)
+
+    def set_terminal_title() -> None:
+        relpath = os.path.relpath(os.curdir, start=hydra.utils.get_original_cwd())
+        cwd = os.getcwd()
+        title = min(cwd, relpath, key=len)
+        print(f"\x1b]2;{title}\x07")
+
+    set_terminal_title()
 
     logging.captureWarnings(True)
     copy_source_code()
@@ -109,7 +118,8 @@ def main(cfg: DictConfig) -> None:
                 nets.train()
                 while rb.data_sampled < target_samples - batch_samples:
                     t.process_batch(rb.sample(), tb.create_step_logger(n))
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, Exception) as e:
+        log.error(repr(e) + "\n" + traceback.format_exc())
         if n < 30_000:
             ask_delete_logs()
 
