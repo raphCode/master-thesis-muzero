@@ -51,6 +51,14 @@ def main(cfg: DictConfig) -> None:
         if input(msg) == "y":
             shutil.rmtree(cwd)
 
+    def set_terminal_title() -> None:
+        relpath = os.path.relpath(os.curdir, start=hydra.utils.get_original_cwd())
+        cwd = os.getcwd()
+        title = min(cwd, relpath, key=len)
+        print(f"\x1b]2;{title}\x07")
+
+    set_terminal_title()
+
     logging.captureWarnings(True)
     copy_source_code()
     populate_config(cfg)
