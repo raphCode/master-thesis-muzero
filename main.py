@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shutil
 import logging
+import traceback
 from typing import TYPE_CHECKING
 
 import attrs
@@ -92,7 +93,8 @@ def main(cfg: DictConfig) -> None:
                 nets.train()
                 while rb.data_sampled < target_samples - batch_samples:
                     t.process_batch(rb.sample(), tb.create_step_logger(n))
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, Exception) as e:
+        log.error(repr(e) + "\n" + traceback.format_exc())
         if n < 30_000:
             ask_delete_logs()
 
