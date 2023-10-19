@@ -8,7 +8,6 @@ from torch import Tensor, nn
 
 from util import copy_type_signature
 
-from .util import NecroReLu
 from .bases import DynamicsNet, PredictionNet, RepresentationNet
 
 
@@ -34,7 +33,7 @@ class GenericFc(nn.Module):
         self.act_out = act_out
         self.fcs, self.acts, self.norms = zip(
             *[
-                (nn.Linear(a, b), NecroReLu(), nn.LayerNorm(a, elementwise_affine=False))
+                (nn.Linear(a, b), nn.ReLU(), nn.LayerNorm(a, elementwise_affine=False))
                 for a, b in itertools.pairwise(widths)
             ]
         )
@@ -159,7 +158,6 @@ class FcDynamics(DynamicsNet):
             ],
             **kwargs,
         )
-        self.act = NecroReLu()
 
     def forward(
         self,
@@ -167,5 +165,4 @@ class FcDynamics(DynamicsNet):
         action_onehot: Tensor,
     ) -> tuple[Tensor, Tensor, Tensor]:
         latent_out, reward, turn = self.fc_reshape(latent_in, action_onehot)
-        latent_out = self.act(latent_out)
         return latent_in + latent_out, reward, turn
