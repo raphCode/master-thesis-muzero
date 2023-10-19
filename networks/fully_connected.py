@@ -8,7 +8,7 @@ from torch import Tensor, nn
 
 from util import copy_type_signature
 
-from .util import NecroReLu
+from .util import NecroReLu, InstanceNorm0d
 from .bases import DynamicsNet, PredictionNet, RepresentationNet
 
 
@@ -34,7 +34,7 @@ class GenericFc(nn.Module):
         self.act_out = act_out
         self.fcs, self.acts, self.norms = zip(
             *[
-                (nn.utils.weight_norm(nn.Linear(a, b)), NecroReLu(), nn.BatchNorm1d(b))
+                (nn.utils.weight_norm(nn.Linear(a, b)), NecroReLu(), InstanceNorm0d())
                 for a, b in itertools.pairwise(widths)
             ]
         )
@@ -49,10 +49,13 @@ class GenericFc(nn.Module):
         x = torch.cat([i.flatten(1) for i in inputs], dim=1)
         last = self.fcs[-1]
         for fc, act, norm in zip(self.fcs, self.acts, self.norms):
+            skip = x
+            x = norm(x)
             x = fc(x)
-            # x = norm(x)
             if fc is not last or self.act_out:
                 x = act(x)
+            if skip.shape == x.shape:
+                x = x + skip
         return x
 
     @copy_type_signature(forward)  # provide typed __call__ interface
@@ -110,8 +113,7 @@ class FcRepresentation(RepresentationNet):
             act_out=True,
             **kwargs,
         )
-        self.bn = nn.BatchNorm1d(latent_shape[0])
-        self.bn = nn.LayerNorm(latent_shape)
+        self.bn = InstanceNorm0d()
 
     def forward(
         self,
@@ -162,8 +164,7 @@ class FcDynamics(DynamicsNet):
             **kwargs,
         )
         self.act = NecroReLu()
-        self.bn = nn.BatchNorm1d(C.networks.latent_shape)
-        self.bn = nn.LayerNorm(C.networks.latent_shape)
+        self.bn = InstanceNorm0d()
 
     def forward(
         self,
@@ -202,7 +203,7 @@ class GRUDynamics(DynamicsNet):
             ],
             **kwargs,
         )
-        self.bn = nn.LayerNorm(C.networks.latent_shape)
+        self.bn = InstanceNorm0d()
 
     def forward(
         self,
