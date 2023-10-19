@@ -1,5 +1,4 @@
 = Discussion
-<discussion>
 /*
 Hier diskutierst du deine Ergenisse und deine Arbeit.
 Hier darfst du jetzt Sachen in deine Ergebnisse interpretieren (z.B. Algorithmus A ist

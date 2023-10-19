@@ -1,5 +1,4 @@
 = Approach
-<approach>
 /*
 Hier beschreibst du, was du in der Arbeit neues gemacht hast, und wie du es implementiert
 hast.

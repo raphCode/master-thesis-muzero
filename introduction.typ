@@ -1,5 +1,4 @@
 = Introduction
-<introduction>
 /*
 Hier beschreibst du die Idee und Motivation deiner Arbeit. 
 Ziel ist es zu sagen was du gemacht hast und warum es wichtig ist, dass es jemand

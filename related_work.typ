@@ -1,5 +1,4 @@
 = Related Work
-<related_work>
 /*
 Hier beschreibst du welche verwandte Arbeiten es gibt und wie deine Arbeit sich davon
 abhebt.

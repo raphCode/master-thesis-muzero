@@ -1,5 +1,4 @@
 = Theory
-<theory>
 /*
 Ich finde ein extra Theorie Kapitel gut, in dem man die theoretischen Grundlagend
 zusammenfasst, die nötig sind um die verwendeten Algorithmen zu verstehen. 
