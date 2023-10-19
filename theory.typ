@@ -9,7 +9,7 @@ damit gut zeigen, dass man das Material verstanden hat.
 #import "thesis.typ": citet
 
 == !RL
-<sec_rl>
+<sec-rl>
 
 !Rl refers to a subset of machine learning where a decision maker learns by trial and
 error while interacting with its !env.  
@@ -73,7 +73,7 @@ To translate multiple !rs earned over a period of time into a singular value tha
 the agent in making optimal decisions, we use the concept of a !ret.
 The !ret is a !fn of the !r !seq.
 The !ag's learning objective is then defined as maximizing the !exret#footnote[for details
-about how the _expected_ !ret is defined, see @sec_rl_exret_and_nstep].
+about how the _expected_ !ret is defined, see @sec-rl_exret_and_nstep].
 In a simple case, the !ret $G_t$ may be defined as the sum of all !rs occurring after time
 step $t$:
 $ G_t eq.def r_(t+1) + r_(t+2) + r_(t+3) + ... + r_T $
@@ -96,7 +96,7 @@ reduced by a factor of $gamma^(k-1)$ compared to if it had arrived immediately.
 @sutton
 
 === !Ps and !V !Fns
-<sec_rl_exret_and_nstep>
+<sec-rl_exret_and_nstep>
 
 A !p is a formal description of the !ag's behavior.
 Given a !s $s_t$, the !p $pi(a|s)$ denotes the !prob that the !ag chooses !a $a_t=a$ if
@@ -138,7 +138,7 @@ This use of the !ag's current !v !fn is known as bootstrapping.
 This section introduces basic !gtic concepts, just enough to provide justification for the
 design and behavior of !mz.
 It also provides foundations to discuss the limitations of the original !mz !impl in
-@sec_muzero_limitations.
+@sec-muzero_limitations.
 
 !Gt is a broad interdisciplinary field that uses mathematical models to analyze how
 individuals make decisions in interactive situations.
@@ -203,7 +203,7 @@ For any !pl and any !s of the !g, it is thus possible to derive the expected pay
 
 Both !gt and !rl are about decision making, so naturally they employ similar concepts.
 However, comparable concepts have slightly different terminology in the two fields.
-@tbl_gt_rl_terms shows a tabular overview of related terms between !gt and !rl.
+@tbl-gt_rl_terms shows a tabular overview of related terms between !gt and !rl.
 
 #figure(
   table(
@@ -219,7 +219,7 @@ However, comparable concepts have slightly different terminology in the two fiel
     [!h], [!traj],
   ),
   caption: [Comparison of similar concepts in !gt and !rl],
-) <tbl_gt_rl_terms>
+) <tbl-gt_rl_terms>
 
 === Properties of !Gs
 
@@ -243,7 +243,7 @@ This situation arises, for example, when modeling real-world economic situations
 may be gains from trades.
 
 ==== !I
-<sec_pinf>
+<sec-pinf>
 
 An important distinction are !gs of !pinf and !impinf.
 A !pinf !g is one in which every !pl, at every !dp, has full knowledge of the !h of the !g
@@ -267,7 +267,7 @@ concealed.
 @gtheo
 
 ==== !PR
-<sec_pr>
+<sec-pr>
 
 The concept of perfect recall describes that a !pl never forgets all his past choices and
 information he got.
@@ -275,7 +275,7 @@ This allows !pls to unambiguously separate past, present und future !ss.
 @gtheo
 
 !Pr is often assumed in !gt, since it is a requirement for e.g. the rationality of !pls,
-which is explained in @sec_bi_mp.
+which is explained in @sec-bi_mp.
 @gtheo
 
 ==== Simultaneous / !Seql Moves
@@ -314,7 +314,7 @@ of the !pls.
 @gtheo
 
 ==== Cooperation and Collaboration
-<sec_gt_collab>
+<sec-gt_collab>
 
 Traditional !gt divides !gs into two categories, cooperative and non-cooperative.
 The cooperative approach studies !gs where the rules are only broadly defined.
@@ -385,7 +385,7 @@ playing the !g.
 #figure(
   draw_gametree(root),
   caption: [!Exf example of an contrived !g with two !pls and a chance event]
-) <fig_exf_example>
+) <fig-exf_example>
 
 The !exf looks similar to a regular tree in computer science.
 It is accordingly also known as a !g tree.
@@ -396,7 +396,7 @@ In summary, it can be stated that the !exf enumerates all possible !hs of the !g
 tree-like form.
 @gtheo
 
-An example of the !exf of an contrived !g is given in @fig_exf_example.
+An example of the !exf of an contrived !g is given in @fig-exf_example.
 The root !n denotes the start of the !g, in the example it is labeled with~C.
 In this case the !n is meant to represent a chance event, specifically a coin flip.
 Therefore, it has two possible outcomes with equal !probs of $1/2$ each, and the edges are
@@ -412,12 +412,12 @@ If the !g continues, the other !pl is given a choice to go left or right, after 
 
 The !exf also allows an visual explanation of subgames.
 The !exf of a subgame is a subset of the original !g's !g tree.
-In the example of @fig_exf_example, if a !g were to start at any of the !ns labeled with~1
+In the example of @fig-exf_example, if a !g were to start at any of the !ns labeled with~1
 or~2 and shares all !ns below, this is a subgame of the original !g.
 @gtheo
 
-For example, @fig_exf_subgame shows two particular subgames from the !g in
-@fig_exf_example:
+For example, @fig-exf_subgame shows two particular subgames from the !g in
+@fig-exf_example:
 
 #figure(
   stack(
@@ -426,8 +426,8 @@ For example, @fig_exf_subgame shows two particular subgames from the !g in
     draw_gametree(root.children.at(0)),
     align(horizon, draw_gametree(root.children.at(1).children.at(1)))
   ),
-  caption: [Some subgames of the !g in @fig_exf_example]
-) <fig_exf_subgame>
+  caption: [Some subgames of the !g in @fig-exf_example]
+) <fig-exf_subgame>
 
 ]
 
@@ -452,7 +452,7 @@ simple !algo, called !bi.
 ===== !SP
 
 !Bi is best introduced with a !sp !g, as it makes the !g analysis straightforward.
-Consider for example this !g in !exf, as shown in @fig_bi_sp:
+Consider for example this !g in !exf, as shown in @fig-bi_sp:
 
 #[
 
@@ -470,7 +470,7 @@ Consider for example this !g in !exf, as shown in @fig_bi_sp:
 #figure(
   draw_gametree(root),
   caption: [!Bi in a simple !sp !g]
-) <fig_bi_sp>
+) <fig-bi_sp>
 
 The optimal !sty can now be computed bottom-up, starting at the leaf !ns:
 If the !pl were already at~!dp #node1.content, he would certainly choose
@@ -490,7 +490,7 @@ ${ #get_optimal_strategy(root).join(" ") }$.
 ]
 
 ===== !MP
-<sec_bi_mp>
+<sec-bi_mp>
 
 In a !mp setting, the !stys of other !pls influence the course of the !g and thus the
 utility of !ss.
@@ -540,14 +540,14 @@ Such self-enforcing !sty combinations are known as Nash equilibria.
 #let node_leftmost = node1.children.at(0)
 
 Such a solution for !mp !gs can be computed as well with !bi.
-@fig_bi_mp visualizes the process for an example !g with three !pls, each having one !dp.
+@fig-bi_mp visualizes the process for an example !g with three !pls, each having one !dp.
 The !ns are now labeled with the number of the !pl at turn, so there are multiple !ns with
 the same number.
 
 #figure(
   draw_gametree(root),
   caption: [!Bi in a !mp !g with three moves]
-) <fig_bi_mp>
+) <fig-bi_mp>
 
 The tree looks a bit more complicated since a !mp !g involves payoff vectors instead of
 single scalar payoffs.
@@ -556,7 +556,7 @@ Starting at the last !dps in the tree, !pl~#node_leftmost.content can decide whi
 take.
 He is only interested in maximizing his payoff, so he only looks a the third entry of the
 payoff vectors.
-In @fig_bi_mp, this is illustrated by underlining the respective entry in the tuple of
+In @fig-bi_mp, this is illustrated by underlining the respective entry in the tuple of
 payoffs.
 In the specific case of the leftmost !dp in the tree, !pl~#node_leftmost.content has the
 possible
@@ -571,7 +571,7 @@ assigned that maximize !pl~#node_leftmost.content's payoff.
 Next, we can move one step upwards in the tree, looking at !pl~#node1.content's decision.
 He is only interested in the payoffs relevant to him, which are in the second entry of the
 payoff vectors.
-Again, this is illustrated in @fig_bi_mp with underlining the corresponding entries.
+Again, this is illustrated in @fig-bi_mp with underlining the corresponding entries.
 Consider for instance the left !n labeled with~#node1.content:
 The !pl will choose !a~#node1.backprop_info.action, since that gives him the higher payoff
 of~#node1.backprop_info.utility.
@@ -595,7 +595,7 @@ Overall, three rational !pls will choose the respective
 
 If the !g involves chance events, chance !ns may be replaced by their expected outcome
 @gtheo.
-For example, consider the chance !n depicted in @fig_bi_chance with the two outcomes
+For example, consider the chance !n depicted in @fig-bi_chance with the two outcomes
 #repr(p1) and #repr(p2) and !probs #repr((Pa, Pb)) respectively.
 The expected payoff of #repr(exp_payoff) is calculated by weighting the possible payoffs
 by their !probs.
@@ -610,12 +610,12 @@ by their !probs.
 #figure(
   draw_gametree(root),
   caption: [Expected payoff of a chance !n]
-) <fig_bi_chance>
+) <fig-bi_chance>
 
 ]
 
 ===== !ZSUM !Gs
-<sec_negamax>
+<sec-negamax>
 
 For !2p !gs with !zsum payoffs, practical !impls of !bi may keep track of only a single
 payoff scalar in the !g tree, for example the payoff of the first !pl.
@@ -633,9 +633,9 @@ This variant is called negamax.
 
 ==== Subgame Perfection
 
-An interesting property of the solutions visualized in @fig_bi_sp and @fig_bi_mp is that
+An interesting property of the solutions visualized in @fig-bi_sp and @fig-bi_mp is that
 they also contain optimal !as for !g !s which are not part of the overall optimal !sty.
-For example, in @fig_bi_mp, the right !n of !pl~#node2.content is not part of the optimal
+For example, in @fig-bi_mp, the right !n of !pl~#node2.content is not part of the optimal
 play.
 However, if !pl~#node2.content would ever find himself in this !g !s (maybe through a
 mishap of !pl~#root.content), he knows that his best option
@@ -679,7 +679,7 @@ Each !n in the tree represents a !g !s $s$ and stores a visit count $n_s$, that 
 in how many iterations the !n was visited.
 A !n also keeps track of its mean !v $v_s$ as approximated by the !mc simulations.
 In the basic variant, each iteration of the !algo consists of four phases, as illustrated
-in @fig_mcts_phases.
+in @fig-mcts_phases.
 
 #[
 
@@ -703,7 +703,7 @@ in @fig_mcts_phases.
     }.map(align.with(center))
   ),
   caption: [The four phases of one iteration of !mcts],
-) <fig_mcts_phases>
+) <fig-mcts_phases>
 
 #let phase(n) = labels.at(n - 1)
 
@@ -751,7 +751,7 @@ the rollout !p.
 #cite("mcts_survey", "mcts_review", "alphago")
 
 === #phase(4)
-<sec_mcts_backprop>
+<sec-mcts_backprop>
 
 Propagates the !v $z$ obtained in the #phase(3) upwards in the tree, updating the
 statistics of all ancestor !ns.
@@ -786,7 +786,7 @@ evolved from traditional game playing programs.
 This section explores and explains the predecessors, they are listed in ascending order of
 publication date.
 They build on each other and eventually lead to !mz, which is explained in detail in
-@sec_muzero.
+@sec-muzero.
 
 Since the first two !algos, !ago and !agoz, focused on the !g of Go, I start with a
 overview of previous attempts at Computer Go.
@@ -838,7 +838,7 @@ The performance of these approaches is limited, reaching only strong amateur lev
 #cite("fuego", "pachi", "go_learn_patterns").
 
 === !ago
-<sec_alphago>
+<sec-alphago>
 
 !ago by #citet("alphago") is a novel and successful approach to the !g of Go with the full
 19x19 board size.
@@ -864,13 +864,13 @@ board in the current as well as past moves.
 
 !ago uses multiple !nns for the !mcts.
 They are trained with a multi-stage pipeline that includes supervised and !rl.
-@fig_alphago_train shows an overview of the training process and the !nns used in !ago.
+@fig-alphago_train shows an overview of the training process and the !nns used in !ago.
 Some of the !nns are only used to generate training data for other !nets.
 
 #figure(
   training_pipeline,
   caption: [The !ago training pipeline]
-) <fig_alphago_train>
+) <fig-alphago_train>
 
 The pipeline starts with supervised learning (SL) on the KGS Go dataset, which contains Go
 games played by human experts.
@@ -972,7 +972,7 @@ than previous computer Go programs.
 
 One MCTS iteration is concluded by backpropagating $V(s_L)$ up in the tree.
 All edges on the search path are updated so that $Q(s, a)$ represents the average !v of
-all simulations that passed through it, like described in @sec_mcts_backprop.
+all simulations that passed through it, like described in @sec-mcts_backprop.
 
 Each !n $s$ in the search tree is only processed once by the !nns, when the !n is
 expanded.
@@ -998,7 +998,7 @@ This distributed version was able to beat a professional human player in 5 out o
 ]
 
 === !agoz
-<sec_alphago_zero>
+<sec-alphago_zero>
 
 !agoz by #citet("alphago_zero") is similar to !ago:
 It also uses MCTS with !nns to play Go at super-human levels.
@@ -1036,7 +1036,7 @@ manner:
 At each !s $s$ of the !g, a !mcts with 1600 iterations is performed.
 The MCTS executes like in !ago with $lambda = 0$, that is, without any rollouts.
 A !nn $f_theta_*$ guides the search process by !p !preds $p(a, s)$ and provides !v
-estimates $v(s)$, for details see @sec_alphago.
+estimates $v(s)$, for details see @sec-alphago.
 An distinction to !ago is that the image of the Go board is randomly rotated or flipped
 before using it as the input for the !nn.
 This data augmentation step exploits symmetries of the !g of Go and aims to reduce !pred
@@ -1107,7 +1107,7 @@ precursor !ago in the case of Go.
 The training success was also reported to be repeatable across multiple independent runs.
 
 === !mz
-<sec_muzero>
+<sec-muzero>
 
 !mz by #citet("muzero") is yet another improvement over !az in terms of generalization.
 !mz learns a dynamic model of the !g, solely from interactions, and uses it in the !mcts
@@ -1153,7 +1153,7 @@ $ (s^t, r^t) = #dyn (s^(t-1), a^(t-1)) $
 
 ==== !MCTS
 
-The recurrent inference is used during !mcts, as visualized in @fig_muzero_mcts.
+The recurrent inference is used during !mcts, as visualized in @fig-muzero_mcts.
 To decide on an !a in !g !s $s$, a search tree is initialized with the !g !obs:
 $s^0 = #rep (s)$.
 During the MCTS expansion phase, the !dnet #dyn is used to obtain the next !s $s^(n+1)$
@@ -1162,9 +1162,9 @@ and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^
 #figure(
   mcts,
   caption: [!Mcts in !mz]
-) <fig_muzero_mcts>
+) <fig-muzero_mcts>
 
-The selection of !ns happens according to a pUCT formula (introduced in @sec_alphago).
+The selection of !ns happens according to a pUCT formula (introduced in @sec-alphago).
 Specifically, in !s $s^k$, the child !n corresponding to the !a $a^k$ is selected
 $ a^k = limits("argmax")_a { Q(s, a) + P(s, a) frac(sqrt(sum_b N(s, b)), 1 + N(s, a))
 [c_1 + log(frac(sum_b N(s, b) + c_2 + 1, c_2))] } $
@@ -1205,7 +1205,7 @@ For $k = leaf...0$ an n-step !ret is calculated, bootstrapped from the simulatio
 $v^leaf$:
 $ G^k = sum_(i=1)^(leaf-k) gamma^(i-1) r_(k+i) + gamma^(leaf-k) v^leaf $
 This is equivalent to the calculation of the discounted n-step !ret in !rl, introduced in
-@sec_rl_exret_and_nstep.
+@sec-rl_exret_and_nstep.
 
 #let s = $s^k$
 #let ac = $a^(k+1)$
@@ -1220,7 +1220,7 @@ $ #Q colon.eq frac(#N times #Q + #G, #N + 1) \
 ]
 
 This is equivalent to the formulas for a pratical !impl keeping track of average !n !vs,
-outlined in @sec_mcts_backprop.
+outlined in @sec-mcts_backprop.
 
 ==== Training
 
@@ -1234,7 +1234,7 @@ Like !az, !mz uses selfplay with MCTS to generate training data.
 For each selfplay step at time $t$ the data $(s_t, a_t, pi_t, z)$ is recorded.
 The first two entries contain the !s of the !env and executed !a respectively.
 $pi_t$<join-right> denotes the search !p, as derived from the root !n, like in !mz's
-precursors (see @sec_alphago_zero for details).
+precursors (see @sec-alphago_zero for details).
 $z$ is the final outcome of the !g, indicating a win, loss or draw.
 
 #[
@@ -1256,7 +1256,7 @@ and !as from a selfplay !traj.
 Specifically, a training example beginning at time step $t$ consists of the tuple
 $(s_t, (#series_a), (#series_p), z)$, where $K$ is the unroll length, a hyperparameter.
 
-The process is illustrated in @fig_muzero_training_board for $K=2$:
+The process is illustrated in @fig-muzero_training_board for $K=2$:
 
 #figure(
   training(
@@ -1266,7 +1266,7 @@ The process is illustrated in @fig_muzero_training_board for $K=2$:
     Training setup in !mz in the case of board !gs, unrolled for~2 steps.
     Thick arrows indicate training losses.
   ]
-) <fig_muzero_training_board>
+) <fig-muzero_training_board>
 
 First, a !latrep $s_t^0$ is obtained using the !rnet: $s_t^0 = #rep (s_t)$.
 Then, the !dnet #dyn is applied recurrently $K-1$ times with the !as from the !traj
@@ -1307,7 +1307,7 @@ The !dnet is unrolled in the same manner, and an additional !r loss $ell^r$ is i
 The total loss thus becomes
 $ ell_t = loss(p, pi_(t+k), p) + loss(v, G_(t+k), v) + loss(r, r_(t+k), r, start: 1) $
 
-@fig_muzero_training_atari illustrated the updated training setup:
+@fig-muzero_training_atari illustrated the updated training setup:
 
 #figure(
   training(
@@ -1317,7 +1317,7 @@ $ ell_t = loss(p, pi_(t+k), p) + loss(v, G_(t+k), v) + loss(r, r_(t+k), r, start
     Training setup in !mz for Atari !gs, unrolled for~2 steps.
     Thick arrows indicate training losses.
   ]
-) <fig_muzero_training_atari>
+) <fig-muzero_training_atari>
 
 ]
 

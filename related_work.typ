@@ -12,14 +12,14 @@ paper selbst lesen muss um die Ideen darin zu verstehen.
 here.
 
 == !Mp !az
-<sec_mp_azero>
+<sec-mp_azero>
 
 While no !mp version for !mz itself exists, #citet("mp_azero") extended its predecessor
 !algo !az to !mp capabilities.
 
 The original !impl of !az heavily relies on the !zsum property for some architectural
 simplifications:
-The !mcts performs a negamax search (see @sec_negamax for details), which only uses a
+The !mcts performs a negamax search (see @sec-negamax for details), which only uses a
 scalar for describing the !v of !ns @ab_pruning.
 The !nn subsequently also only predicts scalar !vs.
 @azero
@@ -42,7 +42,7 @@ Naturally, the !mcts rotates over the !pls in turn order.
 When selecting a !n's children, the !algo seeks to maximize component $v_i$ of the !v
 vector $arrow(v)$, where $i$ denotes the !pl currently at turn.
 This !algo is known as maxn search @mcts_survey and similar to the !mp !bi introduced
-in @sec_bi_mp.
+in @sec-bi_mp.
 
 They evaluate their work on !mp versions of Connect 4 and !ttt:
 The !nets learn to encode knowledge of the !g into search, indicating that the proposed
@@ -63,7 +63,7 @@ of the !dnet #dyn.
 !smz makes use of !afs when modeling the !env.
 These !afs occur after each !a of the !ag and represent an hypothetical !s of the !env
 before it has transitioned to a true !s @sutton.
-The idea is visualized in @fig_afterstates.
+The idea is visualized in @fig-afterstates.
 In stochastic !envs, !afs therefore can be viewed as a !s of uncertainty from which a
 definitive outcome will emerge.
 From a !gtic viewpoint, !afs may represent decision points of chance events.
@@ -76,7 +76,7 @@ the same !s-!a pair.
 #figure(
   afterstates,
   caption: [Afterstates in !smz]
-) <fig_afterstates>
+) <fig-afterstates>
 
 The transition from the !af $a s_t$ to the true !s $s_(t+1)^i$ is modeled using a chance
 outcome $c_t^i$ from a finite set of $C$<join-right> possible chance outcomes.
@@ -130,7 +130,7 @@ backgammon.
 ]
 
 == !effz
-<rw_effzero>
+<sec-effzero>
 
 !effz by #citet("effzero") is a modification of !mz to achieve similar performance like
 the original !algo, but requiring less training data.
@@ -164,7 +164,7 @@ $ s_t^x = cases(
 Note that the !r !preds $r_t^x$ of the !dnet are omitted for brevity in the formula.
 
 The idea of the additional similarity loss $ell^l$ is to match $s_t^n$ to $s_(t+n)^0$.
-This is illustrated in @fig_effzero_loss.
+This is illustrated in @fig-effzero_loss.
 
 #figure(
   training(
@@ -177,7 +177,7 @@ This is illustrated in @fig_effzero_loss.
     The latent loss $ell^l$ introduced in !effz, indicated by the thick arrows.
     The other !mz losses are omitted for clarity.
   ]
-) <fig_effzero_loss>
+) <fig-effzero_loss>
 
 The authors employ a stop-gradient operation on the side of $s_(t+n)^0$, meaning that
 gradients from the similarity loss are not applied to the !rnet #rep.
@@ -185,7 +185,7 @@ This is due to the fact that they closely modeled their !arch after !simsiam @si
 self-supervised framework that learns !latreps for images.
 The authors further justify this decision by treating $s_t^n$ as the more accurate
 representation and therefore using it as a target for the !dnet's !preds.
-In @fig_effzero_loss, the stop-gradient is reflected by the unidirectionality $ell^l$
+In @fig-effzero_loss, the stop-gradient is reflected by the unidirectionality $ell^l$
 arrow.
 
 ]

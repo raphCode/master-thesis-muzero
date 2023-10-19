@@ -13,7 +13,7 @@ I begin by reviewing the limitations of !mz and the reasons behind them, and the
 to a discussion of how I extend the !arch to more general !gs.
 
 == !mz Limitations
-<sec_muzero_limitations>
+<sec-muzero_limitations>
 
 The !impl of !mz is designed for single-!ag !envs and !2p !zsum !gs.
 Furthermore, all !gs are expected to be deterministic and of !pinf.
@@ -31,8 +31,8 @@ in a stochastic !env compared to other methods that model stochasticity.
 
 Accurately planning ahead also relies on unambiguously identifying the initial state
 $s^0$.
-From a !gtic standpoint, this requires the !g to be with !pr and of !pinf (See @sec_pr and
-@sec_pinf, respectively).
+From a !gtic standpoint, this requires the !g to be with !pr and of !pinf (See @sec-pr and
+@sec-pinf, respectively).
 In the context of !rl, it also means that an !obs must uniquely capture the current !s of
 the !env.
 
@@ -48,7 +48,7 @@ one where the fifty-move rule applies.
 
 In the !2p setting, !mz assumes that the !g is !zsum.
 This assumption is built into the !arch itself, because it performs negamax search (see
-@sec_negamax) during MCTS @muzero.
+@sec-negamax) during MCTS @muzero.
 
 Negamax exploits the !zsum property by using only a single scalar for a !n's !v.
 The design of the !nns (#dyn<join-right> and #pred) in !mz follows this choice and also
@@ -99,7 +99,7 @@ This is especially important in !coll !gs, as it allows the !ag to compensate fo
 teammates.
 
 I perform a number of changes to !mz.
-The updated training setup with all modifications is visualized in @fig_raphzero_training.
+The updated training setup with all modifications is visualized in @fig-raphzero_training.
 
 === Per-!PL !Vs
 
@@ -107,7 +107,7 @@ The updated training setup with all modifications is visualized in @fig_raphzero
 #let vector(x) = $arrow(#x) = [#x _1, #x _2, ..., #x _n] in RR^n$
 
 !Mp !bi requires to keep track of the individual !exuts and !rs for each !pl.
-I follow the design of !mp !az @mp_azero (see @sec_mp_azero) and replace all scalars
+I follow the design of !mp !az @mp_azero (see @sec-mp_azero) and replace all scalars
 describing an !env !r, !s or !n !v, with vectors.
 In an !env with $n$ !ags, these !r and !v vectors consist of $n$ components:
 $ vector(r) \
@@ -121,17 +121,18 @@ with~#r1, the second !ag received a !r of~#r2, and the third !ag got no !r.
 #assert(r3 == 0)
 ]
 
-Note that in a !coll !g, all individual !rs are shared, as outlined in @sec_gt_collab:
+Note that in a !coll !g, all individual !rs are shared, as outlined in @sec-gt_collab:
 $ r_i = r "for" 1 <= i <= n $
 
-This modification is reflected in @fig_raphzero_training by adding vector arrows
+This modification is reflected in @fig-raphzero_training by adding vector arrows
 $arrow(x)$ to !mp data.
 
 === Turn Order !Pred
-<sec_mod_turn>
+<sec-mod_turn>
 
 Making informed decisions within the search tree requires not only individual !rs and !vs,
 but also an understanding who can make a decision at a particular !n.
+//In !mz, an alternating turn order is hardcoded in the search for !vp !gs.
 In !mz, the turn order is hardcoded for !sp and !2p !gs and therefore represents domain
 knowledge about the !env.
 
@@ -158,19 +159,19 @@ $ ell^w (w_(t+n), w_t^n) $
 which aligns the !net !preds $w_t^n$ with their respective targets $w_(t+n)$ for all
 $n = 1...K$, where $K$ is the unroll length.
 
-@fig_raphzero_training shows this change by the added $w$ in the !env transitions and
+@fig-raphzero_training shows this change by the added $w$ in the !env transitions and
 !dnet !preds, as well as the additional loss symbol $ell^w$.
 
 === maxn !MCTS
 
-Following !mp !bi (@sec_bi_mp), the MCTS selection phase considers !n !vs for the !pl currently at turn
+Following !mp !bi (@sec-bi_mp), the MCTS selection phase considers !n !vs for the !pl currently at turn
 only.
 Specifically, each !n !v is a vector:
 $ arrow(Q)(s^n, a^n) = gamma arrow(v)^(n+1) + arrow(r)^(n+1) $
 Let $Q_i (s, a)$ denote the $i$<no-join>-th component of this vector.
 
 In !s $s^k$, maxn-MTCS then selects an !a $a^k$ as to maximize $Q_i (s^k, a^k)$ where $i =
-w^k$, the !pl currently at turn, as outlined in @sec_mod_turn:
+w^k$, the !pl currently at turn, as outlined in @sec-mod_turn:
 $ a^k = limits("argmax")_a ( arrow(Q)_w_i (s, a) + u(s, a) ) $
 where $u(s, a)$ represents some bonus term to incorporate exploration and the prior !probs
 $P(s^k, a^k)$ into the decision.
@@ -197,7 +198,7 @@ The !g simulator also provides the exact chance outcomes $c_t$ if !s $s_t$ is a 
 event.
 These outcomes are used as targets during training for the !p $p$ as predicted by #pred.
 
-Chance events are represented by a dice in @fig_raphzero_training
+Chance events are represented by a dice in @fig-raphzero_training
 #footnote[ignore the fact that the !g !ttt actually has no chance events].
 Note that a chance event $s_t$ differs from regular !g !ss in the figure in two aspects:
 - the !p target for training #pred are the chance outcomes $c_t$
@@ -206,7 +207,7 @@ Note that a chance event $s_t$ differs from regular !g !ss in the figure in two 
 #box[
 === Training Setup Illustration
 
-The training setup with my proposed modifications is summarized in @fig_raphzero_training:
+The training setup with my proposed modifications is summarized in @fig-raphzero_training:
 
 #import "drawings/muzero.typ": rep, dyn, pred, training
 
@@ -228,7 +229,7 @@ The training setup with my proposed modifications is summarized in @fig_raphzero
     chance_event: chance_state,
   ),
   caption: [Training setup of my !impl of !mz for stochastic multi-agent !envs]
-) <fig_raphzero_training>
+) <fig-raphzero_training>
 
 ]
 ]
@@ -239,7 +240,7 @@ Furthermore, I implemented the following modifications:
 
 === Symmetric Latent Similarity Loss
 
-As outlined in @rw_effzero, #citet("effzero") already layed the groundwork for
+As outlined in @sec-effzero, #citet("effzero") already layed the groundwork for
 improvements in !sampeff by introducing a similarity loss between !preds of #rep and dyn.
 However, I thank that their adoption of the stop-gradient operation from !simsiam @simsiam
 may have been short-sighted:
