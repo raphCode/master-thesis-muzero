@@ -8,3 +8,4 @@ node_target_policy_fn:
         softmax_temp: 0.3
 node_selection_score_fn: ${fn:fn.selection.sample_from_prior}
 iterations: 10
+debug_log_mcts_ratio: 0.01
