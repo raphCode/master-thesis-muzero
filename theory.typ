@@ -1299,7 +1299,7 @@ or matching the true !s of the !env.
 The !nets are free to learn any !repr that correctly estimates the !p and !v !fn, they can
 invent any dynamics helpful for accurate planning.
 
-===== Atari !Gs
+===== !Envs with Intermediate !Rs
 
 When applied to !envs with intermediate !rs, such as the Atari suite, !r !preds are
 included in the training.
