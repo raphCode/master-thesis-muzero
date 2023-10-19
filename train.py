@@ -216,7 +216,7 @@ class Trainer:
 
             tbs.add_scalar(
                 f"latent cosine similarity/unroll {n}",
-                F.cosine_similarity(latent[0], latent[1:], dim=1).mean(),
+                F.cosine_similarity(latent[0:1], latent[1:], dim=1).mean(),
             )
 
             value_logits, policy_logits = self.nets.prediction.raw_forward(
