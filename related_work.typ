@@ -162,6 +162,8 @@ $ s_t^x = cases(
   #rep (s_t) & "if" x = 0,
   #dyn (s_t^(x-1), a_(t+x-1)) & "else",
 ) $
+Note that the !r !preds $r_t^x$ of the !dnet are omitted for brevity in the formula.
+
 The idea of the additional similarity loss $ell^l$ is to match $s_t^n$ to $s_(t+n)^0$.
 This is illustrated in @fig_effzero_loss.
 

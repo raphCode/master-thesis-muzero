@@ -1152,12 +1152,6 @@ steps ahead can be predicted given an initial !s $s^0$ and a series of hypotheti
 $a^0, a^1, ..., a^(n-1)$:
 $ (s^t, r^t) = #dyn (s^(t-1), a^(t-1)) $
 
-In contexts where not all outputs of the !nets are needed, I will omit the extra outputs
-for simplicity of notation.
-For example, if one is only interested in the !ss produced by the !dnet, the following
-notation is also valid:
-$ s^t = #dyn (s^(t-1), a^(t-1)) $
-
 ==== !MCTS
 
 The recurrent inference is used during !mcts, as visualized in @fig_muzero_mcts.
