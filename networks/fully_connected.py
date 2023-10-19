@@ -34,7 +34,11 @@ class GenericFc(nn.Module):
         self.act_out = act_out
         self.fcs, self.acts, self.norms = zip(
             *[
-                (nn.Linear(a, b), nn.ReLU(), InstanceNorm0d())
+                (
+                    torch.nn.utils.parametrizations.weight_norm(nn.Linear(a, b)),
+                    nn.ReLU(),
+                    InstanceNorm0d(),
+                )
                 for a, b in itertools.pairwise(widths)
             ]
         )
