@@ -6,7 +6,7 @@ In Research-papern ist hierfür meist kein Platz aber in einer Abschlussarbeit k
 damit gut zeigen, dass man das Material verstanden hat.
 */
 
-#import "thesis.typ": citet
+#import "thesis.typ": citet, neq
 
 == !RL
 <sec-rl>
@@ -128,8 +128,10 @@ The definition of the !v as the discounted sum of future !rs enables to calculat
 type of !ret:
 The n-step !ret sums a truncated !seq of the next $n$ !rs and substitutes the rest with
 the !ag's current !v !fn $v_pi (s)$:
+#neq[
 $ G_t eq.def r_(t+1) + gamma r_(t+2) + ... + gamma^(n-1) r_(t+n) + gamma^n v_pi (s_(t+n)) =
 gamma^n v_pi (s_(t+n)) + sum_(k=1)^n gamma^(k-1) r_(t+k) $
+<eq-rl_nstep>]
 This use of the !ag's current !v !fn is known as bootstrapping.
 @sutton
 
@@ -763,14 +765,18 @@ For example, a pratical MCTS !impl may be interested in the average !v $v_s$ of 
 simulations that passed through the !s $s$.
 It can store the sum of all simulation !vs $u_s$, and divide by the visit count $n_s$ to
 calculate the average !n !v $v_s$
+#neq[
 $ v_s = cases(
   u_s / n_s & "if" n_s eq.not 0,
   0 & "else",
 ) $
+<eq-mcts_backprop1>]
 During the #phase(4) phase, the following updates would then be performed to incorporate a
 simulation result $z$ in the statistics:
+#neq[
 $ n_s colon.eq n_s + 1 \
   u_s colon.eq u_s + z $
+<eq-mcts_backprop2>]
 
 #cite("muzero", "alphago")
 
@@ -944,7 +950,9 @@ to maximize the !a !v plus a bonus.
 
 The bonus term $u(s, a)$ is initially proportional to the prior !prob but decays with
 repeated visits to encourage exploration:
+#neq[
 $ u(s, a) = c P(s, a) frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a)) $
+<eq-uct_alphago>]
 The influence of the bonus can be adjusted with the constant $c$.
 
 The selection !sty maximizes over a probabilistic upper confidence tree @puct.
@@ -1164,7 +1172,7 @@ and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^
   caption: [!Mcts in !mz]
 ) <fig-muzero_mcts>
 
-The selection of !ns happens according to a pUCT formula (introduced in @sec-alphago).
+!Ns are selected according to a a pUCT formula similar to @eq-uct_alphago.
 Specifically, in !s $s^k$, the child !n corresponding to the !a $a^k$ is selected
 $ a^k = limits("argmax")_(a in A) { Q(s, a) + P(s, a)
 frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a))
@@ -1205,8 +1213,8 @@ is the newly expanded leaf !n.
 For $k = leaf...0$ an n-step !ret is calculated, bootstrapped from the simulation#fn !v
 $v^leaf$:
 $ G^k = sum_(i=1)^(leaf-k) gamma^(i-1) r_(k+i) + gamma^(leaf-k) v^leaf $
-This is equivalent to the calculation of the discounted n-step !ret in !rl, introduced in
-@sec-rl_exret_and_nstep.
+This is equivalent to the calculation of the discounted n-step !ret in !rl, see
+@eq-rl_nstep.
 
 #let s = $s^k$
 #let ac = $a^(k+1)$
@@ -1215,13 +1223,13 @@ This is equivalent to the calculation of the discounted n-step !ret in !rl, intr
 #let G = $G^(k+1)$
 
 The statistics for each !n $s^k$ for $k = leaf-1...0$ are updated with the respektive #G:
-$ #Q colon.eq frac(#N times #Q + #G, #N + 1) \
+$ #Q colon.eq frac(#N #Q + #G, #N + 1) \
   #N colon.eq #N + 1 $
 
 ]
 
 This is equivalent to the formulas for a pratical !impl keeping track of average !n !vs,
-outlined in @sec-mcts_backprop.
+as shown in @eq-mcts_backprop1 and @eq-mcts_backprop2.
 
 ==== Training
 

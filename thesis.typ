@@ -75,3 +75,8 @@
     },
   )
 }
+
+#let neq(it) = {
+  set math.equation(numbering: "(1)")
+  it
+}
