@@ -83,6 +83,36 @@ class LossCounts:
         return Losses(**values)
 
 
+class PredictionErrorStats:
+    def __init__(self) -> None:
+        self.num_data = 0
+        self.max_ae = 0.0
+        self.mse_sum = 0.0
+
+    def add_data(self, pred: Tensor, target: Tensor) -> None:
+        ae = torch.abs(pred.detach() - target).flatten()
+        self.max_ae = max(self.max_ae, cast(float, ae.max().item()))
+        self.mse_sum += (ae**2).sum().item()
+        self.num_data += ae.numel()
+
+    @property
+    def mse(self) -> float:
+        if self.num_data == 0:
+            return 0
+        return self.mse_sum / self.num_data
+
+    def log_tb(self, tag: str, tbs: TBStepLogger) -> None:
+        tbs.add_scalar(f"prediction error/{tag} mse", self.mse)
+        tbs.add_scalar(f"prediction error/{tag} max absolute error", self.max_ae)
+
+    def __add__(self, other: PredictionErrorStats) -> PredictionErrorStats:
+        result = PredictionErrorStats()
+        result.num_data = self.num_data + other.num_data
+        result.mse_sum = self.mse_sum + other.mse_sum
+        result.max_ae = max(self.max_ae, other.max_ae)
+        return result
+
+
 class SLAW:
     """
     Implements automatic loss weighting as described in:
@@ -188,6 +218,8 @@ class Trainer:
         pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
 
+        value_pes = PredictionErrorStats()
+        reward_pes = PredictionErrorStats()
         step_losses = []
         counts = LossCounts()
 
@@ -226,6 +258,10 @@ class Trainer:
             def log_mean_grad(tag: str, grad: Tensor) -> None:
                 tbs.add_scalar(tag, grad.abs().mean())
 
+            value_pes.add_data(
+                self.nets.prediction.value_scale(value_logits), step.value_target
+            )
+
             latent.register_hook(
                 functools.partial(log_mean_grad, f"latent gradient/unroll {n}")
             )  # type: ignore [no-untyped-call]
@@ -241,6 +277,10 @@ class Trainer:
                 step.reward,
             )
 
+            reward_pes.add_data(
+                self.nets.dynamics.reward_scale(reward_logits), step.reward
+            )
+
             for k, l in attrs.asdict(loss).items():
                 if k == "latent":
                     continue
@@ -253,6 +293,9 @@ class Trainer:
         weights = self.slaw.weights
 
         total_loss = loss.weighted_sum(weights)
+
+        value_pes.log_tb("value", tbs)
+        reward_pes.log_tb("reward", tbs)
 
         for k, l in attrs.asdict(loss).items():
             tbs.add_scalar(f"loss/{k}", l)
