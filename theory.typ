@@ -807,9 +807,10 @@ This makes an exhaustive search computationally intractable.
 Go programs preceeding !ago therefore use !mcts to subsample !ss in the !g tree.
 A search !p is used to prioritize promising moves, reducing the effective breadth of the
 search tree.
-To estimate !vs of !ns the tree, complete rollouts are simulated until the end of the !g.
+To estimate !vs of !ns of in the tree, complete rollouts are simulated until the end of
+the !g.
 To obtain robust !v estimations, many rollouts are needed.
-Obviously, the !p for selecting !as during rollouts is crucial for the determined !vs and
+The !p for selecting !as during rollouts is crucial for the determined !vs and
 resulting performance.
 #cite("mcts_balancing", "mcts_balancing_practice", "pachi", "fuego")
 
@@ -878,8 +879,8 @@ A !nn trained on this data predicts which moves humans would play in a given boa
 situation.
 This is actually not a novelty on its own, since previously CNNs have already been used
 for this task #cite("go_cnn_2008", "go_cnn_2014a", "go_cnn_2014b").
-However, the use of a larger convolutional !nn allowed them to reach a higher accuracy
-than previous attempts.
+However, the use of a larger convolutional !nn allowed #citet("alphago") to reach a higher
+accuracy than previous attempts.
 
 Two !nns are trained on the KGS Go dataset, a big #slnet and a smaller one, the fast
 #rollnet.
@@ -944,7 +945,8 @@ to maximize the !a !v plus a bonus.
 
 The bonus term $u(s, a)$ is initially proportional to the prior !prob but decays with
 repeated visits to encourage exploration:
-$ u(s, a) prop P(s, a) / (1 + N(s, a)) $
+$ u(s, a) = c P(s, a) frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a)) $
+The influence of the bonus can be adjusted with the constant $c$.
 
 The selection !sty maximizes over a probabilistic upper confidence tree @puct.
 Such formulas (and variants) are therefore also referred to as "pUCT formulas".
@@ -1064,7 +1066,8 @@ Mean-squared error and cross-entropy is used to align the !net's !preds
 $(p, v) = f_theta_i (s)$ with the search !probs $pi$ and !g outcome $z$, respectively.
 Specifically, the !net is optimized using gradient descent on the loss !fn
 $ l = (z - v)^2 - pi "log" p + c norm(theta)^2 $
-where the last term is used for L2 weight normalisation.
+where the last term is used for L2 weight normalisation, with the constant $c$ determining
+its influence.
 
 New versions of the !nn $f_theta_i$ are evaluated in a tournament against the current
 selfplay !pl $alpha_theta_*$ before they may be used for the selfplay data generation.
