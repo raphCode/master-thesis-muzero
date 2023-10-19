@@ -124,9 +124,9 @@ class TrainingData:
                 ts.action,
                 C.game.instance.max_num_actions,
             ),
-            target_policy=torch.tensor(ts.target_policy),
-            value_target=torch.tensor(value_target),
-            reward=torch.tensor(ts.reward),
+            target_policy=torch.tensor(ts.target_policy, dtype=torch.float32),
+            value_target=torch.tensor(value_target, dtype=torch.float32),
+            reward=torch.tensor(ts.reward, dtype=torch.float32),
         )
 
     @classmethod
