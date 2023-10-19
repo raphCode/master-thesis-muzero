@@ -73,7 +73,7 @@ To translate multiple !rs earned over a period of time into a singular value tha
 the agent in making optimal decisions, we use the concept of a !ret.
 The !ret is a !fn of the !r !seq.
 The !ag's learning objective is then defined as maximizing the !exret#footnote[for details
-about how the _expected_ !ret is defined, see @sec-rl_exret_and_nstep].
+about how the _expected_ !ret is defined, see @sec-rl_exret].
 In a simple case, the !ret $G_t$ may be defined as the sum of all !rs occurring after time
 step $t$:
 $ G_t eq.def r_(t+1) + r_(t+2) + r_(t+3) + ... + r_T $
@@ -96,7 +96,7 @@ reduced by a factor of $gamma^(k-1)$ compared to if it had arrived immediately.
 @sutton
 
 === !Ps and !V !Fns
-<sec-rl_exret_and_nstep>
+<sec-rl_exret>
 
 A !p is a formal description of the !ag's behavior.
 Given a !s $s_t$, the !p $pi(a|s)$ denotes the !prob that the !ag chooses !a $a_t=a$ if
