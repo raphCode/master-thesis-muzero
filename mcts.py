@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import logging
+import textwrap
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import TYPE_CHECKING, Self, Literal, Optional, TypeAlias, cast
-from collections.abc import MutableMapping
+from collections.abc import Iterable, MutableMapping
 
 import numpy as np
 import torch
@@ -124,6 +125,28 @@ class Node(ABC):
     def _create_child_at(self, action: int) -> Node:
         pass
 
+    def debug_info(self) -> Iterable[str]:
+        return [
+            f"visits {self.visit_count}",
+            f"pred {np.round(self.value_pred, 2)}",
+            f"reward {np.round(self.reward, 2)}",
+            f"value {np.round(self.value, 2)}",
+        ]
+
+    def debug_description(self) -> str:
+        return "Node"
+
+    def debug_dump_tree(self, maxdepth: int) -> str:
+        if maxdepth <= 1:
+            return repr(self)
+        return repr(self) + "".join(
+            textwrap.indent(f"\n{a}: " + c.debug_dump_tree(maxdepth - 1), 2 * " ")
+            for a, c in sorted(self.children.items())
+        )
+
+    def __repr__(self) -> str:
+        return self.debug_description() + ": " + ", ".join(self.debug_info())
+
 
 class StateNode(Node):
     """
@@ -177,6 +200,12 @@ class StateNode(Node):
             self.mcts,
         )
 
+    def debug_description(self) -> str:
+        if self.player is TurnStatus.CHANCE_PLAYER:
+            return "Chance"
+        else:
+            return f"Player {self.player}"
+
 
 class TerminalNode(Node):
     """
@@ -225,6 +254,18 @@ class TerminalNode(Node):
             F.one_hot(torch.tensor(action), C.game.instance.max_num_actions),
         )
         return TerminalNode(latent, np.zeros_like(self.reward), self.mcts)
+
+    def debug_info(self) -> Iterable[str]:
+        return [
+            f"visits {self.visit_count}",
+            f"reward {np.round(self.reward, 2)}",
+        ]
+
+    def debug_description(self) -> str:
+        return "Terminal"
+
+    def debug_dump_tree(self, _: int) -> str:
+        return repr(self)
 
 
 class MCTS:
@@ -303,3 +344,12 @@ class MCTS:
         Return the latent of the child node with the specified action.
         """
         return self.root.get_create_child(action).latent
+
+    def debug_dump_tree(self, maxdepth: int = 5) -> str:
+        return "\n".join(
+            [
+                "Value: " + repr(self.nets.prediction.value_scale),
+                "Reward: " + repr(self.nets.dynamics.reward_scale),
+                self.root.debug_dump_tree(maxdepth),
+            ]
+        )
