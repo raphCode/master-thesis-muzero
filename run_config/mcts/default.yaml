@@ -7,5 +7,5 @@ node_target_policy_fn:
         _target_: fn.policy.FromExpandedValues
         softmax_temp: 0.3
 node_selection_score_fn: ${fn:fn.selection.sample_from_prior}
-iterations: 20
-debug_log_mcts_ratio: 0.01
+iterations: 3
+debug_log_mcts_ratio: 0.05

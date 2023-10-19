@@ -1,11 +1,11 @@
 representation:
     _target_: networks.fully_connected.FcRepresentation
-    hidden_depth: 1
+    hidden_depth: 0
     latent_features: 50
 prediction:
     _target_: networks.fully_connected.FcPrediction
-    hidden_depth: 2
+    hidden_depth: 0
 dynamics:
     _target_: networks.fully_connected.FcDynamics
-    hidden_depth: 2
-scalar_support_size: 10
+    hidden_depth: 0
+scalar_support_size: 2
