@@ -75,6 +75,7 @@ class Rescaler(RescalerPy, nn.Module):
 
     def __init__(self, support_size: int, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
+        assert support_size >= 2, "need at least two distinct min max values"
         self.register_buffer("support", torch.linspace(0, 1, support_size))
 
     def forward(self, logits: Tensor) -> Tensor:
@@ -82,6 +83,7 @@ class Rescaler(RescalerPy, nn.Module):
         support logits -> actual value in [min, max] range
         Shapes: (B, S, V) -> (B, V)
         """
+        return logits[:, 0, :]
         return cast(
             Tensor,
             torch.tensordot(F.softmax(logits, dim=1), self.support, dims=([1], [0])),
@@ -95,6 +97,9 @@ class Rescaler(RescalerPy, nn.Module):
           target: (B, V)
           return: (B, V)
         """
+        preds = self(logits)
+        return target - preds
+
         n = len(self.support)
         mini, maxi = self.support[[0, -1]]
         i = ((target - mini) / (maxi - mini) * (n - 1)).to(dtype=torch.int64)
