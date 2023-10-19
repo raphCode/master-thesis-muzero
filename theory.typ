@@ -1212,7 +1212,7 @@ Specifically, let the search path consist of the !ns $s^0, s^1, ..., s^leaf$, wh
 is the newly expanded leaf !n.
 For $k = leaf...0$ an n-step !ret is calculated, bootstrapped from the simulation#fn !v
 $v^leaf$:
-$ G^k = sum_(i=1)^(leaf-k) gamma^(i-1) r_(k+i) + gamma^(leaf-k) v^leaf $
+$ G^k = gamma^(leaf-k) v^leaf + sum_(i=1)^(leaf-k) gamma^(i-1) r_(k+i) $
 This is equivalent to the calculation of the discounted n-step !ret in !rl, see
 @eq-rl_nstep.
 
