@@ -91,6 +91,7 @@ class MctsConfig:
     node_target_policy_fn: PolicyFn
     node_selection_score_fn: SelectionFn
     iterations: int
+    debug_log_mcts_ratio: float
 
 
 @frozen(kw_only=True)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 import logging
 from typing import TYPE_CHECKING, Optional
 
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
 rng = np.random.default_rng()
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 
 @frozen
@@ -31,6 +33,7 @@ class SelfplayResult:
 
 def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
     need_chance_values = C.training.n_step_horizon < C.training.max_steps_per_game
+    debug_game = random.random() < C.mcts.debug_log_mcts_ratio
     state = C.game.instance.new_initial_state()
     traj = []
     n_players = C.game.instance.max_num_players
@@ -45,6 +48,9 @@ def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
         target_policy: ndarr_f32,
         mcts_value: Optional[ndarr_f32] = None,
     ) -> None:
+        if debug_game:
+            log.debug(">" * 5 + f" action: {action}")
+
         state.apply_action(action)
 
         def get_turn_status() -> int:
@@ -93,6 +99,14 @@ def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
                 valid_actions_mask=state.valid_actions_mask,
             )
         mcts.ensure_visit_count(mcts.cfg.iterations)
+
+        if debug_game:
+            log.debug(
+                f"Game state and MCST at step {n_step}:\n"
+                + repr(state)
+                + "\n"
+                + mcts.debug_dump_tree()
+            )
 
     n_mcts_chance = 0
     for n_step in range(C.training.max_steps_per_game):
