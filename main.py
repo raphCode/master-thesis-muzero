@@ -5,6 +5,7 @@ import shutil
 import logging
 import traceback
 from typing import TYPE_CHECKING
+from contextlib import suppress
 
 import attrs
 import hydra
@@ -105,7 +106,9 @@ def main(cfg: DictConfig) -> None:
     except (KeyboardInterrupt, Exception) as e:
         log.error(repr(e) + "\n" + traceback.format_exc())
         if n < 30_000:
-            ask_delete_logs()
+            with suppress(AssertionError):
+                ask_delete_logs()
+        raise
 
 
 if __name__ == "__main__":
