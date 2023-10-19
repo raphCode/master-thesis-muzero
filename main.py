@@ -62,9 +62,16 @@ def main(cfg: DictConfig) -> None:
 
     logging.captureWarnings(True)
     copy_source_code()
+    if torch.cuda.is_available():
+        dev = f"cuda:{torch.cuda.current_device()}"
+        log.info(f"Using compute device {dev}")
+        torch.set_default_device(dev)  # type: ignore [no-untyped-call]
+
     populate_config(cfg)
 
     nets = C.networks.factory()
+    if torch.cuda.is_available():
+        nets.cuda()
     rb = ReplayBuffer()
     t = Trainer(nets)
     n = 0

@@ -169,7 +169,7 @@ class StateNode(Node):
         self.mask = valid_actions_mask
         self.player = current_player
         value_pred, policy = mcts.nets.prediction.si(latent)
-        probs = policy.detach().numpy()
+        probs = policy.detach().cpu().numpy()
         if valid_actions_mask is not None:
             # Just in case you want to disable the mask:
             # The correct place to do so is the game implementation. It must then return
@@ -180,7 +180,7 @@ class StateNode(Node):
         super().__init__(
             latent=latent,
             reward=reward,
-            value_pred=value_pred.detach().numpy(),
+            value_pred=value_pred.detach().cpu().numpy(),
             probs=probs if policy_override is None else policy_override,
             mcts=mcts,
         )
@@ -192,10 +192,10 @@ class StateNode(Node):
         )
         turn_status = TurnStatus.from_index(cast(int, turn_onehot.argmax().item()))
         if turn_status is TurnStatus.TERMINAL_STATE:
-            return TerminalNode(latent, reward.detach().numpy(), self.mcts)
+            return TerminalNode(latent, reward.detach().cpu().numpy(), self.mcts)
         return StateNode(
             latent,
-            reward.detach().numpy(),
+            reward.detach().cpu().numpy(),
             turn_status,
             self.mcts,
         )
