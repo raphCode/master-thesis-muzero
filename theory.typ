@@ -1069,7 +1069,7 @@ overrule bad !as.
 The !nn $f_theta_i$ is trained on samples $(s, pi, z)$ drawn from the latest selfplay !gs.
 Random rotations and reflections of the input image to the !nn are used to provide data
 augmentation.
-Mean-squared error and cross-entropy is used to align the !net's !preds 
+Mean-squared error and cross-entropy is used to align the !net !preds 
 $(p, v) = f_theta_i (s)$ with the search !probs $pi$ and !g outcome $z$, respectively.
 Specifically, the !net is optimized using gradient descent on the loss !fn
 $ l = (z - v)^2 - pi "log" p + c norm(theta)^2 $
@@ -1172,7 +1172,7 @@ and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^
   caption: [!Mcts in !mz]
 ) <fig-muzero_mcts>
 
-!Ns are selected according to a a pUCT formula similar to @eq-uct_alphago.
+!Ns are selected according to a pUCT formula similar to @eq-uct_alphago.
 Specifically, in !s $s^k$, the child !n corresponding to the !a $a^k$ is selected
 $ a^k = limits("argmax")_(a in A) { Q(s, a) + P(s, a)
 frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a))
