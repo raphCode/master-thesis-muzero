@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import itertools
 from os import path
 from string import ascii_lowercase, ascii_uppercase
@@ -8,6 +9,7 @@ from pathlib import Path
 from functools import cache, cached_property
 from contextlib import suppress
 
+import attrs
 import numpy as np
 import imageio.v3 as iio
 
@@ -22,6 +24,33 @@ if TYPE_CHECKING:
     from .util import Pos, ndarr_f64, ndarr_int, ndarr_bool
 
 rng = np.random.default_rng()
+
+
+@attrs.frozen(kw_only=True)
+class StateSpaceComplexity:
+    """
+    State space complexity of a carchess map with contributions of individual components.
+    """
+
+    tl: int
+    car: int
+    spawn: int
+    rounds: int
+    total: int = 1
+
+    def __attrs_post_init__(self) -> None:
+        object.__setattr__(self, "total", math.prod(attrs.astuple(self)))
+
+    def __str__(self) -> str:
+        return "\n".join(
+            [
+                f"Traffic lights: {self.tl:.2g}",
+                f"Cars:           {self.car:.2g}",
+                f"Spawn counts:   {self.spawn:.2g}",
+                f"Rounds:         {self.rounds:.2g}",
+                f"Total:          {self.total:.2g}",
+            ]
+        )
 
 
 class Map:
@@ -101,7 +130,7 @@ class Map:
     @cache
     def spawn_count_observation(self, max_density: float = 1) -> ndarr_int:
         # plus one for zero count plane
-        max_spawn = int(self.max_lane_capacity * max_density) + 1
+        max_spawn = self.get_max_spawn_count(max_density)
         spawn_map = np.zeros([max_spawn, *self.size], dtype=int)
         for l in self.layers:
             count, mask = l.spawn_count_observation
@@ -120,6 +149,22 @@ class Map:
     @cached_property
     def size(self) -> tuple[int, int]:
         return cast(tuple[int, int], self.tl.lights.shape)
+
+    def get_max_spawn_count(self, max_density: float) -> int:
+        return int(self.max_lane_capacity * max_density) + 1
+
+    def estimate_state_space_complexity(
+        self, max_density: float, rounds: int
+    ) -> StateSpaceComplexity:
+        """
+        Approximate the number of possible observation states to gauge game complexity.
+        """
+        num_tl_states = 2 ** np.count_nonzero(self.tl.lights)
+        num_spawn_states = (1 + self.get_max_spawn_count(max_density)) ** len(self.layers)
+        num_car_states = 2 ** np.count_nonzero(self.lane_observation.sum(axis=0))
+        return StateSpaceComplexity(
+            tl=num_tl_states, car=num_car_states, spawn=num_spawn_states, rounds=rounds
+        )
 
     def tl_flat_action(self, flat_index: int) -> None:
         w, h = self.size

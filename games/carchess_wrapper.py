@@ -174,6 +174,11 @@ class CarchessGame(Game):
         self.reward_goal = float(reward_goal)
         self.reward_crash = float(reward_crash)
         self.map = Map(map_name)
+        log.info(
+            f"Initialized carchess game with map '{map_name}'\n"
+            "Estimated state space complexity:\n"
+            + str(self.map.estimate_state_space_complexity(self.max_density, self.rounds))
+        )
 
     def new_initial_state(self) -> GameState:
         self.map.reset(prepopulate=0)
