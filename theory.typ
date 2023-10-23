@@ -952,7 +952,7 @@ The bonus term $u(s, a)$ is initially proportional to the prior !prob but decays
 repeated visits to encourage exploration:
 #neq[
 $ u(s, a) = c P(s, a) frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a)) $
-<eq-uct_alphago>]
+<eq-alphago_uct>]
 The influence of the bonus can be adjusted with the constant $c$.
 
 The selection !sty maximizes over a probabilistic upper confidence tree @puct.
@@ -1172,7 +1172,7 @@ and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^
   caption: [!Mcts in !mz]
 ) <fig-muzero_mcts>
 
-!Ns are selected according to a pUCT formula similar to @eq-uct_alphago.
+!Ns are selected according to a pUCT formula similar to @eq-alphago_uct.
 Specifically, in !s $s^k$, the child !n corresponding to the !a $a^k$ is selected
 $ a^k = limits("argmax")_(a in A) { Q(s, a) + P(s, a)
 frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a))
