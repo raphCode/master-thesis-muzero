@@ -261,16 +261,9 @@ class Trainer:
                 step.value_target,
             )
 
-            def log_mean_grad(tag: str, grad: Tensor) -> None:
-                tbs.add_scalar(tag, grad.abs().mean())
-
             value_pes.add_data(
                 self.nets.prediction.value_scale(value_logits), step.value_target
             )
-
-            latent.register_hook(
-                functools.partial(log_mean_grad, f"latent gradient/unroll {n}")
-            )  # type: ignore [no-untyped-call]
 
             latent, reward_logits, turn_status_logits = self.nets.dynamics.raw_forward(
                 latent,
