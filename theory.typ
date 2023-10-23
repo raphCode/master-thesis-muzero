@@ -945,7 +945,9 @@ Each edge stores an !a !v $Q(s, a)$, the visit count $N(s, a)$ and a prior !prob
 derived from !preds from the #slnet.
 In each time step $t$ of the MCTS selection phase, the child !n corresponding to the !a
 $a_t$ is selected from the !s $s_t$
+#neq[
 $ a_t = limits("argmax")_a ( Q(s_t, a) + u(s_t, a)) $
+<eq-alphago_mcts_select>]
 to maximize the !a !v plus a bonus.
 
 The bonus term $u(s, a)$ is initially proportional to the prior !prob but decays with
@@ -1041,17 +1043,28 @@ The !agoz training pipeline performs these tasks in parallel:
 
 Specifically, selfplay with the !pl $alpha_theta_*$ is carried out in the following
 manner:
-At each !s $s$ of the !g, a !mcts with 1600 iterations is performed.
+At each !dp in the !g, a !mcts with 1600 iterations is performed.
 The MCTS executes like in !ago with $lambda = 0$, that is, without any rollouts.
-A !nn $f_theta_*$ guides the search process by !p !preds $p(a, s)$ and provides !v
-estimates $v(s)$, for details see @sec-alphago.
+A !nn $f_theta_*$ provides !p $p_s$ and !v $v_s$ !preds for each state $s$ in the search
+tree:
+$ (p_s, v_s) = f_theta_*(s) $
+where $p_s$ denotes a !prob distribution over !as: $p_s (a) = Pr(a|s)$.
+
+Like in !ago, the !p !preds $p$ serve as the tree !p and guide the search, as outlined in
+@eq-alphago_mcts_select and @eq-alphago_uct.
+The !v !preds $v$ are used to determine the !v of a leaf !n $s_L$ prior to MCTS
+backpropagation: $s_L = v_L$.
+
 An distinction to !ago is that the image of the Go board is randomly rotated or flipped
 before using it as the input for the !nn.
 This data augmentation step exploits symmetries of the !g of Go and aims to reduce !pred
 bias.
 
 The search outputs !probs $pi$ of playing each possible move, proportional to the visit
-counts of the root !n in the search tree, $pi(a|s) prop N(s, a)$.
+counts of the root !n $s$ in the search tree:
+$ pi(a|s) = frac(N(s, a), limits(sum)_(b in A) N(s, b)) $
+where $A$ is the set of !as.
+
 To ensure diverse !g openings, the first 30 moves are sampled from $pi$, so
 $a_t tilde.op pi_t$ for $t = 0, ..., 29$.
 The rest of the moves are selected according to the !a $a_t$ with the highest visit count
@@ -1061,7 +1074,7 @@ as $z$.
 
 Dirichlet noise is blended into the !p !preds $p$ of the root !n to encourage exploration,
 specifically the prior !probs $P(s, a)$ are calculated as
-$ P(s, a) = (1 - epsilon) p_a + epsilon eta_a $
+$ P(s, a) = (1 - epsilon) p_s (a) + epsilon eta_a $
 with $eta_a tilde.op "Dir"(0.03)$ and $epsilon = 0.25$.
 Adding exploration this way ensures all moves may be tried, but the search can still
 overrule bad !as.
