@@ -1074,7 +1074,9 @@ as $z$.
 
 Dirichlet noise is blended into the !p !preds $p$ of the root !n to encourage exploration,
 specifically the prior !probs $P(s, a)$ are calculated as
+#neq[
 $ P(s, a) = (1 - epsilon) p_s (a) + epsilon eta_a $
+<eq-dirichlet_exploration>]
 with $eta_a tilde.op "Dir"(0.03)$ and $epsilon = 0.25$.
 Adding exploration this way ensures all moves may be tried, but the search can still
 overrule bad !as.
@@ -1193,6 +1195,8 @@ frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a))
 where $A$ is the set of possible !as.
 $N(s, a)$ and $P(s, a)$ denote the visit count and prior !prob of the child !n
 corresponding to !a $a$, respectively.
+The prior !prob is a mixture of the !net !preds and Dirichlet noise as shown in
+@eq-dirichlet_exploration.
 
 The constants $c_1$<join-right> and $c_2$ are hyperparameters to control the influence of
 the !p $P(s, a)$ relative to the !v $Q(s, a)$ for higher visit counts.
