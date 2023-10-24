@@ -1077,7 +1077,7 @@ specifically the prior !probs $P(s, a)$ are calculated as
 #neq[
 $ P(s, a) = (1 - epsilon) p_s (a) + epsilon eta_a $
 <eq-dirichlet_exploration>]
-with $eta_a tilde.op "Dir"(0.03)$ and $epsilon = 0.25$.
+with $eta_a tilde.op "Dir"(alpha)$, $alpha = 0.03$ and $epsilon = 0.25$.
 Adding exploration this way ensures all moves may be tried, but the search can still
 overrule bad !as.
 
@@ -1122,6 +1122,13 @@ trains 8 times slower on the !g of Go than its precursor.
 new !net performs better than the current one.
 In contrast, !az only uses a single !net.
 It always uses the latest !net parameters for selfplay data generation.
+
+!az uses the same hyperparameters as !agoz, except for the number of MCTS simulations and
+the Dirichlet exploration noise.
+Specifically, !az employs only 800 MCTS simulations per move during selfplay, as opposed
+to 1600 simulations for !agoz.
+The Dirichlet noise (see @eq-dirichlet_exploration) is adjusted based on the !g:
+!az uses $alpha = {0.3, 0.15, 0.03}$ for chess, shogi and Go respectively.
 
 The publication shows that the !az training approach is feasable of generalization by
 evaluating it on Go, chess and shogi.
