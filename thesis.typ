@@ -85,6 +85,14 @@
   set par(
     justify: true,
   )
+  set figure(
+    gap: 1.5em,
+  )
+  show figure: fig => block(
+    fig,
+    width: 100%,
+    spacing: 2em,
+  )
   set heading(numbering: "I - A 1.1:")
   show heading.where(level: 1): hd => pagebreak(weak: true) + hd
 
