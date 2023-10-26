@@ -88,7 +88,8 @@ In a !2p !zsum !g, the behavior of the opponent !pl is easy to model:
 He will always try to minimize the score of the other !pl.
 This assumption does not hold for general-sum !gs with arbitrary payoffs.
 
-My extension of !mz to !mp !gs is inspired from the !mp !bi in !gt.
+My extension of !mz to !mp !gs is inspired from the !mp !bi in !gt, as introduced in
+@sec-bi_mp.
 My reasoning is that the subgame perfection of !bi solutions enables the RL !ag to learn a
 behavior that exhibits strong play, regardless of the !as of other !pls.
 Specifically, when the other !pls act optimally, the overall play should be close to the
