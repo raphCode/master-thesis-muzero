@@ -38,7 +38,7 @@ The computations used to update !n statistics are performed with elementwise vec
 operations.
 This updates each vector component independently.
 
-Naturally, the !mcts rotates over the !pls in turn order.
+Naturally, the !mcts rotates over the !pls in turn order, as given by the !g simulator.
 When selecting a !n's children, the !algo seeks to maximize component $v_i$ of the !v
 vector $arrow(v)$, where $i$ denotes the !pl currently at turn.
 This !algo is known as maxn search @mcts_survey and similar to the !mp !bi introduced
@@ -48,6 +48,12 @@ They evaluate their work on !mp versions of Connect 4 and !ttt:
 The !nets learn to encode knowledge of the !g into search, indicating that the proposed
 !mp strategy works in principle.
 Performance-wise the !algo places itself below human experts.
+
+In my !impl of !mz for !mp !envs, I also use maxn search, as outlined in @sec-mod_maxn.
+To obtain per-!pl individual utilities during the search, I also extend the !v and !r
+!preds to vectors, for details see @sec-mod_per_player_preds.
+The !pl currently at turn for a tree !n is predicted by the !nets, as discussed in
+@sec-mod_turn_pred.
 
 == !smz
 

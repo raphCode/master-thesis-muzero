@@ -103,6 +103,7 @@ I perform a number of changes to !mz.
 The updated training setup with all modifications is visualized in @fig-raphzero_training.
 
 === Per-!PL !Vs
+<sec-mod_per_player_preds>
 
 #[
 #let vector(x) = $arrow(#x) = [#x _1, #x _2, ..., #x _n] in RR^n$
@@ -164,6 +165,7 @@ $n = 1...K$, where $K$ is the unroll length.
 !dnet !preds, as well as the additional loss symbol $ell^w$.
 
 === maxn !MCTS
+<sec-mod_maxn>
 
 Following !mp !bi (@sec-bi_mp), the MCTS selection phase considers !n !vs for the !pl currently at turn
 only.
