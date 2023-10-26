@@ -91,15 +91,17 @@ class NetContainer(ABC, nn.Module):
 
             return list(map(example_tensor, self._input_shapes()))
 
+        inputs = {
+            "forward": example_inputs(),
+            "raw_forward": example_inputs(),
+        }
+        if not self.training:
+            inputs["si"] = example_inputs(unbatched=True)
         jit_mod = cast(
             torch.jit.TopLevelTracedModule,
             torch.jit.trace_module(  # type: ignore [no-untyped-call]
                 self,
-                dict(
-                    forward=example_inputs(),
-                    raw_forward=example_inputs(),
-                    si=example_inputs(unbatched=True),
-                ),
+                inputs,
             ),
         )
 
