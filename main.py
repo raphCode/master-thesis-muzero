@@ -69,9 +69,19 @@ def main(cfg: DictConfig) -> None:
 
     populate_config(cfg)
 
+    nets_selfplay = C.networks.factory()
     nets = C.networks.factory()
+    nets_selfplay.eval()
+    nets.train()
     if torch.cuda.is_available():
         nets.cuda()
+
+    for ps, p in zip(nets_selfplay.parameters(), nets.parameters()):
+        ps.data = p.data  # share underlying parameter tensors
+    # trace in eval and in training mode
+    nets_selfplay.jit()
+    nets.jit()
+
     rb = ReplayBuffer()
     t = Trainer(nets)
     n = 0
@@ -98,16 +108,15 @@ def main(cfg: DictConfig) -> None:
             tb.add_graphs(C.networks.factory())
             while True:
                 with torch.no_grad():
-                    nets.eval()
-                    result = run_episode(nets, tb.create_step_logger(n))
+                    result = run_episode(nets_selfplay, tb.create_step_logger(n))
                 n += result.moves
                 rb.add_trajectory(result.trajectory, result.game_completed)
                 nets.update_rescalers(rb)
+                nets_selfplay.update_rescalers(rb)
                 batch_samples = C.training.batch_size * C.training.unroll_length
                 target_samples = (
                     rb.data_added * C.training.train_selfplay_ratio * rb.fullness
                 )
-                nets.train()
                 while rb.data_sampled < target_samples - batch_samples:
                     t.process_batch(rb.sample(), tb.create_step_logger(n))
     except (KeyboardInterrupt, Exception) as e:
