@@ -129,7 +129,7 @@ This modification is reflected in @fig-raphzero_training by adding vector arrows
 $arrow(x)$ to !mp data.
 
 === Turn Order !Pred
-<sec-mod_turn>
+<sec-mod_turn_pred>
 
 Making informed decisions within the search tree requires not only individual !rs and !vs,
 but also an understanding who can make a decision at a particular !n.
@@ -172,7 +172,7 @@ $ arrow(Q)(s^n, a^n) = gamma arrow(v)^(n+1) + arrow(r)^(n+1) $
 Let $Q_i (s, a)$ denote the $i$<no-join>-th component of this vector.
 
 In !s $s^k$, maxn-MTCS then selects an !a $a^k$ as to maximize $Q_i (s^k, a^k)$ where $i =
-w^k$, the !pl currently at turn, as outlined in @sec-mod_turn:
+w^k$, the !pl currently at turn, as outlined in @sec-mod_turn_pred:
 $ a^k = limits("argmax")_a ( arrow(Q)_w_i (s, a) + u(s, a) ) $
 where $u(s, a)$ represents some bonus term to incorporate exploration and the prior !probs
 $P(s^k, a^k)$ into the decision.
