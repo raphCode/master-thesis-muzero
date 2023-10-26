@@ -42,6 +42,16 @@ Note that the subscript used to represent an !a that occurred between $s_t$ and 
 varies in different literature:
 Some associate this !a with time step $t$ @sutton, others with $t+1$ @muzero.
 In this thesis, I will follow the first convention given in #citet("sutton").
+This is visualized in @fig-rl_env_transition:
+
+#[
+#import "drawings/rl_env_transition.typ": rl_transition
+
+#figure(
+  rl_transition,
+  caption: [Transitions in an !rl !env]
+) <fig-rl_env_transition>
+]
 
 The concept of !seql decision making can be formalized with finite !mdps.
 Finite means the sets of possible !ss $S$, !as $A$ and !rs $R$ each have a finite number
