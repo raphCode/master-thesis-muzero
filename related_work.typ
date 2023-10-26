@@ -8,8 +8,8 @@ paper selbst lesen muss um die Ideen darin zu verstehen.
 
 #import "thesis.typ": citet
 
-!mz and its precursors already inspired several other works, some of which are summarized
-here.
+Below, I summarize some publications about !mz and its precursors, which are similar to
+the work in this thesis.
 
 == !Mp !az
 <sec-mp_azero>
