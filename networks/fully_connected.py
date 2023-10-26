@@ -38,8 +38,6 @@ class GenericFc(nn.Module):
             skip = x
             y = fc(x)  # type: Tensor
             x = F.relu(y)
-            if fc.in_features == fc.out_features:
-                x = x + skip  # skip connection / ResNet
         return y
 
 
