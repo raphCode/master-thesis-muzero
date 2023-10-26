@@ -72,8 +72,8 @@ class TensorCache:
         self.zeros = functools.cache(torch.zeros)
 
     @functools.cache
-    def onehot(self, index: int | torch.Tensor, num_classes: int) -> torch.LongTensor:
-        return cast(torch.LongTensor, F.one_hot(self.tensor(index), num_classes))
+    def onehot(self, index: int | torch.Tensor, num_classes: int) -> torch.Tensor:
+        return F.one_hot(self.tensor(index), num_classes).to(dtype=torch.float32)
 
 
 T = TypeVar("T")
