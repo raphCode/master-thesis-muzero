@@ -200,7 +200,9 @@ class DynamicsNetContainer(NetContainer):
         latent: Tensor,
         action_onehot: Tensor,
     ) -> tuple[Tensor, Tensor, Tensor]:
-        latent, reward_log, turn_status_log = self.net(latent, action_onehot)
+        latent, reward_log, turn_status_log = self.net(
+            latent, action_onehot.to(dtype=torch.float32)
+        )
         return (
             latent,
             self.reward_scale(reward_log),
