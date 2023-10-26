@@ -1251,7 +1251,7 @@ This is equivalent to the calculation of the discounted n-step !ret in !rl, see
 @eq-rl_nstep.
 
 #let s = $s^k$
-#let ac = $a^(k+1)$
+#let ac = $a^k$
 #let N = $N(#s, #ac)$
 #let Q = $Q(#s, #ac)$
 #let G = $G^(k+1)$
