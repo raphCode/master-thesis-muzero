@@ -129,7 +129,7 @@ In !smz, it is set to the maximum number of distinct chance outcomes in the !g o
 
 ]
 
-Stochastic MuZero matches the performance of !mz in deterministic !envs.
+!Smz matches the performance of !mz in deterministic !envs.
 It outperforms previous approaches in stochastic domains, such as the !g 2048 and
 backgammon.
 
