@@ -18,4 +18,5 @@ Sessionx.vim
 
 # hydra run output directory
 *outputs*/
-bisect/
+*bisect*/
+*multirun*/

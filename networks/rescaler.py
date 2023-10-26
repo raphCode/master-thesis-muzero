@@ -82,6 +82,8 @@ class Rescaler(RescalerPy, nn.Module):
         support logits -> actual value in [min, max] range
         Shapes: (B, S, V) -> (B, V)
         """
+        mini, maxi = self.support[[0, -1]]
+        return F.sigmoid(logits[:, 0, :]) * 1.3 * (maxi - mini) + mini
         return cast(
             Tensor,
             torch.tensordot(F.softmax(logits, dim=1), self.support, dims=([1], [0])),
@@ -95,8 +97,13 @@ class Rescaler(RescalerPy, nn.Module):
           target: (B, V)
           return: (B, V)
         """
-        n = len(self.support)
         mini, maxi = self.support[[0, -1]]
+        normalized_pred = F.sigmoid(logits[:, 0, :]) * 1.3
+        normalized_target = (target - mini) / (maxi - mini)
+        return F.mse_loss(
+            normalized_pred, normalized_target, reduction="none"
+        )#.exp() - 1
+        n = len(self.support)
         i = ((target - mini) / (maxi - mini) * (n - 1)).to(dtype=torch.int64)
         i = i.clamp(0, n - 2)
         low = self.support[i]

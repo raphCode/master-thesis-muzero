@@ -141,6 +141,7 @@ class TrainConfig:
     n_step_horizon: int
     replay_buffer_size: int
     max_steps_per_game: int
+    random_play_steps: int
     latent_dist_pnorm: float
     optimizer: OptimizerPartial
     learning_rates: LearningRates

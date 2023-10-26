@@ -14,10 +14,11 @@ from hydra.core.config_store import ConfigStore
 
 from train import Trainer
 from config import C
-from selfplay import run_episode
+from selfplay import run_episode,random_play
 from config.impl import (
     populate_config,
     copy_source_code,
+    patch_dictconfig,
     monkeypatch_dictconfig,
     register_omegaconf_resolvers,
 )
@@ -35,6 +36,7 @@ cs.store(name="base_config", node=BaseConfig)
 log = logging.getLogger("main")
 
 
+# @patch_dictconfig
 @hydra.main(version_base=None, config_path="run_config", config_name="base_config")
 def main(cfg: DictConfig) -> None:
     def ask_delete_logs() -> None:
@@ -107,8 +109,11 @@ def main(cfg: DictConfig) -> None:
             nets.jit()
             tb.add_graphs(C.networks.factory())
             while True:
-                with torch.no_grad():
-                    result = run_episode(nets_selfplay, tb.create_step_logger(n))
+                if n < C.training.random_play_steps:
+                    result = random_play(tb.create_step_logger(n))
+                else:
+                    with torch.no_grad():
+                        result = run_episode(nets_selfplay, tb.create_step_logger(n))
                 n += result.moves
                 rb.add_trajectory(result.trajectory, result.game_completed)
                 nets.update_rescalers(rb)
@@ -120,7 +125,7 @@ def main(cfg: DictConfig) -> None:
                     t.process_batch(rb.sample(), tb.create_step_logger(n))
     except (KeyboardInterrupt, Exception) as e:
         log.error(repr(e) + "\n" + traceback.format_exc())
-        if n < 30_000:
+        if n < 300_000:
             with suppress(AssertionError):
                 ask_delete_logs()
         raise

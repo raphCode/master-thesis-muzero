@@ -1,6 +1,7 @@
 import math
+from util import copy_type_signature
 import itertools
-from typing import Any, Optional, cast
+from typing import Any, Optional, cast, Callable
 from collections.abc import Sequence
 
 import torch
@@ -9,8 +10,10 @@ from torch import Tensor, nn
 
 from .bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
 
+from .util import ModuleFactory, NoOp
 
-class GenericFc(nn.Module):
+
+class FcImpl(nn.Module):
     """
     Generic fully connected network implementation.
     """
@@ -22,26 +25,43 @@ class GenericFc(nn.Module):
         *,
         hidden_depth: int = 2,
         width: Optional[int] = None,
+        raw_out: bool = True,
+        normalisation: Callable[..., nn.Module] = NoOp,
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
+        self.raw_out = raw_out
         if width is None:
             width = int(max(input_width, output_width) * 1.2)
         widths = [input_width] + [width] * hidden_depth + [output_width]
-        self.fc_layers = [nn.Linear(a, b) for a, b in itertools.pairwise(widths)]
-        for n, layer in enumerate(self.fc_layers):
-            self.add_module(f"fc{n}", layer)
+        fc_factory = ModuleFactory(self, nn.Linear, "fc")
+        self.fc_layers = [fc_factory(a, b) for a, b in itertools.pairwise(widths)]
+        norm_factory = ModuleFactory(self, normalisation, "norm")
+        self.norms = [norm_factory(b) for b in widths[1:]]
 
     def fc_forward(self, *inputs: Tensor) -> Tensor:
         x = torch.cat([i.flatten(1) for i in inputs], dim=1)
-        for fc in self.fc_layers:
+        last = self.fc_layers[-1]
+        for fc, norm in zip(self.fc_layers, self.norms):
             skip = x
-            y = fc(x)  # type: Tensor
-            x = F.relu(y)
-        return y
+            x = fc(x)
+            if fc is last and self.raw_out:
+                return x
+            x = norm(x)
+            x = F.relu(x)
+        return x
 
 
-class FcBase(GenericFc, NetBase):
+class GenericFc(FcImpl):
+    def forward(self, *inputs: Tensor) -> Tensor:
+        return self.fc_forward(*inputs)
+
+    @copy_type_signature(forward)
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return super().__call__(*args, **kwargs)
+
+
+class FcReshaperImpl(FcImpl):
     out_shapes: Sequence[Sequence[int]]
 
     def __init__(
@@ -74,24 +94,35 @@ class FcBase(GenericFc, NetBase):
         )
 
 
-class FcRepresentation(FcBase, RepresentationNet):
+class FcReshaper(FcReshaperImpl):
+    def forward(self, *inputs: Tensor) -> Tensor:
+        return self.reshape_forward(*inputs)
+
+    @copy_type_signature(forward)
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return super().__call__(*args, **kwargs)
+
+
+class FcRepresentation(FcReshaperImpl, RepresentationNet):
     def __init__(self, latent_features: int, **kwargs: Any):
         from config import C
 
         super().__init__(
             in_shapes=C.game.instance.observation_shapes,
             out_shapes=[[latent_features]],
+            raw_out=False,
             **kwargs,
         )
+        self.norm = nn.BatchNorm1d(latent_features)
 
     def forward(
         self,
         *observations: Tensor,
     ) -> Tensor:
-        return self.reshape_forward(*observations)[0]
+        return self.norm(self.reshape_forward(*observations)[0])
 
 
-class FcPrediction(FcBase, PredictionNet):
+class FcPrediction(FcReshaperImpl, PredictionNet):
     def __init__(self, **kwargs: Any):
         from config import C
 
@@ -113,7 +144,7 @@ class FcPrediction(FcBase, PredictionNet):
         )
 
 
-class FcDynamics(FcBase, DynamicsNet):
+class FcDynamics(FcReshaperImpl, DynamicsNet):
     def __init__(self, **kwargs: Any):
         from mcts import TurnStatus
         from config import C
@@ -130,13 +161,12 @@ class FcDynamics(FcBase, DynamicsNet):
             ],
             **kwargs,
         )
+        self.norm = nn.BatchNorm1d(C.networks.latent_shape[0])
 
     def forward(
         self,
         latent: Tensor,
         action_onehot: Tensor,
     ) -> tuple[Tensor, Tensor, Tensor]:
-        return cast(
-            tuple[Tensor, Tensor, Tensor],
-            self.reshape_forward(latent, action_onehot),
-        )
+        latent, reward, turn = self.reshape_forward(latent, action_onehot)
+        return self.norm(latent), reward, turn

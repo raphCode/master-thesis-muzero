@@ -4,7 +4,7 @@ import shutil
 import logging
 import subprocess
 from os import path
-from typing import Any, Optional, cast
+from typing import Any, Optional, cast, TypeVar, Callable
 
 import attrs
 import hydra
@@ -75,6 +75,14 @@ def monkeypatch_dictconfig() -> None:
         gorilla.Patch(DictConfig, "__init__", init_shim, gorilla.Settings(allow_hit=True))
     )
     original_init = gorilla.get_original_attribute(DictConfig, "__init__")
+import functools
+Fn = TypeVar("Fn", bound=Callable[..., Any])
+def patch_dictconfig(fn:Fn)->Fn:
+    @functools.wraps(fn)
+    def wrapper(*args:Any, **kwargs:Any)->Any:
+        monkeypatch_dictconfig()
+        return fn(*args, **kwargs)
+    return wrapper
 
 
 def register_omegaconf_resolvers() -> None:
