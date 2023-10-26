@@ -180,6 +180,7 @@ where $u(s, a)$ represents some bonus term to incorporate exploration and the pr
 $P(s^k, a^k)$ into the decision.
 
 === Chance Events
+<sec-mod_chance>
 
 I model stochastic !envs with an explicit chance !pl.
 He is at turn whenever a chance event occurs in the !g.

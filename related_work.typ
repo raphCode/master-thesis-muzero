@@ -135,6 +135,11 @@ backgammon.
 
 ]
 
+My !impl also handles stochastic !envs.
+Unlike !smz, I learn the occurence of chance events and their outcomes from ground-truth
+labels given by the !g simulator.
+For more details see @sec-mod_chance.
+
 == !effz
 <sec-effzero>
 
