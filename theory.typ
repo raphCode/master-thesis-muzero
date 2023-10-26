@@ -1328,10 +1328,6 @@ with $ell^p$<join-right> and $ell^v$ being loss !fns for !p and !v, respectively
 
 The parameters of the three !nns are updated jointly via backpropagation on the total loss
 $ell$, in an end-to-end manner.
-No other constraints are given on the !latreps, such as reconstructing the original !obs
-or matching the true !s of the !env.
-The !nets are free to learn any !repr that correctly estimates the !p and !v !fn, they can
-invent any dynamics helpful for accurate planning.
 
 ===== !Envs with Intermediate !Rs
 
