@@ -1083,8 +1083,9 @@ simulator: #masked_prior_from_pred(pred: a => $p_s (#a)$)
 
 Like in !ago, the !p !preds $p$ serve as the tree !p and guide the search, as outlined in
 @eq-alphago_mcts_select and @eq-alphago_uct.
-The !v !preds $v$ are used to determine the !v of a leaf !n $s_L$ prior to MCTS
-backpropagation: $s_L = v_L$.
+The !v !preds $v$ are used to determine the !v $z = v_L$ of a leaf !n $s_L$ prior to MCTS
+backpropagation, which is introduced in @sec-mcts_backprop.
+The !v !preds fully replace the MCTS simulation / rollout phase.
 
 An distinction to !ago is that the image of the Go board is randomly rotated or flipped
 before using it as the input for the !nn.
