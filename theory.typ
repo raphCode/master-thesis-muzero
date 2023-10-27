@@ -972,11 +972,18 @@ The selection !sty maximizes over a probabilistic upper confidence tree @puct.
 Such formulas (and variants) are therefore also referred to as "pUCT formulas".
 #cite("alphago", "muzero", "stochastic_muzero")
 
+#[
+#import "common.typ": masked_prior_from_pred
+
 The MCTS selection phase traverses the tree as usual, until time step $L$, where it
 reaches a leaf !n that may be expanded (if it is not a !ts).
 During expansion, the new !n corresponding to !s $s_L$ is processed by the #slnet to yield
-the prior !probs
-$ P(s_L, a) = #sl (a|s_L) $
+the prior !probs $P(s_L, a)$:
+#masked_prior_from_pred(pred: a => $sl (#a|s_L)$, state: $s_L$)
+where $A(s_L)$ denotes the set of legal !as in !s $s_L$, as given by the !g simulator.
+The prior for illegal !as is masked to zero, and the remaining !probs are rescaled to sum
+to one: $sum_(b in A(s_L)) P(s_L, a) = 1$.
+]
 
 During the MCTS simulation phase, the new !n is evaluated using a combination of !mc
 rollouts and the #vnet.
