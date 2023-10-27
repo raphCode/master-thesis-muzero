@@ -1,6 +1,7 @@
 venv*/
 
 *.pdf
+*.djvu
 *.toc
 
 ### Vim ###
