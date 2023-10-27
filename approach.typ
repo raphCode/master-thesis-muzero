@@ -245,7 +245,7 @@ Furthermore, I implemented the following modifications:
 === Symmetric Latent Similarity Loss
 
 As outlined in @sec-effzero, #citet("effzero") already layed the groundwork for
-improvements in !sampeff by introducing a similarity loss between !preds of #rep and dyn.
+improvements in !sampeff by introducing a similarity loss between !preds of #rep and #dyn.
 However, I thank that their adoption of the stop-gradient operation from !simsiam @simsiam
 may have been short-sighted:
 
