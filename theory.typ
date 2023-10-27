@@ -1035,24 +1035,31 @@ also improving the playing strength.
 
 The main changes over !ago are:
 
-*Training*\
-Most importantly, !agoz is trained solely by !rl and selfplay.
-!agoz uses MCTS for all the selfplay during training.
-This contrasts with !ago, which uses human data and supervised learning, as well as
-selfplay without any search.
-
-*!Mcts*\
-The search in !agoz works the same way as in !ago, but does not use any rollouts during
-the MCTS.
-!agoz solely relies on the !net !v !preds to assign !vs in the search tree.
+#[
+#import "drawings/alphago.typ": sl, rl, v, roll
 
 *!Net !arch*\
 !agoz only uses a single CNN $f_theta$ with two output heads, predicting !p $p$ and !v $v$
 together: $(p, v) = f_theta (s)$.
-The input to this unified !net are images only consisting of the Go stone positions, no
-extra feature planes are added.
-Contrastingly, !ago uses two separate !nns for !p and !v, and the !net input contains
-hand-crafted features.
+The input to this unified !net are images consisting of the Go stone positions, no extra
+feature planes are added.
+
+Contrastingly, the equivalent to $f_theta$ in !ago are the two separate !nns #sl and #v.
+Also, input images to !ago's !nns contain hand-crafted features.
+The !nets #roll and #rl and their training procedures are dropped in !agoz.
+
+*!Mcts*\
+The MCTS in !agoz works the same way as in !ago, but does not use any rollouts.
+!agoz solely relies on the !net !v !preds to assign !vs in the search tree.
+!agoz does not contain a rollout !p !net like #roll in !ago.
+
+*Training*\
+Most importantly, !agoz is trained solely by !rl and selfplay.
+!agoz uses MCTS for all the selfplay during training.
+
+This contrasts with !ago, which uses human data and supervised learning, as well as
+selfplay without any search.
+]
 
 The !agoz training pipeline performs these tasks in parallel:
 - optimizing the !nn's parameters $theta_i$ from recent selfplay data
