@@ -1,0 +1,23 @@
+representation:
+    _target_: networks.convolutional.ConvRepresentation
+    filters: 32
+    depth: 3
+    latent_features: 32
+    fc_head_args:
+        hidden_depth: 0
+        normalisation:
+            _target_: torch.nn.BatchNorm1d
+            _partial_: true
+prediction:
+    _target_: networks.fully_connected.FcPrediction
+    hidden_depth: 5
+    normalisation:
+        _target_: torch.nn.BatchNorm1d
+        _partial_: true
+dynamics:
+    _target_: networks.fully_connected.FcDynamics
+    hidden_depth: 5
+    normalisation:
+        _target_: torch.nn.BatchNorm1d
+        _partial_: true
+scalar_support_size: 11

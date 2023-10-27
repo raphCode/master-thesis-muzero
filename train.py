@@ -1,4 +1,5 @@
 from __future__ import annotations
+import operator
 
 import math
 import logging
@@ -84,17 +85,13 @@ class LossCounts:
         return Losses(**values)
 
 
-class PredictionErrorStats:
-    def __init__(self) -> None:
-        self.num_data = 0
-        self.max_ae = 0.0
-        self.mse_sum = 0.0
 
-    def add_data(self, pred: Tensor, target: Tensor) -> None:
+class PredictionErrorStats:
+    def __init__(self, pred: Tensor, target: Tensor) -> None:
         ae = torch.abs(pred.detach() - target).flatten()
-        self.max_ae = max(self.max_ae, cast(float, ae.max().item()))
-        self.mse_sum += (ae**2).sum().item()
-        self.num_data += ae.numel()
+        self.max_ae =  cast(float, ae.max().item())
+        self.mse_sum = (ae**2).sum().item()
+        self.num_data = ae.numel()
 
     @property
     def mse(self) -> float:
@@ -102,16 +99,10 @@ class PredictionErrorStats:
             return 0
         return self.mse_sum / self.num_data
 
-    def log_tb(self, tag: str, tbs: TBStepLogger) -> None:
-        tbs.add_scalar(f"prediction error/{tag} mse", self.mse)
-        tbs.add_scalar(f"prediction error/{tag} max absolute error", self.max_ae)
+    def log_tb(self, fmt_tag: str, tbs: TBStepLogger) -> None:
+        tbs.add_scalar(fmt_tag.format("mse"), self.mse)
+        tbs.add_scalar(fmt_tag.format("max abs error"), self.max_ae)
 
-    def __add__(self, other: PredictionErrorStats) -> PredictionErrorStats:
-        result = PredictionErrorStats()
-        result.num_data = self.num_data + other.num_data
-        result.mse_sum = self.mse_sum + other.mse_sum
-        result.max_ae = max(self.max_ae, other.max_ae)
-        return result
 
 
 class SLAW:
@@ -219,8 +210,8 @@ class Trainer:
         pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
 
-        value_pes = PredictionErrorStats()
-        reward_pes = PredictionErrorStats()
+        value_pes = []
+        reward_pes = []
         step_losses = []
         counts = LossCounts()
 
@@ -263,9 +254,9 @@ class Trainer:
                 step.value_target,
             )
 
-            value_pes.add_data(
+            value_pes.append(PredictionErrorStats(
                 self.nets.prediction.value_scale(value_logits), step.value_target
-            )
+  )          )
 
             latent, reward_logits, turn_status_logits = self.nets.dynamics.raw_forward(
                 latent,
@@ -278,9 +269,11 @@ class Trainer:
                 step.reward,
             )
 
-            reward_pes.add_data(
+            reward_pes.append(PredictionErrorStats(
                 self.nets.dynamics.reward_scale(reward_logits), step.reward
-            )
+ )           )
+            value_pes[-1].log_tb(f"value {{}}/unroll {n}", tbs)
+            reward_pes[-1].log_tb(f"reward {{}}/unroll {n}", tbs)
 
             for k, l in attrs.asdict(loss).items():
                 if k == "latent":
@@ -294,9 +287,6 @@ class Trainer:
         weights = self.slaw.weights
 
         total_loss = loss.weighted_sum(weights)
-
-        value_pes.log_tb("value", tbs)
-        reward_pes.log_tb("reward", tbs)
 
         for k, l in attrs.asdict(loss).items():
             tbs.add_scalar(f"loss/{k}", l)

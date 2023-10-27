@@ -1,11 +1,16 @@
 node_action_fn:
-    _target_: fn.action.DrawFromPolicyFn
-    policy_fn: ${..node_target_policy_fn}
+    _target_: fn.action.UseSelectionFn
+    selection_fn: ${fn:fn.selection.highest_value}
 node_target_policy_fn:
-    _target_: fn.policy.HandlePlayerNodes
-    policy_fn:
-        _target_: fn.policy.FromExpandedValues
-        softmax_temp: 0.3
-node_selection_score_fn: ${fn:fn.selection.sample_from_prior}
+    _target_: fn.policy.FromExpandedValues
+    softmax_temp: 0.3
+node_selection_score_fn:
+    _target_: fn.selection.SwitchOnNodeType
+    normal_selection_fn:
+        _target_: fn.selection.RotateSelectionFns
+        selection_fns:
+            - ${fn:fn.selection.sample_from_prior}
+            - ${fn:fn.selection.lowest_visit_count}
+            - ${fn:fn.selection.highest_value}
 iterations: 10
-debug_log_mcts_ratio: 0.01
+debug_log_mcts_ratio: 0.02

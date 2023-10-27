@@ -104,6 +104,10 @@ def main(cfg: DictConfig) -> None:
                 | unroll_multiline_layout(  # type: ignore [operator]
                     "latent gradient",
                     "latent cosine similarity",
+                    "value mse",
+                    "reward mse",
+                    "value max abs error",
+                    "reward max abs error",
                 ),
             )
             nets.jit()

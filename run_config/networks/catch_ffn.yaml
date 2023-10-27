@@ -1,0 +1,20 @@
+representation:
+    _target_: networks.fully_connected.FcRepresentation
+    hidden_depth: 1
+    latent_features: 50
+    normalisation:
+        _target_: torch.nn.BatchNorm1d
+        _partial_: true
+prediction:
+    _target_: networks.fully_connected.FcPrediction
+    hidden_depth: 2
+    normalisation:
+        _target_: torch.nn.BatchNorm1d
+        _partial_: true
+dynamics:
+    _target_: networks.fully_connected.FcDynamics
+    hidden_depth: 2
+    normalisation:
+        _target_: torch.nn.BatchNorm1d
+        _partial_: true
+scalar_support_size: 11

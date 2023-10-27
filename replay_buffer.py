@@ -106,6 +106,7 @@ class ReplayBuffer:
         Return a training batch composed of random subsections of the stored trajectories.
         See the docs for TrainingData for an ascii art visualisation of the returned data.
         """
+        unroll_len = random.randrange(1, C.training.unroll_length+ 1)
         # Select random start indices in the buffer for the trajectory subsections.
         # A subsection is only accepted when when the remaining trajectory has the the
         # required minimum length.
@@ -115,7 +116,7 @@ class ReplayBuffer:
         for _ in range(retry_limit * C.training.batch_size):
             start_index = random.randrange(len(self.buffer))
             traj_id, traj = self.buffer[start_index]
-            unroll_len_id, _ = self.buffer[start_index + C.training.unroll_length - 1]
+            unroll_len_id, _ = self.buffer[start_index + unroll_len - 1]
             if traj.is_observation and traj_id == unroll_len_id:
                 sampled_starts.add(start_index)
             if len(sampled_starts) == C.training.batch_size:
@@ -127,13 +128,13 @@ class ReplayBuffer:
 
         # Walk forward in the buffer from the start indices, collecting trajectory states
         batch = []
-        for n in range(C.training.unroll_length):
+        for n in range(unroll_len):
             batch_step = []
             for start_index in sorted(sampled_starts):
                 _, data = self.buffer[start_index + n]
                 batch_step.append(data)
             batch.append(TrainingData.stack_batch(batch_step))
-        self.data_sampled += len(sampled_starts) * C.training.unroll_length
+        self.data_sampled += len(sampled_starts)
         return batch
 
     @property

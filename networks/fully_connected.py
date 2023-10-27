@@ -32,7 +32,7 @@ class FcImpl(nn.Module):
         super().__init__(**kwargs)
         self.raw_out = raw_out
         if width is None:
-            width = int(max(input_width, output_width) * 1.2)
+            width = int(min(input_width, output_width))
         widths = [input_width] + [width] * hidden_depth + [output_width]
         fc_factory = ModuleFactory(self, nn.Linear, "fc")
         self.fc_layers = [fc_factory(a, b) for a, b in itertools.pairwise(widths)]
@@ -41,7 +41,7 @@ class FcImpl(nn.Module):
 
     def fc_forward(self, *inputs: Tensor) -> Tensor:
         x = torch.cat([i.flatten(1) for i in inputs], dim=1)
-        last = self.fc_layers[-1]
+        *_, last = self.fc_layers
         for fc, norm in zip(self.fc_layers, self.norms):
             skip = x
             x = fc(x)
@@ -49,6 +49,8 @@ class FcImpl(nn.Module):
                 return x
             x = norm(x)
             x = F.relu(x)
+            if fc.in_features == fc.out_features:
+                x = x + skip  # skip connection / ResNet
         return x
 
 

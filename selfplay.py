@@ -104,6 +104,12 @@ def random_play(tbs: TBStepLogger) -> SelfplayResult:
         action_mask = state.valid_actions_mask
         valid_actions = np.flatnonzero(action_mask)
         action = valid_actions[rng.integers(valid_actions.size)]
+        if not action_mask[action]:
+            log.debug("BOOM")
+            log.debug(action_mask)
+            log.debug(valid_actions)
+            log.debug(action)
+
         ac.commit(
             action,
             obs=state.observation,

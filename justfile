@@ -8,7 +8,7 @@ clear-screen:
     clear
 
 train-catch *params: clear-screen
-    {{train_cmd}} training=catch networks=catch game=os_catch {{params}}
+    {{train_cmd}} training=catch networks=catch_cnn game=os_catch {{params}}
 
 debug-catch *params: && clear-screen
     {{debug_cmd}} training=catch networks=catch game=os_catch {{params}}
