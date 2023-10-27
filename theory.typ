@@ -1068,6 +1068,12 @@ tree:
 $ (p_s, v_s) = f_theta_*(s) $
 where $p_s$ denotes a !prob distribution over !as: $p_s (a) = Pr(a|s)$.
 
+#[
+#import "common.typ": masked_prior_from_pred
+Like in !ago, the !p !preds are masked with the set of legal !as $A(s)$ from the
+simulator: #masked_prior_from_pred(pred: a => $p_s (#a)$)
+]
+
 Like in !ago, the !p !preds $p$ serve as the tree !p and guide the search, as outlined in
 @eq-alphago_mcts_select and @eq-alphago_uct.
 The !v !preds $v$ are used to determine the !v of a leaf !n $s_L$ prior to MCTS
@@ -1090,10 +1096,10 @@ $a_t = limits("argmax")_a ( N(s_t, a) )$.
 !Gs are played until an terminal condition is reached, and the outcome of the !g is scored
 as $z$.
 
-Dirichlet noise is blended into the !p !preds $p$ of the root !n to encourage exploration,
-specifically the prior !probs $P(s, a)$ are calculated as
+Dirichlet noise is blended into the prior !probs $P'(r, a)$ of the root !n $r$ to
+encourage exploration:
 #neq[
-$ P(s, a) = (1 - epsilon) p_s (a) + epsilon eta_a $
+$ P'(r, a) = (1 - epsilon) P(r, a) + epsilon eta_a $
 <eq-dirichlet_exploration>]
 with $eta_a tilde.op "Dir"(alpha)$, $alpha = 0.03$ and $epsilon = 0.25$.
 Adding exploration this way ensures all moves may be tried, but the search can still
