@@ -33,3 +33,10 @@ class DrawFromPolicyFn:
     def __call__(self, node: Node) -> int:
         probs = self.policy_fn(node)
         return rng.choice(len(probs), p=probs)
+
+
+def highest_visit_count(node: Node) -> int:
+    return max(node.children.keys(), key=lambda a: node.children[a].visit_count)
+
+
+assert_fn_type(highest_visit_count)
