@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 import numpy as np
 
-from mcts import Node, StateNode, TurnStatus
+from mcts import Node, StateNode, TurnStatus, TerminalNode
 from config import C
 
 from .util import argmax, map_actions_callback
@@ -79,25 +79,28 @@ def sample_from_prior(node: Node) -> int:
 assert_fn_type(sample_from_prior)
 
 
-class SwitchOnChanceNodes:
+class SwitchOnNodeType:
     """
-    Switches between two selection fns depending on the StateNode being a chance event.
-    Effectively makes other selection fns compatible with chance nodes.
-    Node types other than StateNode are handled with the normal function.
+    Switches between selection fns depending on the node (chance / terminal / player)
+    Effectively makes other selection fns compatible with chance and terminal nodes.
     """
 
     def __init__(
         self,
         normal_selection_fn: SelectionFn,
         chance_selection_fn: SelectionFn = from_prior_deterministic,
+        terminal_selection_fn: SelectionFn = from_prior_deterministic,
     ):
         self.normal_fn = normal_selection_fn
         self.chance_fn = chance_selection_fn
+        self.terminal_fn = terminal_selection_fn
 
     def __call__(self, node: Node) -> int:
+        if isinstance(node, TerminalNode):
+            return self.terminal_fn(node)
         if isinstance(node, StateNode) and node.player is TurnStatus.CHANCE_PLAYER:
             return self.chance_fn(node)
         return self.normal_fn(node)
 
 
-assert_fn_type(SwitchOnChanceNodes(from_prior_deterministic))
+assert_fn_type(SwitchOnNodeType(from_prior_deterministic))
