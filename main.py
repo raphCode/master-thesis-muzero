@@ -14,7 +14,7 @@ from hydra.core.config_store import ConfigStore
 
 from train import Trainer
 from config import C
-from selfplay import run_episode
+from selfplay import random_play, run_episode
 from config.impl import (
     populate_config,
     copy_source_code,
@@ -107,8 +107,11 @@ def main(cfg: DictConfig) -> None:
             nets.jit()
             tb.add_graphs(C.networks.factory())
             while True:
-                with torch.no_grad():
-                    result = run_episode(nets_selfplay, tb.create_step_logger(n))
+                if n < C.training.random_play_steps:
+                    result = random_play(tb.create_step_logger(n))
+                else:
+                    with torch.no_grad():
+                        result = run_episode(nets_selfplay, tb.create_step_logger(n))
                 n += result.moves
                 rb.add_trajectory(result.trajectory, result.game_completed)
                 nets.update_rescalers(rb)

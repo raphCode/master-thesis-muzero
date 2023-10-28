@@ -4,6 +4,7 @@ unroll_length: 3
 discount_factor: 0.99
 n_step_horizon: ${.max_steps_per_game}
 replay_buffer_size: 50_000
+random_play_steps: 50_000
 max_steps_per_game: 1000
 latent_dist_pnorm: 1
 optimizer:

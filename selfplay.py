@@ -81,6 +81,47 @@ class ActionComitter:
             )
         )
 
+
+def random_play(tbs: TBStepLogger) -> SelfplayResult:
+    state = C.game.instance.new_initial_state()
+    ac = ActionComitter(state)
+
+    for n_step in range(C.training.max_steps_per_game):
+        if state.is_terminal:
+            n_step -= 1
+            break
+
+        if state.is_chance:
+            chance_outcomes = state.chance_outcomes
+            action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
+            ac.commit(
+                action,
+                obs=None,
+                target_policy=chance_outcomes,
+            )
+            continue
+
+        action_mask = state.valid_actions_mask
+        valid_actions = np.flatnonzero(action_mask)
+        action = valid_actions[rng.integers(valid_actions.size)]
+        ac.commit(
+            action,
+            obs=state.observation,
+            target_policy=action_mask / action_mask.sum(),
+        )
+
+    tbs.add_scalar("selfplay/game length", n_step)
+    trunc_msg = " (truncated)" * (not state.is_terminal)
+    log.info(
+        f"Finished random play game: {n_step + 1} steps{trunc_msg}, scores: "
+        + " ".join(f"{s:.2f}" for s in ac.scores)
+    )
+    for n, score in enumerate(ac.scores):
+        tbs.add_scalar(f"selfplay/score{n:02d}", score)
+
+    return SelfplayResult(n_step, state.is_terminal, ac.traj)
+
+
 def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
     need_chance_values = C.training.n_step_horizon < C.training.max_steps_per_game
     debug_game = random.random() < C.mcts.debug_log_mcts_ratio
