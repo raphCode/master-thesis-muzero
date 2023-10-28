@@ -194,7 +194,7 @@ The authors employ a stop-gradient operation on the side of $s_(t+n)^0$, meaning
 gradients from the similarity loss are not applied to the !rnet #rep.
 This is due to the fact that they closely modeled their !arch after !simsiam @simsiam, a
 self-supervised framework that learns !latreps for images.
-The authors further justify this decision by treating $s_t^n$ as the more accurate
+The authors further justify this decision by treating $s_(t+n)^0$ as the more accurate
 representation and therefore using it as a target for the !dnet's !preds.
 In @fig-effzero_loss, the stop-gradient is reflected by the unidirectionality $ell^l$
 arrow.
