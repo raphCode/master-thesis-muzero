@@ -42,11 +42,15 @@ class pUCTscore:
             )
             return float(value_score.clip(0, 1)) + prior_score
 
-        return argmax(
+        uct_scores = np.fromiter(
             map_actions_callback(
                 node, child_score, lambda prior: prior * prior_scale_half
-            )
+            ),
+            dtype=np.float64,
         )
+        if node.mask is not None:
+            uct_scores[~node.mask] = float("-inf")
+        return argmax(uct_scores)
 
 
 assert_fn_type(pUCTscore())
