@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 import attrs
 import numpy as np
 import torch
+import torch.nn.functional as F
 from attrs import Factory, define
 from toolz import dicttoolz  # type: ignore
 from torch import Tensor, nn
@@ -215,7 +216,6 @@ class Trainer:
             loss = criterion(prediction, target)
             return loss.view(loss.shape[0], -1).mean(dim=1).sum()
 
-        pdist = nn.PairwiseDistance(p=C.training.latent_dist_pnorm)
         cross = nn.CrossEntropyLoss(reduction="none")
 
         value_pes = PredictionErrorStats()
@@ -238,11 +238,10 @@ class Trainer:
                     latent = obs_latent
                 else:
                     mask = step.is_observation
-                    loss.latent = ml(
-                        pdist,
+                    loss.latent = -F.cosine_similarity(
                         latent[mask].flatten(start_dim=1),
                         obs_latent[mask].flatten(start_dim=1),
-                    )
+                    ).sum()
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
 
             value_logits, policy_logits = self.nets.prediction.raw_forward(
