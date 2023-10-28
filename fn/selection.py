@@ -28,7 +28,7 @@ class pUCTscore:
         assert isinstance(node, StateNode)
         assert node.player is not TurnStatus.CHANCE_PLAYER
         prior_scale_half = (
-            math.log(self.c1 + (node.visit_count + self.c2 + 1) / self.c2)
+            self.c1 + math.log((node.visit_count + self.c2 + 1) / self.c2)
         ) * math.sqrt(node.visit_count)
 
         def child_score(prior: float, child: Node) -> float:
@@ -40,7 +40,7 @@ class pUCTscore:
                 child.normalized_reward[node.player]
                 + child.normalized_value[node.player] * C.training.discount_factor
             )
-            return float(value_score) + prior_score
+            return float(value_score.clip(0, 1)) + prior_score
 
         return argmax(
             map_actions_callback(
