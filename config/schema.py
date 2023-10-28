@@ -90,6 +90,8 @@ class MctsConfig:
     node_action_fn: ActionFn
     node_target_policy_fn: PolicyFn
     node_selection_score_fn: SelectionFn
+    dirichlet_noise_blend: float
+    dirichlet_noise_alpha: float
     iterations: int
     debug_log_mcts_ratio: float
 

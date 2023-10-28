@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
+rng = np.random.default_rng()
+
 
 class TurnStatus(Enum):
     CHANCE_PLAYER = 0  # the chance player is at turn
@@ -296,6 +298,15 @@ class MCTS:
             valid_actions_mask=valid_actions_mask,
             policy_override=policy_override,
         )
+        blend = self.cfg.dirichlet_noise_blend
+        if blend > 0:
+            if self.root.mask is not None:
+                mask = self.root.mask
+            else:
+                mask = np.ones_like(self.root.probs)
+            alpha = self.cfg.dirichlet_noise_alpha * mask
+            noise = rng.dirichlet(alpha)
+            self.root.probs = self.root.probs * (1 - blend) + noise * blend
 
     def ensure_visit_count(self, count: int) -> None:
         """
