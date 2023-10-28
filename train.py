@@ -238,9 +238,13 @@ class Trainer:
                     latent = obs_latent
                 else:
                     mask = step.is_observation
+                    if C.training.latent_loss_detach:
+                        target_latent = obs_latent.detach()
+                    else:
+                        target_latent = obs_latent
                     loss.latent = -F.cosine_similarity(
                         latent[mask].flatten(start_dim=1),
-                        obs_latent[mask].flatten(start_dim=1),
+                        target_latent[mask].flatten(start_dim=1),
                     ).sum()
                     counts.latent += cast(int, step.is_observation.count_nonzero().item())
 

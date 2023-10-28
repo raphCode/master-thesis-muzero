@@ -7,6 +7,7 @@ replay_buffer_size: 10_000
 random_play_steps: 10_000
 max_steps_per_game: 1000
 max_total_steps: 100_000
+latent_loss_detach: false
 optimizer:
     _target_: torch.optim.Adam
 learning_rates:

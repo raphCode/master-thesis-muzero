@@ -145,6 +145,7 @@ class TrainConfig:
     max_steps_per_game: int
     max_total_steps: int
     random_play_steps: int
+    latent_loss_detach: bool
     optimizer: OptimizerPartial
     learning_rates: LearningRates
     loss_weights: LossWeights
