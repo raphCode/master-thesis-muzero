@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
     from util import ndarr_f32
     from networks import Networks
+    from games.bases import GameState
     from tensorboard_wrapper import TBStepLogger
 
 rng = np.random.default_rng()
@@ -31,55 +32,61 @@ class SelfplayResult:
     trajectory: list[TrajectoryState]
 
 
-def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
-    need_chance_values = C.training.n_step_horizon < C.training.max_steps_per_game
-    debug_game = random.random() < C.mcts.debug_log_mcts_ratio
-    state = C.game.instance.new_initial_state()
-    traj = []
-    n_players = C.game.instance.max_num_players
-    scores = np.zeros(n_players)
-    mcts = MCTS(nets, C.mcts)
-    seen_obs = False
+class ActionComitter:
+    def __init__(self, state: GameState, debug: bool = False):
+        self.state = state
+        self.scores = np.zeros(C.game.instance.max_num_players)
+        self.zero_values = np.zeros(C.game.instance.max_num_players, dtype=np.float32)
+        self.seen_obs = False
+        self.traj: list[TrajectoryState] = []
+        self.debug = debug
 
-    def commit_step(
+    def commit(
+        self,
         action: int,
         *,
         obs: Optional[tuple[torch.Tensor, ...]],
         target_policy: ndarr_f32,
         mcts_value: Optional[ndarr_f32] = None,
     ) -> None:
-        if debug_game:
+        if self.debug:
             log.debug(">" * 5 + f" action: {action}")
 
-        state.apply_action(action)
+        self.state.apply_action(action)
 
         def get_turn_status() -> int:
-            if state.is_terminal:
+            if self.state.is_terminal:
                 return TurnStatus.TERMINAL_STATE.target_index
-            if state.is_chance:
+            if self.state.is_chance:
                 return TurnStatus.CHANCE_PLAYER.target_index
-            return state.current_player_id
+            return self.state.current_player_id
 
-        nonlocal scores
-        rewards = state.rewards
-        scores += rewards
+        rewards = self.state.rewards
+        self.scores += rewards
 
-        if not seen_obs:
+        if obs is not None:
+            self.seen_obs = True
+        if not self.seen_obs:
             # no point in recording a trajectory before the first observation
             return
 
-        traj.append(
+        self.traj.append(
             TrajectoryState(
                 observations=obs,
                 turn_status=get_turn_status(),
                 action=action,
                 target_policy=target_policy,
-                mcts_value=mcts_value
-                if mcts_value is not None
-                else np.zeros(n_players, dtype=np.float32),
+                mcts_value=mcts_value if mcts_value is not None else self.zero_values,
                 reward=rewards,
             )
         )
+
+def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
+    need_chance_values = C.training.n_step_horizon < C.training.max_steps_per_game
+    debug_game = random.random() < C.mcts.debug_log_mcts_ratio
+    state = C.game.instance.new_initial_state()
+    mcts = MCTS(nets, C.mcts)
+    ac = ActionComitter(state, debug=debug_game)
 
     def update_mcts(
         latent: torch.Tensor,
@@ -117,10 +124,10 @@ def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
         if state.is_chance:
             chance_outcomes = state.chance_outcomes
             action = rng.choice(C.game.instance.max_num_actions, p=chance_outcomes)
-            if state.is_chance and need_chance_values and seen_obs:
+            if state.is_chance and need_chance_values and ac.seen_obs:
                 update_mcts(mcts.get_latent_at(action), chance_outcomes)
                 n_mcts_chance += 1
-            commit_step(
+            ac.commit(
                 action,
                 obs=None,
                 target_policy=chance_outcomes,
@@ -128,19 +135,18 @@ def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
             )
             continue
 
-        seen_obs = True
         obs = state.observation
         latent = nets.representation.si(*obs)
         update_mcts(latent)
         action = mcts.get_action()
-        commit_step(
+        ac.commit(
             action,
             obs=obs,
             target_policy=mcts.get_policy(),
             mcts_value=mcts.root.value,
         )
 
-    if need_chance_values and len(traj) < C.training.n_step_horizon:
+    if need_chance_values and len(ac.traj) < C.training.n_step_horizon:
         # When the game trajectory is shorter than the n-step horizon, the MCTS values for
         # intermediate chance values will never be used.
         # Consider adjusting the n-step horizon either lower (to make use of the values)
@@ -154,9 +160,9 @@ def run_episode(nets: Networks, tbs: TBStepLogger) -> SelfplayResult:
     trunc_msg = " (truncated)" * (not state.is_terminal)
     log.info(
         f"Finished selfplay game: {n_step + 1} steps{trunc_msg}, scores: "
-        + " ".join(f"{s:.2f}" for s in scores)
+        + " ".join(f"{s:.2f}" for s in ac.scores)
     )
-    for n, score in enumerate(scores):
+    for n, score in enumerate(ac.scores):
         tbs.add_scalar(f"selfplay/score{n:02d}", score)
 
-    return SelfplayResult(n_step, state.is_terminal, traj)
+    return SelfplayResult(n_step, state.is_terminal, ac.traj)
