@@ -106,7 +106,7 @@ def main(cfg: DictConfig) -> None:
             )
             nets.jit()
             tb.add_graphs(C.networks.factory())
-            while True:
+            while n < C.training.max_total_steps or C.training.max_total_steps < 0:
                 if n < C.training.random_play_steps:
                     result = random_play(tb.create_step_logger(n))
                 else:
