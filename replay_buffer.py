@@ -92,7 +92,6 @@ class ReplayBuffer:
                     TrainingData.from_trajectory_state(
                         traj_state,
                         value_target,
-                        is_terminal=(game_completed and t == len(traj) - 1),
                         cache=self.cache,
                     ),
                 )

@@ -81,7 +81,6 @@ class TrainingData:
         cls,
         ts: TrajectoryState,
         value_target: ndarr_f32,
-        is_terminal: bool,
         cache: Optional[TensorCache] = None,
     ) -> TrainingData:
         if cache is None:
@@ -92,7 +91,7 @@ class TrainingData:
             if ts.observations is not None
             else cls.empty_observation,
             turn_status=cache.tensor(
-                TurnStatus.TERMINAL_STATE.target_index if is_terminal else ts.turn_status,
+                ts.turn_status,
                 dtype=torch.long,
             ),
             action_onehot=cache.onehot(
