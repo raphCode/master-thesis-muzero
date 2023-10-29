@@ -1,4 +1,4 @@
-common_args := "mcts=default "
+common_args := "mcts=muzero "
 debug_cmd := "HYDRA_FULL_ERROR=1 pudb main.py hydra.run.dir=/tmp/hydra_dbg " + common_args
 train_cmd := "python main.py " + common_args
 bisect_run_dir := "'hydra.run.dir=bisect/${now:%Y-%m-%d}/${now:%H-%M-%S}-'`git rev-parse --short HEAD`"

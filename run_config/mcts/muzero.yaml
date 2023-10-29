@@ -1,0 +1,11 @@
+node_action_fn: ${fn:fn.action.highest_visit_count}
+node_target_policy_fn: ${fn:fn.policy.from_visit_counts}
+node_selection_score_fn: 
+    _target_: fn.selection.SwitchOnNodeType
+    normal_selection_fn:
+        _target_: fn.selection.pUCTscore
+        c1: 1.5
+dirichlet_noise_blend: 0.1
+dirichlet_noise_alpha: 0.5
+iterations: 30
+debug_log_mcts_ratio: 0.1
