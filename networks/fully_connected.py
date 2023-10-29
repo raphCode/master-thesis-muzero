@@ -7,6 +7,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
+from .util import ModuleFactory
 from .bases import NetBase, DynamicsNet, PredictionNet, RepresentationNet
 
 
@@ -28,9 +29,8 @@ class GenericFc(nn.Module):
         if width is None:
             width = int(max(input_width, output_width) * 1.2)
         widths = [input_width] + [width] * hidden_depth + [output_width]
-        self.fc_layers = [nn.Linear(a, b) for a, b in itertools.pairwise(widths)]
-        for n, layer in enumerate(self.fc_layers):
-            self.add_module(f"fc{n}", layer)
+        fc_factory = ModuleFactory(self, nn.Linear, "fc")
+        self.fc_layers = [fc_factory(a, b) for a, b in itertools.pairwise(widths)]
 
     def fc_forward(self, *inputs: Tensor) -> Tensor:
         x = torch.cat([i.flatten(1) for i in inputs], dim=1)
