@@ -27,7 +27,7 @@ class GenericFc(nn.Module):
     ):
         super().__init__(**kwargs)
         if width is None:
-            width = int(max(input_width, output_width) * 1.2)
+            width = input_width
         widths = [input_width] + [width] * hidden_depth + [output_width]
         fc_factory = ModuleFactory(self, nn.Linear, "fc")
         self.fc_layers = [fc_factory(a, b) for a, b in itertools.pairwise(widths)]
