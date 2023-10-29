@@ -23,9 +23,11 @@ class GenericFc(nn.Module):
         *,
         hidden_depth: int = 2,
         width: Optional[int] = None,
+        first_layer_pre_activation: bool = True,
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
+        self.first_layer_pre_activation = first_layer_pre_activation
         if width is None:
             width = input_width
         widths = [input_width] + [width] * hidden_depth + [output_width]
@@ -34,13 +36,16 @@ class GenericFc(nn.Module):
 
     def fc_forward(self, *inputs: Tensor) -> Tensor:
         x = torch.cat([i.flatten(1) for i in inputs], dim=1)
+        first = self.fc_layers[0]
+        last = self.fc_layers[-1]
         for fc in self.fc_layers:
             skip = x
-            y = fc(x)  # type: Tensor
-            x = F.relu(y)
-            if fc.in_features == fc.out_features:
+            if not first or self.first_layer_pre_activation:
+                x = F.relu(x)
+            x = fc(x)
+            if fc is not last and fc.in_features == fc.out_features:
                 x = x + skip  # skip connection / ResNet
-        return y
+        return x
 
 
 class FcBase(GenericFc, NetBase):
@@ -83,7 +88,7 @@ class FcRepresentation(FcBase, RepresentationNet):
         super().__init__(
             in_shapes=C.game.instance.observation_shapes,
             out_shapes=[[latent_features]],
-            **kwargs,
+            **(dict(first_layer_pre_activation=False) |kwargs),
         )
 
     def forward(
