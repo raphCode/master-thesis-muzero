@@ -1247,7 +1247,7 @@ the !p $P(s, a)$ relative to the !v $Q(s, a)$ for higher visit counts.
 In contrast to !az, $Q(s, a)$ consists not only of the child !n !v, it must also include
 the transition !r:
 $ Q(s^k, a^k) = gamma v^(k+1) + r^(k+1) $ 
-where $gamma$ is the standard !rl !df, as introduced in @sec-rl_return.
+where $gamma$ is the !rl !df, as introduced in @sec-rl_return.
 
 #[
 

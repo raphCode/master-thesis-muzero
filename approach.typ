@@ -192,6 +192,8 @@ Following !mp !bi (@sec-bi_mp), the MCTS selection phase considers !n !vs for th
 only.
 Specifically, each !n !v is a vector:
 $ arrow(Q)(s^n, a^n) = gamma arrow(v)^(n+1) + arrow(r)^(n+1) $
+where $gamma$ is the !rl !df, as introduced in @sec-rl_return.
+
 Let $Q_i (s, a)$ denote the $i$<no-join>-th component of this vector.
 
 In !s $s^k$, maxn-MTCS then selects an !a $a^k$ as to maximize $Q_i (s^k, a^k)$ where $i =
