@@ -251,7 +251,7 @@ Examples of !2p !zsum !gs are !ttt, chess and Go, since only one !pl may win (pa
 Also poker is considered a !zsum !g, because a !pl wins exactly the amount which his
 opponents lose.
 
-Contrastingly, in non-!zsum !gs, no restriction is imposed on the payoff vectors.
+Contrastingly, in general-sum !gs, no restriction is imposed on the payoff vectors.
 This situation arises, for example, when modeling real-world economic situations, as there
 may be gains from trades.
 
