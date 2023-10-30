@@ -1109,7 +1109,7 @@ encourage exploration:
 #neq[
 $ P'(r, a) = (1 - epsilon) P(r, a) + epsilon eta_a $
 <eq-dirichlet_exploration>]
-with $eta_a tilde.op "Dir"(alpha)$, $alpha = 0.03$ and $epsilon = 0.25$.
+for $a in A(s)$, with $eta_a tilde.op "Dir"(alpha)$, $alpha = 0.03$ and $epsilon = 0.25$.
 Adding exploration this way ensures all moves may be tried, but the search can still
 overrule bad !as.
 
