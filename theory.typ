@@ -1155,6 +1155,9 @@ new !net performs better than the current one.
 In contrast, !az only uses a single !net.
 It always uses the latest !net parameters for selfplay data generation.
 
+Compared to !agoz, there are no distinct selfplay !pls $alpha_theta_i$, and consequently
+no need to evaluate a best performing !pl $alpha_theta_i$
+
 !az uses the same hyperparameters as !agoz, except for the number of MCTS simulations and
 the Dirichlet exploration noise.
 Specifically, !az employs only 800 MCTS simulations per move during selfplay, as opposed
