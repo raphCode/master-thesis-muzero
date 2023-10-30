@@ -91,8 +91,11 @@ programmed to exploit the !zsum property and alternating turn order of the !g.
 
 == Extension to !MP, Stochastic and General Sum !Gs
 
-I propose an extension of !mz to more general !gs than the original !impl is capable of.
-This includes !gs with chance events, more than two !pls, and therefore arbitrary payoffs.
+As outlined in @sec-muzero_limitations, the original !mz !impl is not applicable to !envs
+with more than two !pls, stochasticity or general-sum !gs.
+In this section, I propose modifications to the !mz !arch which lift these three
+restrictions, thus improving the generality of the !algo.
+
 The modified !algo retains compatibility with the original !mz !envs (board !gs and the
 Atari suite) as special cases.
 The !gs are still required to be with !pinf.
@@ -101,7 +104,7 @@ Planning ahead in a !g with more than one !pl requires some !i or assumptions ab
 behavior of other !pls.
 In a !2p !zsum !g, the behavior of the opponent !pl is easy to model:
 He will always try to minimize the score of the other !pl.
-This assumption does not hold for general-sum !gs with arbitrary payoffs.
+This assumption does not hold for !mp general-sum !gs with arbitrary payoffs.
 
 My extension of !mz to !mp !gs is inspired from the !mp !bi in !gt, as introduced in
 @sec-bi_mp.
