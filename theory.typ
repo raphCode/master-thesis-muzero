@@ -1264,13 +1264,9 @@ However, the backpropagation in !mz needs to take intermediate rewards into acco
 !preds are ignored and MCTS backpropagation is performed as in !az.].
 The !v to backpropagate is updated for every parent !n on the search path.
 
-#let fn = footnote[technically no !mc simulation takes place, but the result of an inference of
-#pred on the just expanded !n $s^leaf$ is used. I just adhere to the general terminology of
-MCTS here.]
-
 Specifically, let the search path consist of the !ns $s^0, s^1, ..., s^leaf$, where $s^leaf$
 is the newly expanded leaf !n.
-For $k = leaf...0$ an n-step !ret is calculated, bootstrapped from the simulation#fn !v
+For $k = leaf...0$ an n-step !ret is calculated, bootstrapped from the leaf !n !v
 $v^leaf$:
 $ G^k = gamma^(leaf-k) v^leaf + sum_(i=1)^(leaf-k) gamma^(i-1) r_(k+i) $
 This is equivalent to the calculation of the discounted n-step !ret in !rl, see
