@@ -316,7 +316,7 @@ class MCTS:
             node = self.root
             search_path = [self.root]
             was_expanded = True
-            while was_expanded:
+            while was_expanded and not isinstance(node, TerminalNode):
                 action = self.cfg.node_selection_score_fn(node)
                 was_expanded = action in node.children
                 node = node.get_create_child(action)
