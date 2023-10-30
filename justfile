@@ -25,3 +25,7 @@ eval-ll eval_dir *params:
     {{train_cmd}} training=catch networks=catch game=os_catch 'hydra.run.dir=outputs/{{eval_dir}}/raphzero/{{dated_run}}' {{params}} training.latent_loss_detach=false
 
 eval-ll-big eval_dir *params: (eval-ll eval_dir "game.instance.columns=10" "training=catch_big" params)
+
+eval-tns eval_dir *params: 
+    {{train_cmd}} training=catch networks=catch game=os_catch 'hydra.run.dir=outputs/{{eval_dir}}/muzero/{{dated_run}}' {{params}} training.absorbing_terminal_states=true
+    {{train_cmd}} training=catch networks=catch game=os_catch 'hydra.run.dir=outputs/{{eval_dir}}/raphzero/{{dated_run}}' {{params}} training.absorbing_terminal_states=false
