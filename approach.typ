@@ -264,7 +264,7 @@ Furthermore, I implemented the following modifications:
 
 As outlined in @sec-effzero, #citet("effzero") already layed the groundwork for
 improvements in !sampeff by introducing a similarity loss between !preds of #rep and #dyn.
-However, I thank that their adoption of the stop-gradient operation from !simsiam @simsiam
+However, I think that their adoption of the stop-gradient operation from !simsiam @simsiam
 may have been short-sighted:
 
 In !simsiam, the task is to learn discriminative !latreps from input data in a
@@ -279,7 +279,7 @@ without the use of a stop-gradient mechanism:
 The only requirement is that a decorrelation mechanism of some form must be present in the
 !arch that penalizes collapsed solutions.
 
-In !mz, I hypothesize that a decorrelation is already achieved by the training losses
+In !effz, I hypothesize that a decorrelation is already achieved by the training losses
 $ell^r$, $ell^p$<join-right> and $ell^v$.
 
 Intuitively, if the !latreps of #rep and #dyn were to collapse, the !r, !p and !v !preds
