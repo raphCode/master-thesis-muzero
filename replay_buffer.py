@@ -55,6 +55,7 @@ class ReplayBuffer:
         traj_id = self.buffer.position + len(traj)
 
         rewards = np.stack([ts.reward for ts in traj])
+        second_to_last, last = traj[-2:]
         for t, traj_state in enumerate(traj):
             # The target for the prediction network value head is the bootstrapped n step
             # return. In general, it is calculated by adding future rewards over the n
@@ -86,19 +87,33 @@ class ReplayBuffer:
             if not nstep_end_terminal:
                 value_target += traj[t + n - 1].mcts_value * self.discounts[n]
 
-            self.buffer.append(
-                (
+            self._add_ts(
+                traj_id,
+                TrainingData.from_trajectory_state(
+                    traj_state,
+                    value_target,
+                    absorbing_ts=second_to_last
+                    if traj_state is last and C.training.absorbing_terminal_states
+                    else None,
+                    cache=self.cache,
+                ),
+            )
+        if C.training.absorbing_terminal_states:
+            for _ in range(C.training.unroll_length):
+                self._add_ts(
                     traj_id,
-                    TrainingData.from_trajectory_state(
-                        traj_state,
+                    TrainingData.absorbing(
+                        second_to_last,
                         value_target,
                         cache=self.cache,
                     ),
                 )
-            )
-            self.values.extend(value_target)
-            self.rewards.extend(traj_state.reward)
-        self.data_added += len(traj)
+
+    def _add_ts(self, traj_id: int, td: TrainingData) -> None:
+        self.buffer.append((traj_id, td))
+        self.values.extend(td.value_target)
+        self.rewards.extend(td.reward)
+        self.data_added += 1
 
     def sample(self) -> list[TrainingData]:
         """

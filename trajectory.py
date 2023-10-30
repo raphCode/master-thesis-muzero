@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 import operator
 import functools
 from typing import TYPE_CHECKING, Iterable, Optional, TypeAlias, cast
@@ -9,7 +10,6 @@ import torch
 from attrs import frozen
 from torch import Tensor
 
-from mcts import TurnStatus
 from util import TensorCache
 from config import C
 
@@ -77,10 +77,37 @@ class TrainingData:
         return tuple(map(torch.zeros, C.game.instance.observation_shapes))
 
     @classmethod
+    def absorbing(
+        cls,
+        ts: TrajectoryState,
+        value_target: ndarr_f32,
+        cache: Optional[TensorCache] = None,
+    ) -> TrainingData:
+        if cache is None:
+            cache = TensorCache()
+        return cls(
+            is_observation=cache.tensor(False),
+            observations=cls.empty_observation,
+            turn_status=cache.tensor(
+                ts.turn_status,
+                dtype=torch.long,
+            ),
+            action_onehot=cache.onehot(
+                random.randrange(0, C.game.instance.max_num_actions),
+                C.game.instance.max_num_actions,
+            ),
+            target_policy=torch.ones(C.game.instance.max_num_actions)
+            / C.game.instance.max_num_actions,
+            value_target=torch.tensor(value_target, dtype=torch.float32),
+            reward=0 * torch.tensor(ts.reward, dtype=torch.float32),
+        )
+
+    @classmethod
     def from_trajectory_state(
         cls,
         ts: TrajectoryState,
         value_target: ndarr_f32,
+        absorbing_ts: Optional[TrajectoryState] = None,
         cache: Optional[TensorCache] = None,
     ) -> TrainingData:
         if cache is None:
@@ -91,7 +118,7 @@ class TrainingData:
             if ts.observations is not None
             else cls.empty_observation,
             turn_status=cache.tensor(
-                ts.turn_status,
+                absorbing_ts.turn_status if absorbing_ts is not None else ts.turn_status,
                 dtype=torch.long,
             ),
             action_onehot=cache.onehot(
