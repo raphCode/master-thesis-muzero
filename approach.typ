@@ -7,10 +7,13 @@ hast.
 #import "thesis.typ": citet, blockquote
 #import "drawings/muzero.typ": rep, dyn, pred
 
-
-The original !mz !impl is limited to a specific class of !gs.
+This chapter is divided into four parts.
 I begin by reviewing the limitations of !mz and the reasons behind them, and then move on
-to a discussion of how I extend the !arch to more general !gs.
+to a discussion of how I propose to extend the !arch to handle more general !gs.
+The third part proposes additional modifications that aim to improve the performance of
+!mz in some cases.
+The final part gives an overview about the !mz !impl written as part of this thesis,
+detailing the processes of selfplay and training with my modifications.
 
 == !mz Limitations
 <sec-muzero_limitations>
