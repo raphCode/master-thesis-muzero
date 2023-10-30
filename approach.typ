@@ -293,46 +293,18 @@ the stop-gradient operation.
 
 === !TNs in the MCTS
 
-#box(stroke: red+3pt, inset:5pt, radius:10%)[
-TODO: Reason for !tns does not feel properly justified yet.\
-Chapter is thus WIP.\
-Maybe a better reasoning is that !nns tend to go "haywire" when used on input data never
-encountered during training.
-This might lead to !preds which are very off for !ns after !tns, biasing statistics of the
-whole tree.
-Treating !tns as "absorbing" during training means every !a must be trained, which is not
-very elegant and may not generalize.
-]
+#[
+#import "drawings/muzero.typ": dyn
 
 In !az, the !mcts uses a perfect simulator to determine the next !g !s for hypothetical
 !as.
-Naturally, this simulator also indicates when the !g is over and there are no further
-moves to search for @azero.
-These !tss are an important concept in !RL, since their value is by definition zero:
-no future !rs can occur @sutton.
+This simulator also indicates when the !g is over and there are no further moves to search
+for @azero.
+!mz replaces the perfect simulator with the !dnet #dyn, which is a learned model of the
+!env @muzero.
+]
 
-Tss play an important role in the case of $n$<no-join>-step !rets:
-!Rets are exact for the last $n$ steps of a training !traj, because only !env !rs are
-summed.
-A training !traj ending at time $T$ thus has ground-thruth targets for the !vs
-$v^(T-n), v^(T-n+1), ..., v^T$.
-For previous time steps $t < T-n$, the !rets are bootstrapped with the !ag's !v !fn
-$v_(t+n)$.
-The accuracy of the training targets thus depends on the !vs estimated by the !ag.
-
-In !mz, the n-step !ret is bootstrapped with the !v of the root !n from the tree search.
-It is therefore desireable if the !v in the search tree are accurate for timesteps near
-!ts.
-!N !vs in a !mc search tree depend on !vs backpropagated from child !ns.
-This recursive condition repeats until a !tn is reached, where the !env ultimately
-provides an outcome.
-In the case where !rs are sparse (zero most of the time, nonzero in !ts), !tns represent
-ground-thruth anchors for !vs in the search because their !v is taken from the !env.
-
-!mz replaces the perfect simulator with the !dnet, which provides !r !preds for
-transitions between !ns.
-I finde it unexpected that !mz does not include any concept of !tns:
-
+However, I find it unexpected that this learned model does not include any concept of !tns:
 #blockquote("muzero")[
   _MuZero_ does not give special treatment to terminal nodes and always uses the value
   predicted by the network. Inside the tree, the search can proceed past a terminal node -
@@ -340,12 +312,24 @@ I finde it unexpected that !mz does not include any concept of !tns:
   by treating terminal states as absorbing states during training.
 ]
 
+I hypothesize that this !sty may perform badly in !envs where !rs only occur in !tss:
+If the !r !preds beyond !tns are not close to zero, these nonzero !rs get backpropagated
+upwards and might bias the statistics in the search tree.
+As the backpropagation involves summing over all future !rs #footnote[discounted by the
+!rl discount factor $gamma$], the error may accumulate as the search progresses deeper
+beyond !tns.
+
+My approach is to predict the end of the !g with the !dnet.
+During MCTS, !ns which are predicted to be terminal are not allowed to be expanded.
+In this case, when the selection phase reaches a !tn, the backpropagation phase is
+triggered immediatly with the !tn's predicted !v.
+
 #[
 
 #let wt = $w_frak(T)$
 
-My approach is to enhance the turn order !pred $w$ with another special !pl, the terminal !pl #wt.
-He is at turn when the !g (!env) reached a !ts.
-This allows the MCTS to not expand !ns beyond !tss.
+To realize the prediction of !tss, I add another special !pl to the set of possible turn
+order !preds $W$:
+The terminal !pl $#wt in W$ is at turn when the !env reaches a !ts.
 
 ]
