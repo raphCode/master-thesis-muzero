@@ -45,6 +45,7 @@ one where the fifty-move rule applies.
 @muzero
 
 === !ZSUM !Gs
+<sec-limits_zsum>
 
 In the !2p setting, !mz assumes that the !g is !zsum.
 This assumption is built into the !arch itself, because it performs negamax search (see
@@ -53,6 +54,12 @@ This assumption is built into the !arch itself, because it performs negamax sear
 Negamax exploits the !zsum property by using only a single scalar for a !n's !v.
 The design of the !nns (#dyn<join-right> and #pred) in !mz follows this choice and also
 only predict a single scalar for !s !vs and transition !rs.
+
+Put differently, the original !mz !impl can only learn to play in favor of one !pl, for
+example white in chess or Go.
+Generating strong moves for the other !pl, black in example, is achieved by negating the
+!v and !r !preds for moves of this !pl.
+@muzero
 
 === Fixed Turn Order
 
@@ -70,9 +77,17 @@ separately.
 However, by expanding the !a set $A$ with a castling move, the assumption about
 alternating turn order still holds.
 
-The alternating turn order is exploited by the negamax search !impl.
-For single-!ag !envs, negamax is disabled altogether.
-@muzero
+The original !mz !impl uses knowledge of the turn order during !mcts:
+When !mz is configured to operate in the !2p setting, the MCTS !impl negates !n !vs at
+every odd#footnote[or even, depending on who is at turn at the root !n] level in the
+search tree (also known as negamax search, see @sec-negamax) @muzero.
+When operating in !sp !envs, this negation is disabled and all !n !v are maximized.
+The type of !env is specified in the configuration of the !algo and can thus be considered
+as domain knowledge regarding the order of turns.
+
+As outlined in @sec-limits_zsum, !mz in fact only learns a !p for one !pl in !zsum !gs.
+In other words, to generate strong play for both sides, the MCTS !impl is explicitly
+programmed to exploit the !zsum property and alternating turn order of the !g.
 
 == Extension to !MP, Stochastic and General Sum !Gs
 
