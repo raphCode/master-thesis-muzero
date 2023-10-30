@@ -23,7 +23,7 @@ arxiv: &arxiv
 
 eprint = partial(print, file=sys.stderr)
 
-arxiv_id_regex = re.compile(r"(\d{4}\.\d{5})(v\d+)?")
+arxiv_id_regex = re.compile(r"(\d{4}\.\d{4,5})(v\d+)?")
 
 
 def id_from_result(result: arxiv.Result) -> str:
