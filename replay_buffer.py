@@ -111,8 +111,8 @@ class ReplayBuffer:
 
     def _add_ts(self, traj_id: int, td: TrainingData) -> None:
         self.buffer.append((traj_id, td))
-        self.values.extend(td.value_target)
-        self.rewards.extend(td.reward)
+        self.values.extend(td.value_target.cpu().numpy().tolist())
+        self.rewards.extend(td.reward.cpu().numpy().tolist())
         self.data_added += 1
 
     def sample(self) -> list[TrainingData]:
