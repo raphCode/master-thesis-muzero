@@ -4,16 +4,69 @@ Hier beschreibst du, wie du deinen Ansatz evaluiert hast. Z.B. beschreiben von
 Experimenten oder Nutzerstudien.
 */
 
-== The !Coll !G Carchess
 
-I evaluated my proposed !mp modifications on the !g Carchess.
+
+== Training !Envs
+
+I apply my !impl of !mz to two different !gs.
+In this section, I describe the !g mechanics and !obs tensors.
+
+=== The !G Catch
+<sec-game_catch>
+
+Catch is a simple !sp !g which is primarily designed to test if a !rl system is capable of
+learning anything at all.
+The !g consists of a two-dimensional grid with a configurable number of columns $c$ and
+rows $r$.
+
+At the beginning of the !g, a single block spawns in the top row, in a random column.
+This block descends by one row in every round of the game, and the !g ends when it reaches
+the bottom row.
+
+The !pl can move another block in the bottom row and has to "catch" the falling block by
+moving to the same column.
+Movement is possible via three !as, which respectively move the bottom block one column to
+the left, right or let it stay in its current position.
+The !pl's block always starts in the center column when the !g starts.
+
+The !g has no intermediate !rs, but a single terminal !r in the last round, which is 1 if
+the !pl caught the falling block, and -1 otherwise.
+
+@fig-game_catch shows a visualisation of the !g for $c = 5$ and $r = 10$ after three rounds:
+
+#[
+#import "drawings/catch.typ": catch
+
+#figure(
+  catch,
+  caption: [The !g Catch in the third round]
+) <fig-game_catch>
+]
+
+In my experiments I use a grid size of $c = 5$ and $r = 10$.
+
+==== !OBSs
+
+An !obs in Catch consists of a 2D image with a single plane, representing the !g grid.
+The image width and height thus equal the number of rows $r$ and columns $c$,
+respectively.
+The image has zeros everywhere except for the two blocks, where the corresponding pixel is
+set to one.
+
+The !obs includes a second tensor with one element, set to a constant 1.
+#footnote[This tensor exists for technical reasons only: It is designed to encode the
+current !pl in !mp !gs, but degrades to a single-element constant in !sp !gs.]
+
+=== The !Coll !G Carchess
+
 Carchess is a round-based !coll !mp !g on a grid-like structure.
 Core element of the game are a number of lanes that cross at intersections, as well as
 traffic lights that can be toggled to control the flow of traffic.
 
 A screenshot of a graphical frontend to the !g is shown in
 @fig-carchess_screenshot_tutorial.
-Instead of traffic lights, the controls are visualized as barriers in this version.
+Instead of traffic lights, the controls are visualized as barriers in this version, but
+they work the same way.
 
 #figure(
   image(
@@ -95,14 +148,10 @@ The map's properties are outlined in @tbl-carchess_map_properties:
   caption: [Properties of the Carchess map "tutorial"],
 ) <tbl-carchess_map_properties>
 
+==== !OBSs
 
-== !NN !ARCH
-
-I use the following !nns for the evaluation:
-
-=== !OBS
-
-I use !obss of the following form in the !g Carchess, consisting of three tensors:
+I use !obss of the following form in the !g Carchess, each !obs consisting of three
+tensors:
 
 The first !obs tensor is a three-dimensional image encoding the position of lanes, cars
 and traffic lights on the grid.
@@ -136,12 +185,3 @@ The other two !obs tensors are one-dimensional onehot-encodings of the !pl curre
 turn and the current round number in the !g, respectively.
 Their respective lengths are defined by the game settings $n$ and $r$.
 Refer to @tbl-carchess_settings for the specific settings I use.
-
-
-
-This chapter is divided into two parts.
-The first one examines the effects of the different proposed modifications on top of
-!mz on training performance.
-For this, an ablation study is chosen so that the effect of individual modifications as
-well as groups of modifications can be analyzed.
-The second part applies the proposed !algo to a !mp !g.
