@@ -6,6 +6,7 @@ import logging
 import traceback
 from typing import TYPE_CHECKING
 from datetime import date, timedelta
+from functools import cache
 from contextlib import suppress
 
 import attrs
@@ -53,11 +54,14 @@ def main(cfg: DictConfig) -> None:
         if input(msg) == "y":
             shutil.rmtree(cwd)
 
-    def set_terminal_title() -> None:
+    @cache
+    def get_run_dir() -> str:
         relpath = os.path.relpath(os.curdir, start=hydra.utils.get_original_cwd())
         cwd = os.getcwd()
-        title = min(cwd, relpath, key=len)
-        print(f"\x1b]2;{title}\x07")
+        return min(cwd, relpath, key=len)
+
+    def set_terminal_title() -> None:
+        print(f"\x1b]2;{get_run_dir()}\x07", end="")
 
     set_terminal_title()
 
@@ -109,6 +113,7 @@ def main(cfg: DictConfig) -> None:
             nets.jit()
             tb.add_graphs(C.networks.factory())
             while n < C.training.max_total_steps or C.training.max_total_steps < 0:
+                set_terminal_title()
                 if n < C.training.random_play_steps:
                     result = random_play(tb.create_step_logger(n))
                 else:
