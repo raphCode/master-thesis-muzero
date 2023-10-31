@@ -5,6 +5,7 @@ import shutil
 import logging
 import traceback
 from typing import TYPE_CHECKING
+from datetime import date, timedelta
 from contextlib import suppress
 
 import attrs
@@ -45,7 +46,7 @@ def main(cfg: DictConfig) -> None:
         assert os.path.exists("tb")
         assert os.path.exists(".hydra")
         msg = (
-            "\nAborted a short run."
+            "\nAborted a run."
             f"\nThe run created tensorboard event files and various logs in:\n{cwd}"
             "\nDo you want to delete this directory? [N/y] "
         )
@@ -68,6 +69,7 @@ def main(cfg: DictConfig) -> None:
         torch.set_default_device(dev)  # type: ignore [no-untyped-call]
 
     populate_config(cfg)
+    start_date = date.today()
 
     nets_selfplay = C.networks.factory()
     nets = C.networks.factory()
@@ -122,12 +124,15 @@ def main(cfg: DictConfig) -> None:
                 )
                 while rb.data_sampled < target_samples - batch_samples:
                     t.process_batch(rb.sample(), tb.create_step_logger(n))
-    except (KeyboardInterrupt, Exception) as e:
+    except Exception as e:
         log.error(repr(e) + "\n" + traceback.format_exc())
-        if n < 30_000:
+        with suppress(AssertionError):
+            ask_delete_logs()
+        raise
+    except KeyboardInterrupt:
+        if date.today() - start_date < timedelta(hours=3):
             with suppress(AssertionError):
                 ask_delete_logs()
-        raise
 
 
 if __name__ == "__main__":
