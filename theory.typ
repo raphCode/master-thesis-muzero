@@ -1350,6 +1350,8 @@ with $ell^p$<join-right> and $ell^v$ being loss !fns for !p and !v, respectively
 
 The parameters of the three !nns are updated jointly via backpropagation on the total loss
 $ell$, in an end-to-end manner.
+Performing backpropagation repeatedly through the same !net (#dyn<no-join>) is also known
+as backpropagation through time.
 
 ===== !Envs with Intermediate !Rs
 
