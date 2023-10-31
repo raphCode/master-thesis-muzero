@@ -1177,7 +1177,7 @@ The training success was also reported to be repeatable across multiple independ
 !mz by #citet("muzero") is yet another improvement over !az in terms of generalization.
 !mz learns a dynamic model of the !g, solely from interactions, and uses it in the !mcts
 to plan ahead.
-In contrast, !az uses an explicit simulator during the tree search to obtain !g !s for a
+In contrast, !az uses an explicit simulator during the tree search to obtain a !g !s for a
 !seq of hypothetical !as.
 This simulator represents domain knowledge of the !env.
 
