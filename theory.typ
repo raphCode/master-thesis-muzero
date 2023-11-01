@@ -1303,23 +1303,14 @@ precursors (see @sec-alphago_zero for details).
 $z$ is the final outcome of the !g, indicating a win, loss or draw.
 
 #[
-
-#let series(x, start: 0, end: $K$) = {
-  let sub(n) = { if n == 0 {} else { $+#n$ } }
-  let item(n) = math.attach(x, b: $t$ + sub(n))
-  $#item(start), #item(start + 1), ..., #x _#end$
-}
-#let series_p = series($pi$)
-#let series_a = series($a$, end: $K - 1$)
-#let series_r = series($r$, start: 1)
-#let series_g = series($G$, start: 1)
+#import "common.typ": series_pi, series_a, series_r, series_g
 
 #let loss(letter, target, pred, start: 0) = $sum_(k=start)^K ell^letter (pred _t^k, target)$
 
 For training, the !dnet #dyn is unrolled for $K$ steps and aligned with a !seq of !env !ss
 and !as from a selfplay !traj.
 Specifically, a training example beginning at time step $t$ consists of the tuple
-$(s_t, (#series_a), (#series_p), z)$, where $K$ is the unroll length, a hyperparameter.
+$(s_t, (#series_a), (#series_pi), z)$, where $K$ is the unroll length, a hyperparameter.
 
 The process is illustrated in @fig-muzero_training_board for $K=2$:
 
@@ -1366,7 +1357,7 @@ the !g $z$.
 This n-step !ret is bootstrapped with the !v of the MCTS root !n.
 
 Likewise, a training sample includes the !seq of sample !rets and $K - 1$ experienced !rs:
-$ (s_t, (#series_a), (#series_r), (#series_p), (#series_g)) $
+$ (s_t, (#series_a), (#series_r), (#series_pi), (#series_g)) $
 The !dnet is unrolled in the same manner, and an additional !r loss $ell^r$ is introduced.
 The total loss thus becomes
 $ ell_t = loss(p, pi_(t+k), p) + loss(v, G_(t+k), v) + loss(r, r_(t+k), r, start: 1) $

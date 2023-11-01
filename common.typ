@@ -10,3 +10,15 @@
   ) \
   "with" m = frac(1, sum_(b in A(state)) pred(b)) $
 }
+
+#let series(x, start: 0, end: $K$) = {
+  let sub(n) = { if n == 0 {} else { $+#n$ } }
+  let item(n) = math.attach(x, b: $t$ + sub(n))
+  $#item(start), #item(start + 1), ..., #x _#end$
+}
+#let series_pi = series($pi$)
+#let series_p = series($p$)
+#let series_a = series($a$, end: $K - 1$)
+#let series_r = series($r$, start: 1)
+#let series_w = series($w$, start: 1)
+#let series_g = series($G$, start: 1)
