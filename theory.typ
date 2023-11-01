@@ -1234,8 +1234,8 @@ and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^
 !Ns are selected according to a pUCT formula similar to @eq-alphago_uct.
 Specifically, in !s $s^k$, the child !n corresponding to the !a $a^k$ is selected
 $ a^k = limits("argmax")_(a in A) { Q(s, a) + P(s, a)
-frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a))
-[c_1 + log(frac(sum_(b in A) N(s, b) + c_2 + 1, c_2))] } $
+  frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a)) \
+  [c_1 + log(frac(sum_(b in A) N(s, b) + c_2 + 1, c_2))] } $
 where $A$ is the set of possible !as.
 $N(s, a)$ and $P(s, a)$ denote the visit count and prior !prob of the child !n
 corresponding to !a $a$, respectively.
