@@ -16,7 +16,16 @@ std = v.rolling_std(w, min_periods=0)
 v_min = v_smoothed - std * 1.96
 v_max = v_smoothed + std * 1.96
 
+s = 500
+
 print("steps", steps[-1])
+
+print("start", steps[-s])
+print("prev", steps[-s-1])
+
+def mean_std(data):
+    print(f"Mean: {data.mean():.2f}, Stddev: {data.std():.2f}")
+mean_std(v[:-s])
 
 fig, ax = plt.subplots()
 fig.set_size_inches(7, 4)
