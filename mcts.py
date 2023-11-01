@@ -148,7 +148,7 @@ class Node(ABC):
         if maxdepth <= 1:
             return repr(self)
         return repr(self) + "".join(
-            textwrap.indent(f"\n{a}: " + c.debug_dump_tree(maxdepth - 1), 2 * " ")
+            textwrap.indent(f"\n{a}: " + c.debug_dump_tree(maxdepth - 1), 4 * " ")
             for a, c in sorted(self.children.items())
         )
 
