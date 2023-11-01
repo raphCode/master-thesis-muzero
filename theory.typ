@@ -1077,8 +1077,9 @@ where $p_s$ denotes a !prob distribution over !as: $p_s (a) = Pr(a|s)$.
 
 #[
 #import "common.typ": masked_prior_from_pred
-Like in !ago, the !p !preds are masked with the set of legal !as $A(s)$ from the
-simulator: #masked_prior_from_pred(pred: a => $p_s (#a)$)
+Like in !ago, the !p !preds $p_s$ are masked with the set of legal !as $A(s)$ from the
+simulator to yield the !n prior !probs $P(s, a)$:
+#masked_prior_from_pred(pred: a => $p_s (#a)$)
 ]
 
 Like in !ago, the !p !preds $p$ serve as the tree !p and guide the search, as outlined in
