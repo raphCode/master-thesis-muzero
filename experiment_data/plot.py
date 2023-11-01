@@ -14,6 +14,7 @@ steps = None
 plot_data = defaultdict(list)
 score_data = defaultdict(list)
 thres_data = defaultdict(list)
+counts = defaultdict(int)
 labels = dict()
 
 thres = 0
@@ -33,6 +34,8 @@ for file in files:
     plot_data[variant].append(v_smoothed)
     with open(os.path.join(*p[:2] , "label"), "r") as f:
         labels[variant] = f.readline().strip()
+
+    counts[variant] += 1
 
     samples = np.array(v)[-final_samples:]
     score_data[variant] = np.concatenate([score_data[variant], samples])
@@ -58,7 +61,7 @@ for variant, runs in plot_data.items():
 
     def mean_std(tag, data):
         print(tag, f"Mean: {data.mean():.2f}, Stddev: {data.std():.2f}")
-    print(label)
+    print(label, counts[variant], "runs")
     mean_std("final score:", score_data[variant])
     mean_std(f"thres {thres}:", np.array(thres_data[variant]))
 
