@@ -121,3 +121,33 @@ Smoothing is applied as outlined in @eq-score_smoothing.
 ) <tbl-scores_tns>
 
 ]
+
+#pagebreak(weak: true)
+== Application to Carchess
+
+#[
+#let nsteps = 824584
+#let w = 30
+
+Here I report the results of the applications of my !impl of !mz to Carchess.
+@fig-plot_carchess shows the score during selfplay over #nsteps steps on the map
+"tutorial".
+I define the score in Carchess as the cumultative !r as experienced by a single !pl.
+
+At each time step $t$ in the plot, the mean and 95% confidence interval is computed over
+the last #w data points.
+The plot thus shows the average score, as computed over a sliding window of size #w.
+
+#figure(
+  image("experiment_data/carchess/plot.svg"),
+  caption: [
+    Mean Score during selfplay. The Error band shows a 95% confidence interval of the last
+    #w scores at each data point.
+    ],
+) <fig-plot_carchess>
+
+The mean and standard deviation of the selfplay score over the last 500 data points is
+*$61.02 plus.minus 15.54$*.
+This corresponds to !gs played during !env steps $#{nsteps / 2} <= n < #nsteps$.
+
+]
