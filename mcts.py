@@ -135,7 +135,6 @@ class Node(ABC):
 
     def debug_info(self) -> Iterable[str]:
         return [
-            f"visits {self.visit_count}",
             f"pred {np.round(self.value_pred, 2)}",
             f"reward {np.round(self.reward, 2)}",
             f"value {np.round(self.value, 2)}",
@@ -147,8 +146,17 @@ class Node(ABC):
     def debug_dump_tree(self, maxdepth: int) -> str:
         if maxdepth <= 1:
             return repr(self)
+
+        def selection_stats(action: int) -> str:
+            child = self.children[action]
+            action_str = f"|{action}|"
+            return f"{child.visit_count:2d}x {action_str:>4} {self.probs[action]:.2f}"
+
         return repr(self) + "".join(
-            textwrap.indent(f"\n{a}: " + c.debug_dump_tree(maxdepth - 1), 4 * " ")
+            textwrap.indent(
+                "\n" + selection_stats(a) + " " + c.debug_dump_tree(maxdepth - 1),
+                4 * " " * (self is not self.mcts.root),
+            )
             for a, c in sorted(self.children.items())
         )
 
@@ -209,6 +217,8 @@ class StateNode(Node):
         )
 
     def debug_description(self) -> str:
+        if self is self.mcts.root:
+            return "Root"
         if self.player is TurnStatus.CHANCE_PLAYER:
             return "Chance"
         return f"Player {self.player}"
