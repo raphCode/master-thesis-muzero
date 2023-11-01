@@ -15,6 +15,6 @@ do
   mkdir -p "$run"
   for tag in "${tags[@]}"
   do
-    curl "http://localhost:6009/data/plugin/scalars/scalars?tag=${tag// /+}&run=${run// /+}/tb&format=csv" > "$run/${tag//\// }.csv"
+    curl "http://localhost:6009/data/plugin/scalars/scalars?tag=${tag// /+}&run=${run// /+}&format=csv" > "$run/${tag//\// }.csv"
   done
 done
