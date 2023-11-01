@@ -30,17 +30,20 @@ class pUCTscore:
         prior_scale_half = (
             self.c1 + math.log((node.visit_count + self.c2 + 1) / self.c2)
         ) * math.sqrt(node.visit_count)
+        vmin = node.mcts.root.value_min[node.player]
+        vmax = node.mcts.root.value_max[node.player]
 
         def child_score(prior: float, child: Node) -> float:
             if TYPE_CHECKING:
                 assert isinstance(node, StateNode)
                 assert node.player is not TurnStatus.CHANCE_PLAYER
             prior_score = prior * prior_scale_half / (child.visit_count + 1)
-            value_score = (
-                child.normalized_reward[node.player]
-                + child.normalized_value[node.player] * C.training.discount_factor
-            )
-            return float(value_score.clip(0, 1)) + prior_score
+            value = (
+                child.reward
+                + child.value * C.training.discount_factor
+            )[node.player]
+            value_score = (value - vmin) / (vmax - vmin + 1e-5)
+            return value_score + prior_score
 
         uct_scores = np.fromiter(
             map_actions_callback(
