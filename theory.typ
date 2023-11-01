@@ -1350,6 +1350,9 @@ The parameters of the three !nns are updated jointly via backpropagation on the 
 $ell$, in an end-to-end manner.
 Performing backpropagation repeatedly through the same !net (#dyn<no-join>) is also known
 as backpropagation through time.
+To keep the gradients stable during backpropagation of the unrolled !dnet,
+#citet("muzero") rescale the gradients of the !latreps $s^n$ at the input of the !dnet by
+0.5.
 
 ===== !Envs with Intermediate !Rs
 
