@@ -139,6 +139,7 @@ class TrainConfig:
     train_selfplay_ratio: float
     batch_size: int
     unroll_length: int
+    random_unroll_length: bool
     discount_factor: float
     n_step_horizon: int
     replay_buffer_size: int

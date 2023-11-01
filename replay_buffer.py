@@ -120,7 +120,10 @@ class ReplayBuffer:
         Return a training batch composed of random subsections of the stored trajectories.
         See the docs for TrainingData for an ascii art visualisation of the returned data.
         """
-        unroll_len = random.randrange(1, C.training.unroll_length + 1)
+        if C.training.random_unroll_length:
+            unroll_len = random.randrange(1, C.training.unroll_length + 1)
+        else:
+            unroll_len = C.training.unroll_length
         # Select random start indices in the buffer for the trajectory subsections.
         # A subsection is only accepted when when the remaining trajectory has the the
         # required minimum length.

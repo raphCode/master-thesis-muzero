@@ -20,9 +20,9 @@ train-2048 *params: clear-screen
     {{train_cmd}} training=\"2048\" networks=\"2048\" game=os_2048 {{params}}
 
 eval-ll eval_dir *params: 
-    {{train_cmd}} training=catch networks=catch game=os_catch 'hydra.run.dir=outputs/{{eval_dir}}/muzero/{{dated_run}}' {{params}} training.loss_weights.latent=0
-    {{train_cmd}} training=catch networks=catch game=os_catch 'hydra.run.dir=outputs/{{eval_dir}}/effzero/{{dated_run}}' {{params}} training.latent_loss_detach=true
-    {{train_cmd}} training=catch networks=catch game=os_catch 'hydra.run.dir=outputs/{{eval_dir}}/raphzero/{{dated_run}}' {{params}} training.latent_loss_detach=false
+    {{train_cmd}} training=catch networks=catch game=os_catch 'hydra.run.dir=outputs/{{eval_dir}}/muzero/{{dated_run}}' {{params}} training.random_unroll_length=true training.loss_weights.latent=0
+    {{train_cmd}} training=catch networks=catch game=os_catch 'hydra.run.dir=outputs/{{eval_dir}}/effzero/{{dated_run}}' {{params}} training.random_unroll_length=true training.latent_loss_detach=true
+    {{train_cmd}} training=catch networks=catch game=os_catch 'hydra.run.dir=outputs/{{eval_dir}}/raphzero/{{dated_run}}' {{params}} training.random_unroll_length=true training.latent_loss_detach=false
 
 eval-ll-big eval_dir *params: (eval-ll eval_dir "game.instance.columns=10" "training=catch_big" params)
 
