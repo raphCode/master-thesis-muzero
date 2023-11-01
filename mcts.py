@@ -211,8 +211,7 @@ class StateNode(Node):
     def debug_description(self) -> str:
         if self.player is TurnStatus.CHANCE_PLAYER:
             return "Chance"
-        else:
-            return f"Player {self.player}"
+        return f"Player {self.player}"
 
 
 class TerminalNode(Node):
