@@ -1343,6 +1343,9 @@ given by
 $ ell_t = loss(p, pi_(t+k), p) + loss(v, z, v) $
 with $ell^p$<join-right> and $ell^v$ being loss !fns for !p and !v, respectively.
 
+!Mz always uses the cross-entropy loss for $ell^p$.
+The loss $ell^v$ in the case of board !gs is the mean squared error.
+
 The parameters of the three !nns are updated jointly via backpropagation on the total loss
 $ell$, in an end-to-end manner.
 Performing backpropagation repeatedly through the same !net (#dyn<no-join>) is also known
@@ -1379,5 +1382,39 @@ $ ell_t = loss(p, pi_(t+k), p) + loss(v, G_(t+k), v) + loss(r, r_(t+k), r, start
 ) <fig-muzero_training_atari>
 
 ]
+
+For !v and !r !preds in Atari !gs, !mz uses the following setup:
+First, the targets $G$ and $r$ are scaled using the invertible transform $e(x)$:
+$ e(x) = "sign"(x) (sqrt(abs(x) + 1) - 1) + epsilon x $
+where $epsilon = 0.001$.
+
+Subsequently, a second transformation $phi(x)$ is applied to the transformed targets
+$e(G)$ and $e(r)$, generating equivalent categorical !reprs over a discrete set $F$ of
+numbers, referred to as the support.
+Under the transformation $phi(x)$, each scalar is represented as the linear combination of
+its two adjacent supports $x_"low", x_"high" in F$:
+$ x = p_"low" x_"low" + p_"high" x_"high" $
+where $p_"low"$ and $p_"high"$ denote the weights of the supports $x_"low"$ and
+$x_"high"$, respectively.
+Additionally $p_"low" + p_"high" = 1$ is required.
+
+As an example, consider the support set $F = ZZ$:
+The target $x = 3.7$ would be represented by
+$p_"low" = 0.7, p_"high" = 0.3, x_"low" = 3, x_"high" = 4$.
+
+The !v and !r outputs of the !nns are also modelled using a softmax output of size $|F|$.
+During training, a cross-entropy loss is used for $ell^r$ and $ell^v$ to align the
+categorical !preds $r_t^n$ and $v_t^n$ to the transformed targets $phi(e(r_(t+n)))$ and
+$phi(e(G_(t+n)))$, respectively.
+
+During inference, the actual !vs and !rs are obtained by inverting the two transforms:
+First, the expected scalar quantity $hat(x')$ under the softmax distribution over the
+support $F$ is computed.
+Subsequently, the inverse $e^(-1)$ of the scaling transformation $e(x)$ is applied to
+recover the actual !v $x$:
+$ x = e^(-1) (hat(x')) $
+
+!mz uses a support size $|F| = 601$ with one support for every integer in the interval
+$[-300, 300]$.
 
 ]
