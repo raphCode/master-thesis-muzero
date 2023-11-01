@@ -1095,7 +1095,9 @@ bias.
 
 The search outputs !probs $pi$ of playing each possible move, proportional to the visit
 counts of the root !n $s$ in the search tree:
+#neq[
 $ pi(a|s) = frac(N(s, a), limits(sum)_(b in A) N(s, b)) $
+<eq-mcts_policy>]
 where $A$ is the set of !as.
 
 To ensure diverse !g openings, the first 30 moves are sampled from $pi$, so
@@ -1300,8 +1302,8 @@ precursors.
 Like !az, !mz uses selfplay with MCTS to generate training data.
 For each selfplay step at time $t$ the data $(s_t, a_t, pi_t, z)$ is recorded.
 The first two entries contain the !s of the !env and executed !a respectively.
-$pi_t$<join-right> denotes the search !p, as derived from the root !n, like in !mz's
-precursors (see @sec-alphago_zero for details).
+$pi_t$<join-right> denotes the search !p, as derived from the root !n according to
+@eq-mcts_policy.
 $z$ is the final outcome of the !g, indicating a win, loss or draw.
 
 #[
