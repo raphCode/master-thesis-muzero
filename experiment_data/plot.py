@@ -26,7 +26,7 @@ for file in files:
     variant = p[1]
     raw = polars.read_csv(file)
     v = raw["Value"]
-    v_smoothed=v.ewm_mean(alpha=0.03)
+    v_smoothed=v.ewm_mean(alpha=0.03, adjust=False)
     s = np.array(raw["Step"])
     if steps is not None:
         assert np.allclose(s, steps)
