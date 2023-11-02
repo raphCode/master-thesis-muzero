@@ -10,9 +10,12 @@ andere schreiben das auch am Ende der Conclusion.)
 */
 #import "thesis.typ": citet
 
-In this chapter I discuss the results from the previous chapter.
+In this chapter I discuss the results presented in @sec-results.
 
 == Ablation Study: Latent Loss Variants
+
+Here I provide a discussion about the results of the ablation study for the latent loss
+variants, as presented in @sec-results_ll.
 
 At first glance, @fig-plot_ll shows similar training dynamics among the three variants:
 All variants eventually learn to play the !g with near-perfect accuracy, as indicated by

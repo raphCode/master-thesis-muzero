@@ -1,4 +1,5 @@
 = Results
+<sec-results>
 /*
 Hier beschreibst du die Ergebnisse deiner Evaluation descriptiv. 
 Hier gibst du noch keine eigene Meinung oder Interpretation der Ergebnisse. Wirklich nur
@@ -47,6 +48,7 @@ $t in NN and t < resample$.
 ]
 
 == Ablation Study: Latent Loss Variants
+<sec-results_ll>
 
 #[
 #import "experiment_data/data.typ": nruns_latent_loss as nruns, nsteps_latent_loss as nsteps
