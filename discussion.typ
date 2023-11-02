@@ -134,3 +134,14 @@ As shown by #citet("uct_mp"), MCTS with a pUCT formula in !mp !gs converges to a
 equilibrium !sty.
 However, this the resulting !sty may not precisely be the optimal !sty computes by !bi in
 !gt, as introduced in @sec-bi_mp.
+
+Modeling every !dp of every !pl in the MCTS creates a very high branching factor,
+which makes it difficult to reach high search depths.
+An alternative is to use opponent models that model the moves of other !pls in a
+deterministic fashion.
+This effectiveld transforms a !mp !g into a !sp !g by hiding the other !pls's !as in the
+!env transitions.
+@mcts_oppo
+
+Exploring further limitations of my approach and how to overcome them could be an
+interesting direction for future research.

@@ -313,17 +313,18 @@ simsiam:
   parent: *arxiv
   doi: 10.48550/arXiv.2011.10566
 
-simclr:
+mcts_oppo:
   type: article
-  title: A Simple Framework for Contrastive Learning of Visual Representations
-  date: 2020-02-13
+  title: "Know your Enemy: Investigating Monte-Carlo Tree Search with Opponent Models in Pommerman"
+  date: 2023-05-22
   author: 
-    - Ting Chen
-    - Simon Kornblith
-    - Mohammad Norouzi
-    - Geoffrey Hinton
+    - Jannis Weil
+    - Johannes Czech
+    - Tobias Meuser
+    - Kristian Kersting
   parent: *arxiv
-  doi: 10.48550/arXiv.2002.05709
+  doi: 10.48550/arXiv.2305.13206
+
 azero_sorting:
   type: article
   title: Faster sorting algorithms discovered using deep reinforcement learning
