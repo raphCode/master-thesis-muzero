@@ -119,6 +119,8 @@ I contribute the high variance of the scores to the of chance events in the !g.
 These chance events come in the form of updating the car spawn counts, there are 4 chance
 events per round with up to 5 distinct chance outcomes.
 
+The best score on this map with the chosen parameters is roughly 80-90 as achieved by
+human !pls.
 Overall, I am satisfied with the results.
 They serve as an proof of concept for my proposed !mp extension of !mz and indicate that
 it is capable of learning.
