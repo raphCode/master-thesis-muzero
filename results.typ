@@ -88,6 +88,7 @@ where $z_t$ is the !g outcome at time $t$.
 
 #pagebreak(weak: true)
 == Ablation Study: !TNs
+<sec-results_tns>
 
 #[
 #import "experiment_data/data.typ": nruns_terminal_nodes as nruns, nsteps_terminal_nodes as nsteps

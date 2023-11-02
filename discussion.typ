@@ -41,3 +41,39 @@ This is in line with my theory that the other training losses achieve sufficient
 decorrelation of the latent space to prevent a collapse, as outlined in
 @sec-mod_symm_latent_loss.
 ]
+== Ablation Study: !TNs
+
+Here I discuss the results of my ablation study as presented in @sec-results_tns.
+
+@fig-plot_tns shows that the two variants perform differently.
+Specifically, the variant without !tns learns faster, it reaches the optimal !g score of 1
+after 10k !env steps.
+In contrast, the variant with !tns learns slower and does not reach perfect play by the
+end of 25k !env steps, as shown in @tbl-scores_tns.
+However, a direct interpretation of the final selfplay scores is difficult because the
+variance of the runs is very high in comparison with the difference of in scores.
+
+My original hypothesis was that !preds for !ns beyond !g end might lead to bias in the !n
+!vs of the tree.
+I assumed that this bias slows down learning, so the observed result is surprising to me.
+
+The results of manually inspecting the search trees reveal several interesting aspects:
+First, in the variant without !tns, there is in fact bias in the !n !v estimates, as
+evident by deviations from the optimal !n !vs and !n !vs outside of the range $[-1, 1]$ of
+possible !vs for the !g Catch.
+Second, nonzero !r !preds for !ns beyond !tss are very likely the cause of the observed bias:
+I come to this conclusion, as there is no other way of creating !n !vs $v$ with magnitudes
+$|v| > 2$ in the tree, given correct !r !preds for !ns correspondig to !g !ss.
+Third, the nonzero !r !preds appear at depth $K - 1$ in the tree, indicating that the
+training of absorbing !ss does not generalize well for unroll counts higher than the one
+used during training, $K$.
+Finally, the variant with !tns correctly predicts !tns and the search does not expand beyond
+them.
+
+From the faster learning with !tns, I conclude that the bias in the search may actually help
+convergence in the specific !env tested.
+The larger magnitudes of the !n !vs might pronounce !v differences for distinct !as,
+helping the pUCT selection formula focusing on more promising !ns.
+
+An interesting direction for future research might be to further explore the effects of
+predicting !tns in different types of !envs.
