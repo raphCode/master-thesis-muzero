@@ -671,3 +671,14 @@ vq_vae:
     - Koray Kavukcuoglu
   parent: *arxiv
   doi: 10.48550/arXiv.1711.00937
+
+uct_mp:
+  type: article
+  title: An Analysis of UCT in Multi-player Games
+  author: "Sturtevant, Nathan R."
+  isbn: 978-3-540-87608-3
+  parent:
+    type: proceedings
+    title: Computers and Games
+    publisher: Springer Berlin Heidelberg
+  page-range: 37-49

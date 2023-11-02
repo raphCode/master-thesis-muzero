@@ -125,3 +125,12 @@ it is capable of learning.
 
 Tuning of hyperparameters, as well as further experiments with the proposed !mp !arch on,
 for example other Carchess maps or entirely different !envs, are left for future work.
+
+== Limitations of my Approach
+
+A couple of shortcomings can be identified in my !mp extension:
+
+As shown by #citet("uct_mp"), MCTS with a pUCT formula in !mp !gs converges to an optimal
+equilibrium !sty.
+However, this the resulting !sty may not precisely be the optimal !sty computes by !bi in
+!gt, as introduced in @sec-bi_mp.
