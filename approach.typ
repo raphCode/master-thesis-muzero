@@ -478,6 +478,8 @@ $ o/i approx E $
 
 A batch of training data is sampled from the buffer such as the first !g !s $s_0$ contains
 an !obs, that is $w_0 in.not {wt, wc}$.
+Also, it is required the remaining length of the !g starting at $s_0$ is greater or equals
+$K$ to ensure a complete unroll is possible.
 Training and losses are described in in @sec-muzero_atari and @sec-mod_turn_pred.
 For the latent similarity loss $ell^l$ I use negative cosine similarity.
 
