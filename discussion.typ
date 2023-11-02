@@ -92,3 +92,31 @@ helping the pUCT selection formula focusing on more promising !ns.
 
 An interesting direction for future research might be to further explore the effects of
 predicting !tns in different types of !envs.
+
+== Application to Carchess
+
+Finally, I discuss the results of applying my !impl of !mz to the !g Carchess.
+Note that the results are based on a single run of training, so care must be taken when
+interpreting the results.
+
+@fig-plot_carchess shows three stages of training:
+In the beginning, random play is used to quickly generate training data up to
+$n < 1 times 10^5$ !env steps.
+The scores encountered during this period of random play also serve as the baseline
+performance.
+Afterwards, the !algo switches to selfplay !gs, and the score rises immediatly.
+This indicates that the !nns learned a useful model of the !env from random play that can
+be used for move selection and planning ahead.
+
+For a number $1 times 10^5 < n < 3 times 10^5$ of !env steps, the mean score
+increases slowly.
+This phase indicates successful learning and improvement of the !p and !v !preds.
+Afterwards, the mean score settles at 61.02, which seems to be the best play achievable
+with this !impl and chosen hyperparameters.
+
+I contribute the high variance of the scores to the of chance events in the !g.
+These chance events come in the form of updating the car spawn counts, there are 4 chance
+events per round with up to 5 distinct chance outcomes.
+
+Further experiments of the proposed !mp !arch on, for example other Carchess maps or
+entirely different !env are left for future work.
