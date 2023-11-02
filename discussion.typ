@@ -32,6 +32,7 @@ Overall, no practical speedup in terms of reaching the final accuracity is achie
 
 #[
 #import "drawings/muzero.typ": rep, dyn
+
 My proposed symmetric latent loss does not perform any different than !mz.
 On one hand, I did expect my variant to perform at least more similar to !effz, because
 the additional latent loss provides feedback to both the !repr #rep and !dnet #dyn.
