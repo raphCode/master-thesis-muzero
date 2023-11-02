@@ -119,5 +119,9 @@ I contribute the high variance of the scores to the of chance events in the !g.
 These chance events come in the form of updating the car spawn counts, there are 4 chance
 events per round with up to 5 distinct chance outcomes.
 
-Further experiments of the proposed !mp !arch on, for example other Carchess maps or
-entirely different !env are left for future work.
+Overall, I am satisfied with the results.
+They serve as an proof of concept for my proposed !mp extension of !mz and indicate that
+it is capable of learning.
+
+Tuning of hyperparameters, as well as further experiments with the proposed !mp !arch on,
+for example other Carchess maps or entirely different !envs, are left for future work.
