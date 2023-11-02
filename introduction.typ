@@ -83,21 +83,20 @@ For !2p !gs, an additional requirement is that the !g must be !zsum, meaning tha
 The original !impl also can only handle deterministic !envs.
 This excludes its application to games with chance events, such as dice throws.
 
-Finally, !mz has high computational requirements, which results in long training times.
-
-This thesis is structured as following:\
+The rest of this thesis is structured as following: \
 First, theoretical foundations of !rl, !gt and computers playing !gs are outlined.
 They lead up to an understanding of the !mz !algo and its precursors.
 After that, related !algos are reviewed, highlighting their differences, strengths and
 limitations.
 
-Building on this study of prior work and theoretical foundations, I present two
+Building on this study of prior work and theoretical foundations, I present these
 contributions:
-- an extension of !mz to !mp !gs including chance events and arbitrary !rs.
-- performance enhancements to improve the training time.
+- a symmetrical variant of the !effz#footnote[Another work on top of !mz, by
+  #citet("effzero")] latent loss
+- a modification to handle !tss during the search
+- an extension of !mz to !mp !gs with chance events and arbitrary !rs
 
-This thesis is accompanied by an !impl of !mz that includes modifications as proposed by
-me and in prior work.
-With this !impl, the modifications are experimentally evaluated on two aspects:
-First, an ablation study compares the influence of the different performance enhancements.
-Second, I confirm my !mp extension is able to learn a !coll !mp !g.
+This thesis is accompanied by an !impl of !mz that includes the proposed modifications.
+With this !impl, I perform three experiments in @sec-eval:
+First, two ablation studies analyze the influence of each of the proposed modifications.
+Finally, I confirm my !mp extension is able to learn a !coll !mp !g.
