@@ -1,0 +1,16 @@
+representation:
+    _target_: networks.convolutional.ConvRepresentation
+    filters: 64
+    depth: 5
+    latent_features: 150
+    fc_head_args:
+        width: 300
+        hidden_depth: 1
+prediction:
+    _target_: networks.fully_connected.FcPrediction
+    hidden_depth: 3
+dynamics:
+    _target_: networks.gru.GRUDynamics
+    fc_head_args:
+        hidden_depth: 3
+scalar_support_size: 11

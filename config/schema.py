@@ -148,6 +148,7 @@ class TrainConfig:
     random_play_steps: int
     latent_loss_detach: bool
     absorbing_terminal_states: bool
+    grad_norm_clip: float
     optimizer: OptimizerPartial
     learning_rates: LearningRates
     loss_weights: LossWeights

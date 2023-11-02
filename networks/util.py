@@ -1,10 +1,7 @@
-from __future__ import annotations
-
 import itertools
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable
 
-if TYPE_CHECKING:
-    from torch import nn
+from torch import Tensor, nn
 
 
 class ModuleFactory:
@@ -29,3 +26,11 @@ class ModuleFactory:
         mod = self.mod(*args, **kwargs)
         self.parent.add_module(self.name + str(next(self.counter)), mod)
         return mod
+
+
+class NoOp(nn.Module):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def forward(self, x: Tensor) -> Tensor:
+        return x

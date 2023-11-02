@@ -5,7 +5,7 @@ node_selection_score_fn:
     normal_selection_fn:
         _target_: fn.selection.pUCTscore
         c1: 1.5
-dirichlet_noise_blend: 0.1
+dirichlet_noise_blend: 0.2
 dirichlet_noise_alpha: 0.5
 iterations: 30
 debug_log_mcts_ratio: 0.1

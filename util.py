@@ -52,11 +52,12 @@ def monkeypatch_wrap_args(obj: Any, attr: str, wrap_fn: Callable[P, Any]) -> Non
 
 
 def get_output_shape(
-    module: torch.nn.Module,
+    module: Callable[..., torch.Tensor],
     *input_shapes: Sequence[int],
     **kwargs: Any,
 ) -> tuple[int]:
-    module.eval()
+    if isinstance(module, torch.nn.Module):
+        module.eval()
     example_inputs = [torch.zeros(1, *shape) for shape in input_shapes]
     return cast(tuple[int], tuple(module(*example_inputs, **kwargs).shape[1:]))
 

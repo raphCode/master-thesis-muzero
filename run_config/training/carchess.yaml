@@ -1,27 +1,26 @@
-batch_size: 256
+batch_size: 512
 train_selfplay_ratio: 100
-unroll_length: 3
+unroll_length: 6
 random_unroll_length: false
-discount_factor: 0.98
+discount_factor: 1
 n_step_horizon: ${.max_steps_per_game}
-replay_buffer_size: 10_000
-random_play_steps: 3_000
-max_steps_per_game: 1_000
-max_total_steps: 50_000
+replay_buffer_size: 30_000
+random_play_steps: 100_000
+max_steps_per_game: 1000
+max_total_steps: -1
 absorbing_terminal_states: false
 latent_loss_detach: false
-grad_norm_clip: 0.08
+grad_norm_clip: 8e-3
 optimizer:
-    _target_: torch.optim.Adam
-    weight_decay: 1e-5
+    _target_: madgrad.MADGRAD
 learning_rates:
     base: 1e-3
     dynamics: 1
     prediction: 1
     representation: 1
 loss_weights:
-    latent: 1
-    value: 1
+    latent: 0.1
+    value: 0.1
     reward: 1
-    policy: 0.01
+    policy: 0.1
     turn: 1

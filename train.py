@@ -259,7 +259,10 @@ class Trainer:
             )
 
             def log_mean_grad(tag: str, grad: Tensor) -> None:
-                tbs.add_scalar(tag, grad.abs().mean())
+                norm=torch.linalg.vector_norm(grad).cpu().item()
+                tbs.add_scalar(tag, norm)
+                if norm > C.training.grad_norm_clip:
+                    return grad / norm * C.training.grad_norm_clip
 
             value_pes.add_data(
                 self.nets.prediction.value_scale(value_logits), step.value_target
