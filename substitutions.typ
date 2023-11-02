@@ -1,3 +1,5 @@
+#import "common.typ": showrule_regex_captures
+
 #let capitalize(text, first_only: false) = {
   let args = { if first_only { (count: 1) } else { (:) } }
   text.replace(regex("\b[[:alpha:]]"), match => { upper(match.text) }, ..args)
@@ -21,14 +23,6 @@
   } else {
     text + "s"
   }
-}
-
-#let showrule_regex_captures(pattern, callback) = body => {
-  // apply a show rule to the regex,
-  // match it again to get capture groups and call the callback with them
-  let r = regex(pattern)
-  show r: it => { callback(..it.text.match(r).captures) }
-  body
 }
 
 #let get_substitution(key, plural_form: false) = {

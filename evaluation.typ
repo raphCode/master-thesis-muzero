@@ -5,7 +5,16 @@ Hier beschreibst du, wie du deinen Ansatz evaluiert hast. Z.B. beschreiben von
 Experimenten oder Nutzerstudien.
 */
 
+#import "thesis.typ": citet
+#import "drawings/muzero.typ": dyn
 
+This chapter describes the experiments I perform.
+The first part describes the !gs I use as !rl !envs in my experiments.
+The second and third part present the setup of the ablation studies I perform to examine
+the effect of the proposed symmetric latent loss and the use of !tns in the
+search tree, respectively.
+The final part presents the setup I use to examine if my !mp modifications are able to
+learn in a collaborative !mp !g.
 
 == Training !Envs
 
@@ -60,6 +69,7 @@ current !pl in !mp !gs, but degrades to a single-element constant in !sp !gs.]
 
 === The !Coll !G Carchess
 
+-//I evaluated my proposed !mp modifications on the !g Carchess.
 Carchess is a round-based !coll !mp !g on a grid-like structure.
 Core element of the game are a number of lanes that cross at intersections, as well as
 traffic lights that can be toggled to control the flow of traffic.
@@ -186,3 +196,97 @@ The other two !obs tensors are one-dimensional onehot-encodings of the !pl curre
 turn and the current round number in the !g, respectively.
 Their respective lengths are defined by the game settings $n$ and $r$.
 Refer to @tbl-carchess_settings for the specific settings I use.
+
+#pagebreak(weak: true)
+== Ablation Study: Latent Loss Variants
+<sec-eval_ll>
+
+I perform experiments to investigate the effects of the different latent loss variants.
+Specifically, I compare these three variants:
+- no latent loss, like the original !mz !impl proposed by #citet("muzero")
+- latent loss with stop-gradient, like in !effz proposed by #citet("effzero"), see @sec-effzero
+- symmetric latent loss, which I propose in @sec-mod_symm_latent_loss
+
+At each training step, I choose the unroll length $K tilde.op "unif"{1, K_max}$ to ensure the
+unrolling starts at !tss, too.
+
+I use the !g Catch for this evaluation, as introduced in @sec-game_catch.
+
+Apart from the latent loss weight, I fixed all hyperparameters to the values shown in
+
+#[
+
+#import "common.typ": sci_numbers
+
+#show: sci_numbers
+
+#figure(
+  table(
+    columns: (auto, auto),
+    [*Parameter*], [*Value*],
+    [Batch size $B$], [256],
+    [Number of latent features], [50],
+    [Support size for !v and !r !preds $|F|$], [11],
+    [Unroll length $K_max$], [3],
+    [Optimizer], [Adam],
+    [Weight decay], [1e-5],
+    [Learning rate], [1e-3],
+    [Loss weight for $ell^v$], [1],
+    [Loss weight for $ell^r$], [1],
+    [Loss weight for $ell^p$], [1e-2],
+    [Loss weight for $ell^w$], [1],
+    [Discount factor $gamma$], [0.98],
+    [pUCT formula $c_1$], [1.5],
+    [pUCT formula $c_2$], [1e3],
+    [Dirichlet exploration noise $epsilon$], [0.2],
+    [Dirichlet exploration noise $alpha$], [0.5],
+    [Number of MCTS iterations per move], [30],
+    [Training / Selfplay ratio $E$], [100],
+    [Random play steps $R$], [3e3],
+    [Number of Steps in Buffer], [1e4],
+  ),
+  caption: [Hyperparameters of the !nns and MCTS for my evaluation of the latent loss],
+) <tbl-ll_hparams>
+
+]
+
+=== !NN !ARCH
+<sec-eval_catch_nn>
+
+In this section I describe the !nns I use.
+If present, a residual block $r(x)$ consisting of a layer $f(x)$ denotes a skip connection
+around the layer:
+$ r(x) = x + f(x) $
+
+#[
+#import "eval/networks.typ": *
+
+#let latent_size = 50
+#let action_size = 5
+#let turn_size = 3
+#let support_shape = (11, 1)
+
+==== !RNET
+
+All !obs tensors are flattened and concatenated to yield a tensor with 51 elements.
+This !obs tensor is processed by the following layers:
+- #linear(latent_size)
+The !latreps in this !arch have therefore #latent_size dimensions.
+
+==== !DNET
+
+#dnet_input(latent_size, action_size)
+- #res(linear(55))
+- #res(linear(55))
+- #linear(64, act: none)
+#dnet_output(latent_size, support_shape, turn_size)
+
+==== !PNET
+
+#pnet_input(latent_size)
+- #linear(16)
+- #res(linear(16))
+- #linear(16, act: none)
+#pnet_output((11, 1), action_size)
+
+]

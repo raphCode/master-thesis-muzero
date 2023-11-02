@@ -11,6 +11,16 @@
   "with" m = frac(1, sum_(b in A(state)) pred(b)) $
 }
 
+#let showrule_regex_captures(pattern, callback) = body => {
+  // apply a show rule to the regex,
+  // match it again to get capture groups and call the callback with them
+  let r = regex(pattern)
+  show r: it => { callback(..it.text.match(r).captures) }
+  body
+}
+
+#let sci_numbers =  showrule_regex_captures("(\d)e(-?\d)", (frac, exp) => $#frac times 10^#exp$)
+
 #let wc = $w_frak(C)$
 #let wt = $w_frak(T)$
 
