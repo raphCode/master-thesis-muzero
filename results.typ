@@ -120,6 +120,27 @@ Smoothing is applied as outlined in @eq-score_smoothing.
   caption: ablation_scores_caption(nruns, nsteps, 10),
 ) <tbl-scores_tns>
 
+Additionally, I present an analysis of the !mc search tree of both variants near the end
+of training.
+Specifically, I pick multiple logged selfplay !gs at random from the last 100 selfplay !gs
+in each run.
+I then manually inspect the final search tree, that is, after all MCTS iterations have
+passed.
+
+The key aspects observed across multiple search trees are summarized below.
+
+*For both variants:*
+- !r !preds for all !ns correspondig to !g !ss are zero, except for the !tss, where the
+  !preds are near 1 or -1.
+
+*For the variant with !tns:*
+- !tns are present in the search tree, corresponding to !tss of the !g
+- all !n !vs are found to be in the interval $[-1, 1]$
+
+*For the variant without !tns:*
+- !n !vs $v$ with magnitudes $|v| > 2$ are present in the tree
+- no !tns are present and the search progresses beyond !ns corresponding to !tss of !g
+- !ns $>=3$ levels beyond !g end have nonzero !r !preds
 ]
 
 #pagebreak(weak: true)
