@@ -29,6 +29,7 @@ in the long term through its action choices.
 This concept can be mathematically modeled with !mdps.
 
 === Finite !MDPs
+<sec-finite_mdp>
 
 Specifically, an !ag interacts with its !env in discrete time steps $t = 0, 1, 2, ...$.
 At each time $t$, the !ag receives an !obs of the current !s $s_t in S$ and then chooses
@@ -1235,9 +1236,11 @@ and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^
 
 !Ns are selected according to a pUCT formula similar to @eq-alphago_uct.
 Specifically, in !s $s^k$, the child !n corresponding to the !a $a^k$ is selected
-$ a^k = limits("argmax")_(a in A) { Q(s, a) + P(s, a)
-  frac(sqrt(sum_(b in A) N(s, b)), 1 + N(s, a)) \
-  [c_1 + log(frac(sum_(b in A) N(s, b) + c_2 + 1, c_2))] } $
+#neq[
+$ a^k = limits("argmax")_(a in A) { Q(s^k, a) + P(s^k, a)
+  frac(sqrt(sum_(b in A) N(s^k, b)), 1 + N(s^k, a)) \
+  [c_1 + log(frac(sum_(b in A) N(s^k, b) + c_2 + 1, c_2))] } $
+<eq-muzero_puct>]
 where $A$ is the set of possible !as.
 $N(s, a)$ and $P(s, a)$ denote the visit count and prior !prob of the child !n
 corresponding to !a $a$, respectively.
@@ -1355,6 +1358,7 @@ To keep the gradients stable during backpropagation of the unrolled !dnet,
 0.5.
 
 ===== !Envs with Intermediate !Rs
+<sec-muzero_atari>
 
 When applied to !envs with intermediate !rs, such as the Atari suite, !r !preds are
 included in the training.

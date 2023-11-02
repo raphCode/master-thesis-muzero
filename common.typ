@@ -11,6 +11,10 @@
   "with" m = frac(1, sum_(b in A(state)) pred(b)) $
 }
 
+#let wc = $w_frak(C)$
+#let wt = $w_frak(T)$
+
+
 #let series(x, start: 0, end: $K$) = {
   let sub(n) = { if n == 0 {} else { $+#n$ } }
   let item(n) = math.attach(x, b: $t$ + sub(n))

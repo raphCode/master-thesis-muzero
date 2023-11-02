@@ -4,7 +4,7 @@ Hier beschreibst du, was du in der Arbeit neues gemacht hast, und wie du es impl
 hast.
 */
 
-#import "thesis.typ": citet, blockquote
+#import "thesis.typ": citet, blockquote, neq
 #import "drawings/muzero.typ": rep, dyn, pred
 
 This chapter is divided into four parts.
@@ -65,6 +65,7 @@ Generating strong moves for the other !pl, black in example, is achieved by nega
 @muzero
 
 === Fixed Turn Order
+<sec-limits_turn_order>
 
 The limitation to !gs with up to two !pls implicitly makes assumptions about the turn
 order.
@@ -156,24 +157,23 @@ $arrow(x)$ to !mp data.
 Making informed decisions within the search tree requires not only individual !rs and !vs,
 but also an understanding who can make a decision at a particular !n.
 //In !mz, an alternating turn order is hardcoded in the search for !vp !gs.
-In !mz, the turn order is hardcoded for !sp and !2p !gs and therefore represents domain
-knowledge about the !env.
+As outlined in @sec-limits_turn_order, in the original !mz !impl, the turn order is
+hardcoded for !sp and !2p !gs and therefore represents domain knowledge about the !env.
 
 To achieve a more general !algo, my !impl does not make any assumptions about the turn
 order.
 Instead, the next !pl at turn is learnt by the !dnet #dyn.
 I chose this design since in !mp !gs, the next !pl at turn may depend on the !h of !as.
 
-I added an additional output head $w$ to the !dnet #dyn:
+I propose to add an additional output head $w$ to the !dnet #dyn:
 $ (s^n, r^n, w^n) = #dyn (s^(n-1), a^(n-1)) $
-which predicts the !pl $w^n$ at turn in !s
-$s^n$.
-It is implemented as a categorical distribution $T$ over the set of !pls $W$:
-$ T(s, w) = Pr(w|s) $
+The output $w^n$ predicts a !prob distribution over the set of possible !pls $W$, estimating
+how likely !pl $y in W$ is at turn in !s $s^n$:
+$ w^n (y) = Pr(y|s^n) $
 
-During MCTS, for each !s $s^n$ encountered, the current !pl $w^n$ is assumed to be the one
+During MCTS, for each !s $s^n$ encountered, the current !pl $y^n$ is assumed to be the one
 with the highest predicted !prob:
-$ w^n = limits("argmax")_(w in W) ( T(s^n, w) ) $
+$ y^n = op("argmax", limits: #true)_(y in W) w^n (y) $
 
 The turn output $w$ is trained like the !r $arrow(r)$, based on ground-truth labels $w_t$
 given by the !g simulator during selfplay.
@@ -181,6 +181,8 @@ For this purpose an additional loss term is introduced
 $ ell^w (w_(t+n), w_t^n) $
 which aligns the !net !preds $w_t^n$ with their respective targets $w_(t+n)$ for all
 $n = 1...K$, where $K$ is the unroll length.
+
+In my !impl, I use a categorical cross-entropy loss for $ell^w$.
 
 @fig-raphzero_training shows this change by the added $w$ in the !env transitions and
 !dnet !preds, as well as the additional loss symbol $ell^w$.
@@ -196,11 +198,12 @@ where $gamma$ is the !rl !df, as introduced in @sec-rl_return.
 
 Let $Q_i (s, a)$ denote the $i$<no-join>-th component of this vector.
 
-In !s $s^k$, maxn-MTCS then selects an !a $a^k$ as to maximize $Q_i (s^k, a^k)$ where $i =
-w^k$, the !pl currently at turn, as outlined in @sec-mod_turn_pred:
-$ a^k = limits("argmax")_a ( arrow(Q)_w_i (s, a) + u(s, a) ) $
-where $u(s, a)$ represents some bonus term to incorporate exploration and the prior !probs
-$P(s^k, a^k)$ into the decision.
+In !s $s^k$, maxn-MTCS then selects an !a $a^k$ as to maximize $Q_i (s^k, a^k)$ where
+$i = y^k$, the !pl currently at turn, as outlined in @sec-mod_turn_pred.
+
+Specifically, I use @eq-muzero_puct to select !as in the search tree, with 
+$Q(s^k, a) = Q_i (s^k, a)$.
+The constants $c_1$ and $c_2$ are detailed in @sec-eval.
 
 === Chance Events
 <sec-mod_chance>
@@ -209,13 +212,13 @@ I model stochastic !envs with an explicit chance !pl.
 He is at turn whenever a chance event occurs in the !g.
 
 #[
-#let wc = $w_frak(C)$
+#import "common.typ": wc
 
 The occurrence of chance events is given by the !dnet as part of the turn order !pred $w$.
 An additional special !pl #wc is added to the set of !pls $W$:
 $ W' = W union {wc} $
 
-If $w^n = #wc$, the current decision !n $s^n$ is assumed to be a chance event.
+If $y^n = #wc$, the current decision !n $s^n$ is assumed to be a chance event.
 The !probs of the different chance outcomes are predicted by the !pnet #pred.
 During MCTS, child !ns of a chance event $s^n$ are selected solely according to the !p $p^n$.
 
@@ -261,9 +264,15 @@ The training setup with my proposed modifications is summarized in @fig-raphzero
 ]
 ]
 
-== Further Enhancements
+== Further Modifications
 
-Furthermore, I implemented the following modifications:
+I spent a significant amount of time and effort trying to get !mz to train reliably and
+accurately.
+At many points I was not sure if low performance is caused by a software bug or bad design
+choices related to the !nets and their training.
+I therefore explored some ideas on how to improve the design of the !arch to help !net
+convergence.
+I outline some of the notable changes I implemented below.
 
 === Symmetric Latent Similarity Loss
 <sec-mod_symm_latent_loss>
@@ -337,5 +346,142 @@ triggered immediatly with the !tn's predicted !v.
 To realize the prediction of !tss, I add another special !pl to the set of possible turn
 order !preds $W$:
 The terminal !pl $#wt in W$ is at turn when the !env reaches a !ts.
+
+]
+
+== Overview of the !Impl
+
+This section summarizes my !mz !impl and describes the process of search, selfplay and
+training.
+
+=== General
+<sec-raphzero_general>
+
+At a high level, my !impl is similar to !mz:
+It performs selfplay with MCTS to generate training data, and trains the !nns on this
+data.
+However, !mz by #citet("muzero") is a large-scale !arch, running selfplay and training in
+parallel distributed over multiple machines.
+In contrast, my !impl is designed to operate on a single machine, and uses a single
+process#footnote[parallelization is possible, but was never implemented].
+Specifically, my !impl performs selfplay and training in alternation.
+
+The time base in my !impl is the total number of steps $n$ performed in the !rl !env.
+A step is defined as a single !s-!a transition, as introduced in @sec-finite_mdp.
+For example, a !2p !g with 10 turns and a single chance event contributes
+$10 * 2 + 1 = 21$ !env steps.
+Selfplay and training metrics are logged with respect to this time base, as detailed in
+@sec-raphzero_data_gen and @sec-raphzero_training.
+
+The !nns and MCTS generally act on the set of possible !as $A$:
+MCTS selects actions $a in A$, and the !net policy !preds $p$ are distributions over the
+set of !as $A$.
+Since my !impl also handles stochastic !gs, chance outcomes must also be included in $A$
+The set of possible !as $A$ is thus the union of the set $A'$ of !as !pls can take and the
+set of possible chance outcomes $C$:
+$ A = A' union C $
+
+For concrete values for all of the settings and hyperparameters introduced in this
+section, refer to @sec-eval.
+
+=== Data Generation 
+<sec-raphzero_data_gen>
+
+To generate training data, !gs are played and their !traj is recorded.
+Specifically, $T$ steps are taken in each !g, until the !g terminates naturally, or the
+configurable setting $M$ is reached, at which the !g is truncated.
+
+#[
+#import "common.typ": wc, wt
+
+At chance events, that is when $w_t = wc$, the !g simulator provides the chance outcomes
+$c_t$ as a distribution over !as:
+#neq[
+$ c_t (a|s_t) = P(s, a) $
+<eq-chance_outcomes>]
+where $a in C$, the set of possible chance actions.
+
+#let tup(policy) = $(s_t, a_t, r_(t+1), w_(t+1), policy, G_t)$
+At each time step $t = u, u + 1, ..., T - 1, T$ a tuple $D$ of training data
+is recorded:
+$ D = cases(
+  tup(pi_t) &"if" w_t eq.not wc \
+  tup(c_t) &"if" w_t = wc \
+  ) $
+The recorded !traj begins at the first time step $u$ where the !g provides an !obs, that is,
+the current !pl at turn $w_t$ is not the chance !pl:
+$ u = min_t t " subject to " w_t in.not {wt, wc} and 0 <= t <= T $
+
+The tuple of training data $D$ contains the following data:
+- $s_t$: !g !s
+- $a_t$: !a taken
+- $r_(t+1)$: experienced !r
+- $w_(t+1)$: !pl at turn in the next !g !s $s_(t+1)$
+- $pi_t$: MCTS !p according to @eq-mcts_policy 
+- $c_t$: chance outcomes according to @eq-chance_outcomes
+- $G_t$: n-step !ret according to @eq-rl_nstep
+
+In all !gs, if the !s $s_t$ is a chance event, the !a $a_t$ is sampled from the
+distribution of chance outcomes $c_t$, provided by the !g simulator:
+$ a_t tilde.op c_t "if" w_t = wc $
+
+When a !g finishes, its metrics such as the score (cumultative !r) are logged.
+The metrics are associated with the total step number $n$ (see @sec-raphzero_general) when
+the !g was started.
+As an example, if all !gs take 10 steps, the score of the first !g is logged at $n=0$, the
+second !g's score at $n=10$, and so on.
+
+==== Warmup with random play
+
+If the number of total !env steps $n$ is below a configurable threshold $R$ at the
+beginning of a !g, !pl !as are selected randomly in the !g.
+Specifically, all !as $a_t$ at time $t$ where $w_t eq.not wc$ are sampled from a uniform
+distribution over the set of legal !as $A(s_t)$.
+MCTS is not used in these !gs, and no !nn inferences take place.
+]
+
+This period of random play quickly generates training data so that the !dnet #dyn can
+learn a model of the !env in a minimal amount of wall clock time.
+
+==== Selfplay and Search
+
+As soon as the number of total !env steps $n$ is above the threshold $R$, selfplay with
+MCTS is used to generate data.
+
+Dirichlet noise is blended into the root !n according to @eq-dirichlet_exploration.
+!As are selected as outlined in @sec-mod_maxn.
+
+=== Training
+<sec-raphzero_training>
+
+The latest $N$ tuples of training data are stored in a buffer for training.
+The buffer additionally keeps track of the total number $i$ of training data tuples added
+to the buffer, and the total number $o$ of training data tuples consumed by the training
+process.
+After each played !g, the generated training data is added to the buffer, and $i$ is
+incremented by length of the !traj:
+$i' = i + (T - u + 1)$, where $u$ and $T$ denote the first and last time step of the !g
+!traj, as outlined in @sec-raphzero_data_gen.
+
+#[
+#import "common.typ": series_p, series_a, series_r, series_g, wt, wc
+
+When data is sampled from the buffer for training, the number $o$ is incremented by $K *
+B$, where $K$ is the unroll length, and $B$ the batch size:
+$o' = o + (B * K)$
+
+The ratio $o/i$ is roughly held constant at the setting $E$ by training for an appropriate
+amount of times after each !g:
+#neq[
+$ o/i approx E $
+<eq-train_ratio>]
+
+A batch of training data is sampled from the buffer such as the first !g !s $s_0$ contains
+an !obs, that is $w_0 in.not {wt, wc}$.
+Training and losses are described in in @sec-muzero_atari and @sec-mod_turn_pred.
+For the latent similarity loss $ell^l$ I use negative cosine similarity.
+
+I a discrete scalar support $F$ for the !r and !v !preds, as described in
+@sec-muzero_atari, but without the transform $e(x)$.
 
 ]
