@@ -18,11 +18,12 @@
 #let dnet_output(latent_size, support_shape, turn_size) = [
   The resulting #{latent_size + support_shape.product() + turn_size}-dimensional tensor is
   split and reshaped into three tensors, with #latent_size elements, shape
-  #tensor_shape(support_shape) and #turn_size elements respectively.
+  #tensor_shape(support_shape) and #turn_size elements, for the latent output, !r support
+  and turn order !pred, respectively.
 ]
 
 #let pnet_output(support_shape, action_size) = [
   The resulting #{support_shape.product() + action_size}-dimensional tensor is split and
   reshaped into two tensors, with shape #tensor_shape(support_shape) and #action_size
-  elements respectively.
+  elements, for the !v support and !p !preds, respectively.
 ]

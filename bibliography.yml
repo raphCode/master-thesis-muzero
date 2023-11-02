@@ -673,6 +673,16 @@ vq_vae:
   parent: *arxiv
   doi: 10.48550/arXiv.1711.00937
 
+adam:
+  type: article
+  title: "Adam: A Method for Stochastic Optimization"
+  date: 2014-12-22
+  author: 
+    - Diederik P. Kingma
+    - Jimmy Ba
+  parent: *arxiv
+  doi: 10.48550/arXiv.1412.6980
+
 uct_mp:
   type: article
   title: An Analysis of UCT in Multi-player Games
@@ -683,3 +693,13 @@ uct_mp:
     title: Computers and Games
     publisher: Springer Berlin Heidelberg
   page-range: 37-49
+
+madgrad:
+  type: article
+  title: "Adaptivity without Compromise: A Momentumized, Adaptive, Dual Averaged Gradient Method for Stochastic Optimization"
+  date: 2021-01-26
+  author: 
+    - Aaron Defazio
+    - Samy Jelassi
+  parent: *arxiv
+  doi: 10.48550/arXiv.2101.11075

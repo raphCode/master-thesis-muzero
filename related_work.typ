@@ -200,3 +200,9 @@ In @fig-effzero_loss, the stop-gradient is reflected by the unidirectionality $e
 arrow.
 
 ]
+
+In my !arch, I also implement a latent similarity loss, but propose to remove the
+stop-gradient operation, as outlined in @sec-mod_symm_latent_loss.
+In @sec-eval_ll, I evaluate the influence of the latent loss and the stop-gradient
+operation.
+

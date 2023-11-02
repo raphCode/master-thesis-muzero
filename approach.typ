@@ -307,6 +307,7 @@ Consequently, I see no risk of latent collapse in the !effz !arch, and propose t
 the stop-gradient operation.
 
 === !TNs in the MCTS
+<sec-mod_mcts_tns>
 
 #[
 #import "drawings/muzero.typ": dyn

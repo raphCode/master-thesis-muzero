@@ -68,6 +68,7 @@ The !obs includes a second tensor with one element, set to a constant 1.
 current !pl in !mp !gs, but degrades to a single-element constant in !sp !gs.]
 
 === The !Coll !G Carchess
+<sec-carchess>
 
 -//I evaluated my proposed !mp modifications on the !g Carchess.
 Carchess is a round-based !coll !mp !g on a grid-like structure.
@@ -228,7 +229,7 @@ Apart from the latent loss weight, I fixed all hyperparameters to the values sho
     [Number of latent features], [50],
     [Support size for !v and !r !preds $|F|$], [11],
     [Unroll length $K_max$], [3],
-    [Optimizer], [Adam],
+    [Optimizer], [Adam#footnote[@adam]],
     [Weight decay], [1e-5],
     [Learning rate], [1e-3],
     [Loss weight for $ell^v$], [1],
@@ -290,3 +291,114 @@ The !latreps in this !arch have therefore #latent_size dimensions.
 #pnet_output((11, 1), action_size)
 
 ]
+
+== Ablation Study: !TNs
+
+I perform experiments to investigate the effect of predicting the end of the !g and using
+!tns in the search tree.
+Specifically, I compare these two variants:
+- no !tns, like the original !mz !impl proposed by #citet("muzero"). During training,
+  absorbing !ss are used for up to $K$ steps beyond the !g end.
+- using !tns, like proposed in @sec-mod_mcts_tns
+
+I use the !g Catch for this evaluation, as introduced in @sec-game_catch.
+I use the same setup as in @sec-eval_catch_nn, with the following differences:
+- the latent loss weight for $ell^l$ is set to zero
+
+=== !NN !ARCH
+
+I use the same !nns as outlined in @sec-eval_catch_nn.
+
+== Application to Carchess
+
+I evaluate my !mp extension on the !g Carchess, as outlined in @sec-carchess.
+I use the hyperparameters according to @tbl-carchess_hparams.
+
+#[
+#import "common.typ": sci_numbers
+#show: sci_numbers
+
+#figure(
+  table(
+    columns: (auto, auto),
+    [*Parameter*], [*Value*],
+    [Batch size $B$], [512],
+    [Number of latent features], [150],
+    [Support size for !v and !r !preds $|F|$], [11],
+    [Unroll length $K_max$], [6],
+    [Optimizer], [MADGRAD#footnote[@madgrad]],
+    [Learning rate], [1e-3],
+    [Loss weight for $ell^l$], [0.1],
+    [Loss weight for $ell^v$], [0.1],
+    [Loss weight for $ell^r$], [1],
+    [Loss weight for $ell^p$], [0.1],
+    [Loss weight for $ell^w$], [1],
+    [Discount factor $gamma$], [0.98],
+    [pUCT formula $c_1$], [2],
+    [pUCT formula $c_2$], [1e3],
+    [Dirichlet exploration noise $epsilon$], [0.2],
+    [Dirichlet exploration noise $alpha$], [0.5],
+    [Number of MCTS iterations per move], [30],
+    [Training / Selfplay ratio $E$], [100],
+    [Random play steps $R$], [1e5],
+    [Number of Steps in Buffer], [3e4],
+  ),
+  caption: [Hyperparameters of the !nns and MCTS for my evaluation of the latent loss],
+) <tbl-carchess_hparams>
+
+]
+
+=== !NN !ARCH
+
+In this section I describe the !nns I use.
+If present, a residual block $r(x)$ consisting of a layer $f(x)$ denotes a skip connection
+around the layer:
+$ r(x) = x + f(x) $
+
+#[
+#import "eval/networks.typ": *
+
+#let latent_size = 150
+#let action_size = 100
+#let turn_size = 3
+#let support_shape = (11, 2)
+
+#let conv(k, f) = [
+  ReLU pre-activation, Convolution with #f filters of kernel size $#k x #k$ and padding such that the input size is retained
+]
+
+==== !RNET
+
+The image !obs tensor is processed by a stack of these layers:
+- Convolution with kernel size 1x1, 64 Filters
+- 4x Residual Blocks, each consisting of: ReLU pre-activation and Convolution with kernel size 1x1, 64 Filters
+- max pooling along the height and width of the image, concatenation of the tensors
+
+The resulting image tensor is flattened and concatenated with the other !obs input tensors.
+A linear layer processes this tensor and outputs a 150-dimensional latent tensor.
+
+==== !DNET
+
+#dnet_input(latent_size, action_size)
+The tensor is then processed by a stack of these layers:
+- 3x Residual Blocks, each consisting of: ReLU pre-activation and Linear Layer of 250 output neurons
+- #linear(26, act: none)
+The resulting 26-dimensional tensor is split and reshaped into two tensors, with shape
+11×2 and 3 elements, for the !r support and turn order !pred, respectively.
+
+
+The latent output is produced by a single GRU cell of hidden size #latent_size and input
+size #action_size.
+
+
+==== !PNET
+
+#pnet_input(latent_size)
+The tensor is then processed by a stack of these layers:
+- 4x Residual Blocks, each consisting of: ReLU pre-activation and Linear Layer of 150 output neurons
+- Residual Block, consisting of: ReLU pre-activation and Linear Layer of 122 output neurons
+The resulting 122-dimensional tensor is split and reshaped into two tensors, with shape
+11×2 and 100 elements, for the !v support and !p !preds, respectively.
+
+]
+
