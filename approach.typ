@@ -266,6 +266,7 @@ The training setup with my proposed modifications is summarized in @fig-raphzero
 Furthermore, I implemented the following modifications:
 
 === Symmetric Latent Similarity Loss
+<sec-mod_symm_latent_loss>
 
 As outlined in @sec-effzero, #citet("effzero") already layed the groundwork for
 improvements in !sampeff by introducing a similarity loss between !preds of #rep and #dyn.
