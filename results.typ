@@ -154,8 +154,8 @@ The key aspects observed across multiple search trees are summarized below.
 #let w = 30
 
 Here I report the results of the applications of my !impl of !mz to Carchess.
-@fig-plot_carchess shows the score during selfplay over #nsteps steps on the map
-"tutorial".
+@fig-plot_carchess shows the score during a single run of selfplay over #nsteps !g steps
+on the map "tutorial".
 I define the score in Carchess as the cumultative !r as experienced by a single !pl.
 
 At each time step $t$ in the plot, the mean and 95% confidence interval is computed over
@@ -165,8 +165,8 @@ The plot thus shows the average score, as computed over a sliding window of size
 #figure(
   image("experiment_data/carchess/plot.svg"),
   caption: [
-    Mean Score during selfplay. The Error band shows a 95% confidence interval of the last
-    #w scores at each data point.
+    Mean score during a single run of selfplay. The error band shows a 95% confidence
+    interval of the last #w scores at each data point.
     ],
 ) <fig-plot_carchess>
 

@@ -39,8 +39,9 @@ the additional latent loss provides feedback to both the !repr #rep and !dnet #d
 However, the findings suggest that the symmetric latent loss might provide detrimental
 training signals to the !rnet #rep.
 
-On the other hand, no latent collapse is observed without the stop-gradient operation, as
-would be evident from very poor playing performance.
+On the other hand, the performance is not significantly worse than !Mz, indicating that no
+latent collapse occurs without the stop-gradient operation, as would be evident from very
+poor playing performance.
 This is consistent with my theory that the other training losses achieve sufficient
 decorrelation of the latent space to prevent a collapse, as outlined in
 @sec-mod_symm_latent_loss.
@@ -53,8 +54,8 @@ that the observed differences can also be explained by the variance of the data.
 Second, the !g Catch is very simple and might not exhibit enough complexity for the !nns
 used.
 
-Exploring bigger, more challenging !env is therefore an interesting direction for further
-research about latent losses in !mz.
+Exploring bigger, more challenging !env with latent losses may therefore be an interesting
+direction for further research about latent losses in !mz.
 
 == Ablation Study: !TNs
 
