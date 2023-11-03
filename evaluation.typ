@@ -260,7 +260,7 @@ around the layer:
 $ r(x) = x + f(x) $
 
 #[
-#import "eval/networks.typ": *
+#import "networks.typ": *
 
 #let latent_size = 50
 #let action_size = 5
@@ -356,16 +356,12 @@ around the layer:
 $ r(x) = x + f(x) $
 
 #[
-#import "eval/networks.typ": *
+#import "networks.typ": *
 
 #let latent_size = 150
 #let action_size = 100
 #let turn_size = 3
 #let support_shape = (11, 2)
-
-#let conv(k, f) = [
-  ReLU pre-activation, Convolution with #f filters of kernel size $#k x #k$ and padding such that the input size is retained
-]
 
 ==== !RNET
 
