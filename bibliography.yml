@@ -703,3 +703,18 @@ madgrad:
     - Samy Jelassi
   parent: *arxiv
   doi: 10.48550/arXiv.2101.11075
+
+gru:
+  type: article
+  title: Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation
+  date: 2014-06-03
+  author: 
+    - Kyunghyun Cho
+    - Bart van Merrienboer
+    - Caglar Gulcehre
+    - Dzmitry Bahdanau
+    - Fethi Bougares
+    - Holger Schwenk
+    - Yoshua Bengio
+  parent: *arxiv
+  doi: 10.48550/arXiv.1406.1078

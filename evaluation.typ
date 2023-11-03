@@ -325,7 +325,7 @@ I use the hyperparameters according to @tbl-carchess_hparams.
     [Batch size $B$], [512],
     [Number of latent features], [150],
     [Support size for !v and !r !preds $|F|$], [11],
-    [Unroll length $K_max$], [6],
+    [Unroll length $K$], [6],
     [Optimizer], [MADGRAD#footnote[@madgrad]],
     [Learning rate], [1e-3],
     [Loss weight for $ell^l$], [0.1],
@@ -343,7 +343,7 @@ I use the hyperparameters according to @tbl-carchess_hparams.
     [Random play steps $R$], [1e5],
     [Number of Steps in Buffer], [3e4],
   ),
-  caption: [Hyperparameters of the !nns and MCTS for my evaluation of the latent loss],
+  caption: [Hyperparameters of the !nns and MCTS for my evaluation on Carchess],
 ) <tbl-carchess_hparams>
 
 ]
@@ -371,10 +371,15 @@ $ r(x) = x + f(x) $
 
 The image !obs tensor is processed by a stack of these layers:
 - Convolution with kernel size 1x1, 64 Filters
-- 4x Residual Blocks, each consisting of: ReLU pre-activation and Convolution with kernel size 1x1, 64 Filters
-- max pooling along the height and width of the image, concatenation of the tensors
+- 4x Residual Blocks, each consisting of: ReLU pre-activation and Convolution with
+  kernel size 3x3, 64 Filters and Padding of 1 in each direction
+- Per-channel max pooling along the height and width of the image, concatenation of the tensors.
+  Specifically, an image tensor of shape $w times h$ and with $c$ channels yields two
+  tensors of shape $c times w$ and $c times h$, which are concatenated to a
+  $c times (w+h)$ tensor.
 
-The resulting image tensor is flattened and concatenated with the other !obs input tensors.
+The resulting tensor of shape 64x20 is flattened and concatenated with the other !obs
+input tensors.
 A linear layer processes this tensor and outputs a 150-dimensional latent tensor.
 
 ==== !DNET
@@ -386,9 +391,10 @@ The tensor is then processed by a stack of these layers:
 The resulting 26-dimensional tensor is split and reshaped into two tensors, with shape
 11×2 and 3 elements, for the !r support and turn order !pred, respectively.
 
-
-The latent output is produced by a single GRU cell of hidden size #latent_size and input
-size #action_size.
+The latent output $s^(k+1)$ is produced by a single GRU#footnote[as proposed by @gru] cell
+operating on the latent input $s^k$ and !a $a^k$.
+Specifically, the input hidden state of the GRU cell is the #{latent_size}-dimensional
+tensor representing !s $s^k$ and the cell input is the !a onehot representing $a^k$.
 
 
 ==== !PNET
