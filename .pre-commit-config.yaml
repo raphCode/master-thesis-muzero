@@ -7,9 +7,15 @@ repos:
         language: python
         files: "bibliography.yml"
         additional_dependencies: ["pyyaml"]
-      - id: check_typst_compile
-        name: Check if the document compiles without errors
+      - id: check_typst_compile_paper
+        name: Check if the paper compiles without errors
         entry: typst compile main.typ
+        language: system
+        always_run: true
+        pass_filenames: false
+      - id: check_typst_compile_slides
+        name: Check if the slides compile without errors
+        entry: typst compile slides.typ
         language: system
         always_run: true
         pass_filenames: false
