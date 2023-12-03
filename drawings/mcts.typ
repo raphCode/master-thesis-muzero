@@ -4,7 +4,7 @@
   auto, ([], [], []), (auto, (auto, [], none, []), [])
 )
 
-#let draw_mcts(phase) = {
+#let draw_phase(phase) = {
   assert(1 <= phase and phase <= 4)
 
   canvas(length: 0.7cm, {

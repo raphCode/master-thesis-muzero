@@ -697,7 +697,7 @@ in @fig-mcts_phases.
 
 #[
 
-#import "drawings/mcts.typ": draw_mcts
+#import "drawings/mcts.typ"
 
 #let labels = (
   [Selection],
@@ -713,7 +713,7 @@ in @fig-mcts_phases.
     row-gutter: 5mm,
     ..labels.map(strong).map(align.with(center + bottom)).map(par.with(justify: false)),
     ..for i in range(labels.len()) {
-      (draw_mcts(i + 1), )
+      (mcts.draw_phase(i + 1), )
     }.map(align.with(center))
   ),
   caption: [The four phases of one iteration of !mcts],
