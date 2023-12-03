@@ -1,4 +1,5 @@
 #import "@preview/slydst:0.1.0": *
+#import "substitutions.typ"
 
 #show: slides.with(
   title: "Master's Thesis: MuZero",
@@ -6,6 +7,8 @@
   authors: (),
   layout: "medium",
 )
+
+#show: substitutions.subs
 
 #let todo = text.with(fill: red)
 
@@ -148,7 +151,7 @@ image/animation of MC search tree: build tree incrementally across multiple slid
 - !effz uses a stop-gradient (align !dnet towards !rnet)
 - I propose to remove the stop-gradient (align both !nn towards each other)
 
-== !TNS in the MCTS
+== !TNs in the MCTS
 
 - Original !mz may search beyond !g end
 - I propose:
@@ -165,7 +168,7 @@ image/animation of MC search tree: build tree incrementally across multiple slid
 
 #todo[image here]
 
-== Ablation Study: !TNS
+== Ablation Study: !TNs
 
 #todo[image here]
 
