@@ -338,18 +338,22 @@
         circle("node", radius: nodesize)
         let n = node.content
         content("node", [$s^#n$<no-join>], name: "node")
-        if parent != none {
-          get-ctx(ctx => {
+        get-ctx(ctx => {
+          let (anchors, m) = (("left", "right"), -1)
+          if parent != none {
             let (px, py, _) = coordinate.resolve(ctx, parent)
             let (nx, ny, _) = coordinate.resolve(ctx, "node")
-            let (anchors, m) = if px < node.x {
-              (("left", "right"), -1)
-            } else {
-              (("right", "left"), 1)
+            if px > node.x {
+              (anchors, m) = (("right", "left"), 1)
             }
-            let (a_pred, a_dyn) = anchors
-            let offset(dx, to: "node") = (rel: (x: dx * m), to: to)
+          }
+          let (a_pred, a_dyn) = anchors
+          let offset(dx, to: "node") = (rel: (x: dx * m), to: to)
 
+          net_inference(offset(-arrowdist), offset(-1.5), "pred")
+          content(offset(-1.6), $ v^#n, p^#n $, anchor: a_pred)
+
+          if parent != none {
             let b = (a: "node", number: arrowdist + 0.15 + 0.3, abs: true, b: parent)
             content(
               b,
@@ -358,9 +362,6 @@
               padding: 0.05
             )
 
-            net_inference(offset(-arrowdist), offset(-1.5), "pred")
-            content(offset(-1.6), $ v^#n, p^#n $, anchor: a_pred)
-
             let a = (a: parent, number: arrowdist, abs: true, b: "node")
             content(
               (a: parent, b: "node", number: arrowdist + 0.3, abs: true),
@@ -368,8 +369,8 @@
               anchor: "bottom-" + a_pred,
               padding: 0.05,
             )
-          })
-        }
+          }
+        })
       }
     },
     draw-edge: (from, to, node) => {
