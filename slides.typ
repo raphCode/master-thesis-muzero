@@ -31,7 +31,7 @@
 
 == !mz
 
-- Model-based deep !RL !Algo
+- Model-based deep !RL !algo
 - Developed by Google DeepMind
 - !Gs: Go, shogi, chess, Atari
 - Evolution:
@@ -109,7 +109,8 @@
 == Summary
 
 - Like !az, but no simulator in the tree search
-- Instead: Learns a model of the !env
+- Instead: Learns a model of the !env dynamics
+- Represents !g !ss in a latent space
 
 == !NNs
 
@@ -137,9 +138,10 @@
 == !NN Training
 
 - Sample $K$ consecutive training steps from buffer
-- Start with !obs, then unroll !dnet for $K-1$ steps using !as
-- End-to-end learning of !ps, !vs and !rs $K$ steps ahead
+- Start with !obs
+- Then unroll !dnet for $K-1$ steps using !as
 - Backpropagation-through-time
+- End-to-end learning of !ps, !vs and !rs $K$ steps ahead
 
 #todo[image]
 
@@ -167,8 +169,8 @@
 
 - Add special chance !pl to the set of !pls
 - Is at turn when chance events occur
-- !P target are the chance outcome !probs (ground-truth from simulator)
-- MCTS selects !as according to predicted !p when the chance !pl is at turn
+- !P targets are the chance outcome !probs (ground-truth from simulator)
+- MCTS selects !as according to predicted chance !p when the chance !pl is at turn
 
 = Evaluation
 
