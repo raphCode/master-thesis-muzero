@@ -15,8 +15,6 @@
 
 #show: substitutions.subs
 
-#let todo = text.with(fill: red)
-
 #let reveal(content, condition: false) = {
   if condition {
     content
@@ -90,7 +88,6 @@
   - *!p*: Distribution over !as \
     _What are promising moves to try in the search?_
 
-#todo[maybe image here]
 == !MCTS
 
 - Builds (!g) tree of possible future !as
