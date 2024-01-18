@@ -88,16 +88,21 @@
 
 == Selfplay and !NN Training
 
-#let pad = box.with(width: 3cm)
+#[
+#let row(symbol, description, type) = {
+  box(width: 3.5cm)[*#symbol*: #description]
+  text(type, gray)
+}
 
 - Play !gs using MCTS for both !pls
 - Record training data $(s, pi, z)$ for each !g !s
-  - #pad[*$s$*: !G !s] Observation image
-  - #pad[*$pi$*: MCTS !p] Distribution over !as \
+  - #row($s$, [!G !s], [!Obs image])
+  - #row($pi$, [MCTS !p], [Distribution over !as]) \
     _Which !as of the root !n were visited by the search?_
-  - #pad[*$z$*: !G Outcome] Scalar\
+  - #row($z$, [!G Outcome], [Scalar]) \
     _Ended the game in a win, loss or draw?_
 - Supervised training on this data
+]
 
 = !mz
 
