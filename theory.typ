@@ -1230,7 +1230,20 @@ During the MCTS expansion phase, the !dnet #dyn is used to obtain the next !s $s
 and the !r $r^(n+1)$ associated with the !s transition for an !a $a^n$ in !s $s^n$.
 
 #figure(
-  mcts,
+  mcts(
+    (
+      0,
+      (
+        1,
+        (true, true, false),
+        (2, 3, true),
+      ),
+      (
+        true,
+        (true, true, true, true),
+      ),
+    )
+  ),
   caption: [!Mcts in !mz]
 ) <fig-muzero_mcts>
 

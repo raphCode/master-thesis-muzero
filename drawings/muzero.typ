@@ -309,20 +309,7 @@
   connect_last()
 })
 
-#let mcts = canvas(length: 1cm, {
-  let data = (
-    0,
-    (
-      1,
-      (true, true, false),
-      (2, 3, true),
-    ),
-    (
-      true,
-      (true, true, true, true),
-    ),
-  )
-
+#let mcts(data) = canvas(length: 1cm, {
   let nodesize = 0.35
   let arrowdist = 0.5
 
