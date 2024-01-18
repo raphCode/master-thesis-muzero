@@ -3,7 +3,10 @@
 
 #show: slides.with(
   title: "Master's Thesis: MuZero",
-  subtitle: "Deep Reinforcement Learning with MuZero: Theoretical Foundations, Variants, and Implementation for a Collaborative Game",
+  subtitle: [
+    Deep Reinforcement Learning with MuZero:
+    Theoretical Foundations, Variants, and Implementation for a Collaborative Game
+  ],
   authors: (),
   layout: "medium",
 )
@@ -175,4 +178,3 @@ image/animation of MC search tree: build tree incrementally across multiple slid
 == Application to Carchess
 
 #todo[image here]
-
