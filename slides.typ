@@ -170,35 +170,10 @@
 - !P target are the chance outcome !probs (ground-truth from simulator)
 - MCTS selects !as according to predicted !p when the chance !pl is at turn
 
-= More Modifications
 
-== Symmetric Latent Similarity Loss
 
-- Based on !effz
-- Additional loss to align !latreps of !dnet and !rnet for same !g !ss
-- !effz uses a stop-gradient (align !dnet towards !rnet)
-- I propose to remove the stop-gradient (align both !nn towards each other)
 
-== !TNs in the MCTS
 
-- Original !mz may search beyond !g end
-- I propose:
-  - Predict terminal !g !ss during search
-  - Disallow !ns beyond !tss
-- Implementation:
-  - Add special terminal !pl to the set of !pls
-  - Is at turn when the !g terminated
-  - Trained on ground-truth labels from the !g simulator
-
-= Experiments
-
-== Ablation Study: Symmetric Latent Similarity Loss
-
-#todo[image here]
-
-== Ablation Study: !TNs
-
-#todo[image here]
 
 == Application to Carchess
 
