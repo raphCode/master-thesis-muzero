@@ -362,7 +362,6 @@
               padding: 0.05
             )
 
-            let a = (a: parent, number: arrowdist, abs: true, b: "node")
             content(
               (a: parent, b: "node", number: arrowdist + 0.3, abs: true),
               $ a^#(n - 1) $,
