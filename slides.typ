@@ -1,5 +1,6 @@
 #import "@preview/slydst:0.1.0": *
 #import "substitutions.typ"
+#import "drawings/muzero.typ"
 
 #show: slides.with(
   title: "Master's Thesis: MuZero",
@@ -143,7 +144,25 @@
 - Backpropagation-through-time
 - End-to-end learning of !ps, !vs and !rs $K$ steps ahead
 
-#todo[image]
+#v(2em)
+#place(scale(
+  90%,
+  origin: top + left,
+  muzero.training(
+    value_target: "return",
+    draw_pnet: false,
+  ),
+))
+
+#pagebreak()
+
+#scale(
+  80%,
+  origin: top + left,
+  muzero.training(
+    value_target: "return",
+  ),
+)
 
 = !MP Modifications
 
