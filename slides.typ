@@ -70,20 +70,21 @@
     _What are promising moves to try in the search?_
 
 #todo[maybe image here]
+== !MCTS
 
-== Move selection with MCTS
-
-- Assume reasonably trained !nns are available
-- For every !g !s, use MCTS to find a move:
-
-#todo[
-image/animation of MC search tree: build tree incrementally across multiple slides:
-- initially: root !n / !g !s
-- !net inference to yield initial !p and !v
-- select !a, use simulator to get next board !repr
-- repeat: 800 iterations
-- play most visited !a in root !n
-]
+- Builds (!g) tree of possible future !as
+- Stochastic !algo: Random samples in the !a space
+- Tree grows iteratively:
+  + *Selection*: _Find the most urgent node_ \
+    Guided by:
+    - !net !p !preds
+    - exploration
+    - exploitation
+  + *Expansion*: _Add a new node, query !net_ 
+  + *Backpropagation*: _Update statistics in the tree_
+- New search tree at every !g !s to find a move
+- Search results are used as !p training target \
+  *$->$ !P improvement*
 
 == Selfplay and !NN Training
 
