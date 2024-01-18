@@ -170,11 +170,42 @@
 - !P target are the chance outcome !probs (ground-truth from simulator)
 - MCTS selects !as according to predicted !p when the chance !pl is at turn
 
+= Evaluation
 
+== Carchess
 
+#grid(columns: (1fr, 1fr))[
+- Cars spawn and drive along roads
+- Cars may crash at intersections
+- !Pls control traffic with barriers
+- Goals:
+  - Bring cars to their destination
+  - Avoid crashes
+- 10 Rounds of:
+  - Each !pl toggles one barrier
+  - Traffic advances for 5 steps
+  - Spawn counts are updated randomly
+- Collaboration: All !pls receive same !r
+]
 
+#place(
+  top + right,
+  dx: 5mm,
+  image(
+    "drawings/carchess_screenshot_tutorial.jpg",
+    height: 7cm,
+  ),
+)
 
+== Carchess: Results
 
-== Application to Carchess
+- Single training run
+- 100.000 !env steps of random play at the beginning
+- Mean score + 95% CI over last 30 plotted data points
 
-#todo[image here]
+#v(0.5em)
+#place(image("experiment_data/carchess/plot.svg", width: 90%))
+
+#heading(outlined: false)[Thanks]
+
+= Questions
