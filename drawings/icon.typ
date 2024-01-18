@@ -108,3 +108,20 @@
   side(0, 1, number: 3)
   side(0, 0, number: 5)
 }, name: name)
+
+#let database(pos, size: 0.3, name: "") = padding({
+  set-origin(pos)
+  scale(size)
+
+  set-style(stroke: 0.7pt)
+  scale((y: 0.5))
+  let n = 3
+  let r = 2
+  set-origin((0, -n / 2))
+  for y in range(n) {
+    arc((r, y), start: 0deg, stop: -180deg, radius: r)
+  }
+  circle((0, n), radius: r)
+  line((r, 0), (r, n))
+  line((-r, 0), (-r, n))
+}, name: name)

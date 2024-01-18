@@ -1,6 +1,6 @@
 #import "@preview/cetz:0.1.1": canvas, draw
 #import "util.typ": padding, bez_vert, bez_hor
-#import "icon.typ": network
+#import "icon.typ": network, database
 
 #let sl = $p_sigma$
 #let rl = $p_rho$
@@ -11,22 +11,7 @@
   import draw: *
 
   let dataset(pos, ct, name: "") = {
-    padding({
-      set-origin(pos)
-      scale(0.3)
-
-      set-style(stroke: 0.7pt)
-      scale((y: 0.5))
-      let n = 3
-      let r = 2
-      set-origin((0, -n / 2))
-      for y in range(n) {
-        arc((r, y), start: 0deg, stop: -180deg, radius: r)
-      }
-      circle((0, n), radius: r)
-      line((r, 0), (r, n))
-      line((-r, 0), (-r, n))
-    }, name: name)
+    database(pos, name: name)
     content((rel: (y: 0.1), to: name + ".top"), align(center, ct + [\
     Games]), anchor: "bottom")
   }
