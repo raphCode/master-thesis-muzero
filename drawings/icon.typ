@@ -25,10 +25,6 @@
 #let tic_tac_toe(pos, n: 5, name: none) = group({
   set-origin(pos)
   scale(0.4)
-  set-style(
-    fill: none,
-    stroke: 1pt,
-  )
   let size = 3
   set-origin((-size / 2, -size / 2))
   for i in range(1, size) {

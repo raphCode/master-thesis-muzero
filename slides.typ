@@ -1,6 +1,7 @@
 #import "@preview/slydst:0.1.0": *
 #import "substitutions.typ"
 #import "drawings/muzero.typ"
+#import "drawings/slides.typ": animate_mcts
 
 #show: slides.with(
   title: "Master's Thesis: MuZero",
@@ -23,6 +24,25 @@
     hide(content)
   }
 }
+
+// MCTS tree definition
+
+#let n(path: false, ..args) = {
+  (path: path, children: args.pos())
+}
+
+#let l = n()  // leaf node
+#let p = n.with(path: true)
+
+#let tree_def = n(
+  n(
+    n(l, l, l),
+    p(l, l),
+  ),
+  n(
+    n(l, l, l),
+  )
+)
 
 == Content
 
@@ -87,6 +107,8 @@
 - Search results are used as !p training target \
   *$->$ !P improvement*
 
+#animate_mcts(tree_def, alphazero: true)
+
 == Selfplay and !NN Training
 
 #[
@@ -139,7 +161,7 @@
 
 == !MCTS
 
-#todo[Animation that builds search tree incrementally]
+#animate_mcts(tree_def, alphazero: false)
 
 == Selfplay
 
