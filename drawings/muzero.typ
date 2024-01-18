@@ -343,7 +343,7 @@
           if parent != none {
             let (px, py, _) = coordinate.resolve(ctx, parent)
             let (nx, ny, _) = coordinate.resolve(ctx, "node")
-            if px > node.x {
+            if px > nx {
               (anchors, m) = (("right", "left"), 1)
             }
           }
