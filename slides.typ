@@ -15,6 +15,14 @@
 
 #let todo = text.with(fill: red)
 
+#let reveal(content, condition: false) = {
+  if condition {
+    content
+  } else {
+    hide(content)
+  }
+}
+
 == Content
 
 #outline()
@@ -32,12 +40,23 @@
   - !az
   - !mz
 
-== !az and !mz
+#let overview_slide(show_mcts: false) = [
+  #import "drawings/slides.typ": architecture_overview
 
-- Outperform state-of-the-art programs
-- Learn from scratch using selfplay
-- Use !MCTS (MCTS) to plan ahead
-  
+  == !az and !mz
+
+  - Learn from scratch using selfplay
+  #reveal(condition: show_mcts)[
+    - Use !MCTS (MCTS) to plan ahead
+  ]
+
+  #v(1fr)
+  #align(center, architecture_overview(show_mcts))
+]
+
+#overview_slide(show_mcts: false)
+#overview_slide(show_mcts: true)
+
 = !az
 
 == !NN
