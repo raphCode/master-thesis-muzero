@@ -115,10 +115,27 @@
 
 == !NNs
 
-- 3 !nets:
-  - !Rnet: !Obs $->$ !Latrep
-  - !Pnet: !Latrep $->$ !P, !V
-  - !Dnet: !Latrep, !A $->$ !Latrep, !R
+#[
+#let row(label, input, output, net) = {
+  import "drawings/slides.typ": muzero_network_arrow
+  (
+    list.item(label + [:]),
+    align(right, input),
+    muzero_network_arrow(net),
+    output,
+  ).map(align.with(horizon))
+}
+
+- 3 !Nets:
+  #v(-0.5em - 0.5pt)
+  #grid(
+    columns: 4,
+    gutter: 7pt,
+    ..row([Representation], [!Obs], [Latent], "repr"),
+    ..row([Prediction], [Latent], [!P, !V], "pred"),
+    ..row([Dynamics], [Latent, !A], [Latent, !R], "dyn"),
+  )
+]
 
 == !MCTS
 

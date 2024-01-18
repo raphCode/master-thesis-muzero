@@ -1,6 +1,7 @@
 #import "@preview/cetz:0.1.1": canvas, draw, tree
 #import "util.typ": padding, bez90
 #import "icon.typ": database
+#import "muzero.typ": net_inference
 
 #let architecture_overview(show_mcts) = canvas(length: 1cm, {
   import draw: *
@@ -62,4 +63,8 @@
   content("data.bottom", [Training Data], padding: 0.3, anchor: "top")
   content("gen.top", [Generation], padding: 0.1, anchor: "bottom")
   content("train.top", [Training], padding: 0.1, anchor: "bottom")
+})
+
+#let muzero_network_arrow(net, length: 2) = canvas(length: 1cm, {
+  net_inference((0, 0), (length, 0), net)
 })
