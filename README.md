@@ -14,6 +14,9 @@ This repo contains the source code of:
 The repo is mostly a show-off of the work I did for my thesis, do not expect any more
 value or useable software.
 
+The final compiled thesis PDF can be viewed in [thesis.pdf](thesis.pdf) and the slides in
+[slides.pdf](slides.pdf).
+
 ## Other branches
 
 - __paper-*__: old versions of the paper source code, in different typesetting systems.
